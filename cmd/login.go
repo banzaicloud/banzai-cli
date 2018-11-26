@@ -15,21 +15,14 @@
 package cmd
 
 import (
-	"bufio"
-	"fmt"
-	"os"
-	"strings"
-	"syscall"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 var options struct {
-	endpoint string
-	username string
-	password string
+	Endpoint string
+	Username string
+	Password string
 }
 
 // loginCmd represents the login command
@@ -37,32 +30,51 @@ var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Configure and log in to a Banzai Cloud context",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("login called")
-		reader := bufio.NewReader(os.Stdin)
+		log.Fatal("Not implemented. Please either set a pipeline token aquired from https://beta.banzaicloud.io/pipeline/api/v1/token in the environemnt variable PIPELINE_TOKEN or as pipeline.token in ~/.banzai/config.yaml")
+	}}
 
-		options.username = os.Getenv("USER")
-		fmt.Printf("Please provide your Github credentials to retrieve and store a token for using Pipeline.\n\n")
-		fmt.Printf("Github username [%s]: ", options.username)
-		if username, err := reader.ReadString('\n'); err != nil {
-			log.Fatalf("could not read username: %v", err)
-		} else if username != "\n" {
-			options.username = strings.TrimSpace(username)
-		}
+/*Run: func(cmd *cobra.Command, args []string) {
+	fmt.Println("login called")
 
-		fmt.Print("Github password: ")
-		if password, err := terminal.ReadPassword(int(syscall.Stdin)); err != nil {
-			log.Fatalf("could not read password: %v", err)
-		} else {
-			options.password = string(password)
+	qs := []*survey.Question{}
+
+	if options.Username == "" {
+		qs = append(qs, &survey.Question{
+			Name: "username",
+			Prompt: &survey.Input{
+				Message: "Github username:",
+				Help:    "Please provide your Github credentials to retrieve and store a token for using Pipeline.",
+			},
+			Validate:  survey.Required,
+			Transform: survey.Title,
+		})
+	}
+
+	if options.Password == "" {
+		qs = append(qs, &survey.Question{
+			Name: "password",
+			Prompt: &survey.Password{
+				Message: "Github password:",
+				Help:    "Please provide your Github credentials to retrieve and store a token for using Pipeline. We won't store your password."},
+			Validate: survey.Required,
+		})
+	}
+
+	if len(qs) > 0 {
+		if err := survey.Ask(qs, &options); err != nil {
+			log.Fatalf("failed to ask for options: %v", err)
 		}
-		fmt.Println()
-		fmt.Printf("%+v\n", options)
-	},
-}
+	}
+
+	fmt.Printf("%+v\n", options)
+},*/
 
 func init() {
 	rootCmd.AddCommand(loginCmd)
 
-	loginCmd.Flags().StringVarP(&options.endpoint, "endpoint", "e", "https://beta.banzaicloud.io/pipeline", "The endpoint of the Banzai Cloud Pipeline instance to use")
-	loginCmd.MarkFlagRequired("endpoint")
+	/*
+		loginCmd.Flags().StringVarP(&options.Endpoint, "endpoint", "e", "https://beta.banzaicloud.io/pipeline", "The endpoint of the Banzai Cloud Pipeline instance to use")
+		loginCmd.Flags().StringVarP(&options.Username, "username", "u", "", "Github username to use")
+		loginCmd.Flags().StringVarP(&options.Username, "password", "p", "", "Github password to use (not recommended)")
+	*/
 }
