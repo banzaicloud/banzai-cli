@@ -65,7 +65,7 @@ func ClusterList(cmd *cobra.Command, args []string) {
 		logAPIError("list clusters", err, orgId)
 		log.Fatalf("could not list clusters: %v", err)
 	}
-	Out(clusters, []string{"Id", "Name", "Distribution", "Status", "CreatorName", "CreatedAt"})
+	Out(clusters, []string{"Id", "Name", "Distribution", "Status", "CreatedBy", "CreatedAt"})
 }
 
 var clusterGetCmd = &cobra.Command{
