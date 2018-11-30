@@ -2,12 +2,52 @@
 
 
 [[projects]]
+  branch = "master"
+  digest = "1:2b23c176460b7b078aeffc44d97515e13d7aa5857c1c2768b3e3defc0397626e"
+  name = "github.com/antihax/optional"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "ca021399b1a6796ecb758292c6311ce0b28857fc"
+
+[[projects]]
+  digest = "1:e40b97f3c849abe0807d4f3c0a82d9786b788f8d4eb94745aef3874c576ec8b6"
+  name = "github.com/banzaicloud/pipeline"
+  packages = ["client"]
+  pruneopts = "UT"
+  revision = "1fc21d3600ad26fed27b2a618280d83afd171609"
+  version = "0.6.4"
+
+[[projects]]
   digest = "1:abeb38ade3f32a92943e5be54f55ed6d6e3b6602761d74b4aab4c9dd45c18abd"
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
   pruneopts = "UT"
   revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
   version = "v1.4.7"
+
+[[projects]]
+  digest = "1:2cd7915ab26ede7d95b8749e6b1f933f1c6d5398030684e6505940a10f31cfda"
+  name = "github.com/ghodss/yaml"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:97df918963298c287643883209a2c3f642e6593379f97ab400c2a2e219ab647d"
+  name = "github.com/golang/protobuf"
+  packages = ["proto"]
+  pruneopts = "UT"
+  revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
+  version = "v1.2.0"
+
+[[projects]]
+  digest = "1:12b576df886880295d4c319584f77ea0f449e508901d0cd2d1fce6873e8cffc3"
+  name = "github.com/goph/emperror"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "9870ade6f413fe7fbddcb3eb8a735822deeef874"
+  version = "v0.12.0"
 
 [[projects]]
   digest = "1:c0d19ab64b32ce9fe5cf4ddceba78d5bc9807f0016db6b1183599da3dcc24d10"
@@ -109,6 +149,14 @@
   version = "v1.2.0"
 
 [[projects]]
+  digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
   digest = "1:69b1cc331fca23d702bd72f860c6a647afd0aa9fcbc1d0659b1365e26546dd70"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
@@ -168,12 +216,42 @@
   version = "v1.2.1"
 
 [[projects]]
+  digest = "1:33092b366cfcc395fae86161d7caa4c7ffef4f93ee43113c1c1e28fc0dc71972"
+  name = "github.com/ttacon/chalk"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "76b3c8b611dea8f83e49e9ce81fc2b189e0ef3d2"
+  version = "v0.1"
+
+[[projects]]
   branch = "master"
   digest = "1:3f3a05ae0b95893d90b9b3b5afdb79a9b3d96e4e36e099d841ae602e4aca0da8"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
   revision = "3d3f9f413869b949e48070b5bc593aa22cc2b8f2"
+
+[[projects]]
+  branch = "master"
+  digest = "1:f8b491a7c25030a895a0e579742d07136e6958e77ef2d46e769db8eec4e58fcd"
+  name = "golang.org/x/net"
+  packages = [
+    "context",
+    "context/ctxhttp",
+  ]
+  pruneopts = "UT"
+  revision = "adae6a3d119ae4890b46832a2e88a95adc62b8e7"
+
+[[projects]]
+  branch = "master"
+  digest = "1:0142ef85bbc356750e329654ef29734ff05bd70ec9d8c1f46e39a3e97683318f"
+  name = "golang.org/x/oauth2"
+  packages = [
+    ".",
+    "internal",
+  ]
+  pruneopts = "UT"
+  revision = "8f65e3013ebad444f13bc19536f7865efc793816"
 
 [[projects]]
   branch = "master"
@@ -202,7 +280,24 @@
   version = "v0.3.0"
 
 [[projects]]
-  digest = "1:8aebecf08fbcb288d879a0e21de4636389c2bc58ab45789a05d7f7e94577482f"
+  digest = "1:08206298775e5b462e6c0333f4471b44e63f1a70e42952b6ede4ecc9572281eb"
+  name = "google.golang.org/appengine"
+  packages = [
+    "internal",
+    "internal/base",
+    "internal/datastore",
+    "internal/log",
+    "internal/remote_api",
+    "internal/urlfetch",
+    "urlfetch",
+  ]
+  pruneopts = "UT"
+  revision = "4a4468ece617fc8205e99368fa2200e9d1fad421"
+  version = "v1.3.0"
+
+[[projects]]
+  branch = "prompt-again"
+  digest = "1:c061e477e338865806e50617335e41d2bfdd41ab9605a365ae93fa8afd00f2cd"
   name = "gopkg.in/AlecAivazis/survey.v1"
   packages = [
     ".",
@@ -210,8 +305,8 @@
     "terminal",
   ]
   pruneopts = "UT"
-  revision = "fb519f89e19299d852ffdd9b734af122d2dcbd30"
-  version = "v1.7.0"
+  revision = "9120408a919fe93057ff9b82b398b823c5aee530"
+  source = "github.com/orymate/survey"
 
 [[projects]]
   digest = "1:342378ac4dcb378a5448dd723f0784ae519383532f5e70ade24132c4c8693202"
@@ -225,11 +320,19 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/antihax/optional",
+    "github.com/banzaicloud/pipeline/client",
+    "github.com/ghodss/yaml",
+    "github.com/goph/emperror",
+    "github.com/mattn/go-isatty",
     "github.com/mitchellh/go-homedir",
+    "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
     "github.com/spf13/viper",
+    "github.com/ttacon/chalk",
     "gopkg.in/AlecAivazis/survey.v1",
+    "gopkg.in/yaml.v2",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

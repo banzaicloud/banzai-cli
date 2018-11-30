@@ -15,14 +15,19 @@
 package cmd
 
 import (
+	"fmt"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 var options struct {
 	Endpoint string
 	Username string
 	Password string
+	Token    string
 }
 
 // loginCmd represents the login command
@@ -30,7 +35,33 @@ var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Configure and log in to a Banzai Cloud context",
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Fatal("Not implemented. Please either set a pipeline token aquired from https://beta.banzaicloud.io/pipeline/api/v1/token in the environemnt variable PIPELINE_TOKEN or as pipeline.token in ~/.banzai/config.yaml")
+		endpoint := viper.GetString("pipeline.basepath")
+		if isInteractive() {
+
+			survey.AskOne(
+				&survey.Input{
+					Message: "Pipeline endpoint:",
+					Help:    "The API endpoint to use for accessing Pipeline",
+					Default: endpoint,
+				}, &endpoint, survey.Required)
+
+			if options.Token == "" {
+				survey.AskOne(
+					&survey.Input{
+						Message: "Pipeline token:",
+						Help:    fmt.Sprintf("Please copy your Pipeline access token from the token field of %s/api/v1/token", endpoint),
+					}, &options.Token, survey.Required)
+			}
+		}
+		if options.Token != "" {
+			viper.Set("pipeline.token", options.Token)
+			viper.Set("pipeline.basepath", endpoint)
+			if err := WriteConfig(); err != nil {
+				log.Fatalf("can't write config: %v", err)
+			}
+		} else {
+			log.Fatal("Password login is not implemented yet. Please either set a pipeline token aquired from https://beta.banzaicloud.io/pipeline/api/v1/token in the environment variable PIPELINE_TOKEN or as pipeline.token in ~/.banzai/config.yaml. You can also use the `banzai login -t $TOKEN` command.")
+		}
 	}}
 
 /*Run: func(cmd *cobra.Command, args []string) {
@@ -71,6 +102,7 @@ var loginCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(loginCmd)
+	loginCmd.Flags().StringVarP(&options.Token, "token", "t", "", "Pipeline token to save")
 
 	/*
 		loginCmd.Flags().StringVarP(&options.Endpoint, "endpoint", "e", "https://beta.banzaicloud.io/pipeline", "The endpoint of the Banzai Cloud Pipeline instance to use")

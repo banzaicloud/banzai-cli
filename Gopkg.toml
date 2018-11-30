@@ -37,6 +37,11 @@
   name = "github.com/spf13/viper"
   version = "1.2.1"
 
+[[constraint]]
+  name = "gopkg.in/AlecAivazis/survey.v1"
+  branch = "prompt-again"
+  source = "github.com/orymate/survey"
+
 [prune]
   go-tests = true
   unused-packages = true
