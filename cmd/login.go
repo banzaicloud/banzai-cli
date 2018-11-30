@@ -56,6 +56,12 @@ var loginCmd = &cobra.Command{
 		if options.Token != "" {
 			viper.Set("pipeline.token", options.Token)
 			viper.Set("pipeline.basepath", endpoint)
+			if isInteractive() {
+				viper.Set(orgIdKey, 0)
+				if GetOrgId(true) == 0 {
+					log.Fatalf("login failed")
+				}
+			}
 			if err := WriteConfig(); err != nil {
 				log.Fatalf("can't write config: %v", err)
 			}
