@@ -6,6 +6,10 @@
 $ go get github.com/banzaicloud/banzai-cli/cmd/banzai
 ```
 
+```
+$ brew install banzaicloud/tap/banzai-cli
+```
+
 ### Use
 
 ```
