@@ -146,6 +146,11 @@ func ClusterDelete(cmd *cobra.Command, args []string) {
 			log.Fatal("deletion cancelled")
 		}
 	}
+	if cluster, _, err := pipeline.ClustersApi.DeleteCluster(ctx, orgId, id, nil); err != nil {
+		logAPIError("get cluster", err, id)
+	} else {
+		log.Printf("Deleting cluster %v", cluster)
+	}
 	if cluster, _, err := pipeline.ClustersApi.GetCluster(ctx, orgId, id); err != nil {
 		logAPIError("get cluster", err, id)
 	} else {
