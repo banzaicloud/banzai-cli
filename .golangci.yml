@@ -1,0 +1,20 @@
+linters:
+    enable-all: true
+    disable:
+        - maligned
+
+        # TODO: these
+        - gochecknoglobals
+        - lll
+        - deadcode
+        - golint
+        - gochecknoinits
+        - gofmt
+        - gocritic
+        - megacheck
+        - errcheck
+        - goimports
+
+linters-settings:
+    golint:
+        min-confidence: 0.1
