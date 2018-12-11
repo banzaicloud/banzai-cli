@@ -1,4 +1,4 @@
-:construction: This is a command line interface under heavy development for the Banzai Cloud platform.
+:construction: This is a command line interface under heavy development for the [Banzai Cloud Pipeline](https://beta.banzaicloud.io/) platform.
 
 ### Installation
 
