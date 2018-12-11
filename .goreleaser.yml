@@ -1,0 +1,25 @@
+builds:
+    -
+        main: ./cmd/banzai
+        env:
+            - CGO_ENABLED=0
+        goos:
+            - linux
+            - darwin
+            - windows
+        goarch:
+            - amd64
+
+archive:
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+    name_template: 'checksums.txt'
+
+brew:
+    github:
+        owner: banzaicloud
+    description: Command-line interface for Banzai Cloud products
+    homepage: https://banzaicloud.com/
+    test: |
+        system "#{bin}/banzai-cli --version"
