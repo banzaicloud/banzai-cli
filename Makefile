@@ -27,6 +27,7 @@ DEP_VERSION = 0.5.0
 GOLANGCI_VERSION = 1.12.2
 GOTESTSUM_VERSION = 0.3.2
 LICENSEI_VERSION = 0.0.7
+GORELEASER_VERSION = 0.94.0
 
 GOLANG_VERSION = 1.11
 
@@ -110,6 +111,17 @@ license-check: bin/licensei ## Run license check
 .PHONY: license-cache
 license-cache: bin/licensei ## Generate license cache
 	bin/licensei cache
+
+bin/goreleaser: bin/goreleaser-${GORELEASER_VERSION}
+	@ln -sf goreleaser-${GORELEASER_VERSION} bin/goreleaser
+bin/goreleaser-${GORELEASER_VERSION}:
+	@mkdir -p bin
+	curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh | bash -s -- -b ./bin/ v${GORELEASER_VERSION}
+	@mv bin/goreleaser $@
+
+.PHONY: release
+release: bin/goreleaser # Publish a release
+	bin/goreleaser release
 
 #release-%: TAG_PREFIX = v
 release-%:
