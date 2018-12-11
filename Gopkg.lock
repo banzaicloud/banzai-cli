@@ -14,8 +14,8 @@
   name = "github.com/banzaicloud/pipeline"
   packages = ["client"]
   pruneopts = "UT"
-  revision = "1fc21d3600ad26fed27b2a618280d83afd171609"
-  version = "0.6.4"
+  revision = "0959ce0285b749828ad32532c39907e2c7dd7f30"
+  version = "0.6.5"
 
 [[projects]]
   digest = "1:abeb38ade3f32a92943e5be54f55ed6d6e3b6602761d74b4aab4c9dd45c18abd"
@@ -42,12 +42,12 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:12b576df886880295d4c319584f77ea0f449e508901d0cd2d1fce6873e8cffc3"
+  digest = "1:4e0e5d786c35c402574cda1906195d9fbd76a35d2c921eb10199741faf4f0256"
   name = "github.com/goph/emperror"
   packages = ["."]
   pruneopts = "UT"
-  revision = "9870ade6f413fe7fbddcb3eb8a735822deeef874"
-  version = "v0.12.0"
+  revision = "b1b4a9b847ebc56299eb729faa942b89e9d8a562"
+  version = "v0.14.0"
 
 [[projects]]
   digest = "1:c0d19ab64b32ce9fe5cf4ddceba78d5bc9807f0016db6b1183599da3dcc24d10"
@@ -208,12 +208,12 @@
   version = "v1.0.3"
 
 [[projects]]
-  digest = "1:214775c11fd26da94a100111a62daa25339198a4f9c57cb4aab352da889f5b93"
+  digest = "1:de37e343c64582d7026bf8ab6ac5b22a72eac54f3a57020db31524affed9f423"
   name = "github.com/spf13/viper"
   packages = ["."]
   pruneopts = "UT"
-  revision = "2c12c60302a5a0e62ee102ca9bc996277c2f64f5"
-  version = "v1.2.1"
+  revision = "6d33b5a963d922d182c91e8a1c88d81fd150cfd4"
+  version = "v1.3.1"
 
 [[projects]]
   digest = "1:33092b366cfcc395fae86161d7caa4c7ffef4f93ee43113c1c1e28fc0dc71972"
@@ -225,11 +225,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3f3a05ae0b95893d90b9b3b5afdb79a9b3d96e4e36e099d841ae602e4aca0da8"
+  digest = "1:38f553aff0273ad6f367cb0a0f8b6eecbaef8dc6cb8b50e57b6a81c1d5b1e332"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "3d3f9f413869b949e48070b5bc593aa22cc2b8f2"
+  revision = "505ab145d0a99da450461ae2c1a9f6cd10d1f447"
 
 [[projects]]
   branch = "master"
@@ -240,29 +240,29 @@
     "context/ctxhttp",
   ]
   pruneopts = "UT"
-  revision = "adae6a3d119ae4890b46832a2e88a95adc62b8e7"
+  revision = "610586996380ceef02dd726cc09df7e00a3f8e56"
 
 [[projects]]
   branch = "master"
-  digest = "1:0142ef85bbc356750e329654ef29734ff05bd70ec9d8c1f46e39a3e97683318f"
+  digest = "1:5276e08fe6a1dfdb65b4f46a2e5d5c9e00be6e499105e441049c3c04a0c83b36"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
     "internal",
   ]
   pruneopts = "UT"
-  revision = "8f65e3013ebad444f13bc19536f7865efc793816"
+  revision = "d668ce993890a79bda886613ee587a69dd5da7a6"
 
 [[projects]]
   branch = "master"
-  digest = "1:f343f077a5b0bc3a3788b3a04e24dd417e3e25b2acb529c413e212d2c42416ef"
+  digest = "1:c73348dab344986c67ff12db47eee08aa2ec1f6bf431dcd73514c6dd8c502a57"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "0cf1ed9e522b7dbb416f080a5c8003de9b702bf4"
+  revision = "7da8ea5c81829e397bdf930c5d8ba4b703616f33"
 
 [[projects]]
   digest = "1:8029e9743749d4be5bc9f7d42ea1659471767860f0cdc34d37c3111bd308a295"
@@ -296,7 +296,6 @@
   version = "v1.3.0"
 
 [[projects]]
-  branch = "prompt-again"
   digest = "1:c061e477e338865806e50617335e41d2bfdd41ab9605a365ae93fa8afd00f2cd"
   name = "gopkg.in/AlecAivazis/survey.v1"
   packages = [
@@ -305,16 +304,16 @@
     "terminal",
   ]
   pruneopts = "UT"
-  revision = "9120408a919fe93057ff9b82b398b823c5aee530"
-  source = "github.com/orymate/survey"
+  revision = "e205523512c83e9236698dbe7eb9649ec56e80ca"
+  version = "v1.7.1"
 
 [[projects]]
-  digest = "1:342378ac4dcb378a5448dd723f0784ae519383532f5e70ade24132c4c8693202"
+  digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   pruneopts = "UT"
-  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
-  version = "v2.2.1"
+  revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
+  version = "v2.2.2"
 
 [solve-meta]
   analyzer-name = "dep"
