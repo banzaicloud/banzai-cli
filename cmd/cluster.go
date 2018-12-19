@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -60,7 +61,7 @@ var clusterListCmd = &cobra.Command{
 func ClusterList(cmd *cobra.Command, args []string) {
 	pipeline := InitPipeline()
 	orgId := GetOrgId(true)
-	clusters, _, err := pipeline.ClustersApi.ListClusters(ctx, orgId)
+	clusters, _, err := pipeline.ClustersApi.ListClusters(context.Background(), orgId)
 	if err != nil {
 		logAPIError("list clusters", err, orgId)
 		log.Fatalf("could not list clusters: %v", err)
@@ -79,7 +80,7 @@ var clusterGetCmd = &cobra.Command{
 func ClusterGet(cmd *cobra.Command, args []string) {
 	pipeline := InitPipeline()
 	orgId := GetOrgId(true)
-	clusters, _, err := pipeline.ClustersApi.ListClusters(ctx, orgId)
+	clusters, _, err := pipeline.ClustersApi.ListClusters(context.Background(), orgId)
 	if err != nil {
 		logAPIError("list clusters", err, orgId)
 		log.Fatalf("could not list clusters: %v", err)
@@ -94,7 +95,7 @@ func ClusterGet(cmd *cobra.Command, args []string) {
 	if id == 0 {
 		log.Fatalf("cluster %q could not be found", args[0])
 	}
-	cluster, _, err := pipeline.ClustersApi.GetCluster(ctx, orgId, id)
+	cluster, _, err := pipeline.ClustersApi.GetCluster(context.Background(), orgId, id)
 	if err != nil {
 		logAPIError("get cluster", err, id)
 		log.Fatalf("could not get cluster: %v", err)
@@ -118,7 +119,7 @@ var clusterDeleteCmd = &cobra.Command{
 func ClusterDelete(cmd *cobra.Command, args []string) {
 	pipeline := InitPipeline()
 	orgId := GetOrgId(true)
-	clusters, _, err := pipeline.ClustersApi.ListClusters(ctx, orgId)
+	clusters, _, err := pipeline.ClustersApi.ListClusters(context.Background(), orgId)
 	if err != nil {
 		logAPIError("list clusters", err, orgId)
 		log.Fatalf("could not list clusters: %v", err)
@@ -135,7 +136,7 @@ func ClusterDelete(cmd *cobra.Command, args []string) {
 	}
 
 	if isInteractive() {
-		if cluster, _, err := pipeline.ClustersApi.GetCluster(ctx, orgId, id); err != nil {
+		if cluster, _, err := pipeline.ClustersApi.GetCluster(context.Background(), orgId, id); err != nil {
 			logAPIError("get cluster", err, id)
 		} else {
 			Out1(cluster, []string{"Id", "Name", "Distribution", "Status", "CreatorName", "CreatedAt", "StatusMessage"})
@@ -146,12 +147,12 @@ func ClusterDelete(cmd *cobra.Command, args []string) {
 			log.Fatal("deletion cancelled")
 		}
 	}
-	if cluster, _, err := pipeline.ClustersApi.DeleteCluster(ctx, orgId, id, nil); err != nil {
+	if cluster, _, err := pipeline.ClustersApi.DeleteCluster(context.Background(), orgId, id, nil); err != nil {
 		logAPIError("get cluster", err, id)
 	} else {
 		log.Printf("Deleting cluster %v", cluster)
 	}
-	if cluster, _, err := pipeline.ClustersApi.GetCluster(ctx, orgId, id); err != nil {
+	if cluster, _, err := pipeline.ClustersApi.GetCluster(context.Background(), orgId, id); err != nil {
 		logAPIError("get cluster", err, id)
 	} else {
 		Out1(cluster, []string{"Id", "Name", "Distribution", "Status", "CreatorName", "CreatedAt", "StatusMessage"})
@@ -234,7 +235,7 @@ func ClusterCreate(cmd *cobra.Command, args []string) {
 			}
 		}
 		if out.SecretId == "" && out.SecretName == "" {
-			secrets, _, err := pipeline.SecretsApi.GetSecrets(ctx, orgId, &client.GetSecretsOpts{Type_: optional.NewString(out.Cloud)})
+			secrets, _, err := pipeline.SecretsApi.GetSecrets(context.Background(), orgId, &client.GetSecretsOpts{Type_: optional.NewString(out.Cloud)})
 			if err != nil {
 				log.Errorf("could not list secrets: %v", err)
 			} else {
@@ -288,7 +289,7 @@ func ClusterCreate(cmd *cobra.Command, args []string) {
 		}
 	}
 	log.Debugf("create request: %#v", out)
-	cluster, _, err := pipeline.ClustersApi.CreateCluster(ctx, orgId, out)
+	cluster, _, err := pipeline.ClustersApi.CreateCluster(context.Background(), orgId, out)
 	if err != nil {
 		logAPIError("create cluster", err, out)
 		log.Fatalf("failed to create cluster: %v", err)
@@ -323,12 +324,12 @@ func ClusterShell(cmd *cobra.Command, args []string) {
 		log.Fatalf("no cluster selected")
 	}
 
-	cluster, _, err := pipeline.ClustersApi.GetCluster(ctx, orgId, id)
+	cluster, _, err := pipeline.ClustersApi.GetCluster(context.Background(), orgId, id)
 	if err != nil {
 		log.Fatalf("could not get cluster details: %v", err)
 	}
 
-	config, _, err := pipeline.ClustersApi.GetClusterConfig(ctx, orgId, id)
+	config, _, err := pipeline.ClustersApi.GetClusterConfig(context.Background(), orgId, id)
 	if err != nil {
 		log.Fatalf("could not get cluster config: %v", err)
 	}
@@ -389,7 +390,7 @@ func ClusterShell(cmd *cobra.Command, args []string) {
 
 func GetClusterId(org int32, ask bool) int32 {
 	pipeline := InitPipeline()
-	clusters, _, err := pipeline.ClustersApi.ListClusters(ctx, org)
+	clusters, _, err := pipeline.ClustersApi.ListClusters(context.Background(), org)
 	if err != nil {
 		log.Fatalf("could not list clusters: %v", err)
 	}

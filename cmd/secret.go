@@ -15,6 +15,8 @@
 package cmd
 
 import (
+	"context"
+
 	"github.com/banzaicloud/pipeline/client"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -28,7 +30,7 @@ var secretCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		pipeline := InitPipeline()
 		orgId := GetOrgId(true)
-		secrets, _, err := pipeline.SecretsApi.GetSecrets(ctx, orgId, &client.GetSecretsOpts{})
+		secrets, _, err := pipeline.SecretsApi.GetSecrets(context.Background(), orgId, &client.GetSecretsOpts{})
 		if err != nil {
 			log.Fatalf("could not list secrets: %v", err)
 		}
