@@ -68,7 +68,7 @@ func NewColumn(name string) *Column {
 
 func NamedColumn(name, fieldName string) *Column {
 	tpl := fmt.Sprintf("{{.%s}}", fieldName)
-	col, err := CustomColumn(name, fieldName, tpl)
+	col, err := CustomColumn(name, tpl)
 	if err != nil {
 		panic(err)
 	}
@@ -76,7 +76,7 @@ func NamedColumn(name, fieldName string) *Column {
 	return col
 }
 
-func CustomColumn(name, fieldName, tpl string) (*Column, error) {
+func CustomColumn(name, tpl string) (*Column, error) {
 	parsedTemplate, err := template.New(name).Parse(tpl)
 	if err != nil {
 		return nil, err
