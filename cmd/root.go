@@ -20,6 +20,8 @@ import (
 	"os"
 	"path"
 
+	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command"
 	"github.com/banzaicloud/banzai-cli/pkg/formatting"
 	"github.com/banzaicloud/pipeline/client"
 	"github.com/goph/emperror"
@@ -86,6 +88,10 @@ func init() {
 	_ = viper.BindPFlag("output.verbose", flags.Lookup("verbose"))
 
 	viper.SetDefault("pipeline.basepath", "https://beta.banzaicloud.io/pipeline")
+
+	cli := cli.NewCli(os.Stdout)
+
+	command.AddCommands(rootCmd, cli)
 }
 
 func isColor() bool {

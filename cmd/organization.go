@@ -128,9 +128,9 @@ func GetOrgId(ask bool) int32 {
 }
 
 func init() {
-	rootCmd.AddCommand(organizationCmd)
-	organizationCmd.AddCommand(organizationListCmd)
-	organizationCmd.AddCommand(organizationSelectCmd)
+	//rootCmd.AddCommand(organizationCmd)
+	//organizationCmd.AddCommand(organizationListCmd)
+	//organizationCmd.AddCommand(organizationSelectCmd)
 
 	// Here you will define your flags and configuration settings.
 
