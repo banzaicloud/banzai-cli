@@ -17,9 +17,10 @@ package formatting
 import (
 	"bytes"
 	"fmt"
-	"github.com/ttacon/chalk"
 	"reflect"
 	"text/template"
+
+	"github.com/ttacon/chalk"
 )
 
 type Column struct {
@@ -40,6 +41,7 @@ func (c *Column) FormatFieldOrError(data interface{}) (string, error) {
 	buf := new(bytes.Buffer)
 	tpl := c.Template
 	err := tpl.Execute(buf, data)
+
 	return buf.String(), err
 }
 
@@ -48,6 +50,7 @@ func (c *Column) FormatField(data interface{}) string {
 	if err != nil {
 		return fmt.Sprintf("#(%v)", err)
 	}
+
 	return trunc(result, c.MaxLength)
 }
 
@@ -55,6 +58,7 @@ func trunc(s string, length int) string {
 	if length > 0 && len(s) > length {
 		return s[0:length-len(ellipsis)] + ellipsis
 	}
+
 	return s
 }
 
@@ -68,15 +72,17 @@ func NamedColumn(name, fieldName string) *Column {
 	if err != nil {
 		panic(err)
 	}
+
 	return col
 }
 
 func CustomColumn(name, fieldName, tpl string) (*Column, error) {
-	template, err := template.New(name).Parse(tpl)
+	parsedTemplate, err := template.New(name).Parse(tpl)
 	if err != nil {
 		return nil, err
 	}
-	return &Column{Name: name, Template: template}, nil
+
+	return &Column{Name: name, Template: parsedTemplate}, nil
 }
 
 func NewTable(data interface{}, fields []string) *Table {
@@ -84,7 +90,9 @@ func NewTable(data interface{}, fields []string) *Table {
 	for _, field := range fields {
 		columns = append(columns, *NewColumn(field))
 	}
+
 	slice := asSlice(data)
+
 	return &Table{Columns: columns, Rows: slice, Separator: "  "}
 }
 
@@ -98,6 +106,7 @@ func asSlice(slice interface{}) []interface{} {
 	for i := 0; i < s.Len(); i++ {
 		ret[i] = s.Index(i).Interface()
 	}
+
 	return ret
 }
 
@@ -107,41 +116,47 @@ func (t *Table) Format(color bool) string {
 		colWidths[i] = len(column.Name)
 	}
 
-	formattedFields := [][]string{}
-	for _, row := range t.Rows {
-		formattedRow := []string{}
+	formattedFields := make([][]string, len(t.Rows))
+	for i, row := range t.Rows {
+		formattedRow := make([]string, len(t.Columns))
+
 		for i, column := range t.Columns {
 			value := column.FormatField(row)
-			formattedRow = append(formattedRow, value)
-			len := len(value)
-			if len > colWidths[i] {
+			formattedRow[i] = value
+
+			if len := len(value); len > colWidths[i] {
 				colWidths[i] = len
 			}
 		}
-		formattedFields = append(formattedFields, formattedRow)
+
+		formattedFields[i] = formattedRow
 	}
 
-	//header
+	// header
 	out := ""
 	for i, column := range t.Columns {
 		if i > 0 {
 			out += t.Separator
 		}
+
 		out += fmt.Sprintf("%- *s", colWidths[i], column.Name)
 	}
 	if color {
 		out = chalk.Bold.TextStyle(out)
 	}
 
-	//rows
+	// rows
 	for _, row := range formattedFields {
 		out += "\n"
+
 		for i, field := range row {
 			if i > 0 {
 				out += t.Separator
 			}
+
 			out += fmt.Sprintf("%- *s", colWidths[i], field)
 		}
 	}
+
 	return out
 }
