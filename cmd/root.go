@@ -15,20 +15,21 @@
 package cmd
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+	"path"
+
 	"github.com/banzaicloud/banzai-cli/pkg/formatting"
 	"github.com/banzaicloud/pipeline/client"
 	"github.com/goph/emperror"
 	"github.com/mattn/go-isatty"
-	homedir "github.com/mitchellh/go-homedir"
+	"github.com/mitchellh/go-homedir"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	yaml "gopkg.in/yaml.v2"
-	"os"
-	"path"
+	"golang.org/x/oauth2"
+	"gopkg.in/yaml.v2"
 )
 
 var rootOptions struct {
@@ -49,8 +50,6 @@ func preRun(cmd *cobra.Command, args []string) {
 		log.SetLevel(log.DebugLevel)
 	}
 }
-
-var ctx = context.TODO()
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -145,11 +144,14 @@ func WriteConfig() error {
 }
 
 func InitPipeline() *client.APIClient {
-	pipelineConfig := client.NewConfiguration()
-	pipelineConfig.BasePath = viper.GetString("pipeline.basepath")
-	token := viper.GetString("pipeline.token")
-	ctx = context.WithValue(context.Background(), client.ContextAccessToken, token)
-	return client.NewAPIClient(pipelineConfig)
+	config := client.NewConfiguration()
+	config.BasePath = viper.GetString("pipeline.basepath")
+	config.UserAgent = "banzai-cli/1.0.0/go"
+	config.HTTPClient = oauth2.NewClient(nil, oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: viper.GetString("pipeline.token")},
+	))
+
+	return client.NewAPIClient(config)
 }
 
 func Out1(data interface{}, fields []string) {

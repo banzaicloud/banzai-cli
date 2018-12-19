@@ -15,6 +15,8 @@
 package cmd
 
 import (
+	"context"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -47,7 +49,7 @@ var organizationListCmd = &cobra.Command{
 
 func OrganizationList(cmd *cobra.Command, args []string) {
 	pipeline := InitPipeline()
-	orgs, _, err := pipeline.OrganizationsApi.ListOrgs(ctx)
+	orgs, _, err := pipeline.OrganizationsApi.ListOrgs(context.Background())
 	if err != nil {
 		log.Fatalf("could not list organizations: %v", err)
 	}
@@ -62,7 +64,7 @@ func OrganizationList(cmd *cobra.Command, args []string) {
 
 func searchOrganizationId(name string) int32 {
 	pipeline := InitPipeline()
-	orgs, _, err := pipeline.OrganizationsApi.ListOrgs(ctx)
+	orgs, _, err := pipeline.OrganizationsApi.ListOrgs(context.Background())
 	if err != nil {
 		logAPIError("list organizations", err, nil)
 		return 0
@@ -78,7 +80,7 @@ func searchOrganizationId(name string) int32 {
 
 func searchOrganizationName(id int32) string {
 	pipeline := InitPipeline()
-	org, _, err := pipeline.OrganizationsApi.GetOrg(ctx, id)
+	org, _, err := pipeline.OrganizationsApi.GetOrg(context.Background(), id)
 	if err != nil {
 		logAPIError("get organization", err, id)
 		return ""
@@ -108,7 +110,7 @@ func GetOrgId(ask bool) int32 {
 		log.Fatal("No organization is selected. Use the --organization switch, or set it using `banzai org`.")
 	}
 	pipeline := InitPipeline()
-	orgs, _, err := pipeline.OrganizationsApi.ListOrgs(ctx)
+	orgs, _, err := pipeline.OrganizationsApi.ListOrgs(context.Background())
 	if err != nil {
 		log.Fatalf("could not list organizations: %v", err)
 	}
