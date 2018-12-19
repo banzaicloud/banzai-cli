@@ -44,3 +44,14 @@ func AskOrganization(banzaiCli cli.Cli) int32 {
 
 	return orgResultMap[name]
 }
+
+// GetOrganization returns the current organization.
+func GetOrganization(banzaiCli cli.Cli) int32 {
+	id := banzaiCli.Context().OrganizationID()
+
+	if id == 0 {
+		id = AskOrganization(banzaiCli)
+	}
+
+	return id
+}

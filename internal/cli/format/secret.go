@@ -12,19 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package command
+package format
 
 import (
-	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/organization"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/secret"
-	"github.com/spf13/cobra"
+	"io"
+
+	"github.com/banzaicloud/banzai-cli/internal/cli/output"
+	log "github.com/sirupsen/logrus"
 )
 
-// AddCommands adds all the commands from cli/command to the root command
-func AddCommands(cmd *cobra.Command, banzaiCli cli.Cli) {
-	cmd.AddCommand(
-		organization.NewOrganizationCommand(banzaiCli),
-		secret.NewSecretCommand(banzaiCli),
-	)
+// SecretWrite writes a secret list to the output.
+func SecretWrite(out io.Writer, format string, color bool, data interface{}) {
+	ctx := &output.Context{
+		Out:    out,
+		Color:  color,
+		Format: format,
+		Fields: []string{"Id", "Name", "Type", "UpdatedBy", "Tags"},
+	}
+
+	err := output.Output(ctx, data)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

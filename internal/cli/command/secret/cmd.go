@@ -12,19 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package command
+package secret
 
 import (
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/organization"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/secret"
 	"github.com/spf13/cobra"
 )
 
-// AddCommands adds all the commands from cli/command to the root command
-func AddCommands(cmd *cobra.Command, banzaiCli cli.Cli) {
+// NewSecretCommand returns a cobra command for `secret` subcommands.
+func NewSecretCommand(banzaiCli cli.Cli) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "secret",
+		Aliases: []string{"secrets", "s"},
+		Short:   "Manage secrets",
+	}
+
 	cmd.AddCommand(
-		organization.NewOrganizationCommand(banzaiCli),
-		secret.NewSecretCommand(banzaiCli),
+		NewListCommand(banzaiCli),
 	)
+
+	// Temporarily, until we have only one command here
+	cmd = NewListCommand(banzaiCli)
+	cmd.Use = "secret"
+	cmd.Aliases = []string{"secrets", "s"}
+
+	return cmd
 }
