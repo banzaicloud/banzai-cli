@@ -25,24 +25,38 @@ type row struct {
 }
 
 func TestTable(t *testing.T) {
-	table := NewTable(
-		[]row{
-			row{"foo", "bar", 3},
-			row{"foofoo", "barbar", 33}},
-		[]string{"Bar", "Baz", "Foo"})
-
-	expected := "Bar     Baz  Foo   \nbar     3    foo   \nbarbar  33   foofoo"
-
-	if got := table.Format(false); got != expected {
-		t.Errorf("got %q instead of expected %q", got, expected)
+	tests := map[string]struct {
+		data     interface{}
+		fields   []string
+		expected string
+	}{
+		"struct": {
+			data: []row{
+				{"foo", "bar", 3},
+				{"foofoo", "barbar", 33},
+			},
+			fields:   []string{"Bar", "Baz", "Foo"},
+			expected: "Bar     Baz  Foo   \nbar     3    foo   \nbarbar  33   foofoo",
+		},
+		"pointer": {
+			data: []*row{
+				{"foo", "bar", 3},
+				{"foofoo", "barbar", 33},
+			},
+			fields:   []string{"Bar", "Baz", "Foo"},
+			expected: "Bar     Baz  Foo   \nbar     3    foo   \nbarbar  33   foofoo",
+		},
 	}
 
-	table2 := NewTable(
-		[]*row{
-			&row{"foo", "bar", 3},
-			&row{"foofoo", "barbar", 33}},
-		[]string{"Bar", "Baz", "Foo"})
-	if got := table2.Format(false); got != expected {
-		t.Errorf("got %q instead of expected %q", got, expected)
+	for name, test := range tests {
+		name, test := name, test
+
+		t.Run(name, func(t *testing.T) {
+			table := NewTable(test.data, test.fields)
+
+			if got := table.Format(false); got != test.expected {
+				t.Errorf("unexpected table result\ngot : %s\nwant: %q", got, test.expected)
+			}
+		})
 	}
 }
