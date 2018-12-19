@@ -64,25 +64,26 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&rootOptions.CfgFile, "config", "", "config file (default is $HOME/.banzai/config.yaml)")
-	//rootCmd.PersistentFlags().StringVarP(&BanzaiContext, "context", "c", "default", "name of Banzai Cloud context to use")
+	flags := rootCmd.PersistentFlags()
 
-	rootCmd.PersistentFlags().StringVarP(&rootOptions.Output, "output", "o", "default", "output format (default|yaml|json)")
+	flags.StringVar(&rootOptions.CfgFile, "config", "", "config file (default is $HOME/.banzai/config.yaml)")
+	//flags.StringVarP(&BanzaiContext, "context", "c", "default", "name of Banzai Cloud context to use")
+	flags.StringVarP(&rootOptions.Output, "output", "o", "default", "output format (default|yaml|json)")
 
-	rootCmd.PersistentFlags().Int32("organization", 0, "organization id")
-	viper.BindPFlag("organization.id", rootCmd.PersistentFlags().Lookup("organization"))
+	flags.Int32("organization", 0, "organization id")
+	_ = viper.BindPFlag("organization.id", flags.Lookup("organization"))
 
-	rootCmd.PersistentFlags().Bool("no-color", false, "never display color output")
-	viper.BindPFlag("formatting.no-color", rootCmd.PersistentFlags().Lookup("no-color"))
-	rootCmd.PersistentFlags().Bool("color", false, "use colors on non-tty outputs")
-	viper.BindPFlag("formatting.force-color", rootCmd.PersistentFlags().Lookup("color"))
-	rootCmd.PersistentFlags().Bool("no-interactive", false, "never ask questions interactively")
-	viper.BindPFlag("formatting.no-interactive", rootCmd.PersistentFlags().Lookup("no-interactive"))
-	rootCmd.PersistentFlags().Bool("interactive", false, "ask questions interactively even if stdin or stdout is non-tty")
-	viper.BindPFlag("formatting.force-interactive", rootCmd.PersistentFlags().Lookup("interactive"))
+	flags.Bool("no-color", false, "never display color output")
+	_ = viper.BindPFlag("formatting.no-color", flags.Lookup("no-color"))
+	flags.Bool("color", false, "use colors on non-tty outputs")
+	_ = viper.BindPFlag("formatting.force-color", flags.Lookup("color"))
+	flags.Bool("no-interactive", false, "never ask questions interactively")
+	_ = viper.BindPFlag("formatting.no-interactive", flags.Lookup("no-interactive"))
+	flags.Bool("interactive", false, "ask questions interactively even if stdin or stdout is non-tty")
+	_ = viper.BindPFlag("formatting.force-interactive", flags.Lookup("interactive"))
 
-	rootCmd.PersistentFlags().Bool("verbose", false, "more verbose output")
-	viper.BindPFlag("output.verbose", rootCmd.PersistentFlags().Lookup("verbose"))
+	flags.Bool("verbose", false, "more verbose output")
+	_ = viper.BindPFlag("output.verbose", flags.Lookup("verbose"))
 
 	viper.SetDefault("pipeline.basepath", "https://beta.banzaicloud.io/pipeline")
 }
