@@ -17,6 +17,7 @@ package secret
 import (
 	"context"
 
+	"github.com/antihax/optional"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/format"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
@@ -26,7 +27,8 @@ import (
 )
 
 type listOptions struct {
-	format string
+	format     string
+	secretType string
 }
 
 // NewListCommand creates a new cobra.Command for `banzai organization list`.
@@ -45,14 +47,18 @@ func NewListCommand(banzaiCli cli.Cli) *cobra.Command {
 	flags := cmd.Flags()
 
 	flags.StringVarP(&options.format, "format", "f", "default", "Output format (default|yaml|json)")
+	flags.StringVarP(&options.secretType, "type", "t", "", "Filter list to the given type")
 
 	return cmd
 }
 
 func runList(banzaiCli cli.Cli, options listOptions) {
 	orgID := input.GetOrganization(banzaiCli)
-
-	secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &client.GetSecretsOpts{})
+	typeFilter := optional.EmptyString()
+	if options.secretType != "" {
+		typeFilter = optional.NewString(options.secretType)
+	}
+	secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &client.GetSecretsOpts{Type_: typeFilter})
 	if err != nil {
 		// TODO: review log usage
 		log.Fatalf("could not list secrets: %v", err)
