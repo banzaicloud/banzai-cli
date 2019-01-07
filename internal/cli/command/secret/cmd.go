@@ -29,12 +29,8 @@ func NewSecretCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	cmd.AddCommand(
 		NewListCommand(banzaiCli),
+		NewGetCommand(banzaiCli),
 	)
-
-	// Temporarily, until we have only one command here
-	cmd = NewListCommand(banzaiCli)
-	cmd.Use = "secret"
-	cmd.Aliases = []string{"secrets", "s"}
 
 	return cmd
 }

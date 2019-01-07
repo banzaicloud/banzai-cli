@@ -31,14 +31,15 @@ type listOptions struct {
 	secretType string
 }
 
-// NewListCommand creates a new cobra.Command for `banzai organization list`.
+// NewListCommand creates a new cobra.Command for `banzai secret list`.
 func NewListCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := listOptions{}
 
 	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "List secrets",
-		Args:  cobra.NoArgs,
+		Use:     "list",
+		Short:   "List secrets",
+		Args:    cobra.NoArgs,
+		Aliases: []string{"l", "ls"},
 		Run: func(cmd *cobra.Command, args []string) {
 			options.format, _ = cmd.Flags().GetString("output")
 			runList(banzaiCli, options)
@@ -64,5 +65,5 @@ func runList(banzaiCli cli.Cli, options listOptions) {
 		log.Fatalf("could not list secrets: %v", err)
 	}
 
-	format.SecretWrite(banzaiCli.Out(), options.format, banzaiCli.Color(), secrets)
+	format.SecretsWrite(banzaiCli.Out(), options.format, banzaiCli.Color(), secrets)
 }
