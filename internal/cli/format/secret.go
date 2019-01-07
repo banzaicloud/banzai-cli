@@ -21,8 +21,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// SecretWrite writes a secret list to the output.
+// SecretWrite writes a secret to the output.
 func SecretWrite(out io.Writer, format string, color bool, data interface{}) {
+	SecretsWrite(out, format, color, []interface{}{data})
+}
+
+// SecretsWrite writes a secret list to the output.
+func SecretsWrite(out io.Writer, format string, color bool, data interface{}) {
 	ctx := &output.Context{
 		Out:    out,
 		Color:  color,

@@ -33,7 +33,7 @@ func NewSelectCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "select [ORG NAME]",
-		Short: "Select and organization",
+		Short: "Select an organization as the default",
 		Args:  cobra.MaximumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) > 0 {

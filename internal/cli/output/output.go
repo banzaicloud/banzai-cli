@@ -21,7 +21,7 @@ import (
 
 	"github.com/banzaicloud/banzai-cli/pkg/formatting"
 	"github.com/pkg/errors"
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // Context contains parameters for formatting data.
@@ -32,7 +32,12 @@ type Context struct {
 	Fields []string
 }
 
-// Output writes data in a specific format.
+// SingleOutput writes single record in a specific format.
+func SingleOutput(ctx *Context, data interface{}) error {
+	return Output(ctx, []interface{}{data})
+}
+
+// Output writes a data slice in a specific format.
 func Output(ctx *Context, data interface{}) error {
 	switch ctx.Format {
 	case "json":
@@ -55,12 +60,14 @@ func Output(ctx *Context, data interface{}) error {
 
 		return errors.Wrap(err, "cannot write output")
 
-	default:
+	case "default":
 		table := formatting.NewTable(data, ctx.Fields)
 		formatted := table.Format(ctx.Color)
 
 		_, err := fmt.Fprintln(ctx.Out, formatted)
 
 		return errors.Wrap(err, "cannot write output")
+	default:
+		return fmt.Errorf("no output format named %q", ctx.Format)
 	}
 }
