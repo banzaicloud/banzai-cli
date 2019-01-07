@@ -37,13 +37,10 @@ func NewListCommand(banzaiCli cli.Cli) *cobra.Command {
 		Short: "List organizations",
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
+			options.format, _ = cmd.Flags().GetString("output")
 			runList(banzaiCli, options)
 		},
 	}
-
-	flags := cmd.Flags()
-
-	flags.StringVarP(&options.format, "format", "f", "default", "Output format (default|yaml|json)")
 
 	return cmd
 }
