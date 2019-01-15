@@ -296,7 +296,7 @@ func ClusterCreate(cmd *cobra.Command, args []string) {
 	}
 	log.Info("cluster is being created")
 	log.Infof("you can check its status with the command `banzai cluster get %q`", out.Name)
-	Out1(cluster, []string{"Id", "Name", "Status"})
+	Out1(cluster, []string{"Id", "Name"})
 }
 
 func validateClusterCreateRequest(val interface{}) error {
