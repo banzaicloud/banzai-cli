@@ -161,10 +161,6 @@ func InitPipeline() *client.APIClient {
 	return client.NewAPIClient(config)
 }
 
-func Out1(data interface{}, fields []string) {
-	Out([]interface{}{data}, fields)
-}
-
 func Out(data interface{}, fields []string) {
 	switch rootOptions.Output {
 	case "json":

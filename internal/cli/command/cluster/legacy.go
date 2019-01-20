@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package cluster
 
 import (
 	"bytes"
@@ -27,28 +27,20 @@ import (
 
 	"github.com/antihax/optional"
 	"github.com/banzaicloud/pipeline/client"
-	yaml "github.com/ghodss/yaml"
+	"github.com/ghodss/yaml"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/ttacon/chalk"
-	survey "gopkg.in/AlecAivazis/survey.v1"
+	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 const clusterIdKey = "cluster.id"
 
 var clusterOptions struct {
 	Name string
-}
-
-// clusterCmd represents the cluster command
-var clusterCmd = &cobra.Command{
-	Use:     "cluster",
-	Aliases: []string{"clusters", "c"},
-	Short:   "Handle clusters",
-	Run:     ClusterList,
 }
 
 var clusterListCmd = &cobra.Command{
@@ -426,13 +418,6 @@ func GetClusterId(org int32, ask bool) int32 {
 }
 
 func init() {
-	rootCmd.AddCommand(clusterCmd)
-	clusterCmd.AddCommand(clusterListCmd)
-	clusterCmd.AddCommand(clusterGetCmd)
-	clusterCmd.AddCommand(clusterCreateCmd)
-	clusterCmd.AddCommand(clusterShellCmd)
-	clusterCmd.AddCommand(clusterDeleteCmd)
-
 	clusterShellCmd.PersistentFlags().Int32("cluster", 0, "cluster id")
 	viper.BindPFlag(clusterIdKey, clusterShellCmd.PersistentFlags().Lookup("cluster"))
 	clusterShellCmd.PersistentFlags().StringVar(&clusterOptions.Name, "cluster-name", "", "cluster name")

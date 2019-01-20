@@ -1,4 +1,4 @@
-// Copyright © 2018 Banzai Cloud
+// Copyright © 2019 Banzai Cloud
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package command
+package cluster
 
 import (
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/organization"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/secret"
 	"github.com/spf13/cobra"
 )
 
-// AddCommands adds all the commands from cli/command to the root command
-func AddCommands(cmd *cobra.Command, banzaiCli cli.Cli) {
+// NewClusterCommand returns a cobra command for `cluster` subcommands.
+func NewClusterCommand(banzaiCli cli.Cli) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "cluster",
+		Aliases: []string{"clusters", "c"},
+		Short:   "Manage clusters",
+	}
+
 	cmd.AddCommand(
-		cluster.NewClusterCommand(banzaiCli),
-		organization.NewOrganizationCommand(banzaiCli),
-		secret.NewSecretCommand(banzaiCli),
+		clusterListCmd,
+		clusterGetCmd,
+		clusterCreateCmd,
+		clusterShellCmd,
+		clusterDeleteCmd,
 	)
+
+	return cmd
 }
