@@ -3,7 +3,8 @@ linters:
     disable:
         - maligned
 
-        # TODO: these
+        # TODO: fix these
+        - dupl
         - gochecknoglobals
         - lll
         - deadcode

@@ -12,12 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package cluster
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -25,30 +23,19 @@ import (
 	"path"
 	"strings"
 
-	"github.com/antihax/optional"
+	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/pipeline/client"
-	yaml "github.com/ghodss/yaml"
-	"github.com/goph/emperror"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/ttacon/chalk"
-	survey "gopkg.in/AlecAivazis/survey.v1"
+	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 const clusterIdKey = "cluster.id"
 
 var clusterOptions struct {
 	Name string
-}
-
-// clusterCmd represents the cluster command
-var clusterCmd = &cobra.Command{
-	Use:     "cluster",
-	Aliases: []string{"clusters", "c"},
-	Short:   "Handle clusters",
-	Run:     ClusterList,
 }
 
 var clusterListCmd = &cobra.Command{
@@ -63,7 +50,7 @@ func ClusterList(cmd *cobra.Command, args []string) {
 	orgId := GetOrgId(true)
 	clusters, _, err := pipeline.ClustersApi.ListClusters(context.Background(), orgId)
 	if err != nil {
-		logAPIError("list clusters", err, orgId)
+		cli.LogAPIError("list clusters", err, orgId)
 		log.Fatalf("could not list clusters: %v", err)
 	}
 	Out(clusters, []string{"Id", "Name", "Distribution", "Status", "CreatorName", "CreatedAt"})
@@ -82,7 +69,7 @@ func ClusterGet(cmd *cobra.Command, args []string) {
 	orgId := GetOrgId(true)
 	clusters, _, err := pipeline.ClustersApi.ListClusters(context.Background(), orgId)
 	if err != nil {
-		logAPIError("list clusters", err, orgId)
+		cli.LogAPIError("list clusters", err, orgId)
 		log.Fatalf("could not list clusters: %v", err)
 	}
 	var id int32
@@ -97,7 +84,7 @@ func ClusterGet(cmd *cobra.Command, args []string) {
 	}
 	cluster, _, err := pipeline.ClustersApi.GetCluster(context.Background(), orgId, id)
 	if err != nil {
-		logAPIError("get cluster", err, id)
+		cli.LogAPIError("get cluster", err, id)
 		log.Fatalf("could not get cluster: %v", err)
 	}
 	type details struct {
@@ -121,7 +108,7 @@ func ClusterDelete(cmd *cobra.Command, args []string) {
 	orgId := GetOrgId(true)
 	clusters, _, err := pipeline.ClustersApi.ListClusters(context.Background(), orgId)
 	if err != nil {
-		logAPIError("list clusters", err, orgId)
+		cli.LogAPIError("list clusters", err, orgId)
 		log.Fatalf("could not list clusters: %v", err)
 	}
 	var id int32
@@ -137,7 +124,7 @@ func ClusterDelete(cmd *cobra.Command, args []string) {
 
 	if isInteractive() {
 		if cluster, _, err := pipeline.ClustersApi.GetCluster(context.Background(), orgId, id); err != nil {
-			logAPIError("get cluster", err, id)
+			cli.LogAPIError("get cluster", err, id)
 		} else {
 			Out1(cluster, []string{"Id", "Name", "Distribution", "Status", "CreatorName", "CreatedAt", "StatusMessage"})
 		}
@@ -148,165 +135,15 @@ func ClusterDelete(cmd *cobra.Command, args []string) {
 		}
 	}
 	if cluster, _, err := pipeline.ClustersApi.DeleteCluster(context.Background(), orgId, id, nil); err != nil {
-		logAPIError("get cluster", err, id)
+		cli.LogAPIError("get cluster", err, id)
 	} else {
 		log.Printf("Deleting cluster %v", cluster)
 	}
 	if cluster, _, err := pipeline.ClustersApi.GetCluster(context.Background(), orgId, id); err != nil {
-		logAPIError("get cluster", err, id)
+		cli.LogAPIError("get cluster", err, id)
 	} else {
 		Out1(cluster, []string{"Id", "Name", "Distribution", "Status", "CreatorName", "CreatedAt", "StatusMessage"})
 	}
-}
-
-var clusterCreateCmd = &cobra.Command{
-	Use:     "create",
-	Aliases: []string{"c"},
-	Short:   "create cluster based on json stdin or interactive session",
-	Run:     ClusterCreate,
-}
-
-func unmarshal(raw []byte, data interface{}) error {
-	decoder := json.NewDecoder(bytes.NewReader(raw))
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(data); err == nil {
-		return nil
-	}
-
-	// if can't decode as json, try to convert it from yaml first
-	// use this method to prevent unmarshalling directly with yaml, for example to map[interface{}]interface{}
-	converted, err := yaml.YAMLToJSON(raw)
-	if err != nil {
-		return emperror.Wrap(err, "unmarshal")
-	}
-
-	decoder = json.NewDecoder(bytes.NewReader(converted))
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(data); err != nil {
-		return emperror.Wrap(err, "unmarshal")
-	}
-	return nil
-}
-
-func ClusterCreate(cmd *cobra.Command, args []string) {
-	pipeline := InitPipeline()
-	orgId := GetOrgId(true)
-	out := client.CreateClusterRequest{}
-	if isInteractive() {
-		content := ""
-		for {
-			fileName := ""
-			survey.AskOne(&survey.Input{Message: "Load a JSON or YAML file:",
-				Default: "skip",
-				Help:    "Give either a relative or an absolute path to a file containing a JSON or YAML Cluster creation request. Leave empty to cancel."}, &fileName, nil)
-			if fileName == "skip" || fileName == "" {
-				break
-			}
-			if raw, err := ioutil.ReadFile(fileName); err != nil {
-				log.Errorf("failed to read file %q: %v", fileName, err)
-				continue
-			} else {
-				if err := unmarshal(raw, &out); err != nil {
-					log.Fatalf("failed to parse CreateClusterRequest: %v", err)
-				}
-				break
-			}
-		}
-		if out.Properties == nil || len(out.Properties) == 0 {
-			providers := map[string]struct {
-				cloud    string
-				property interface{}
-			}{
-				"acsk": {cloud: "alibaba", property: new(client.CreateAkcsPropertiesAkcs)},
-				"aks":  {cloud: "azure", property: new(client.CreateAksPropertiesAks)},
-				"eks":  {cloud: "amazon", property: new(client.CreateEksPropertiesEks)},
-				"gke":  {cloud: "google", property: new(client.CreateEksPropertiesEks)},
-				"oke":  {cloud: "oracle", property: map[string]interface{}{}},
-			}
-			providerNames := make([]string, 0, len(providers))
-			for provider := range providers {
-				providerNames = append(providerNames, provider)
-			}
-			providerName := ""
-			survey.AskOne(&survey.Select{Message: "Provider:", Help: "Select the provider to use", Options: providerNames}, &providerName, nil)
-			if provider, ok := providers[providerName]; ok {
-				out.Properties = map[string]interface{}{providerName: provider.property}
-				out.Cloud = provider.cloud
-			}
-		}
-		if out.SecretId == "" && out.SecretName == "" {
-			secrets, _, err := pipeline.SecretsApi.GetSecrets(context.Background(), orgId, &client.GetSecretsOpts{Type_: optional.NewString(out.Cloud)})
-			if err != nil {
-				log.Errorf("could not list secrets: %v", err)
-			} else {
-				secretNames := make([]string, len(secrets))
-				for i, secret := range secrets {
-					secretNames[i] = secret.Name
-				}
-				survey.AskOne(&survey.Select{Message: "Secret:", Help: "Select the secret to use for creating cloud resources", Options: secretNames}, &out.SecretName, nil)
-			}
-		}
-		if out.Name == "" {
-			name := fmt.Sprintf("%s%s%d", os.Getenv("USER"), out.Cloud, os.Getpid())
-			survey.AskOne(&survey.Input{Message: "Cluster name:", Default: name}, &out.Name, nil)
-		}
-
-		for {
-			if bytes, err := json.MarshalIndent(out, "", "  "); err != nil {
-				log.Errorf("failed to marshal request: %v", err)
-				log.Debugf("Request: %#v", out)
-			} else {
-				content = string(bytes)
-				fmt.Fprintf(os.Stderr, "The current state of the request:\n\n%s\n", content)
-			}
-
-			open := false
-			survey.AskOne(&survey.Confirm{Message: "Do you want to edit the cluster request in your text editor?"}, &open, nil)
-			if !open {
-				break
-			}
-			///fmt.Printf("BEFORE>>>\n%v<<<\n", content)
-			survey.AskOne(&survey.Editor{Message: "Create cluster request:", Default: content, HideDefault: true, AppendDefault: true}, &content, validateClusterCreateRequest)
-			///fmt.Printf("AFTER>>>\n%v<<<\n", content)
-			if err := json.Unmarshal([]byte(content), &out); err != nil {
-				log.Errorf("can't parse request: %v", err)
-			}
-		}
-		create := false
-		survey.AskOne(&survey.Confirm{
-			Message: fmt.Sprintf("Do you want to CREATE the cluster %q now?", out.Name)}, &create, nil)
-		if !create {
-			log.Fatal("cluster creation cancelled")
-		}
-	} else {
-		// non-tty: read stdin
-		raw, err := ioutil.ReadAll(os.Stdin)
-		if err != nil {
-			log.Fatalf("failed to read stdin: %v", err)
-		}
-		if err := unmarshal(raw, &out); err != nil {
-			log.Fatalf("failed to parse CreateClusterRequest: %v", err)
-		}
-	}
-	log.Debugf("create request: %#v", out)
-	cluster, _, err := pipeline.ClustersApi.CreateCluster(context.Background(), orgId, out)
-	if err != nil {
-		logAPIError("create cluster", err, out)
-		log.Fatalf("failed to create cluster: %v", err)
-	}
-	log.Info("cluster is being created")
-	log.Infof("you can check its status with the command `banzai cluster get %q`", out.Name)
-	Out1(cluster, []string{"Id", "Name"})
-}
-
-func validateClusterCreateRequest(val interface{}) error {
-	str, ok := val.(string)
-	if !ok {
-		return errors.New("value is not a string")
-	}
-	decoder := json.NewDecoder(strings.NewReader(str))
-	decoder.DisallowUnknownFields()
-	return emperror.Wrap(decoder.Decode(&client.CreateClusterRequest{}), "not a valid JSON request")
 }
 
 var clusterShellCmd = &cobra.Command{
@@ -426,13 +263,6 @@ func GetClusterId(org int32, ask bool) int32 {
 }
 
 func init() {
-	rootCmd.AddCommand(clusterCmd)
-	clusterCmd.AddCommand(clusterListCmd)
-	clusterCmd.AddCommand(clusterGetCmd)
-	clusterCmd.AddCommand(clusterCreateCmd)
-	clusterCmd.AddCommand(clusterShellCmd)
-	clusterCmd.AddCommand(clusterDeleteCmd)
-
 	clusterShellCmd.PersistentFlags().Int32("cluster", 0, "cluster id")
 	viper.BindPFlag(clusterIdKey, clusterShellCmd.PersistentFlags().Lookup("cluster"))
 	clusterShellCmd.PersistentFlags().StringVar(&clusterOptions.Name, "cluster-name", "", "cluster name")
