@@ -30,7 +30,7 @@ func NewClusterCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd.AddCommand(
 		clusterListCmd,
 		clusterGetCmd,
-		clusterCreateCmd,
+		NewCreateCommand(banzaiCli),
 		clusterShellCmd,
 		clusterDeleteCmd,
 	)
