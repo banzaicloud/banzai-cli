@@ -1,8 +1,10 @@
 builds:
     -
         main: ./cmd/banzai
+        binary: banzai
         env:
             - CGO_ENABLED=0
+        ldflags: "-s -w -X main.version={{ .Version }} -X main.commitHash={{ .ShortCommit }} -X main.buildDate={{ .Date }}"
         goos:
             - linux
             - darwin
@@ -10,16 +12,10 @@ builds:
         goarch:
             - amd64
 
-archive:
-    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
-
-checksum:
-    name_template: 'checksums.txt'
-
 brew:
     github:
         owner: banzaicloud
-    description: Command-line interface for Banzai Cloud products
+    description: Command-line interface for Banzai Cloud Pipeline platform
     homepage: https://banzaicloud.com/
     test: |
-        system "#{bin}/banzai-cli --version"
+        system "#{bin}/banzai --version"
