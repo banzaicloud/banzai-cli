@@ -34,6 +34,7 @@ import (
 )
 
 type createOptions struct {
+	file string
 }
 
 // NewCreateCommand creates a new cobra.Command for `banzai cluster create`.
@@ -51,6 +52,10 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 		},
 	}
 
+	flags := cmd.Flags()
+
+	flags.StringVarP(&options.file, "file", "f", "", "Cluster descriptor file")
+
 	return cmd
 }
 
@@ -61,24 +66,29 @@ func runCreate(banzaiCli cli.Cli, options createOptions) {
 
 	if isInteractive() {
 		var content string
+		var fileName = options.file
 
 		for {
-			fileName := ""
-			_ = survey.AskOne(
-				&survey.Input{
-					Message: "Load a JSON or YAML file:",
-					Default: "skip",
-					Help:    "Give either a relative or an absolute path to a file containing a JSON or YAML Cluster creation request. Leave empty to cancel.",
-				},
-				&fileName,
-				nil,
-			)
-			if fileName == "skip" || fileName == "" {
-				break
+			if fileName == "" {
+				_ = survey.AskOne(
+					&survey.Input{
+						Message: "Load a JSON or YAML file:",
+						Default: "skip",
+						Help:    "Give either a relative or an absolute path to a file containing a JSON or YAML Cluster creation request. Leave empty to cancel.",
+					},
+					&fileName,
+					nil,
+				)
+				if fileName == "skip" || fileName == "" {
+					break
+				}
 			}
 
 			if raw, err := ioutil.ReadFile(fileName); err != nil {
+				fileName = "" // reset fileName so that we can ask for one
+
 				log.Errorf("failed to read file %q: %v", fileName, err)
+
 				continue
 			} else {
 				if err := unmarshal(raw, &out); err != nil {
@@ -193,7 +203,7 @@ func runCreate(banzaiCli cli.Cli, options createOptions) {
 
 	log.Info("cluster is being created")
 	log.Infof("you can check its status with the command `banzai cluster get %q`", out.Name)
-	Out1(cluster, []string{"ID", "Name"})
+	Out1(cluster, []string{"Id", "Name"})
 }
 
 func validateClusterCreateRequest(val interface{}) error {
