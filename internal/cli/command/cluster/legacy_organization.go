@@ -17,6 +17,7 @@ package cluster
 import (
 	"context"
 
+	"github.com/banzaicloud/banzai-cli/internal/cli"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gopkg.in/AlecAivazis/survey.v1"
@@ -28,7 +29,7 @@ func searchOrganizationId(name string) int32 {
 	pipeline := InitPipeline()
 	orgs, _, err := pipeline.OrganizationsApi.ListOrgs(context.Background())
 	if err != nil {
-		logAPIError("list organizations", err, nil)
+		cli.LogAPIError("list organizations", err, nil)
 		return 0
 	}
 	for _, org := range orgs {

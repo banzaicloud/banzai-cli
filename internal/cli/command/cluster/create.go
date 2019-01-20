@@ -187,7 +187,7 @@ func runCreate(banzaiCli cli.Cli, options createOptions) {
 	log.Debugf("create request: %#v", out)
 	cluster, _, err := banzaiCli.Client().ClustersApi.CreateCluster(context.Background(), orgID, out)
 	if err != nil {
-		logAPIError("create cluster", err, out)
+		cli.LogAPIError("create cluster", err, out)
 		log.Fatalf("failed to create cluster: %v", err)
 	}
 

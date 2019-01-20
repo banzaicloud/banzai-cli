@@ -71,14 +71,6 @@ func Out(data interface{}, fields []string) {
 	}
 }
 
-func logAPIError(action string, err error, request interface{}) {
-	if err, ok := err.(client.GenericOpenAPIError); ok {
-		log.Printf("failed to %s: %v (err %[2]T, request=%+v, response=%s)", action, err, request, err.Body())
-	} else {
-		log.Printf("failed to %s: %v", action, err)
-	}
-}
-
 func isInteractive() bool {
 	if isatty.IsTerminal(os.Stdout.Fd()) && isatty.IsTerminal(os.Stdin.Fd()) {
 		return !viper.GetBool("formatting.no-interactive")

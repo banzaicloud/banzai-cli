@@ -23,6 +23,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/pipeline/client"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -49,7 +50,7 @@ func ClusterList(cmd *cobra.Command, args []string) {
 	orgId := GetOrgId(true)
 	clusters, _, err := pipeline.ClustersApi.ListClusters(context.Background(), orgId)
 	if err != nil {
-		logAPIError("list clusters", err, orgId)
+		cli.LogAPIError("list clusters", err, orgId)
 		log.Fatalf("could not list clusters: %v", err)
 	}
 	Out(clusters, []string{"Id", "Name", "Distribution", "Status", "CreatorName", "CreatedAt"})
@@ -68,7 +69,7 @@ func ClusterGet(cmd *cobra.Command, args []string) {
 	orgId := GetOrgId(true)
 	clusters, _, err := pipeline.ClustersApi.ListClusters(context.Background(), orgId)
 	if err != nil {
-		logAPIError("list clusters", err, orgId)
+		cli.LogAPIError("list clusters", err, orgId)
 		log.Fatalf("could not list clusters: %v", err)
 	}
 	var id int32
@@ -83,7 +84,7 @@ func ClusterGet(cmd *cobra.Command, args []string) {
 	}
 	cluster, _, err := pipeline.ClustersApi.GetCluster(context.Background(), orgId, id)
 	if err != nil {
-		logAPIError("get cluster", err, id)
+		cli.LogAPIError("get cluster", err, id)
 		log.Fatalf("could not get cluster: %v", err)
 	}
 	type details struct {
@@ -107,7 +108,7 @@ func ClusterDelete(cmd *cobra.Command, args []string) {
 	orgId := GetOrgId(true)
 	clusters, _, err := pipeline.ClustersApi.ListClusters(context.Background(), orgId)
 	if err != nil {
-		logAPIError("list clusters", err, orgId)
+		cli.LogAPIError("list clusters", err, orgId)
 		log.Fatalf("could not list clusters: %v", err)
 	}
 	var id int32
@@ -123,7 +124,7 @@ func ClusterDelete(cmd *cobra.Command, args []string) {
 
 	if isInteractive() {
 		if cluster, _, err := pipeline.ClustersApi.GetCluster(context.Background(), orgId, id); err != nil {
-			logAPIError("get cluster", err, id)
+			cli.LogAPIError("get cluster", err, id)
 		} else {
 			Out1(cluster, []string{"Id", "Name", "Distribution", "Status", "CreatorName", "CreatedAt", "StatusMessage"})
 		}
@@ -134,12 +135,12 @@ func ClusterDelete(cmd *cobra.Command, args []string) {
 		}
 	}
 	if cluster, _, err := pipeline.ClustersApi.DeleteCluster(context.Background(), orgId, id, nil); err != nil {
-		logAPIError("get cluster", err, id)
+		cli.LogAPIError("get cluster", err, id)
 	} else {
 		log.Printf("Deleting cluster %v", cluster)
 	}
 	if cluster, _, err := pipeline.ClustersApi.GetCluster(context.Background(), orgId, id); err != nil {
-		logAPIError("get cluster", err, id)
+		cli.LogAPIError("get cluster", err, id)
 	} else {
 		Out1(cluster, []string{"Id", "Name", "Distribution", "Status", "CreatorName", "CreatedAt", "StatusMessage"})
 	}
