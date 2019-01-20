@@ -24,6 +24,7 @@ import (
 
 	"github.com/antihax/optional"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/banzaicloud/pipeline/client"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
@@ -54,19 +55,28 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 }
 
 func runCreate(banzaiCli cli.Cli, options createOptions) {
-	pipeline := InitPipeline()
-	orgId := GetOrgId(true)
+	orgID := input.GetOrganization(banzaiCli)
+
 	out := client.CreateClusterRequest{}
+
 	if isInteractive() {
-		content := ""
+		var content string
+
 		for {
 			fileName := ""
-			survey.AskOne(&survey.Input{Message: "Load a JSON or YAML file:",
-				Default: "skip",
-				Help:    "Give either a relative or an absolute path to a file containing a JSON or YAML Cluster creation request. Leave empty to cancel."}, &fileName, nil)
+			_ = survey.AskOne(
+				&survey.Input{
+					Message: "Load a JSON or YAML file:",
+					Default: "skip",
+					Help:    "Give either a relative or an absolute path to a file containing a JSON or YAML Cluster creation request. Leave empty to cancel.",
+				},
+				&fileName,
+				nil,
+			)
 			if fileName == "skip" || fileName == "" {
 				break
 			}
+
 			if raw, err := ioutil.ReadFile(fileName); err != nil {
 				log.Errorf("failed to read file %q: %v", fileName, err)
 				continue
@@ -74,9 +84,11 @@ func runCreate(banzaiCli cli.Cli, options createOptions) {
 				if err := unmarshal(raw, &out); err != nil {
 					log.Fatalf("failed to parse CreateClusterRequest: %v", err)
 				}
+
 				break
 			}
 		}
+
 		if out.Properties == nil || len(out.Properties) == 0 {
 			providers := map[string]struct {
 				cloud    string
@@ -88,32 +100,41 @@ func runCreate(banzaiCli cli.Cli, options createOptions) {
 				"gke":  {cloud: "google", property: new(client.CreateEksPropertiesEks)},
 				"oke":  {cloud: "oracle", property: map[string]interface{}{}},
 			}
+
 			providerNames := make([]string, 0, len(providers))
+
 			for provider := range providers {
 				providerNames = append(providerNames, provider)
 			}
-			providerName := ""
-			survey.AskOne(&survey.Select{Message: "Provider:", Help: "Select the provider to use", Options: providerNames}, &providerName, nil)
+
+			var providerName string
+
+			_ = survey.AskOne(&survey.Select{Message: "Provider:", Help: "Select the provider to use", Options: providerNames}, &providerName, nil)
+
 			if provider, ok := providers[providerName]; ok {
 				out.Properties = map[string]interface{}{providerName: provider.property}
 				out.Cloud = provider.cloud
 			}
 		}
 		if out.SecretId == "" && out.SecretName == "" {
-			secrets, _, err := pipeline.SecretsApi.GetSecrets(context.Background(), orgId, &client.GetSecretsOpts{Type_: optional.NewString(out.Cloud)})
+			secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &client.GetSecretsOpts{Type_: optional.NewString(out.Cloud)})
+
 			if err != nil {
 				log.Errorf("could not list secrets: %v", err)
 			} else {
 				secretNames := make([]string, len(secrets))
+
 				for i, secret := range secrets {
 					secretNames[i] = secret.Name
 				}
-				survey.AskOne(&survey.Select{Message: "Secret:", Help: "Select the secret to use for creating cloud resources", Options: secretNames}, &out.SecretName, nil)
+
+				_ = survey.AskOne(&survey.Select{Message: "Secret:", Help: "Select the secret to use for creating cloud resources", Options: secretNames}, &out.SecretName, nil)
 			}
 		}
+
 		if out.Name == "" {
 			name := fmt.Sprintf("%s%s%d", os.Getenv("USER"), out.Cloud, os.Getpid())
-			survey.AskOne(&survey.Input{Message: "Cluster name:", Default: name}, &out.Name, nil)
+			_ = survey.AskOne(&survey.Input{Message: "Cluster name:", Default: name}, &out.Name, nil)
 		}
 
 		for {
@@ -122,24 +143,32 @@ func runCreate(banzaiCli cli.Cli, options createOptions) {
 				log.Debugf("Request: %#v", out)
 			} else {
 				content = string(bytes)
-				fmt.Fprintf(os.Stderr, "The current state of the request:\n\n%s\n", content)
+				_, _ = fmt.Fprintf(os.Stderr, "The current state of the request:\n\n%s\n", content)
 			}
 
-			open := false
-			survey.AskOne(&survey.Confirm{Message: "Do you want to edit the cluster request in your text editor?"}, &open, nil)
+			var open bool
+			_ = survey.AskOne(&survey.Confirm{Message: "Do you want to edit the cluster request in your text editor?"}, &open, nil)
 			if !open {
 				break
 			}
+
 			///fmt.Printf("BEFORE>>>\n%v<<<\n", content)
-			survey.AskOne(&survey.Editor{Message: "Create cluster request:", Default: content, HideDefault: true, AppendDefault: true}, &content, validateClusterCreateRequest)
+			_ = survey.AskOne(&survey.Editor{Message: "Create cluster request:", Default: content, HideDefault: true, AppendDefault: true}, &content, validateClusterCreateRequest)
 			///fmt.Printf("AFTER>>>\n%v<<<\n", content)
 			if err := json.Unmarshal([]byte(content), &out); err != nil {
 				log.Errorf("can't parse request: %v", err)
 			}
 		}
-		create := false
-		survey.AskOne(&survey.Confirm{
-			Message: fmt.Sprintf("Do you want to CREATE the cluster %q now?", out.Name)}, &create, nil)
+
+		var create bool
+		_ = survey.AskOne(
+			&survey.Confirm{
+				Message: fmt.Sprintf("Do you want to CREATE the cluster %q now?", out.Name),
+			},
+			&create,
+			nil,
+		)
+
 		if !create {
 			log.Fatal("cluster creation cancelled")
 		}
@@ -149,19 +178,22 @@ func runCreate(banzaiCli cli.Cli, options createOptions) {
 		if err != nil {
 			log.Fatalf("failed to read stdin: %v", err)
 		}
+
 		if err := unmarshal(raw, &out); err != nil {
 			log.Fatalf("failed to parse CreateClusterRequest: %v", err)
 		}
 	}
+
 	log.Debugf("create request: %#v", out)
-	cluster, _, err := pipeline.ClustersApi.CreateCluster(context.Background(), orgId, out)
+	cluster, _, err := banzaiCli.Client().ClustersApi.CreateCluster(context.Background(), orgID, out)
 	if err != nil {
 		logAPIError("create cluster", err, out)
 		log.Fatalf("failed to create cluster: %v", err)
 	}
+
 	log.Info("cluster is being created")
 	log.Infof("you can check its status with the command `banzai cluster get %q`", out.Name)
-	Out1(cluster, []string{"Id", "Name"})
+	Out1(cluster, []string{"ID", "Name"})
 }
 
 func validateClusterCreateRequest(val interface{}) error {
@@ -169,7 +201,7 @@ func validateClusterCreateRequest(val interface{}) error {
 	if !ok {
 		return errors.New("value is not a string")
 	}
-	
+
 	decoder := json.NewDecoder(strings.NewReader(str))
 	decoder.DisallowUnknownFields()
 
