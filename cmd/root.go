@@ -53,6 +53,13 @@ func preRun(cmd *cobra.Command, args []string) {
 	}
 }
 
+// Init is a temporary function to set initial values in the root cmd.
+func Init(version string, commitHash string, buildDate string) {
+	rootCmd.Version = version
+
+	rootCmd.SetVersionTemplate(fmt.Sprintf("Banzai CLI version %s (%s) built on %s\n", version, commitHash, buildDate))
+}
+
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {

@@ -16,6 +16,15 @@ package main
 
 import "github.com/banzaicloud/banzai-cli/cmd"
 
+// Provisioned by ldflags
+// nolint: gochecknoglobals
+var (
+	version    string
+	commitHash string
+	buildDate  string
+)
+
 func main() {
+	cmd.Init(version, commitHash, buildDate)
 	cmd.Execute()
 }
