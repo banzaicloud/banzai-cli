@@ -12,6 +12,20 @@ builds:
         goarch:
             - amd64
 
+archive:
+    name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+    format_overrides:
+        -
+            goos: windows
+            format: zip
+
+checksum:
+    name_template: "{{ .Binary }}_checksums.txt"
+
+changelog:
+    skip: true
+
 brew:
     github:
         owner: banzaicloud
