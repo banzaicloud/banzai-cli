@@ -122,6 +122,8 @@ workflows:
             - build
             -
                 release:
+                    requires:
+                        - build
                     filters:
                         tags:
                             only: /^v?\d+\.\d+\.\d+(-\S*)?$/
