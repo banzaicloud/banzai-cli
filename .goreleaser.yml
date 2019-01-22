@@ -14,7 +14,6 @@ builds:
 
 archive:
     name_template: "banzai_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-
     format_overrides:
         -
             goos: windows
@@ -29,7 +28,9 @@ changelog:
 brew:
     github:
         owner: banzaicloud
-    description: Command-line interface for Banzai Cloud Pipeline platform
+        name: homebrew-tap
+    folder: Formula
     homepage: https://banzaicloud.com/
+    description: Command-line interface for Banzai Cloud Pipeline platform
     test: |
         system "#{bin}/banzai --version"
