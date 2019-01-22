@@ -89,7 +89,8 @@ jobs:
             -
                 persist_to_workspace:
                     root: .
-                    paths: .
+                    paths:
+                        - vendor/
 
             -
                 store_test_results:
@@ -106,6 +107,8 @@ jobs:
         working_directory: /go/src/github.com/banzaicloud/banzai-cli
 
         steps:
+            - checkout
+
             -
                 attach_workspace:
                     at: .
