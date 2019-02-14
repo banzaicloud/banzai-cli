@@ -17,6 +17,7 @@ package command
 import (
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/form"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/organization"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/secret"
 	"github.com/spf13/cobra"
@@ -26,6 +27,7 @@ import (
 func AddCommands(cmd *cobra.Command, banzaiCli cli.Cli) {
 	cmd.AddCommand(
 		cluster.NewClusterCommand(banzaiCli),
+		form.NewFormCommand(banzaiCli),
 		organization.NewOrganizationCommand(banzaiCli),
 		secret.NewSecretCommand(banzaiCli),
 	)

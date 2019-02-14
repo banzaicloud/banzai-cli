@@ -21,3 +21,11 @@
 [[constraint]]
   name = "gopkg.in/AlecAivazis/survey.v1"
   version = "1.7.1"
+
+[[constraint]]
+  name = "github.com/Masterminds/sprig"
+  version = "2.17.1"
+
+[[constraint]]
+  name = "github.com/gobuffalo/packr"
+  version = "2.0.1"

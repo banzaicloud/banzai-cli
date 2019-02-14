@@ -19,22 +19,12 @@ Usage:
   banzai [command]
 
 Available Commands:
-
-  login        Configure and log in to a Banzai Cloud context
-
-  cluster      Handle clusters
-    create      Create cluster based on json stdin or interactive session
-    delete      Delete a cluster
-    get         Get cluster details
-    list        List clusters
-    shell       Start a shell or run a command with the cluster configured as kubectl context
-
-  organization List and select organizations
-    list        List organizations
-    select      Select organization
-
-  secret       List secrets
+  cluster      Manage clusters
+  form         Open forms from config, persist provided values and generate templates
   help         Help about any command
+  login        Configure and log in to a Banzai Cloud context
+  organization List and select organizations
+  secret       Manage secrets
 
 Flags:
       --color                use colors on non-tty outputs
@@ -46,6 +36,7 @@ Flags:
       --organization int32   organization id
   -o, --output string        output format (default|yaml|json) (default "default")
       --verbose              more verbose output
+      --version              version for banzai
 
 Use "banzai [command] --help" for more information about a command.
 ```
