@@ -39,8 +39,9 @@ func NewOpenCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := openOptions{}
 
 	cmd := &cobra.Command{
-		Use:   "open [config yaml]",
+		Use:   "open CONFIG [--port 0] [--browser]",
 		Short: "Open form",
+		Long:  "Open form defined in the config file",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			options.configFile = args[0]
@@ -55,7 +56,7 @@ func NewOpenCommand(banzaiCli cli.Cli) *cobra.Command {
 }
 
 func runOpen(banzaiCli cli.Cli, options openOptions) {
-	listener, err := net.Listen("tcp", ":"+fmt.Sprintf("%d", options.port))
+	listener, err := net.Listen("tcp", "127.0.0.1:"+fmt.Sprintf("%d", options.port))
 	if err != nil {
 		log.Fatal(err)
 	}

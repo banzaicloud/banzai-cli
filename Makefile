@@ -42,9 +42,16 @@ bin/dep-${DEP_VERSION}:
 	curl https://raw.githubusercontent.com/golang/dep/master/install.sh | INSTALL_DIRECTORY=bin DEP_RELEASE_TAG=v${DEP_VERSION} sh
 	@mv bin/dep $@
 
+bin/packr2:
+	go get -u github.com/gobuffalo/packr/v2/packr2
+
 .PHONY: vendor
-vendor: bin/dep ## Install dependencies
+vendor: bin/dep bin/packr2 ## Install dependencies
 	bin/dep ensure -v -vendor-only
+
+.PHONY: pre-build ## Pre build bundles of static assets
+pre-build:
+	@cd internal/cli/command/form && packr2
 
 .PHONY: build
 build: ## Build a binary
@@ -54,12 +61,11 @@ endif
 ifneq (${IGNORE_GOLANG_VERSION_REQ}, 1)
 	@printf "${GOLANG_VERSION}\n$$(go version | awk '{sub(/^go/, "", $$3);print $$3}')" | sort -t '.' -k 1,1 -k 2,2 -k 3,3 -g | head -1 | grep -q -E "^${GOLANG_VERSION}$$" || (printf "Required Go version is ${GOLANG_VERSION}\nInstalled: `go version`" && exit 1)
 endif
-
 	go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/${BINARY_NAME} ${BUILD_PACKAGE}
 
 .PHONY: build-release
 build-release: LDFLAGS += -w
-build-release: build ## Build a binary without debug information
+build-release: pre-build build ## Build a binary without debug information
 
 .PHONY: check
 check: test lint ## Run tests and linters

@@ -43,27 +43,29 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _angular_material_checkbox__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/material/checkbox */ "./node_modules/@angular/material/esm5/checkbox.es5.js");
 /* harmony import */ var _angular_material_select__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/material/select */ "./node_modules/@angular/material/esm5/select.es5.js");
 /* harmony import */ var _angular_material_button__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/material/button */ "./node_modules/@angular/material/esm5/button.es5.js");
-/* harmony import */ var _angular_flex_layout__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/flex-layout */ "./node_modules/@angular/flex-layout/esm5/flex-layout.es5.js");
-/* harmony import */ var _ctrl_ngx_codemirror__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @ctrl/ngx-codemirror */ "./node_modules/@ctrl/ngx-codemirror/fesm5/ctrl-ngx-codemirror.js");
-/* harmony import */ var codemirror_mode_javascript_javascript__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! codemirror/mode/javascript/javascript */ "./node_modules/codemirror/mode/javascript/javascript.js");
-/* harmony import */ var codemirror_mode_javascript_javascript__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(codemirror_mode_javascript_javascript__WEBPACK_IMPORTED_MODULE_8__);
-/* harmony import */ var codemirror_mode_markdown_markdown__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! codemirror/mode/markdown/markdown */ "./node_modules/codemirror/mode/markdown/markdown.js");
-/* harmony import */ var codemirror_mode_markdown_markdown__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(codemirror_mode_markdown_markdown__WEBPACK_IMPORTED_MODULE_9__);
-/* harmony import */ var codemirror_mode_yaml_yaml__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! codemirror/mode/yaml/yaml */ "./node_modules/codemirror/mode/yaml/yaml.js");
-/* harmony import */ var codemirror_mode_yaml_yaml__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(codemirror_mode_yaml_yaml__WEBPACK_IMPORTED_MODULE_10__);
-/* harmony import */ var codemirror_addon_display_placeholder__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! codemirror/addon/display/placeholder */ "./node_modules/codemirror/addon/display/placeholder.js");
-/* harmony import */ var codemirror_addon_display_placeholder__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(codemirror_addon_display_placeholder__WEBPACK_IMPORTED_MODULE_11__);
-/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm5/operators/index.js");
-/* harmony import */ var _angular_material_core__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @angular/material/core */ "./node_modules/@angular/material/esm5/core.es5.js");
-/* harmony import */ var _angular_material__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @angular/material */ "./node_modules/@angular/material/esm5/material.es5.js");
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! rxjs */ "./node_modules/rxjs/_esm5/index.js");
-/* harmony import */ var _angular_cdk_coercion__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @angular/cdk/coercion */ "./node_modules/@angular/cdk/esm5/coercion.es5.js");
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
-/* harmony import */ var lodash_es__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! lodash-es */ "./node_modules/lodash-es/lodash.js");
-/* harmony import */ var ajv__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ajv */ "./node_modules/ajv/lib/ajv.js");
-/* harmony import */ var ajv__WEBPACK_IMPORTED_MODULE_19___default = /*#__PURE__*/__webpack_require__.n(ajv__WEBPACK_IMPORTED_MODULE_19__);
-/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! @angular/forms */ "./node_modules/@angular/forms/fesm5/forms.js");
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! tslib */ "./node_modules/tslib/tslib.es6.js");
+/* harmony import */ var _angular_material_snack_bar__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/material/snack-bar */ "./node_modules/@angular/material/esm5/snack-bar.es5.js");
+/* harmony import */ var _angular_flex_layout__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/flex-layout */ "./node_modules/@angular/flex-layout/esm5/flex-layout.es5.js");
+/* harmony import */ var _ctrl_ngx_codemirror__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @ctrl/ngx-codemirror */ "./node_modules/@ctrl/ngx-codemirror/fesm5/ctrl-ngx-codemirror.js");
+/* harmony import */ var codemirror_mode_javascript_javascript__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! codemirror/mode/javascript/javascript */ "./node_modules/codemirror/mode/javascript/javascript.js");
+/* harmony import */ var codemirror_mode_javascript_javascript__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(codemirror_mode_javascript_javascript__WEBPACK_IMPORTED_MODULE_9__);
+/* harmony import */ var codemirror_mode_markdown_markdown__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! codemirror/mode/markdown/markdown */ "./node_modules/codemirror/mode/markdown/markdown.js");
+/* harmony import */ var codemirror_mode_markdown_markdown__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(codemirror_mode_markdown_markdown__WEBPACK_IMPORTED_MODULE_10__);
+/* harmony import */ var codemirror_mode_yaml_yaml__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! codemirror/mode/yaml/yaml */ "./node_modules/codemirror/mode/yaml/yaml.js");
+/* harmony import */ var codemirror_mode_yaml_yaml__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(codemirror_mode_yaml_yaml__WEBPACK_IMPORTED_MODULE_11__);
+/* harmony import */ var codemirror_addon_display_placeholder__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! codemirror/addon/display/placeholder */ "./node_modules/codemirror/addon/display/placeholder.js");
+/* harmony import */ var codemirror_addon_display_placeholder__WEBPACK_IMPORTED_MODULE_12___default = /*#__PURE__*/__webpack_require__.n(codemirror_addon_display_placeholder__WEBPACK_IMPORTED_MODULE_12__);
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm5/operators/index.js");
+/* harmony import */ var _angular_material_core__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @angular/material/core */ "./node_modules/@angular/material/esm5/core.es5.js");
+/* harmony import */ var _angular_material__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @angular/material */ "./node_modules/@angular/material/esm5/material.es5.js");
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! rxjs */ "./node_modules/rxjs/_esm5/index.js");
+/* harmony import */ var _angular_cdk_coercion__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @angular/cdk/coercion */ "./node_modules/@angular/cdk/esm5/coercion.es5.js");
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
+/* harmony import */ var lodash_es__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! lodash-es */ "./node_modules/lodash-es/lodash.js");
+/* harmony import */ var ajv__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ajv */ "./node_modules/ajv/lib/ajv.js");
+/* harmony import */ var ajv__WEBPACK_IMPORTED_MODULE_20___default = /*#__PURE__*/__webpack_require__.n(ajv__WEBPACK_IMPORTED_MODULE_20__);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! @angular/forms */ "./node_modules/@angular/forms/fesm5/forms.js");
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! tslib */ "./node_modules/tslib/tslib.es6.js");
+
 
 
 
@@ -186,15 +188,15 @@ var FormFieldComponent = /** @class */ (function () {
         configurable: true
     });
     FormFieldComponent.decorators = [
-        { type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Component"], args: [{
+        { type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Component"], args: [{
                     selector: 'bcu-form-field',
                     template: '',
-                    encapsulation: _angular_core__WEBPACK_IMPORTED_MODULE_17__["ViewEncapsulation"].None
+                    encapsulation: _angular_core__WEBPACK_IMPORTED_MODULE_18__["ViewEncapsulation"].None
                 }] }
     ];
     FormFieldComponent.propDecorators = {
-        field: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }],
-        form: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }]
+        field: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }],
+        form: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }]
     };
     return FormFieldComponent;
 }());
@@ -206,11 +208,11 @@ var FormFieldComponent = /** @class */ (function () {
 var FormComponent = /** @class */ (function () {
     function FormComponent() {
         this.fields = [];
-        this.form = new _angular_forms__WEBPACK_IMPORTED_MODULE_20__["FormGroup"]({}, {});
+        this.form = new _angular_forms__WEBPACK_IMPORTED_MODULE_21__["FormGroup"]({}, {});
         this.groups = [];
-        this.save = new _angular_core__WEBPACK_IMPORTED_MODULE_17__["EventEmitter"]();
-        this.valueChanges = new _angular_core__WEBPACK_IMPORTED_MODULE_17__["EventEmitter"]();
-        this.destroy$ = new rxjs__WEBPACK_IMPORTED_MODULE_15__["Subject"]();
+        this.save = new _angular_core__WEBPACK_IMPORTED_MODULE_18__["EventEmitter"]();
+        this.valueChanges = new _angular_core__WEBPACK_IMPORTED_MODULE_18__["EventEmitter"]();
+        this.destroy$ = new rxjs__WEBPACK_IMPORTED_MODULE_16__["Subject"]();
     }
     Object.defineProperty(FormComponent.prototype, "fieldsByKey", {
         get: /**
@@ -225,7 +227,7 @@ var FormComponent = /** @class */ (function () {
              */
             function (all, field) {
                 var _a;
-                return (Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__assign"])({}, all, (_a = {}, _a[field.key] = field, _a)));
+                return (Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__assign"])({}, all, (_a = {}, _a[field.key] = field, _a)));
             }), {});
         },
         enumerable: true,
@@ -241,7 +243,7 @@ var FormComponent = /** @class */ (function () {
                 return;
             }
             this.groups = groups;
-            this.fields = Object(lodash_es__WEBPACK_IMPORTED_MODULE_18__["flatten"])(this.groups.map((/**
+            this.fields = Object(lodash_es__WEBPACK_IMPORTED_MODULE_19__["flatten"])(this.groups.map((/**
              * @param {?} group
              * @return {?}
              */
@@ -258,7 +260,7 @@ var FormComponent = /** @class */ (function () {
      */
     function () {
         /** @type {?} */
-        var controls = Object(lodash_es__WEBPACK_IMPORTED_MODULE_18__["mapValues"])(this.fieldsByKey, (/**
+        var controls = Object(lodash_es__WEBPACK_IMPORTED_MODULE_19__["mapValues"])(this.fieldsByKey, (/**
          * @param {?} __0
          * @return {?}
          */
@@ -268,7 +270,7 @@ var FormComponent = /** @class */ (function () {
         }));
         // set initial state
         if (this.initialValue) {
-            Object(lodash_es__WEBPACK_IMPORTED_MODULE_18__["forEach"])(this.initialValue, (/**
+            Object(lodash_es__WEBPACK_IMPORTED_MODULE_19__["forEach"])(this.initialValue, (/**
              * @param {?} val
              * @param {?} key
              * @return {?}
@@ -281,8 +283,8 @@ var FormComponent = /** @class */ (function () {
                 }
             }));
         }
-        this.form = new _angular_forms__WEBPACK_IMPORTED_MODULE_20__["FormGroup"](controls, {});
-        this._valueChangesSubscription = this.form.valueChanges.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_12__["takeUntil"])(this.destroy$)).subscribe(this.valueChanges);
+        this.form = new _angular_forms__WEBPACK_IMPORTED_MODULE_21__["FormGroup"](controls, {});
+        this._valueChangesSubscription = this.form.valueChanges.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_13__["takeUntil"])(this.destroy$)).subscribe(this.valueChanges);
     };
     /**
      * @param {?} changes
@@ -296,7 +298,7 @@ var FormComponent = /** @class */ (function () {
         var _this = this;
         if (changes['_groups'] && !changes['_groups'].isFirstChange()) {
             /** @type {?} */
-            var controls_1 = Object(lodash_es__WEBPACK_IMPORTED_MODULE_18__["mapValues"])(this.fieldsByKey, (/**
+            var controls_1 = Object(lodash_es__WEBPACK_IMPORTED_MODULE_19__["mapValues"])(this.fieldsByKey, (/**
              * @param {?} __0
              * @return {?}
              */
@@ -305,7 +307,7 @@ var FormComponent = /** @class */ (function () {
                 return control;
             }));
             // keep current save
-            Object(lodash_es__WEBPACK_IMPORTED_MODULE_18__["forEach"])(this.form.value, (/**
+            Object(lodash_es__WEBPACK_IMPORTED_MODULE_19__["forEach"])(this.form.value, (/**
              * @param {?} val
              * @param {?} key
              * @return {?}
@@ -325,9 +327,9 @@ var FormComponent = /** @class */ (function () {
             if (this._valueChangesSubscription) {
                 this._valueChangesSubscription.unsubscribe();
             }
-            this.form = new _angular_forms__WEBPACK_IMPORTED_MODULE_20__["FormGroup"](controls_1, {});
+            this.form = new _angular_forms__WEBPACK_IMPORTED_MODULE_21__["FormGroup"](controls_1, {});
             this._valueChangesSubscription = this.form.valueChanges
-                .pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_12__["takeUntil"])(this.destroy$))
+                .pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_13__["takeUntil"])(this.destroy$))
                 .subscribe(this.valueChanges);
             this.valueChanges.emit(this.form.value);
         }
@@ -350,7 +352,7 @@ var FormComponent = /** @class */ (function () {
      */
     function () {
         /** @type {?} */
-        var defaults = Object(lodash_es__WEBPACK_IMPORTED_MODULE_18__["mapValues"])(this.fieldsByKey, (/**
+        var defaults = Object(lodash_es__WEBPACK_IMPORTED_MODULE_19__["mapValues"])(this.fieldsByKey, (/**
          * @param {?} __0
          * @return {?}
          */
@@ -371,7 +373,7 @@ var FormComponent = /** @class */ (function () {
             this.save.emit(this.form.getRawValue());
         }
         else {
-            Object(lodash_es__WEBPACK_IMPORTED_MODULE_18__["forEach"])(this.form.controls, (/**
+            Object(lodash_es__WEBPACK_IMPORTED_MODULE_19__["forEach"])(this.form.controls, (/**
              * @param {?} control
              * @return {?}
              */
@@ -379,18 +381,18 @@ var FormComponent = /** @class */ (function () {
         }
     };
     FormComponent.decorators = [
-        { type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Component"], args: [{
+        { type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Component"], args: [{
                     selector: 'bcu-form',
-                    template: "<form [formGroup]=\"form\" fxLayout=\"column\">\n  <bcu-form-group\n    *ngFor=\"let group of groups\"\n    [form]=\"form\"\n    [name]=\"group.name\"\n    [description]=\"group.description\"\n    [link]=\"group.link\"\n    [fields]=\"group.fields\"\n  ></bcu-form-group>\n  <div fxLayout=\"row\">\n    <button fxFlex mat-button (click)=\"onReset()\">Clear</button>\n    <button fxFlex mat-button (click)=\"onSave()\">Save</button>\n  </div>\n</form>\n",
-                    encapsulation: _angular_core__WEBPACK_IMPORTED_MODULE_17__["ViewEncapsulation"].None,
-                    styles: ["bcu-form-group:not(:first-child){margin-top:32px}"]
+                    template: "<form class=\"bcu-form\" [formGroup]=\"form\" fxLayout=\"column\">\n  <bcu-form-group\n    *ngFor=\"let group of groups\"\n    [form]=\"form\"\n    [name]=\"group.name\"\n    [description]=\"group.description\"\n    [link]=\"group.link\"\n    [fields]=\"group.fields\"\n  ></bcu-form-group>\n  <div *ngIf=\"groups.length\" class=\"bcu-form-actions\" fxLayout=\"row\">\n    <button fxFlex mat-button (click)=\"onReset()\">Clear</button>\n    <button fxFlex mat-button (click)=\"onSave()\">Save</button>\n  </div>\n</form>\n",
+                    encapsulation: _angular_core__WEBPACK_IMPORTED_MODULE_18__["ViewEncapsulation"].None,
+                    styles: ["bcu-form-group:not(:first-child){margin-top:32px}.bcu-form-actions{margin-top:48px}"]
                 }] }
     ];
     FormComponent.propDecorators = {
-        _groups: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"], args: ['groups',] }],
-        initialValue: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }],
-        save: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Output"] }],
-        valueChanges: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Output"] }]
+        _groups: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"], args: ['groups',] }],
+        initialValue: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }],
+        save: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Output"] }],
+        valueChanges: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Output"] }]
     };
     return FormComponent;
 }());
@@ -426,16 +428,16 @@ var DisableControlDirective = /** @class */ (function () {
         configurable: true
     });
     DisableControlDirective.decorators = [
-        { type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Directive"], args: [{
+        { type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Directive"], args: [{
                     selector: '[bcuDisableControl]',
                 },] }
     ];
     /** @nocollapse */
     DisableControlDirective.ctorParameters = function () { return [
-        { type: _angular_forms__WEBPACK_IMPORTED_MODULE_20__["NgControl"] }
+        { type: _angular_forms__WEBPACK_IMPORTED_MODULE_21__["NgControl"] }
     ]; };
     DisableControlDirective.propDecorators = {
-        bcuDisableControl: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }]
+        bcuDisableControl: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }]
     };
     return DisableControlDirective;
 }());
@@ -448,19 +450,19 @@ var FormGroupComponent = /** @class */ (function () {
     function FormGroupComponent() {
     }
     FormGroupComponent.decorators = [
-        { type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Component"], args: [{
+        { type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Component"], args: [{
                     selector: 'bcu-form-group',
                     template: "<div class=\"bcu-form-group\">\n  <h3>{{ name }}</h3>\n  <p *ngIf=\"description\">{{ description }}</p>\n  <a *ngIf=\"link\" [href]=\"link\" target=\"_blank\" rel=\"noopener noreferrer\">{{ link }}</a>\n  <div class=\"bcu-form-group-fields\">\n    <ng-container *ngFor=\"let field of fields\">\n      <bcu-form-field-container\n        [ngClass]=\"{ hidden: field.isHidden(form.value) }\"\n        [form]=\"form\"\n        [field]=\"field\"\n      ></bcu-form-field-container>\n    </ng-container>\n  </div>\n</div>\n",
-                    encapsulation: _angular_core__WEBPACK_IMPORTED_MODULE_17__["ViewEncapsulation"].None,
+                    encapsulation: _angular_core__WEBPACK_IMPORTED_MODULE_18__["ViewEncapsulation"].None,
                     styles: [".bcu-form-group h3{font-size:16px;font-weight:700;line-height:1.5;letter-spacing:.2px;height:24px;margin:0 0 16px}.bcu-form-group p{padding:0;margin:0}.bcu-form-group a{font-size:75%;line-height:1.5;letter-spacing:.2px;margin:0;padding:0}.bcu-form-group .bcu-form-group-fields{margin-top:16px}.bcu-form-group .hidden{display:none}"]
                 }] }
     ];
     FormGroupComponent.propDecorators = {
-        form: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }],
-        name: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }],
-        description: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }],
-        link: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }],
-        fields: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }]
+        form: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }],
+        name: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }],
+        description: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }],
+        link: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }],
+        fields: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }]
     };
     return FormGroupComponent;
 }());
@@ -508,21 +510,21 @@ var FormFieldContainerComponent = /** @class */ (function () {
         }
     };
     FormFieldContainerComponent.decorators = [
-        { type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Component"], args: [{
+        { type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Component"], args: [{
                     selector: 'bcu-form-field-container',
                     template: "<div class=\"bcu-form-field-container\">\n  <section fxLayout=\"column\">\n    <ng-container #container></ng-container>\n  </section>\n</div>\n",
-                    encapsulation: _angular_core__WEBPACK_IMPORTED_MODULE_17__["ViewEncapsulation"].None,
+                    encapsulation: _angular_core__WEBPACK_IMPORTED_MODULE_18__["ViewEncapsulation"].None,
                     styles: [".bcu-form-field-container label{text-transform:uppercase}.bcu-form-field-container .mat-form-field{margin-top:16px;line-height:1.5;letter-spacing:.2px}"]
                 }] }
     ];
     /** @nocollapse */
     FormFieldContainerComponent.ctorParameters = function () { return [
-        { type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["ComponentFactoryResolver"] }
+        { type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["ComponentFactoryResolver"] }
     ]; };
     FormFieldContainerComponent.propDecorators = {
-        field: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }],
-        form: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }],
-        containerRef: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["ViewChild"], args: ['container', { read: _angular_core__WEBPACK_IMPORTED_MODULE_17__["ViewContainerRef"] },] }]
+        field: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }],
+        form: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }],
+        containerRef: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["ViewChild"], args: ['container', { read: _angular_core__WEBPACK_IMPORTED_MODULE_18__["ViewContainerRef"] },] }]
     };
     return FormFieldContainerComponent;
 }());
@@ -532,7 +534,7 @@ var FormFieldContainerComponent = /** @class */ (function () {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 var FormFieldCodeComponent = /** @class */ (function (_super) {
-    Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__extends"])(FormFieldCodeComponent, _super);
+    Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__extends"])(FormFieldCodeComponent, _super);
     function FormFieldCodeComponent() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
@@ -541,21 +543,21 @@ var FormFieldCodeComponent = /** @class */ (function (_super) {
          * @return {?}
          */
         function () {
-            return Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__assign"])({ lineNumbers: true, theme: 'material', mode: { name: 'javascript', json: true }, viewportMargin: 100, matchBrackets: true, lineWrapping: true }, this.field.options, { readOnly: this.field.isDisabled(this.form.value), placeholder: this.field.placeholder });
+            return Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__assign"])({ lineNumbers: true, theme: 'material', mode: { name: 'javascript', json: true }, viewportMargin: 100, matchBrackets: true, lineWrapping: true }, this.field.options, { readOnly: this.field.isDisabled(this.form.value), placeholder: this.field.placeholder });
         },
         enumerable: true,
         configurable: true
     });
     FormFieldCodeComponent.decorators = [
-        { type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Component"], args: [{
+        { type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Component"], args: [{
                     selector: 'bcu-form-field-code',
                     template: "<div [formGroup]=\"form\" class=\"bcu-form-field-code\" fxFlex>\n  <mat-form-field floatLabel=\"always\" class=\"mat-form-field--no-underline\" fxFlex>\n    <input matInput [id]=\"field.key\" [formControlName]=\"field.key\" [required]=\"field.required\" style=\"display: none\" />\n    <mat-label>{{ field.label }}</mat-label>\n\n    <ngx-codemirror [formControlName]=\"field.key\" [options]=\"options\"></ngx-codemirror>\n\n    <mat-hint *ngIf=\"field.description\" align=\"start\">{{ field.description }}</mat-hint>\n    <mat-error *ngIf=\"isTouched && !isValid\">{{ errorMessage }}</mat-error>\n  </mat-form-field>\n</div>\n",
-                    encapsulation: _angular_core__WEBPACK_IMPORTED_MODULE_17__["ViewEncapsulation"].None,
+                    encapsulation: _angular_core__WEBPACK_IMPORTED_MODULE_18__["ViewEncapsulation"].None,
                     styles: [".bcu-form-field-code .mat-form-field--no-underline .mat-form-field-ripple,.bcu-form-field-code .mat-form-field--no-underline .mat-form-field-underline{background-color:transparent}"]
                 }] }
     ];
     FormFieldCodeComponent.propDecorators = {
-        field: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }]
+        field: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }]
     };
     return FormFieldCodeComponent;
 }(FormFieldComponent));
@@ -565,15 +567,15 @@ var FormFieldCodeComponent = /** @class */ (function (_super) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 var FormFieldInputComponent = /** @class */ (function (_super) {
-    Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__extends"])(FormFieldInputComponent, _super);
+    Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__extends"])(FormFieldInputComponent, _super);
     function FormFieldInputComponent() {
         return _super.call(this) || this;
     }
     FormFieldInputComponent.decorators = [
-        { type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Component"], args: [{
+        { type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Component"], args: [{
                     selector: 'bcu-form-field-input',
                     template: "<div [formGroup]=\"form\" fxFlex>\n  <mat-form-field floatLabel=\"always\" fxFlex=\"\">\n    <mat-label>{{ field.label }}</mat-label>\n    <input\n      matInput\n      [type]=\"field.controlType\"\n      [formControlName]=\"field.key\"\n      [id]=\"field.key\"\n      [required]=\"field.required\"\n      [placeholder]=\"field.placeholder\"\n      [bcuDisableControl]=\"field.isDisabled(form.value)\"\n    />\n\n    <mat-hint *ngIf=\"field.description\" align=\"start\">{{ field.description }}</mat-hint>\n    <mat-error *ngIf=\"isTouched && !isValid\">{{ errorMessage }}</mat-error>\n  </mat-form-field>\n</div>\n",
-                    encapsulation: _angular_core__WEBPACK_IMPORTED_MODULE_17__["ViewEncapsulation"].None,
+                    encapsulation: _angular_core__WEBPACK_IMPORTED_MODULE_18__["ViewEncapsulation"].None,
                     styles: [""]
                 }] }
     ];
@@ -587,15 +589,15 @@ var FormFieldInputComponent = /** @class */ (function (_super) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 var FormFieldTextareaComponent = /** @class */ (function (_super) {
-    Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__extends"])(FormFieldTextareaComponent, _super);
+    Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__extends"])(FormFieldTextareaComponent, _super);
     function FormFieldTextareaComponent() {
         return _super.call(this) || this;
     }
     FormFieldTextareaComponent.decorators = [
-        { type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Component"], args: [{
+        { type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Component"], args: [{
                     selector: 'bcu-form-field-textarea',
                     template: "<div [formGroup]=\"form\" fxFlex>\n  <mat-form-field floatLabel=\"always\" fxFlex>\n    <mat-label>{{ field.label }}</mat-label>\n\n    <textarea\n      matInput\n      [formControlName]=\"field.key\"\n      [id]=\"field.key\"\n      [required]=\"field.required\"\n      [placeholder]=\"field.placeholder\"\n      [bcuDisableControl]=\"field.isDisabled(form.value)\"\n    ></textarea>\n\n    <mat-hint *ngIf=\"field.description\" align=\"start\">{{ field.description }}</mat-hint>\n    <mat-error *ngIf=\"isTouched && !isValid\">{{ errorMessage }}</mat-error>\n  </mat-form-field>\n</div>\n",
-                    encapsulation: _angular_core__WEBPACK_IMPORTED_MODULE_17__["ViewEncapsulation"].None,
+                    encapsulation: _angular_core__WEBPACK_IMPORTED_MODULE_18__["ViewEncapsulation"].None,
                     styles: [""]
                 }] }
     ];
@@ -609,22 +611,22 @@ var FormFieldTextareaComponent = /** @class */ (function (_super) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 var FormFieldSelectComponent = /** @class */ (function (_super) {
-    Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__extends"])(FormFieldSelectComponent, _super);
+    Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__extends"])(FormFieldSelectComponent, _super);
     function FormFieldSelectComponent() {
         return _super.call(this) || this;
     }
     FormFieldSelectComponent.decorators = [
-        { type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Component"], args: [{
+        { type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Component"], args: [{
                     selector: 'bcu-form-field-select',
                     template: "<div [formGroup]=\"form\" fxFlex>\n  <mat-form-field floatLabel=\"always\" fxFlex>\n    <mat-label>{{ field.label }}</mat-label>\n    <mat-select\n      [id]=\"field.key\"\n      [formControlName]=\"field.key\"\n      [required]=\"field.required\"\n      [placeholder]=\"field.placeholder\"\n      [bcuDisableControl]=\"field.isDisabled(form.value)\"\n    >\n      <mat-option *ngFor=\"let opt of field.options\" [value]=\"opt.value || opt\">{{ opt.label || opt }}</mat-option>\n    </mat-select>\n\n    <mat-hint *ngIf=\"field.description\" align=\"start\">{{ field.description }}</mat-hint>\n    <mat-error *ngIf=\"isTouched && !isValid\">{{ errorMessage }}</mat-error>\n  </mat-form-field>\n</div>\n",
-                    encapsulation: _angular_core__WEBPACK_IMPORTED_MODULE_17__["ViewEncapsulation"].None,
+                    encapsulation: _angular_core__WEBPACK_IMPORTED_MODULE_18__["ViewEncapsulation"].None,
                     styles: [""]
                 }] }
     ];
     /** @nocollapse */
     FormFieldSelectComponent.ctorParameters = function () { return []; };
     FormFieldSelectComponent.propDecorators = {
-        field: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }]
+        field: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }]
     };
     return FormFieldSelectComponent;
 }(FormFieldComponent));
@@ -634,15 +636,15 @@ var FormFieldSelectComponent = /** @class */ (function (_super) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 var FormFieldCheckboxComponent = /** @class */ (function (_super) {
-    Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__extends"])(FormFieldCheckboxComponent, _super);
+    Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__extends"])(FormFieldCheckboxComponent, _super);
     function FormFieldCheckboxComponent() {
         return _super.call(this) || this;
     }
     FormFieldCheckboxComponent.decorators = [
-        { type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Component"], args: [{
+        { type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Component"], args: [{
                     selector: 'bcu-form-field-checkbox',
                     template: "<div [formGroup]=\"form\" class=\"bcu-form-field-checkbox\" fxFlex>\n  <mat-form-field floatLabel=\"always\" class=\"mat-form-field--no-underline\" fxFlex>\n    <input matInput [id]=\"field.key\" [formControlName]=\"field.key\" [required]=\"field.required\" style=\"display: none\" />\n    <mat-label *ngIf=\"field.placeholder\">{{ field.placeholder }}</mat-label>\n    <mat-checkbox\n      [formControlName]=\"field.key\"\n      [id]=\"field.key\"\n      [required]=\"field.required\"\n      [bcuDisableControl]=\"field.isDisabled(form.value)\"\n    >\n      {{ field.label }}\n    </mat-checkbox>\n\n    <mat-hint *ngIf=\"field.description\" align=\"start\">{{ field.description }}</mat-hint>\n    <mat-error *ngIf=\"isTouched && !isValid\">{{ errorMessage }}</mat-error>\n  </mat-form-field>\n</div>\n",
-                    encapsulation: _angular_core__WEBPACK_IMPORTED_MODULE_17__["ViewEncapsulation"].None,
+                    encapsulation: _angular_core__WEBPACK_IMPORTED_MODULE_18__["ViewEncapsulation"].None,
                     styles: [".bcu-form-field-checkbox .mat-form-field--no-underline .mat-form-field-ripple,.bcu-form-field-checkbox .mat-form-field--no-underline .mat-form-field-underline{background-color:transparent}"]
                 }] }
     ];
@@ -656,7 +658,7 @@ var FormFieldCheckboxComponent = /** @class */ (function (_super) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 var FormFieldFileComponent = /** @class */ (function (_super) {
-    Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__extends"])(FormFieldFileComponent, _super);
+    Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__extends"])(FormFieldFileComponent, _super);
     function FormFieldFileComponent() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this.dragActive = false;
@@ -707,7 +709,7 @@ var FormFieldFileComponent = /** @class */ (function (_super) {
                         /** @type {?} */
                         var result = JSON.parse((/** @type {?} */ (reader_1.result)));
                         try {
-                            for (var _b = Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__values"])(Object.keys(result)), _c = _b.next(); !_c.done; _c = _b.next()) {
+                            for (var _b = Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__values"])(Object.keys(result)), _c = _b.next(); !_c.done; _c = _b.next()) {
                                 var key = _c.value;
                                 /** @type {?} */
                                 var control = _this.form.controls[baseKey + "." + key];
@@ -791,15 +793,15 @@ var FormFieldFileComponent = /** @class */ (function (_super) {
         this.dragActive = false;
     };
     FormFieldFileComponent.decorators = [
-        { type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Component"], args: [{
+        { type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Component"], args: [{
                     selector: 'bcu-form-field-file',
                     template: "<div [formGroup]=\"form\" class=\"bcu-form-field-file\" fxFlex>\n  <mat-form-field floatLabel=\"always\" class=\"mat-form-field--no-underline\" fxFlex>\n    <mat-label *ngIf=\"field.label\">{{ field.label }}</mat-label>\n    <label\n      class=\"bcu-form-field-file-drop\"\n      [ngClass]=\"{ active: dragActive }\"\n      (drop)=\"onDrop($event)\"\n      (dragover)=\"onDragOver($event)\"\n      (dragleave)=\"onDragLeave()\"\n    >\n      <input\n        bcuMatFileInput\n        type=\"file\"\n        style=\"display:none\"\n        [accept]=\"field.accept\"\n        [id]=\"field.key\"\n        [formControlName]=\"field.key\"\n        [required]=\"field.required\"\n        [bcuDisableControl]=\"field.isDisabled(form.value)\"\n        (change)=\"onFileSelect($event)\"\n      />\n      <span>{{ field.placeholder }}</span>\n    </label>\n\n    <mat-hint *ngIf=\"field.description\" align=\"start\">{{ field.description }}</mat-hint>\n    <mat-error *ngIf=\"isTouched && !isValid\">{{ errorMessage }}</mat-error>\n  </mat-form-field>\n</div>\n",
-                    encapsulation: _angular_core__WEBPACK_IMPORTED_MODULE_17__["ViewEncapsulation"].None,
+                    encapsulation: _angular_core__WEBPACK_IMPORTED_MODULE_18__["ViewEncapsulation"].None,
                     styles: [".bcu-form-field-file .mat-form-field--no-underline .mat-form-field-ripple,.bcu-form-field-file .mat-form-field--no-underline .mat-form-field-underline{background-color:transparent}.bcu-form-field-file .bcu-form-field-file-drop{display:block;margin:auto;height:100px;border:1px dotted rgba(0,0,0,.42);border-radius:16px;text-align:center;line-height:100px;text-transform:uppercase;cursor:pointer;font-size:16px;color:rgba(0,0,0,.54)}.bcu-form-field-file .bcu-form-field-file-drop.active{border:1px solid rgba(0,0,0,.42);background:rgba(0,0,0,.1)}"]
                 }] }
     ];
     FormFieldFileComponent.propDecorators = {
-        field: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }]
+        field: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }]
     };
     return FormFieldFileComponent;
 }(FormFieldComponent));
@@ -852,15 +854,15 @@ var FileValueAccessorDirective = /** @class */ (function () {
         this.onTouched = fn;
     };
     FileValueAccessorDirective.decorators = [
-        { type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Directive"], args: [{
+        { type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Directive"], args: [{
                     // tslint:disable-next-line directive-selector
                     selector: 'input[type=file]',
-                    providers: [{ provide: _angular_forms__WEBPACK_IMPORTED_MODULE_20__["NG_VALUE_ACCESSOR"], useExisting: FileValueAccessorDirective, multi: true }],
+                    providers: [{ provide: _angular_forms__WEBPACK_IMPORTED_MODULE_21__["NG_VALUE_ACCESSOR"], useExisting: FileValueAccessorDirective, multi: true }],
                 },] }
     ];
     FileValueAccessorDirective.propDecorators = {
-        onChange: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["HostListener"], args: ['change', ['$event.target.files'],] }],
-        onTouched: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["HostListener"], args: ['blur',] }]
+        onChange: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["HostListener"], args: ['change', ['$event.target.files'],] }],
+        onTouched: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["HostListener"], args: ['blur',] }]
     };
     return FileValueAccessorDirective;
 }());
@@ -882,9 +884,9 @@ MatInputBase = /** @class */ (function () {
     return MatInputBase;
 }());
 /** @type {?} */
-var _MatInputMixinBase = Object(_angular_material_core__WEBPACK_IMPORTED_MODULE_13__["mixinErrorState"])(MatInputBase);
+var _MatInputMixinBase = Object(_angular_material_core__WEBPACK_IMPORTED_MODULE_14__["mixinErrorState"])(MatInputBase);
 var MatFileInputDirective = /** @class */ (function (_super) {
-    Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__extends"])(MatFileInputDirective, _super);
+    Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__extends"])(MatFileInputDirective, _super);
     function MatFileInputDirective(_elementRef, ngControl, _parentForm, _parentFormGroup, _defaultErrorStateMatcher, inputValueAccessor) {
         var _this = _super.call(this, _defaultErrorStateMatcher, _parentForm, _parentFormGroup, ngControl) || this;
         _this._elementRef = _elementRef;
@@ -897,7 +899,7 @@ var MatFileInputDirective = /** @class */ (function (_super) {
         /**
          * Implemented as part of MatFormFieldControl.
          */
-        _this.stateChanges = new rxjs__WEBPACK_IMPORTED_MODULE_15__["Subject"]();
+        _this.stateChanges = new rxjs__WEBPACK_IMPORTED_MODULE_16__["Subject"]();
         /**
          * Implemented as part of MatFormFieldControl.
          */
@@ -938,7 +940,7 @@ var MatFileInputDirective = /** @class */ (function (_super) {
          * @return {?}
          */
         function (value) {
-            this._disabled = Object(_angular_cdk_coercion__WEBPACK_IMPORTED_MODULE_16__["coerceBooleanProperty"])(value);
+            this._disabled = Object(_angular_cdk_coercion__WEBPACK_IMPORTED_MODULE_17__["coerceBooleanProperty"])(value);
             // Browsers may not fire the blur event if the input is disabled too quickly.
             // Reset from here to ensure that the element doesn't become stuck.
             if (this.focused) {
@@ -986,7 +988,7 @@ var MatFileInputDirective = /** @class */ (function (_super) {
          * @return {?}
          */
         function (value) {
-            this._required = Object(_angular_cdk_coercion__WEBPACK_IMPORTED_MODULE_16__["coerceBooleanProperty"])(value);
+            this._required = Object(_angular_cdk_coercion__WEBPACK_IMPORTED_MODULE_17__["coerceBooleanProperty"])(value);
         },
         enumerable: true,
         configurable: true
@@ -1029,7 +1031,7 @@ var MatFileInputDirective = /** @class */ (function (_super) {
          * @return {?}
          */
         function (value) {
-            this._readonly = Object(_angular_cdk_coercion__WEBPACK_IMPORTED_MODULE_16__["coerceBooleanProperty"])(value);
+            this._readonly = Object(_angular_cdk_coercion__WEBPACK_IMPORTED_MODULE_17__["coerceBooleanProperty"])(value);
         },
         enumerable: true,
         configurable: true
@@ -1196,10 +1198,10 @@ var MatFileInputDirective = /** @class */ (function (_super) {
     };
     MatFileInputDirective.nextId = 0;
     MatFileInputDirective.decorators = [
-        { type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Directive"], args: [{
+        { type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Directive"], args: [{
                     selector: 'input[type=file][bcuMatFileInput]',
                     exportAs: 'bcuMatFileInput',
-                    providers: [{ provide: _angular_material__WEBPACK_IMPORTED_MODULE_14__["MatFormFieldControl"], useExisting: MatFileInputDirective }],
+                    providers: [{ provide: _angular_material__WEBPACK_IMPORTED_MODULE_15__["MatFormFieldControl"], useExisting: MatFileInputDirective }],
                     // tslint:disable-next-line
                     host: {
                         class: 'mat-input-element',
@@ -1221,22 +1223,22 @@ var MatFileInputDirective = /** @class */ (function (_super) {
     ];
     /** @nocollapse */
     MatFileInputDirective.ctorParameters = function () { return [
-        { type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["ElementRef"] },
-        { type: _angular_forms__WEBPACK_IMPORTED_MODULE_20__["NgControl"], decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Self"] }] },
-        { type: _angular_forms__WEBPACK_IMPORTED_MODULE_20__["NgForm"], decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Optional"] }] },
-        { type: _angular_forms__WEBPACK_IMPORTED_MODULE_20__["FormGroupDirective"], decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Optional"] }] },
-        { type: _angular_material_core__WEBPACK_IMPORTED_MODULE_13__["ErrorStateMatcher"] },
-        { type: undefined, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Self"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Inject"], args: [_angular_material__WEBPACK_IMPORTED_MODULE_14__["MAT_INPUT_VALUE_ACCESSOR"],] }] }
+        { type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["ElementRef"] },
+        { type: _angular_forms__WEBPACK_IMPORTED_MODULE_21__["NgControl"], decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Self"] }] },
+        { type: _angular_forms__WEBPACK_IMPORTED_MODULE_21__["NgForm"], decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Optional"] }] },
+        { type: _angular_forms__WEBPACK_IMPORTED_MODULE_21__["FormGroupDirective"], decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Optional"] }] },
+        { type: _angular_material_core__WEBPACK_IMPORTED_MODULE_14__["ErrorStateMatcher"] },
+        { type: undefined, decorators: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Optional"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Self"] }, { type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Inject"], args: [_angular_material__WEBPACK_IMPORTED_MODULE_15__["MAT_INPUT_VALUE_ACCESSOR"],] }] }
     ]; };
     MatFileInputDirective.propDecorators = {
-        accept: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }],
-        disabled: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }],
-        id: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }],
-        placeholder: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }],
-        required: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }],
-        errorStateMatcher: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }],
-        value: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }],
-        readonly: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Input"] }]
+        accept: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }],
+        disabled: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }],
+        id: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }],
+        placeholder: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }],
+        required: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }],
+        errorStateMatcher: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }],
+        value: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }],
+        readonly: [{ type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Input"] }]
     };
     return MatFileInputDirective;
 }(_MatInputMixinBase));
@@ -1249,18 +1251,19 @@ var UniformModule = /** @class */ (function () {
     function UniformModule() {
     }
     UniformModule.decorators = [
-        { type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["NgModule"], args: [{
+        { type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["NgModule"], args: [{
                     imports: [
                         _angular_common__WEBPACK_IMPORTED_MODULE_0__["CommonModule"],
-                        _angular_forms__WEBPACK_IMPORTED_MODULE_20__["FormsModule"],
-                        _angular_forms__WEBPACK_IMPORTED_MODULE_20__["ReactiveFormsModule"],
+                        _angular_forms__WEBPACK_IMPORTED_MODULE_21__["FormsModule"],
+                        _angular_forms__WEBPACK_IMPORTED_MODULE_21__["ReactiveFormsModule"],
                         _angular_platform_browser_animations__WEBPACK_IMPORTED_MODULE_1__["BrowserAnimationsModule"],
                         _angular_material_input__WEBPACK_IMPORTED_MODULE_2__["MatInputModule"],
                         _angular_material_checkbox__WEBPACK_IMPORTED_MODULE_3__["MatCheckboxModule"],
                         _angular_material_select__WEBPACK_IMPORTED_MODULE_4__["MatSelectModule"],
                         _angular_material_button__WEBPACK_IMPORTED_MODULE_5__["MatButtonModule"],
-                        _angular_flex_layout__WEBPACK_IMPORTED_MODULE_6__["FlexLayoutModule"],
-                        _ctrl_ngx_codemirror__WEBPACK_IMPORTED_MODULE_7__["CodemirrorModule"],
+                        _angular_material_snack_bar__WEBPACK_IMPORTED_MODULE_6__["MatSnackBarModule"],
+                        _angular_flex_layout__WEBPACK_IMPORTED_MODULE_7__["FlexLayoutModule"],
+                        _ctrl_ngx_codemirror__WEBPACK_IMPORTED_MODULE_8__["CodemirrorModule"],
                     ],
                     exports: [
                         FormFieldCodeComponent,
@@ -1337,19 +1340,19 @@ var FormField = /** @class */ (function () {
         this.validators = validators;
         this.required = required;
         if (required) {
-            this.validators.push(_angular_forms__WEBPACK_IMPORTED_MODULE_20__["Validators"].required);
+            this.validators.push(_angular_forms__WEBPACK_IMPORTED_MODULE_21__["Validators"].required);
         }
         this.minLength = minLength;
         if (minLength) {
-            this.validators.push(_angular_forms__WEBPACK_IMPORTED_MODULE_20__["Validators"].minLength(minLength));
+            this.validators.push(_angular_forms__WEBPACK_IMPORTED_MODULE_21__["Validators"].minLength(minLength));
         }
         this.maxLength = maxLength;
         if (maxLength) {
-            this.validators.push(_angular_forms__WEBPACK_IMPORTED_MODULE_20__["Validators"].maxLength(maxLength));
+            this.validators.push(_angular_forms__WEBPACK_IMPORTED_MODULE_21__["Validators"].maxLength(maxLength));
         }
         this.pattern = pattern;
         if (pattern) {
-            this.validators.push(_angular_forms__WEBPACK_IMPORTED_MODULE_20__["Validators"].pattern(pattern));
+            this.validators.push(_angular_forms__WEBPACK_IMPORTED_MODULE_21__["Validators"].pattern(pattern));
         }
         if (showIf) {
             /** @type {?} */
@@ -1357,7 +1360,7 @@ var FormField = /** @class */ (function () {
                 additionalProperties: true,
             });
             /** @type {?} */
-            var ajv = new ajv__WEBPACK_IMPORTED_MODULE_19__({ validateSchema: 'log', missingRefs: 'ignore' });
+            var ajv = new ajv__WEBPACK_IMPORTED_MODULE_20__({ validateSchema: 'log', missingRefs: 'ignore' });
             this.showIfSchema = ajv.compile(schema);
         }
         this.hidden = hidden;
@@ -1371,7 +1374,7 @@ var FormField = /** @class */ (function () {
          * @return {?}
          */
         function () {
-            return new _angular_forms__WEBPACK_IMPORTED_MODULE_20__["FormControl"]({
+            return new _angular_forms__WEBPACK_IMPORTED_MODULE_21__["FormControl"]({
                 value: this.default,
                 disabled: this.disabled,
             }, this.validators);
@@ -1419,9 +1422,9 @@ var FormField = /** @class */ (function () {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 var FormFieldCheckbox = /** @class */ (function (_super) {
-    Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__extends"])(FormFieldCheckbox, _super);
+    Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__extends"])(FormFieldCheckbox, _super);
     function FormFieldCheckbox(field) {
-        return _super.call(this, Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__assign"])({}, field, { controlType: CONTROL_TYPES.CHECKBOX })) || this;
+        return _super.call(this, Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__assign"])({}, field, { controlType: CONTROL_TYPES.CHECKBOX })) || this;
     }
     Object.defineProperty(FormFieldCheckbox.prototype, "component", {
         get: /**
@@ -1441,10 +1444,10 @@ var FormFieldCheckbox = /** @class */ (function (_super) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 var FormFieldCode = /** @class */ (function (_super) {
-    Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__extends"])(FormFieldCode, _super);
+    Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__extends"])(FormFieldCode, _super);
     function FormFieldCode(_a) {
-        var _b = _a.options, options = _b === void 0 ? {} : _b, field = Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__rest"])(_a, ["options"]);
-        var _this = _super.call(this, Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__assign"])({}, field, { controlType: CONTROL_TYPES.CODE })) || this;
+        var _b = _a.options, options = _b === void 0 ? {} : _b, field = Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__rest"])(_a, ["options"]);
+        var _this = _super.call(this, Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__assign"])({}, field, { controlType: CONTROL_TYPES.CODE })) || this;
         _this.options = options;
         return _this;
     }
@@ -1466,10 +1469,10 @@ var FormFieldCode = /** @class */ (function (_super) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 var FormFieldFile = /** @class */ (function (_super) {
-    Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__extends"])(FormFieldFile, _super);
+    Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__extends"])(FormFieldFile, _super);
     function FormFieldFile(_a) {
-        var _b = _a.fillForm, fillForm = _b === void 0 ? true : _b, _c = _a.accept, accept = _c === void 0 ? '.json,application/json' : _c, field = Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__rest"])(_a, ["fillForm", "accept"]);
-        var _this = _super.call(this, Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__assign"])({ placeholder: 'Click here to select or drop a file' }, field, { controlType: CONTROL_TYPES.FILE })) || this;
+        var _b = _a.fillForm, fillForm = _b === void 0 ? true : _b, _c = _a.accept, accept = _c === void 0 ? '.json,application/json' : _c, field = Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__rest"])(_a, ["fillForm", "accept"]);
+        var _this = _super.call(this, Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__assign"])({ placeholder: 'Click here to select or drop a file' }, field, { controlType: CONTROL_TYPES.FILE })) || this;
         _this.fillForm = fillForm;
         _this.accept = accept;
         return _this;
@@ -1492,9 +1495,9 @@ var FormFieldFile = /** @class */ (function (_super) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 var FormFieldText = /** @class */ (function (_super) {
-    Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__extends"])(FormFieldText, _super);
+    Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__extends"])(FormFieldText, _super);
     function FormFieldText(field) {
-        return _super.call(this, Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__assign"])({}, field, { controlType: CONTROL_TYPES.TEXT })) || this;
+        return _super.call(this, Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__assign"])({}, field, { controlType: CONTROL_TYPES.TEXT })) || this;
     }
     Object.defineProperty(FormFieldText.prototype, "component", {
         get: /**
@@ -1509,17 +1512,17 @@ var FormFieldText = /** @class */ (function (_super) {
     return FormFieldText;
 }(FormField));
 var FormFieldNumber = /** @class */ (function (_super) {
-    Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__extends"])(FormFieldNumber, _super);
+    Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__extends"])(FormFieldNumber, _super);
     function FormFieldNumber(_a) {
-        var min = _a.min, max = _a.max, _b = _a.validators, validators = _b === void 0 ? [] : _b, field = Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__rest"])(_a, ["min", "max", "validators"]);
+        var min = _a.min, max = _a.max, _b = _a.validators, validators = _b === void 0 ? [] : _b, field = Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__rest"])(_a, ["min", "max", "validators"]);
         var _this = this;
         if (min) {
-            validators.push(_angular_forms__WEBPACK_IMPORTED_MODULE_20__["Validators"].min(min));
+            validators.push(_angular_forms__WEBPACK_IMPORTED_MODULE_21__["Validators"].min(min));
         }
         if (max) {
-            validators.push(_angular_forms__WEBPACK_IMPORTED_MODULE_20__["Validators"].max(max));
+            validators.push(_angular_forms__WEBPACK_IMPORTED_MODULE_21__["Validators"].max(max));
         }
-        _this = _super.call(this, Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__assign"])({}, field, { validators: validators, controlType: CONTROL_TYPES.NUMBER })) || this;
+        _this = _super.call(this, Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__assign"])({}, field, { validators: validators, controlType: CONTROL_TYPES.NUMBER })) || this;
         _this.min = min;
         _this.max = max;
         return _this;
@@ -1537,9 +1540,9 @@ var FormFieldNumber = /** @class */ (function (_super) {
     return FormFieldNumber;
 }(FormField));
 var FormFieldPassword = /** @class */ (function (_super) {
-    Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__extends"])(FormFieldPassword, _super);
+    Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__extends"])(FormFieldPassword, _super);
     function FormFieldPassword(field) {
-        return _super.call(this, Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__assign"])({}, field, { controlType: CONTROL_TYPES.PASSWORD })) || this;
+        return _super.call(this, Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__assign"])({}, field, { controlType: CONTROL_TYPES.PASSWORD })) || this;
     }
     Object.defineProperty(FormFieldPassword.prototype, "component", {
         get: /**
@@ -1559,10 +1562,10 @@ var FormFieldPassword = /** @class */ (function (_super) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 var FormFieldSelect = /** @class */ (function (_super) {
-    Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__extends"])(FormFieldSelect, _super);
+    Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__extends"])(FormFieldSelect, _super);
     function FormFieldSelect(_a) {
-        var _b = _a.options, options = _b === void 0 ? [] : _b, field = Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__rest"])(_a, ["options"]);
-        var _this = _super.call(this, Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__assign"])({}, field, { controlType: CONTROL_TYPES.SELECT })) || this;
+        var _b = _a.options, options = _b === void 0 ? [] : _b, field = Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__rest"])(_a, ["options"]);
+        var _this = _super.call(this, Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__assign"])({}, field, { controlType: CONTROL_TYPES.SELECT })) || this;
         _this.options = [];
         _this.options = options;
         return _this;
@@ -1585,9 +1588,9 @@ var FormFieldSelect = /** @class */ (function (_super) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 var FormFieldTextarea = /** @class */ (function (_super) {
-    Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__extends"])(FormFieldTextarea, _super);
+    Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__extends"])(FormFieldTextarea, _super);
     function FormFieldTextarea(field) {
-        return _super.call(this, Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__assign"])({}, field, { controlType: CONTROL_TYPES.TEXTAREA })) || this;
+        return _super.call(this, Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__assign"])({}, field, { controlType: CONTROL_TYPES.TEXTAREA })) || this;
     }
     Object.defineProperty(FormFieldTextarea.prototype, "component", {
         get: /**
@@ -1620,7 +1623,7 @@ var UniformService = /** @class */ (function () {
          * @param {?} group
          * @return {?}
          */
-        function (group) { return (Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__assign"])({}, group, { fields: Object(lodash_es__WEBPACK_IMPORTED_MODULE_18__["flatten"])(group.fields.map((/**
+        function (group) { return (Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__assign"])({}, group, { fields: Object(lodash_es__WEBPACK_IMPORTED_MODULE_19__["flatten"])(group.fields.map((/**
              * @param {?} field
              * @return {?}
              */
@@ -1638,7 +1641,7 @@ var UniformService = /** @class */ (function () {
      */
     function (_a, throwError) {
         if (throwError === void 0) { throwError = false; }
-        var controlType = _a.controlType, controlGroupType = _a.controlGroupType, field = Object(tslib__WEBPACK_IMPORTED_MODULE_21__["__rest"])(_a, ["controlType", "controlGroupType"]);
+        var controlType = _a.controlType, controlGroupType = _a.controlGroupType, field = Object(tslib__WEBPACK_IMPORTED_MODULE_22__["__rest"])(_a, ["controlType", "controlGroupType"]);
         /** @type {?} */
         var err;
         if (controlGroupType) {
@@ -2057,11 +2060,11 @@ var UniformService = /** @class */ (function () {
         _b[CONTROL_GROUP_TYPES.TLS] = UniformService.tlsFields,
         _b);
     UniformService.decorators = [
-        { type: _angular_core__WEBPACK_IMPORTED_MODULE_17__["Injectable"], args: [{
+        { type: _angular_core__WEBPACK_IMPORTED_MODULE_18__["Injectable"], args: [{
                     providedIn: 'root',
                 },] }
     ];
-    /** @nocollapse */ UniformService.ngInjectableDef = Object(_angular_core__WEBPACK_IMPORTED_MODULE_17__["defineInjectable"])({ factory: function UniformService_Factory() { return new UniformService(); }, token: UniformService, providedIn: "root" });
+    /** @nocollapse */ UniformService.ngInjectableDef = Object(_angular_core__WEBPACK_IMPORTED_MODULE_18__["defineInjectable"])({ factory: function UniformService_Factory() { return new UniformService(); }, token: UniformService, providedIn: "root" });
     return UniformService;
 }());
 
@@ -2111,7 +2114,7 @@ webpackEmptyAsyncContext.id = "./src/$$_lazy_route_resource lazy recursive";
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div>\n  <a style=\"display: none;\" target=\"_blank\" rel=\"noopener noreferrer\" download=\"anwsers.yaml\" #downloadLink></a>\n  <mat-card class=\"container\">\n    <bcu-form\n      [groups]=\"groups | async\"\n      [initialValue]=\"initialValue\"\n      (valueChanges)=\"onValueChanges($event)\"\n      (save)=\"onSave($event)\"\n    ></bcu-form>\n  </mat-card>\n</div>\n"
+module.exports = "<div>\n  <a style=\"display: none;\" target=\"_blank\" rel=\"noopener noreferrer\" download=\"anwsers.yaml\" #downloadLink></a>\n  <mat-card class=\"container\">\n    <div class=\"logo\"></div>\n    <bcu-form\n      *ngIf=\"(groups$ | async) as groups; else loadingOrError\"\n      [groups]=\"groups\"\n      [initialValue]=\"initialValue\"\n      (valueChanges)=\"onValueChanges($event)\"\n      (save)=\"onSave($event)\"\n    ></bcu-form>\n    <ng-template #loadingOrError>\n      <div *ngIf=\"error; else loading\" class=\"error\">\n        <pre>{{ error }}</pre>\n      </div>\n\n      <ng-template #loading>\n        <mat-progress-bar *ngIf=\"loading\" mode=\"indeterminate\"></mat-progress-bar>\n      </ng-template>\n    </ng-template>\n  </mat-card>\n</div>\n"
 
 /***/ }),
 
@@ -2122,7 +2125,7 @@ module.exports = "<div>\n  <a style=\"display: none;\" target=\"_blank\" rel=\"n
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = ".container {\n  max-width: 960px;\n  padding: 24px;\n  margin: 0 auto; }\n\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9Vc2Vycy9hbmRyYXN0b3RoL0RldmVsb3Blci9zcmMvZ2l0aHViLmNvbS9iYW56YWljbG91ZC91bmlmb3JtL3NyYy9hcHAvYXBwLmNvbXBvbmVudC5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0VBQ0UsZ0JBQWdCO0VBQ2hCLGFBQWE7RUFDYixjQUFjLEVBQUEiLCJmaWxlIjoic3JjL2FwcC9hcHAuY29tcG9uZW50LnNjc3MiLCJzb3VyY2VzQ29udGVudCI6WyIuY29udGFpbmVyIHtcbiAgbWF4LXdpZHRoOiA5NjBweDtcbiAgcGFkZGluZzogMjRweDtcbiAgbWFyZ2luOiAwIGF1dG87XG59XG4iXX0= */"
+module.exports = ".container {\n  max-width: 960px;\n  padding: 24px;\n  margin: 48px auto; }\n\n.logo {\n  height: 32px;\n  background: url('logo.svg') no-repeat;\n  margin-bottom: 32px; }\n\n.error {\n  color: #D32F2F;\n  font-size: 1.3em;\n  white-space: pre-wrap; }\n\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9Vc2Vycy9hbmRyYXN0b3RoL0RldmVsb3Blci9zcmMvZ2l0aHViLmNvbS9iYW56YWljbG91ZC91bmlmb3JtL3NyYy9hcHAvYXBwLmNvbXBvbmVudC5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0VBQ0UsZ0JBQWdCO0VBQ2hCLGFBQWE7RUFDYixpQkFBaUIsRUFBQTs7QUFHbkI7RUFDRSxZQUFZO0VBQ1oscUNBQXVDO0VBQ3ZDLG1CQUFtQixFQUFBOztBQUdyQjtFQUNFLGNBQWM7RUFDZCxnQkFBZ0I7RUFDaEIscUJBQXFCLEVBQUEiLCJmaWxlIjoic3JjL2FwcC9hcHAuY29tcG9uZW50LnNjc3MiLCJzb3VyY2VzQ29udGVudCI6WyIuY29udGFpbmVyIHtcbiAgbWF4LXdpZHRoOiA5NjBweDtcbiAgcGFkZGluZzogMjRweDtcbiAgbWFyZ2luOiA0OHB4IGF1dG87XG59XG5cbi5sb2dvIHtcbiAgaGVpZ2h0OiAzMnB4O1xuICBiYWNrZ3JvdW5kOiB1cmwoJy4vbG9nby5zdmcnKSBuby1yZXBlYXQ7XG4gIG1hcmdpbi1ib3R0b206IDMycHg7XG59XG5cbi5lcnJvciB7XG4gIGNvbG9yOiAjRDMyRjJGO1xuICBmb250LXNpemU6IDEuM2VtO1xuICB3aGl0ZS1zcGFjZTogcHJlLXdyYXA7XG59XG4iXX0= */"
 
 /***/ }),
 
@@ -2138,27 +2141,31 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AppComponent", function() { return AppComponent; });
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "./node_modules/tslib/tslib.es6.js");
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
-/* harmony import */ var _banzaicloud_uniform__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @banzaicloud/uniform */ "./dist/banzaicloud/uniform/fesm5/banzaicloud-uniform.js");
-/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/common/http */ "./node_modules/@angular/common/fesm5/http.js");
-/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm5/operators/index.js");
-/* harmony import */ var lodash_fp__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! lodash/fp */ "./node_modules/lodash/fp.js");
-/* harmony import */ var lodash_fp__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(lodash_fp__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var codemirror_mode_javascript_javascript__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! codemirror/mode/javascript/javascript */ "./node_modules/codemirror/mode/javascript/javascript.js");
-/* harmony import */ var codemirror_mode_javascript_javascript__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(codemirror_mode_javascript_javascript__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var codemirror_mode_markdown_markdown__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! codemirror/mode/markdown/markdown */ "./node_modules/codemirror/mode/markdown/markdown.js");
-/* harmony import */ var codemirror_mode_markdown_markdown__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(codemirror_mode_markdown_markdown__WEBPACK_IMPORTED_MODULE_7__);
-/* harmony import */ var codemirror_mode_yaml_yaml__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! codemirror/mode/yaml/yaml */ "./node_modules/codemirror/mode/yaml/yaml.js");
-/* harmony import */ var codemirror_mode_yaml_yaml__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(codemirror_mode_yaml_yaml__WEBPACK_IMPORTED_MODULE_8__);
-/* harmony import */ var codemirror_addon_display_placeholder__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! codemirror/addon/display/placeholder */ "./node_modules/codemirror/addon/display/placeholder.js");
-/* harmony import */ var codemirror_addon_display_placeholder__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(codemirror_addon_display_placeholder__WEBPACK_IMPORTED_MODULE_9__);
+/* harmony import */ var _angular_material__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/material */ "./node_modules/@angular/material/esm5/material.es5.js");
+/* harmony import */ var _banzaicloud_uniform__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @banzaicloud/uniform */ "./dist/banzaicloud/uniform/fesm5/banzaicloud-uniform.js");
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/common/http */ "./node_modules/@angular/common/fesm5/http.js");
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm5/operators/index.js");
+/* harmony import */ var lodash_fp__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! lodash/fp */ "./node_modules/lodash/fp.js");
+/* harmony import */ var lodash_fp__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(lodash_fp__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! rxjs */ "./node_modules/rxjs/_esm5/index.js");
+/* harmony import */ var codemirror_mode_javascript_javascript__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! codemirror/mode/javascript/javascript */ "./node_modules/codemirror/mode/javascript/javascript.js");
+/* harmony import */ var codemirror_mode_javascript_javascript__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(codemirror_mode_javascript_javascript__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var codemirror_mode_markdown_markdown__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! codemirror/mode/markdown/markdown */ "./node_modules/codemirror/mode/markdown/markdown.js");
+/* harmony import */ var codemirror_mode_markdown_markdown__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(codemirror_mode_markdown_markdown__WEBPACK_IMPORTED_MODULE_9__);
+/* harmony import */ var codemirror_mode_yaml_yaml__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! codemirror/mode/yaml/yaml */ "./node_modules/codemirror/mode/yaml/yaml.js");
+/* harmony import */ var codemirror_mode_yaml_yaml__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(codemirror_mode_yaml_yaml__WEBPACK_IMPORTED_MODULE_10__);
+/* harmony import */ var codemirror_addon_display_placeholder__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! codemirror/addon/display/placeholder */ "./node_modules/codemirror/addon/display/placeholder.js");
+/* harmony import */ var codemirror_addon_display_placeholder__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(codemirror_addon_display_placeholder__WEBPACK_IMPORTED_MODULE_11__);
 
 
 
 
 
 
-var reduceObject = lodash_fp__WEBPACK_IMPORTED_MODULE_5__["reduce"].convert({ cap: false });
-var mapObject = lodash_fp__WEBPACK_IMPORTED_MODULE_5__["map"].convert({ cap: false });
+
+
+var reduceObject = lodash_fp__WEBPACK_IMPORTED_MODULE_6__["reduce"].convert({ cap: false });
+var mapObject = lodash_fp__WEBPACK_IMPORTED_MODULE_6__["map"].convert({ cap: false });
 // see https://codemirror.net/mode/index.html
 
 
@@ -2166,13 +2173,22 @@ var mapObject = lodash_fp__WEBPACK_IMPORTED_MODULE_5__["map"].convert({ cap: fal
 // see https://codemirror.net/demo/placeholder.html
 
 var AppComponent = /** @class */ (function () {
-    function AppComponent(http) {
+    function AppComponent(http, snackBar) {
         this.http = http;
-        this.groups = this.http
-            .get('/api/v1/form')
-            .pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["map"])(function (g) { return _banzaicloud_uniform__WEBPACK_IMPORTED_MODULE_2__["UniformService"].factory(g); }));
+        this.snackBar = snackBar;
     }
+    AppComponent.prototype.ngOnInit = function () {
+        var _this = this;
+        this.groups$ = this.http
+            .get('/api/v1/form')
+            .pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_5__["map"])(function (g) { return _banzaicloud_uniform__WEBPACK_IMPORTED_MODULE_3__["UniformService"].factory(g); }))
+            .pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_5__["catchError"])(function (err) {
+            _this.error = err.message + "\n\n" + (err.error || '');
+            return Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["throwError"])(err);
+        }));
+    };
     AppComponent.prototype.onValueChanges = function (event) {
+        // NOTE unused
         this.values = event;
     };
     AppComponent.prototype.onSave = function (event) {
@@ -2186,6 +2202,7 @@ var AppComponent = /** @class */ (function () {
         //       .reduce((value, key) => fp.set(key, event[key], value), {}),
         //   })),
         // }));
+        var _this = this;
         // const data = yaml.safeDump(groups);
         // const blob = new Blob([data], { type: 'text/vnd.yaml' });
         // const url = window.URL.createObjectURL(blob);
@@ -2193,14 +2210,20 @@ var AppComponent = /** @class */ (function () {
         // this.downloadLink.nativeElement.click();
         // window.URL.revokeObjectURL(blob);
         // this.downloadLink.nativeElement.href = '';
-        var values = reduceObject(function (v, val, key) { return lodash_fp__WEBPACK_IMPORTED_MODULE_5__["set"](key, val, v); }, {})(event);
+        var values = reduceObject(function (v, val, key) { return lodash_fp__WEBPACK_IMPORTED_MODULE_6__["set"](key, val, v); }, {})(event);
         this.http
             .post('/api/v1/form', values, {
-            headers: new _angular_common_http__WEBPACK_IMPORTED_MODULE_3__["HttpHeaders"]({
+            headers: new _angular_common_http__WEBPACK_IMPORTED_MODULE_4__["HttpHeaders"]({
                 'Content-Type': 'application/json',
             }),
         })
-            .subscribe();
+            .pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_5__["catchError"])(function (err) {
+            _this.error = err.message + "\n\n" + (err.error || '');
+            return Object(rxjs__WEBPACK_IMPORTED_MODULE_7__["throwError"])(err);
+        }))
+            .subscribe(function () {
+            _this.snackBar.open('Form values has been saved to config file', '⤬');
+        });
     };
     tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["ViewChild"])('downloadLink'),
@@ -2212,7 +2235,7 @@ var AppComponent = /** @class */ (function () {
             template: __webpack_require__(/*! ./app.component.html */ "./src/app/app.component.html"),
             styles: [__webpack_require__(/*! ./app.component.scss */ "./src/app/app.component.scss")]
         }),
-        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [_angular_common_http__WEBPACK_IMPORTED_MODULE_3__["HttpClient"]])
+        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [_angular_common_http__WEBPACK_IMPORTED_MODULE_4__["HttpClient"], _angular_material__WEBPACK_IMPORTED_MODULE_2__["MatSnackBar"]])
     ], AppComponent);
     return AppComponent;
 }());
@@ -2235,9 +2258,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _angular_platform_browser__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/platform-browser */ "./node_modules/@angular/platform-browser/fesm5/platform-browser.js");
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
 /* harmony import */ var _angular_material_card__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/material/card */ "./node_modules/@angular/material/esm5/card.es5.js");
-/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/common/http */ "./node_modules/@angular/common/fesm5/http.js");
-/* harmony import */ var _banzaicloud_uniform__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @banzaicloud/uniform */ "./dist/banzaicloud/uniform/fesm5/banzaicloud-uniform.js");
-/* harmony import */ var _app_component__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./app.component */ "./src/app/app.component.ts");
+/* harmony import */ var _angular_material_progress_bar__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/material/progress-bar */ "./node_modules/@angular/material/esm5/progress-bar.es5.js");
+/* harmony import */ var _angular_material_snack_bar__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/material/snack-bar */ "./node_modules/@angular/material/esm5/snack-bar.es5.js");
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/common/http */ "./node_modules/@angular/common/fesm5/http.js");
+/* harmony import */ var _banzaicloud_uniform__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @banzaicloud/uniform */ "./dist/banzaicloud/uniform/fesm5/banzaicloud-uniform.js");
+/* harmony import */ var _app_component__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./app.component */ "./src/app/app.component.ts");
+
+
 
 
 
@@ -2250,10 +2277,10 @@ var AppModule = /** @class */ (function () {
     }
     AppModule = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_2__["NgModule"])({
-            declarations: [_app_component__WEBPACK_IMPORTED_MODULE_6__["AppComponent"]],
-            imports: [_angular_platform_browser__WEBPACK_IMPORTED_MODULE_1__["BrowserModule"], _angular_common_http__WEBPACK_IMPORTED_MODULE_4__["HttpClientModule"], _banzaicloud_uniform__WEBPACK_IMPORTED_MODULE_5__["UniformModule"], _angular_material_card__WEBPACK_IMPORTED_MODULE_3__["MatCardModule"]],
+            declarations: [_app_component__WEBPACK_IMPORTED_MODULE_8__["AppComponent"]],
+            imports: [_angular_platform_browser__WEBPACK_IMPORTED_MODULE_1__["BrowserModule"], _angular_common_http__WEBPACK_IMPORTED_MODULE_6__["HttpClientModule"], _banzaicloud_uniform__WEBPACK_IMPORTED_MODULE_7__["UniformModule"], _angular_material_card__WEBPACK_IMPORTED_MODULE_3__["MatCardModule"], _angular_material_progress_bar__WEBPACK_IMPORTED_MODULE_4__["MatProgressBarModule"], _angular_material_snack_bar__WEBPACK_IMPORTED_MODULE_5__["MatSnackBarModule"]],
             providers: [],
-            bootstrap: [_app_component__WEBPACK_IMPORTED_MODULE_6__["AppComponent"]],
+            bootstrap: [_app_component__WEBPACK_IMPORTED_MODULE_8__["AppComponent"]],
         })
     ], AppModule);
     return AppModule;

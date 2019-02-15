@@ -38,14 +38,12 @@ func NewTemplateCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := templateOptions{}
 
 	cmd := &cobra.Command{
-		Use:   "template [config] [name]",
+		Use:   "template CONFIG [-n NAME] [-d DIRECTORY]",
 		Short: "Execute form template",
-		Args:  cobra.MinimumNArgs(1),
+		Long:  "Execute form template(s) using values from the provided values in the config file",
+		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			options.configFile = args[0]
-			if len(args) > 1 {
-				options.name = args[1]
-			}
 			if options.directory != "" {
 				path, err := filepath.Abs(options.directory)
 				if err != nil {
@@ -60,6 +58,7 @@ func NewTemplateCommand(banzaiCli cli.Cli) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&options.directory, "directory", "d", "", "write executed template files to this directory")
+	cmd.Flags().StringVarP(&options.name, "name", "n", "", "template name")
 
 	return cmd
 }
