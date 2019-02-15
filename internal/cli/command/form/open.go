@@ -61,7 +61,7 @@ func runOpen(banzaiCli cli.Cli, options openOptions) {
 	}
 
 	port := listener.Addr().(*net.TCPAddr).Port
-	log.Debugf("using port %d\n", port)
+	log.Debugf("using port %d", port)
 
 	web := packr.New("web", path.Join(".", "web"))
 	http.Handle("/", http.FileServer(web))
