@@ -141,7 +141,10 @@ func writeConfig(fileName string, file *File) error {
 	}
 	defer fi.Close()
 
-	fi.Write(config)
+	_, err = fi.Write(config)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

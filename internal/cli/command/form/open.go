@@ -16,10 +16,10 @@ package form
 
 import (
 	"encoding/json"
+	"fmt"
 	"net"
 	"net/http"
 	"path"
-	"strconv"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/gobuffalo/packr/v2"
@@ -55,7 +55,7 @@ func NewOpenCommand(banzaiCli cli.Cli) *cobra.Command {
 }
 
 func runOpen(banzaiCli cli.Cli, options openOptions) {
-	listener, err := net.Listen("tcp", ":"+strconv.Itoa(options.port))
+	listener, err := net.Listen("tcp", ":"+fmt.Sprintf("%d", options.port))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -68,7 +68,7 @@ func runOpen(banzaiCli cli.Cli, options openOptions) {
 	http.HandleFunc("/api/v1/form", createHandler(options))
 
 	if options.openBrowser {
-		open.Start("http://127.0.0.1:" + strconv.Itoa(port))
+		open.Start("http://127.0.0.1:" + fmt.Sprintf("%d", port))
 	} else {
 		log.Infof("to access the form navigate to http://127.0.0.1:%d using a web browser", port)
 	}
