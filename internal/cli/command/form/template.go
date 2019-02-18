@@ -15,22 +15,22 @@
 package form
 
 import (
-	"io"
+	"fmt"
 	"os"
 	"path"
-	"path/filepath"
 	"text/template"
 
 	"github.com/Masterminds/sprig"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 type templateOptions struct {
 	configFile string
 	name       string
-	directory  string
+	force      bool
 }
 
 // NewTemplateCommand creates a new cobra.Command for `banzai form template`.
@@ -38,27 +38,18 @@ func NewTemplateCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := templateOptions{}
 
 	cmd := &cobra.Command{
-		Use:   "template CONFIG [-n NAME] [-d DIRECTORY]",
-		Short: "Execute form template",
+		Use:   "template FORM_CONFIG [-n TEMPLATE_NAME] [--force]",
+		Short: "Execute form template(s)",
 		Long:  "Execute form template(s) using values from the provided values in the config file",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			options.configFile = args[0]
-			if options.directory != "" {
-				path, err := filepath.Abs(options.directory)
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				options.directory = path
-			}
-
 			runExecuteTemplate(banzaiCli, options)
 		},
 	}
 
-	cmd.Flags().StringVarP(&options.directory, "directory", "d", "", "write executed template files to this directory")
 	cmd.Flags().StringVarP(&options.name, "name", "n", "", "template name")
+	cmd.Flags().BoolVar(&options.force, "force", false, "overwrite existing files without prompt")
 
 	return cmd
 }
@@ -92,31 +83,36 @@ func runExecuteTemplate(banzaiCli cli.Cli, options templateOptions) {
 		tmpls = file.Templates
 	}
 
-	// Create directory if it does not exist
-	if options.directory != "" {
-		err = os.MkdirAll(options.directory, os.ModePerm)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
 	for filename, tmpl := range tmpls {
-		t, err := template.New(options.name).Funcs(sprig.TxtFuncMap()).Parse(tmpl)
+		t, err := template.New(options.name).Funcs(sprig.TxtFuncMap()).Option("missingkey=error").Parse(tmpl)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		var f io.Writer
-		if options.directory != "" {
-			f, err = os.Create(path.Join(options.directory, filename))
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			defer f.(io.WriteCloser).Close()
-		} else {
-			f = os.Stdout
+		dir, err := os.Getwd()
+		if err != nil {
+			log.Fatal(err)
 		}
+
+		filePath := path.Join(dir, filename)
+
+		if !options.force {
+			if _, err := os.Stat(filePath); !os.IsNotExist(err) {
+				overwrite := false
+				prompt := &survey.Confirm{Message: fmt.Sprintf("%s already exists. Do you want to overwrite it?", filePath)}
+				survey.AskOne(prompt, &overwrite, nil)
+
+				if !overwrite {
+					continue
+				}
+			}
+		}
+
+		f, err := os.Create(filePath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
 
 		err = t.Execute(f, values)
 		if err != nil {

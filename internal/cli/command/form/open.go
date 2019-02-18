@@ -39,9 +39,8 @@ func NewOpenCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := openOptions{}
 
 	cmd := &cobra.Command{
-		Use:   "open CONFIG [--port 0] [--browser]",
-		Short: "Open form",
-		Long:  "Open form defined in the config file",
+		Use:   "open FORM_CONFIG [--port 0] [--browser]",
+		Short: "Open form defined in the form config file",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			options.configFile = args[0]
@@ -56,7 +55,7 @@ func NewOpenCommand(banzaiCli cli.Cli) *cobra.Command {
 }
 
 func runOpen(banzaiCli cli.Cli, options openOptions) {
-	listener, err := net.Listen("tcp", "127.0.0.1:"+fmt.Sprintf("%d", options.port))
+	listener, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", options.port))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,7 +68,7 @@ func runOpen(banzaiCli cli.Cli, options openOptions) {
 	http.HandleFunc("/api/v1/form", createHandler(options))
 
 	if options.openBrowser {
-		open.Start("http://127.0.0.1:" + fmt.Sprintf("%d", port))
+		open.Start(fmt.Sprintf("http://127.0.0.1:%d", port))
 	} else {
 		log.Infof("to access the form navigate to http://127.0.0.1:%d using a web browser", port)
 	}
@@ -78,15 +77,13 @@ func runOpen(banzaiCli cli.Cli, options openOptions) {
 }
 
 func createHandler(options openOptions) func(w http.ResponseWriter, r *http.Request) {
+	file, err := readConfig(options.configFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
-			file, err := readConfig(options.configFile)
-			if err != nil {
-				log.Error(err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
 			b, err := json.Marshal(file.Form)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -98,11 +95,6 @@ func createHandler(options openOptions) func(w http.ResponseWriter, r *http.Requ
 		}
 
 		if r.Method == "POST" {
-			file, err := readConfig(options.configFile)
-			if err != nil {
-				log.Fatal(err)
-			}
-
 			var values map[string]interface{}
 			decoder := json.NewDecoder(r.Body)
 			err = decoder.Decode(&values)

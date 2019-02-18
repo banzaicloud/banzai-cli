@@ -28,6 +28,7 @@ func NewFormCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	cmd.AddCommand(NewOpenCommand(banzaiCli))
 	cmd.AddCommand(NewTemplateCommand(banzaiCli))
+	cmd.AddCommand(NewMigrateCommand(banzaiCli))
 
 	return cmd
 }

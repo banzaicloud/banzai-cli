@@ -28,6 +28,7 @@ GOLANGCI_VERSION = 1.12.2
 GOTESTSUM_VERSION = 0.3.2
 LICENSEI_VERSION = 0.0.7
 GORELEASER_VERSION = 0.98.0
+GOBIN_VERSION = 0.0.4
 
 GOLANG_VERSION = 1.11
 
@@ -42,19 +43,31 @@ bin/dep-${DEP_VERSION}:
 	curl https://raw.githubusercontent.com/golang/dep/master/install.sh | INSTALL_DIRECTORY=bin DEP_RELEASE_TAG=v${DEP_VERSION} sh
 	@mv bin/dep $@
 
-bin/packr2:
-	go get -u github.com/gobuffalo/packr/v2/packr2
-
 .PHONY: vendor
-vendor: bin/dep bin/packr2 ## Install dependencies
+vendor: bin/dep ## Install dependencies
 	bin/dep ensure -v -vendor-only
 
+bin/gobin: bin/gobin-${GOBIN_VERSION}
+	@ln -sf gobin-${GOBIN_VERSION} bin/gobin
+bin/gobin-${GOBIN_VERSION}:
+	@mkdir -p bin
+ifeq (${OS}, Darwin)
+	curl -L https://github.com/myitcv/gobin/releases/download/v${GOBIN_VERSION}/darwin-amd64 > ./bin/gobin-${GOBIN_VERSION} && chmod +x ./bin/gobin-${GOBIN_VERSION}
+endif
+ifeq (${OS}, Linux)
+	curl -L https://github.com/myitcv/gobin/releases/download/v${GOBIN_VERSION}/linux-amd64 > ./bin/gobin-${GOBIN_VERSION} && chmod +x ./bin/gobin-${GOBIN_VERSION}
+endif
+
+bin/packr2: bin/gobin
+	@mkdir -p bin
+	GOBIN=bin/ bin/gobin github.com/gobuffalo/packr/v2/packr2
+
 .PHONY: pre-build ## Pre build bundles of static assets
-pre-build:
-	@cd internal/cli/command/form && packr2
+pre-build: bin/packr2
+	cd internal/cli/command/form && $(abspath bin/packr2)
 
 .PHONY: build
-build: ## Build a binary
+build: pre-build ## Build a binary
 ifeq (${VERBOSE}, 1)
 	go env
 endif

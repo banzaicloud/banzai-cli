@@ -23,13 +23,13 @@ import (
 	"github.com/goph/emperror"
 )
 
-// File Parsed form config file
-type File struct {
+// ConfigFile Parsed form config file
+type ConfigFile struct {
 	Form      []*Group          `json:"form"`
 	Templates map[string]string `json:"templates"`
 }
 
-func (f File) validate() error {
+func (f ConfigFile) validate() error {
 	if f.Form == nil {
 		return fmt.Errorf("validate %v: form definition is required", f)
 	}
@@ -109,37 +109,51 @@ func (f Field) validate() error {
 	return nil
 }
 
-func readConfig(fileName string) (*File, error) {
-	var file File
-	fileContent, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		return &file, err
+func readConfig(fileName string) (file ConfigFile, err error) {
+	var fileContent []byte
+
+	if fileName == "-" {
+		fileContent, err = ioutil.ReadAll(os.Stdin)
+		if err != nil {
+			return file, err
+		}
+	} else {
+		fileContent, err = ioutil.ReadFile(fileName)
+		if err != nil {
+			return file, err
+		}
 	}
 
 	err = yaml.Unmarshal(fileContent, &file)
 	if err != nil {
-		return &file, emperror.Wrap(err, "invalid format")
+		return file, emperror.Wrap(err, "invalid format")
 	}
 
 	err = file.validate()
 	if err != nil {
-		return &file, err
+		return file, err
 	}
 
-	return &file, nil
+	return file, nil
 }
 
-func writeConfig(fileName string, file *File) error {
+func writeConfig(fileName string, file ConfigFile) error {
 	config, err := yaml.Marshal(file)
 	if err != nil {
 		return err
 	}
 
-	fi, err := os.Create(fileName)
-	if err != nil {
-		return err
+	var fi *os.File
+	if fileName == "-" {
+		fi = os.Stdout
+	} else {
+		fi, err = os.Create(fileName)
+		if err != nil {
+			return err
+		}
+
+		defer fi.Close()
 	}
-	defer fi.Close()
 
 	_, err = fi.Write(config)
 	if err != nil {
