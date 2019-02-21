@@ -59,7 +59,9 @@ ifeq (${OS}, Linux)
 	curl -L https://github.com/myitcv/gobin/releases/download/v${GOBIN_VERSION}/linux-amd64 > ./bin/gobin-${GOBIN_VERSION} && chmod +x ./bin/gobin-${GOBIN_VERSION}
 endif
 
-bin/packr2: bin/gobin
+bin/packr2: bin/packr2-${PACKR_VERSION}
+	@ln -sf packr2-${PACKR_VERSION} bin/packr2
+bin/packr2-${PACKR_VERSION}: bin/gobin
 	@mkdir -p bin
 	GOBIN=bin/ bin/gobin github.com/gobuffalo/packr/v2/packr2
 
