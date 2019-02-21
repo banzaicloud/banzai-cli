@@ -63,7 +63,7 @@ bin/packr2: bin/packr2-${PACKR_VERSION}
 	@ln -sf packr2-${PACKR_VERSION} bin/packr2
 bin/packr2-${PACKR_VERSION}: bin/gobin
 	@mkdir -p bin
-	GOBIN=bin/ bin/gobin github.com/gobuffalo/packr/v2/packr2
+	GOBIN=bin/ bin/gobin github.com/gobuffalo/packr/v2/packr2@${PACKR_VERSION}
 
 .PHONY: pre-build ## Pre build bundles of static assets
 pre-build: bin/packr2
