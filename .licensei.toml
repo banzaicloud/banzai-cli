@@ -11,4 +11,6 @@ ignored = [
 
     "github.com/inconshreveable/mousetrap", # Apache 2.0
     "github.com/magiconair/properties", # BSD-3
+    "github.com/Masterminds/semver", # MIT
+    "github.com/Masterminds/sprig", # MIT
 ]
