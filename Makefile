@@ -29,7 +29,7 @@ GOTESTSUM_VERSION = 0.3.2
 LICENSEI_VERSION = 0.0.7
 GORELEASER_VERSION = 0.98.0
 GOBIN_VERSION = 0.0.4
-PACKR_VERSION = v2.0.1
+PACKR_VERSION = 2.0.1
 
 GOLANG_VERSION = 1.11
 
@@ -63,7 +63,8 @@ bin/packr2: bin/packr2-${PACKR_VERSION}
 	@ln -sf packr2-${PACKR_VERSION} bin/packr2
 bin/packr2-${PACKR_VERSION}: bin/gobin
 	@mkdir -p bin
-	GOBIN=bin/ bin/gobin github.com/gobuffalo/packr/v2/packr2@${PACKR_VERSION}
+	GOBIN=bin/ bin/gobin github.com/gobuffalo/packr/v2/packr2@v${PACKR_VERSION}
+	@mv  bin/packr2 bin/packr2-${PACKR_VERSION}
 
 .PHONY: pre-build ## Pre build bundles of static assets
 pre-build: bin/packr2
