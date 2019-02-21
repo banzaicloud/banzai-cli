@@ -64,7 +64,8 @@ bin/packr2: bin/gobin
 
 .PHONY: pre-build ## Pre build bundles of static assets
 pre-build: bin/packr2
-	cd internal/cli/command/form && $(abspath bin/packr2)
+	cd internal/cli/command/form
+	bin/packr2
 
 .PHONY: build
 build: pre-build ## Build a binary
