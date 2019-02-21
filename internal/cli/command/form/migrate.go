@@ -46,7 +46,7 @@ func NewMigrateCommand(banzaiCli cli.Cli) *cobra.Command {
 	return cmd
 }
 
-func runMigrate(banzaiCli cli.Cli, options migrateOptions) error {
+func runMigrate(_ cli.Cli, options migrateOptions) error {
 	source, err := readConfig(options.sourceConfigFile)
 	if err != nil {
 		return err

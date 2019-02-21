@@ -54,7 +54,7 @@ func NewTemplateCommand(banzaiCli cli.Cli) *cobra.Command {
 	return cmd
 }
 
-func runExecuteTemplate(banzaiCli cli.Cli, options templateOptions) {
+func runExecuteTemplate(_ cli.Cli, options templateOptions) {
 	file, err := readConfig(options.configFile)
 	if err != nil {
 		log.Fatal(err)

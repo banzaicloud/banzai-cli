@@ -54,7 +54,7 @@ func NewOpenCommand(banzaiCli cli.Cli) *cobra.Command {
 	return cmd
 }
 
-func runOpen(banzaiCli cli.Cli, options openOptions) {
+func runOpen(_ cli.Cli, options openOptions) {
 	listener, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", options.port))
 	if err != nil {
 		log.Fatal(err)
