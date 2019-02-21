@@ -49,7 +49,7 @@ func NewTemplateCommand(banzaiCli cli.Cli) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&options.name, "name", "n", "", "template name")
-	cmd.Flags().BoolVar(&options.force, "force", false, "overwrite existing files without prompt")
+	cmd.Flags().BoolVar(&options.force, "force", false, "overwrite existing files")
 
 	return cmd
 }
