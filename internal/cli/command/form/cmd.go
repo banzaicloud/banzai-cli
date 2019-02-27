@@ -12,23 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package command
+package form
 
 import (
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/form"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/organization"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/secret"
 	"github.com/spf13/cobra"
 )
 
-// AddCommands adds all the commands from cli/command to the root command
-func AddCommands(cmd *cobra.Command, banzaiCli cli.Cli) {
-	cmd.AddCommand(
-		cluster.NewClusterCommand(banzaiCli),
-		form.NewFormCommand(banzaiCli),
-		organization.NewOrganizationCommand(banzaiCli),
-		secret.NewSecretCommand(banzaiCli),
-	)
+// NewFormCommand returns a cobra command for `form` subcommands.
+func NewFormCommand(banzaiCli cli.Cli) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "form",
+		Short: "Open forms from config, persist provided values and generate templates",
+	}
+
+	cmd.AddCommand(NewOpenCommand(banzaiCli))
+	cmd.AddCommand(NewTemplateCommand(banzaiCli))
+	cmd.AddCommand(NewMigrateCommand(banzaiCli))
+
+	return cmd
 }

@@ -28,6 +28,8 @@ GOLANGCI_VERSION = 1.12.2
 GOTESTSUM_VERSION = 0.3.2
 LICENSEI_VERSION = 0.0.7
 GORELEASER_VERSION = 0.98.0
+GOBIN_VERSION = 0.0.4
+PACKR_VERSION = 2.0.2
 
 GOLANG_VERSION = 1.11
 
@@ -46,6 +48,32 @@ bin/dep-${DEP_VERSION}:
 vendor: bin/dep ## Install dependencies
 	bin/dep ensure -v -vendor-only
 
+bin/gobin: bin/gobin-${GOBIN_VERSION}
+	@ln -sf gobin-${GOBIN_VERSION} bin/gobin
+bin/gobin-${GOBIN_VERSION}:
+	@mkdir -p bin
+ifeq (${OS}, Darwin)
+	curl -L https://github.com/myitcv/gobin/releases/download/v${GOBIN_VERSION}/darwin-amd64 > ./bin/gobin-${GOBIN_VERSION} && chmod +x ./bin/gobin-${GOBIN_VERSION}
+endif
+ifeq (${OS}, Linux)
+	curl -L https://github.com/myitcv/gobin/releases/download/v${GOBIN_VERSION}/linux-amd64 > ./bin/gobin-${GOBIN_VERSION} && chmod +x ./bin/gobin-${GOBIN_VERSION}
+endif
+
+bin/packr2: bin/packr2-${PACKR_VERSION}
+	@ln -sf packr2-${PACKR_VERSION} bin/packr2
+bin/packr2-${PACKR_VERSION}: bin/gobin
+	@mkdir -p bin
+	GOBIN=bin/ bin/gobin github.com/gobuffalo/packr/v2/packr2@v${PACKR_VERSION}
+	@mv  bin/packr2 bin/packr2-${PACKR_VERSION}
+
+.PHONY: client-build
+client-build: ## Build form client
+	@${MAKE} -C internal/cli/command/form/web build
+
+.PHONY: pre-build
+pre-build: client-build bin/packr2 ## Pre build bundles of static assets
+	cd internal/cli/command/form && $(abspath bin/packr2)
+
 .PHONY: build
 build: ## Build a binary
 ifeq (${VERBOSE}, 1)
@@ -54,12 +82,11 @@ endif
 ifneq (${IGNORE_GOLANG_VERSION_REQ}, 1)
 	@printf "${GOLANG_VERSION}\n$$(go version | awk '{sub(/^go/, "", $$3);print $$3}')" | sort -t '.' -k 1,1 -k 2,2 -k 3,3 -g | head -1 | grep -q -E "^${GOLANG_VERSION}$$" || (printf "Required Go version is ${GOLANG_VERSION}\nInstalled: `go version`" && exit 1)
 endif
-
 	go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/${BINARY_NAME} ${BUILD_PACKAGE}
 
 .PHONY: build-release
 build-release: LDFLAGS += -w
-build-release: build ## Build a binary without debug information
+build-release: pre-build build ## Build a binary without debug information
 
 .PHONY: check
 check: test lint ## Run tests and linters

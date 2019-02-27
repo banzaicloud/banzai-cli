@@ -99,6 +99,55 @@ jobs:
                 store_artifacts:
                     path: build/
 
+    frontend-build:
+        docker:
+            -
+                image: circleci/node:11
+
+        steps:
+            - checkout
+
+            -
+                restore_cache:
+                    name: Restore build dependencies
+                    keys:
+                        - frontend-build-deps-v1-{{ .Branch }}-{{ checksum "Makefile" }}
+
+            -
+                restore_cache:
+                    name: Restore dependencies
+                    keys:
+                        - npm-v1-{{ .Branch }}-{{ checksum "internal/cli/command/form/web/package-lock.json" }}
+                        - npm-v1-{{ .Branch }}
+                        - npm-v1-master
+                        - npm-v1
+
+            -
+                run:
+                    name: Build assets
+                    command: make pre-build
+
+            -
+                save_cache:
+                    name: Save dependencies
+                    key: npm-v1-{{ .Branch }}-{{ checksum "internal/cli/command/form/web/package-lock.json" }}
+                    paths:
+                        - internal/cli/command/form/web/node_modules/
+
+            -
+                save_cache:
+                    name: Save build dependencies
+                    key: frontend-build-deps-v1-{{ .Branch }}-{{ checksum "Makefile" }}
+                    paths:
+                        - bin/
+
+            -
+                persist_to_workspace:
+                    root: .
+                    paths:
+                        - internal/cli/command/form/form-packr.go
+                        - internal/cli/command/form/packrd/
+
     release:
         docker:
             -
@@ -127,6 +176,13 @@ workflows:
                     filters:
                         tags:
                             only: /^v?\d+\.\d+\.\d+(-\S*)?$/
+            -
+                frontend-build:
+                    filters:
+                        tags:
+                            only: /^v?\d+\.\d+\.\d+(-\S*)?$/
+                        branches:
+                            ignore: /.*/
             -
                 release:
                     requires:

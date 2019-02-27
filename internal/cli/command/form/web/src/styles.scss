@@ -1,0 +1,42 @@
+@import '~codemirror/lib/codemirror.css';
+@import '~codemirror/theme/material.css';
+@import '~@angular/material/theming';
+
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat-core();
+
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue. Available color palettes: https://material.io/design/color/
+$uniform-primary: mat-palette($mat-blue);
+$uniform-accent: mat-palette($mat-cyan);
+
+// The warn palette is optional (defaults to red).
+$uniform-warn: mat-palette($mat-red);
+
+// Create the theme object (a Sass map containing all of the palettes).
+$uniform-theme: mat-light-theme($uniform-primary, $uniform-accent, $uniform-warn);
+
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include angular-material-theme($uniform-theme);
+
+html {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: scroll;
+  background: linear-gradient(15deg, #42c8e0, #41c6df 2%, #2873a5 16%, #1f5690 32%, #194282 47%, #153579 63%, #351c77 81%, #320876) no-repeat;
+}
