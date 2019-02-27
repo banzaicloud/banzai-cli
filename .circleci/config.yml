@@ -109,12 +109,6 @@ jobs:
 
             -
                 restore_cache:
-                    name: Restore build dependencies
-                    keys:
-                        - frontend-build-deps-v1-{{ .Branch }}-{{ checksum "Makefile" }}
-
-            -
-                restore_cache:
                     name: Restore dependencies
                     keys:
                         - npm-v1-{{ .Branch }}-{{ checksum "internal/cli/command/form/web/package-lock.json" }}
@@ -125,7 +119,7 @@ jobs:
             -
                 run:
                     name: Build assets
-                    command: make pre-build
+                    command: make client-build
 
             -
                 save_cache:
@@ -135,18 +129,10 @@ jobs:
                         - internal/cli/command/form/web/node_modules/
 
             -
-                save_cache:
-                    name: Save build dependencies
-                    key: frontend-build-deps-v1-{{ .Branch }}-{{ checksum "Makefile" }}
-                    paths:
-                        - bin/
-
-            -
                 persist_to_workspace:
                     root: .
                     paths:
-                        - internal/cli/command/form/form-packr.go
-                        - internal/cli/command/form/packrd/
+                        - internal/cli/command/form/web/dist/
 
     release:
         docker:
@@ -161,6 +147,11 @@ jobs:
             -
                 attach_workspace:
                     at: .
+
+            -
+                run:
+                    name: Bundle assets
+                    command: make client-bundle
 
             -
                 run:
