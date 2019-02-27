@@ -14,6 +14,7 @@ require (
 	github.com/goph/emperror v0.16.0
 	github.com/huandu/xstrings v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.7 // indirect
+	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.0 // indirect
 	github.com/mattn/go-isatty v0.0.4
 	github.com/microcosm-cc/bluemonday v1.0.2 // indirect
