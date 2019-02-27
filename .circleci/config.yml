@@ -179,6 +179,7 @@ workflows:
                 release:
                     requires:
                         - build
+                        - frontend-build
                     filters:
                         tags:
                             only: /^v?\d+\.\d+\.\d+(-\S*)?$/
