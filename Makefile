@@ -26,7 +26,6 @@ GOLANGCI_VERSION = 1.12.2
 GOTESTSUM_VERSION = 0.3.2
 LICENSEI_VERSION = 0.1.0
 GORELEASER_VERSION = 0.98.0
-GOBIN_VERSION = 0.0.4
 PACKR_VERSION = 2.0.2
 
 GOLANG_VERSION = 1.11
@@ -35,23 +34,16 @@ GOLANG_VERSION = 1.11
 # Use with care
 -include override.mk
 
-bin/gobin: bin/gobin-${GOBIN_VERSION}
-	@ln -sf gobin-${GOBIN_VERSION} bin/gobin
-bin/gobin-${GOBIN_VERSION}:
-	@mkdir -p bin
-ifeq (${OS}, Darwin)
-	curl -L https://github.com/myitcv/gobin/releases/download/v${GOBIN_VERSION}/darwin-amd64 > ./bin/gobin-${GOBIN_VERSION} && chmod +x ./bin/gobin-${GOBIN_VERSION}
-endif
-ifeq (${OS}, Linux)
-	curl -L https://github.com/myitcv/gobin/releases/download/v${GOBIN_VERSION}/linux-amd64 > ./bin/gobin-${GOBIN_VERSION} && chmod +x ./bin/gobin-${GOBIN_VERSION}
-endif
-
 bin/packr2: bin/packr2-${PACKR_VERSION}
 	@ln -sf packr2-${PACKR_VERSION} bin/packr2
 bin/packr2-${PACKR_VERSION}: bin/gobin
 	@mkdir -p bin
-	GOBIN=bin/ bin/gobin github.com/gobuffalo/packr/v2/packr2@v${PACKR_VERSION}
-	@mv bin/packr2 bin/packr2-${PACKR_VERSION}
+ifeq (${OS}, Darwin)
+	curl -L https://github.com/gobuffalo/packr/releases/download/v${PACKR_VERSION}/packr_${PACKR_VERSION}_darwin_amd64.tar.gz | tar -zOxf - packr2 > ./bin/packr2-${PACKR_VERSION} && chmod +x ./bin/packr2-${PACKR_VERSION}
+endif
+ifeq (${OS}, Linux)
+	curl -L https://github.com/gobuffalo/packr/releases/download/v${PACKR_VERSION}/packr_${PACKR_VERSION}_linux_amd64.tar.gz | tar -zOxf - packr2 > ./bin/packr2-${PACKR_VERSION} && chmod +x ./bin/packr2-${PACKR_VERSION}
+endif
 
 .PHONY: client-build
 client-build: ## Build form client
