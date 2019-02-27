@@ -32,7 +32,6 @@ GOBIN_VERSION = 0.0.4
 PACKR_VERSION = 2.0.2
 
 GOLANG_VERSION = 1.11
-NODE_VERSION = 11.10.0
 
 # Add the ability to override some variables
 # Use with care
@@ -69,10 +68,7 @@ bin/packr2-${PACKR_VERSION}: bin/gobin
 
 .PHONY: client-build
 client-build: ## Build form client
-ifneq (${IGNORE_NODE_VERSION_REQ}, 1)
-	@printf "${NODE_VERSION}\n$$(node --version | awk '{sub(/^v/, "", $$1);print $$1}')" | sort -t '.' -k 1,1 -k 2,2 -k 3,3 -g | head -1 | grep -q -E "^${NODE_VERSION}$$" || (printf "Required Node version is v${NODE_VERSION}\nInstalled: `node --version`\n" && exit 1)
-endif
-	cd internal/cli/command/form/web && npm i && npm run build -- --prod
+	@${MAKE} -C internal/cli/command/form/web build
 
 .PHONY: pre-build
 pre-build: client-build bin/packr2 ## Pre build bundles of static assets
