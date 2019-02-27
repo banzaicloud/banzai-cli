@@ -10,7 +10,7 @@ endif
 
 	npm run build -- --prod
 
-node_modules/.auto: package.json # install/update dependencies if needed
+node_modules/.auto: package-lock.json # install/update dependencies if needed
 	npm i
 	@touch $@
 
