@@ -14,7 +14,6 @@ COMMIT_HASH ?= $(shell git rev-parse --short HEAD 2>/dev/null)
 BUILD_DATE ?= $(shell date +%FT%T%z)
 LDFLAGS += -X main.version=${VERSION} -X main.commitHash=${COMMIT_HASH} -X main.buildDate=${BUILD_DATE}
 export CGO_ENABLED ?= 0
-export GOOS = $(shell go env GOOS)
 ifeq (${VERBOSE}, 1)
 ifeq ($(filter -v,${GOARGS}),)
 	GOARGS += -v
@@ -70,9 +69,14 @@ bin/packr2-${PACKR_VERSION}: bin/gobin
 client-build: ## Build form client
 	@${MAKE} -C internal/cli/command/form/web build
 
-.PHONY: pre-build
-pre-build: client-build bin/packr2 ## Pre build bundles of static assets
+.PHONY: client-bundle
+client-bundle: bin/packr2 ## Bundle client assets
 	cd internal/cli/command/form && $(abspath bin/packr2)
+
+.PHONY: pre-build
+pre-build: ## Pre build bundles of static assets
+	@${MAKE} client-build
+	@${MAKE} client-bundle
 
 .PHONY: build
 build: ## Build a binary
