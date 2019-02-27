@@ -1,0 +1,17 @@
+.container {
+  max-width: 960px;
+  padding: 24px;
+  margin: 48px auto;
+}
+
+.logo {
+  height: 32px;
+  background: url('./logo.svg') no-repeat;
+  margin-bottom: 32px;
+}
+
+.error {
+  color: #D32F2F;
+  font-size: 1.3em;
+  white-space: pre-wrap;
+}

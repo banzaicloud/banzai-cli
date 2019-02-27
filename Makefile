@@ -29,9 +29,10 @@ GOTESTSUM_VERSION = 0.3.2
 LICENSEI_VERSION = 0.0.7
 GORELEASER_VERSION = 0.98.0
 GOBIN_VERSION = 0.0.4
-PACKR_VERSION = 2.0.1
+PACKR_VERSION = 2.0.2
 
 GOLANG_VERSION = 1.11
+NODE_VERSION = 11.10.0
 
 # Add the ability to override some variables
 # Use with care
@@ -66,12 +67,19 @@ bin/packr2-${PACKR_VERSION}: bin/gobin
 	GOBIN=bin/ bin/gobin github.com/gobuffalo/packr/v2/packr2@v${PACKR_VERSION}
 	@mv  bin/packr2 bin/packr2-${PACKR_VERSION}
 
-.PHONY: pre-build ## Pre build bundles of static assets
-pre-build: bin/packr2
+.PHONY: client-build
+client-build: ## Build form client
+ifneq (${IGNORE_NODE_VERSION_REQ}, 1)
+	@printf "${NODE_VERSION}\n$$(node --version | awk '{sub(/^v/, "", $$1);print $$1}')" | sort -t '.' -k 1,1 -k 2,2 -k 3,3 -g | head -1 | grep -q -E "^${NODE_VERSION}$$" || (printf "Required Node version is v${NODE_VERSION}\nInstalled: `node --version`\n" && exit 1)
+endif
+	cd internal/cli/command/form/web && npm i && npm run build -- --prod
+
+.PHONY: pre-build
+pre-build: client-build bin/packr2 ## Pre build bundles of static assets
 	cd internal/cli/command/form && $(abspath bin/packr2)
 
 .PHONY: build
-build: pre-build ## Build a binary
+build: ## Build a binary
 ifeq (${VERBOSE}, 1)
 	go env
 endif

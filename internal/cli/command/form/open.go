@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"path"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/gobuffalo/packr/v2"
@@ -63,7 +62,7 @@ func runOpen(_ cli.Cli, options openOptions) {
 	port := listener.Addr().(*net.TCPAddr).Port
 	log.Debugf("using port %d", port)
 
-	web := packr.New("web", path.Join(".", "web"))
+	web := packr.New("web", "./web/dist/web")
 	http.Handle("/", http.FileServer(web))
 	http.HandleFunc("/api/v1/form", createHandler(options))
 
