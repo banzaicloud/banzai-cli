@@ -36,7 +36,7 @@ GOLANG_VERSION = 1.11
 
 bin/packr2: bin/packr2-${PACKR_VERSION}
 	@ln -sf packr2-${PACKR_VERSION} bin/packr2
-bin/packr2-${PACKR_VERSION}: bin/gobin
+bin/packr2-${PACKR_VERSION}:
 	@mkdir -p bin
 ifeq (${OS}, Darwin)
 	curl -L https://github.com/gobuffalo/packr/releases/download/v${PACKR_VERSION}/packr_${PACKR_VERSION}_darwin_amd64.tar.gz | tar -zOxf - packr2 > ./bin/packr2-${PACKR_VERSION} && chmod +x ./bin/packr2-${PACKR_VERSION}
