@@ -5,8 +5,8 @@ jobs:
         docker:
             -
                 image: circleci/golang:1.11
-
-        working_directory: /go/src/github.com/banzaicloud/banzai-cli
+                environment:
+                    GOFLAGS: -mod=readonly
 
         steps:
             - checkout
@@ -19,30 +19,30 @@ jobs:
 
             -
                 restore_cache:
-                    name: Restore dependencies
+                    name: Restore Go module cache
                     keys:
-                        - gopkg-v1-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
-                        - gopkg-v1-{{ .Branch }}
-                        - gopkg-v1-master
-                        - gopkg-v1
+                        - gomod-v1-{{ .Branch }}-{{ checksum "go.sum" }}
+                        - gomod-v1-{{ .Branch }}
+                        - gomod-v1-master
+                        - gomod-v1
 
             -
                 run:
-                    name: Install dependencies
-                    command: make vendor
+                    name: Download Go module cache
+                    command: go mod download
 
             -
                 save_cache:
-                    name: Save dependencies
-                    key: gopkg-v1-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
+                    name: Save Go module cache
+                    key: gomod-v1-{{ .Branch }}-{{ checksum "go.sum" }}
                     paths:
-                        - vendor/
+                        - /go/pkg/mod
 
             -
                 restore_cache:
                     name: Restore license cache
                     keys:
-                        - licensei-v1-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
+                        - licensei-v1-{{ .Branch }}-{{ checksum "go.sum" }}
                         - licensei-v1-{{ .Branch }}
                         - licensei-v1-master
                         - licensei-v1
@@ -55,7 +55,7 @@ jobs:
             -
                 save_cache:
                     name: Save license cache
-                    key: licensei-v1-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
+                    key: licensei-v1-{{ .Branch }}-{{ checksum "go.sum" }}
                     paths:
                         - .licensei.cache
 
@@ -87,12 +87,6 @@ jobs:
                         - bin/
 
             -
-                persist_to_workspace:
-                    root: .
-                    paths:
-                        - vendor/
-
-            -
                 store_test_results:
                     path: build/test_results/
             -
@@ -103,6 +97,8 @@ jobs:
         docker:
             -
                 image: circleci/node:11
+                environment:
+                    GOFLAGS: -mod=readonly
 
         steps:
             - checkout
@@ -139,14 +135,21 @@ jobs:
             -
                 image: circleci/golang:1.11
 
-        working_directory: /go/src/github.com/banzaicloud/banzai-cli
-
         steps:
             - checkout
 
             -
                 attach_workspace:
                     at: .
+
+            -
+                restore_cache:
+                    name: Restore Go module cache
+                    keys:
+                        - gomod-v1-{{ .Branch }}-{{ checksum "go.sum" }}
+                        - gomod-v1-{{ .Branch }}
+                        - gomod-v1-master
+                        - gomod-v1
 
             -
                 run:

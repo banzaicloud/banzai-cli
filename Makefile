@@ -22,10 +22,9 @@ TEST_FORMAT = short-verbose
 endif
 
 # Dependency versions
-DEP_VERSION = 0.5.0
 GOLANGCI_VERSION = 1.12.2
 GOTESTSUM_VERSION = 0.3.2
-LICENSEI_VERSION = 0.0.7
+LICENSEI_VERSION = 0.1.0
 GORELEASER_VERSION = 0.98.0
 GOBIN_VERSION = 0.0.4
 PACKR_VERSION = 2.0.2
@@ -35,17 +34,6 @@ GOLANG_VERSION = 1.11
 # Add the ability to override some variables
 # Use with care
 -include override.mk
-
-bin/dep: bin/dep-${DEP_VERSION}
-	@ln -sf dep-${DEP_VERSION} bin/dep
-bin/dep-${DEP_VERSION}:
-	@mkdir -p bin
-	curl https://raw.githubusercontent.com/golang/dep/master/install.sh | INSTALL_DIRECTORY=bin DEP_RELEASE_TAG=v${DEP_VERSION} sh
-	@mv bin/dep $@
-
-.PHONY: vendor
-vendor: bin/dep ## Install dependencies
-	bin/dep ensure -v -vendor-only
 
 bin/gobin: bin/gobin-${GOBIN_VERSION}
 	@ln -sf gobin-${GOBIN_VERSION} bin/gobin
@@ -63,7 +51,7 @@ bin/packr2: bin/packr2-${PACKR_VERSION}
 bin/packr2-${PACKR_VERSION}: bin/gobin
 	@mkdir -p bin
 	GOBIN=bin/ bin/gobin github.com/gobuffalo/packr/v2/packr2@v${PACKR_VERSION}
-	@mv  bin/packr2 bin/packr2-${PACKR_VERSION}
+	@mv bin/packr2 bin/packr2-${PACKR_VERSION}
 
 .PHONY: client-build
 client-build: ## Build form client
