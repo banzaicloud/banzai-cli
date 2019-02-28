@@ -4,7 +4,7 @@ jobs:
     build:
         docker:
             -
-                image: circleci/golang:1.11
+                image: circleci/golang:1.12
                 environment:
                     GOFLAGS: -mod=readonly
 
@@ -131,7 +131,7 @@ jobs:
     release:
         docker:
             -
-                image: circleci/golang:1.11
+                image: circleci/golang:1.12
                 environment:
                     GOFLAGS: -mod=readonly
 
