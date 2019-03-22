@@ -134,6 +134,7 @@ jobs:
                 image: circleci/golang:1.12
                 environment:
                     GOFLAGS: -mod=readonly
+                    GO111MODULE: on
 
         steps:
             - checkout
@@ -155,11 +156,6 @@ jobs:
                 run:
                     name: Bundle assets
                     command: make client-bundle
-
-            -
-                run:
-                    name: Fix packr2 issue
-                    command: sed -i internal/cli/command/form/form-packr.go -e "s|home/circleci/project|github.com/banzaicloud/banzai-cli|"
 
             -
                 run:
