@@ -23,8 +23,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/banzaicloud/pipeline/client"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -65,9 +65,9 @@ var clusterGetCmd = &cobra.Command{
 }
 
 func ClusterGet(cmd *cobra.Command, args []string) {
-	pipeline := InitPipeline()
+	client := InitPipeline()
 	orgId := GetOrgId(true)
-	clusters, _, err := pipeline.ClustersApi.ListClusters(context.Background(), orgId)
+	clusters, _, err := client.ClustersApi.ListClusters(context.Background(), orgId)
 	if err != nil {
 		cli.LogAPIError("list clusters", err, orgId)
 		log.Fatalf("could not list clusters: %v", err)
@@ -82,13 +82,13 @@ func ClusterGet(cmd *cobra.Command, args []string) {
 	if id == 0 {
 		log.Fatalf("cluster %q could not be found", args[0])
 	}
-	cluster, _, err := pipeline.ClustersApi.GetCluster(context.Background(), orgId, id)
+	cluster, _, err := client.ClustersApi.GetCluster(context.Background(), orgId, id)
 	if err != nil {
 		cli.LogAPIError("get cluster", err, id)
 		log.Fatalf("could not get cluster: %v", err)
 	}
 	type details struct {
-		client.GetClusterStatusResponse
+		pipeline.GetClusterStatusResponse
 	}
 	detailed := details{GetClusterStatusResponse: cluster}
 

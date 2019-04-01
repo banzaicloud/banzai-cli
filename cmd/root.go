@@ -20,10 +20,10 @@ import (
 	"os"
 	"path"
 
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command"
 	"github.com/banzaicloud/banzai-cli/pkg/formatting"
-	"github.com/banzaicloud/pipeline/client"
 	"github.com/goph/emperror"
 	"github.com/mattn/go-isatty"
 	"github.com/mitchellh/go-homedir"
@@ -157,15 +157,15 @@ func WriteConfig() error {
 	return nil
 }
 
-func InitPipeline() *client.APIClient {
-	config := client.NewConfiguration()
+func InitPipeline() *pipeline.APIClient {
+	config := pipeline.NewConfiguration()
 	config.BasePath = viper.GetString("pipeline.basepath")
 	config.UserAgent = "banzai-cli/1.0.0/go"
 	config.HTTPClient = oauth2.NewClient(nil, oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: viper.GetString("pipeline.token")},
 	))
 
-	return client.NewAPIClient(config)
+	return pipeline.NewAPIClient(config)
 }
 
 func Out(data interface{}, fields []string) {
@@ -192,7 +192,7 @@ func Out(data interface{}, fields []string) {
 }
 
 func logAPIError(action string, err error, request interface{}) {
-	if err, ok := err.(client.GenericOpenAPIError); ok {
+	if err, ok := err.(pipeline.GenericOpenAPIError); ok {
 		log.Printf("failed to %s: %v (err %[2]T, request=%+v, response=%s)", action, err, request, err.Body())
 	} else {
 		log.Printf("failed to %s: %v", action, err)
