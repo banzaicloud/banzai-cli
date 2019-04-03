@@ -18,10 +18,10 @@ import (
 	"context"
 
 	"github.com/antihax/optional"
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/format"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
-	"github.com/banzaicloud/pipeline/client"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -59,7 +59,7 @@ func runList(banzaiCli cli.Cli, options listOptions) {
 	if options.secretType != "" {
 		typeFilter = optional.NewString(options.secretType)
 	}
-	secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &client.GetSecretsOpts{Type_: typeFilter})
+	secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{Type_: typeFilter})
 	if err != nil {
 		// TODO: review log usage
 		log.Fatalf("could not list secrets: %v", err)

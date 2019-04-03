@@ -20,8 +20,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/pkg/formatting"
-	"github.com/banzaicloud/pipeline/client"
 	"github.com/mattn/go-isatty"
 	"github.com/spf13/viper"
 	"golang.org/x/oauth2"
@@ -33,15 +33,15 @@ var rootOptions struct {
 	Output  string
 }
 
-func InitPipeline() *client.APIClient {
-	config := client.NewConfiguration()
+func InitPipeline() *pipeline.APIClient {
+	config := pipeline.NewConfiguration()
 	config.BasePath = viper.GetString("pipeline.basepath")
 	config.UserAgent = "banzai-cli/1.0.0/go"
 	config.HTTPClient = oauth2.NewClient(nil, oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: viper.GetString("pipeline.token")},
 	))
 
-	return client.NewAPIClient(config)
+	return pipeline.NewAPIClient(config)
 }
 
 func Out1(data interface{}, fields []string) {

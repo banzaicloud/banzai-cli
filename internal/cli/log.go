@@ -15,14 +15,13 @@
 package cli
 
 import (
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	log "github.com/sirupsen/logrus"
-
-	"github.com/banzaicloud/pipeline/client"
 )
 
 // LogAPIError logs API request errors.
 func LogAPIError(action string, err error, request interface{}) {
-	if err, ok := err.(client.GenericOpenAPIError); ok {
+	if err, ok := err.(pipeline.GenericOpenAPIError); ok {
 		log.Errorf("failed to %s: %v (err %[2]T, request=%+v, response=%s)", action, err, request, err.Body())
 	} else {
 		log.Errorf("failed to %s: %v", action, err)

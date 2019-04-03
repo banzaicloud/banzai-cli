@@ -12,7 +12,7 @@ BUILD_PACKAGE = ${PACKAGE}/cmd/banzai
 VERSION ?= $(shell git describe --tags --exact-match 2>/dev/null || git symbolic-ref -q --short HEAD)
 COMMIT_HASH ?= $(shell git rev-parse --short HEAD 2>/dev/null)
 BUILD_DATE ?= $(shell date +%FT%T%z)
-LDFLAGS += -X main.version=${VERSION} -X main.commitHash=${COMMIT_HASH} -X main.buildDate=${BUILD_DATE}
+LDFLAGS += -X main.version=${VERSION} -X main.commitHash=${COMMIT_HASH} -X main.buildDate=${BUILD_DATE} -X main.pipelineVersion=${PIPELINE_VERSION}
 export CGO_ENABLED ?= 0
 ifeq (${VERBOSE}, 1)
 ifeq ($(filter -v,${GOARGS}),)
@@ -21,12 +21,15 @@ endif
 TEST_FORMAT = short-verbose
 endif
 
+PIPELINE_VERSION = 0.15.4
+
 # Dependency versions
 GOTESTSUM_VERSION = 0.3.3
 GOLANGCI_VERSION = 1.15.0
 LICENSEI_VERSION = 0.1.0
 GORELEASER_VERSION = 0.98.0
 PACKR_VERSION = 2.0.8
+OPENAPI_GENERATOR_VERSION = PR1869
 
 GOLANG_VERSION = 1.12
 
@@ -122,6 +125,17 @@ license-check: bin/licensei ## Run license check
 .PHONY: license-cache
 license-cache: bin/licensei ## Generate license cache
 	bin/licensei cache
+
+.PHONY: generate-pipeline-client
+generate-pipeline-client: ## Generate client from Pipeline OpenAPI spec
+	curl https://raw.githubusercontent.com/banzaicloud/pipeline/${PIPELINE_VERSION}/docs/openapi/pipeline.yaml | sed "s/version: .*/version: ${PIPELINE_VERSION}/" > pipeline-openapi.yaml
+	rm -rf .gen/pipeline
+	docker run --rm -v ${PWD}:/local banzaicloud/openapi-generator-cli:${OPENAPI_GENERATOR_VERSION} generate \
+	--additional-properties packageName=pipeline \
+	--additional-properties withGoCodegenComment=true \
+	-i /local/pipeline-openapi.yaml \
+	-g go \
+	-o /local/.gen/pipeline
 
 bin/goreleaser: bin/goreleaser-${GORELEASER_VERSION}
 	@ln -sf goreleaser-${GORELEASER_VERSION} bin/goreleaser

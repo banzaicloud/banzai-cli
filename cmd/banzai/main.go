@@ -22,9 +22,10 @@ var (
 	version    string
 	commitHash string
 	buildDate  string
+	pipelineVersion string
 )
 
 func main() {
-	cmd.Init(version, commitHash, buildDate)
+	cmd.Init(version, commitHash, buildDate, pipelineVersion)
 	cmd.Execute()
 }

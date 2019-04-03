@@ -15,12 +15,12 @@
 package cli
 
 import (
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"io"
 	"os"
 	"path"
 	"sync"
 
-	"github.com/banzaicloud/pipeline/client"
 	"github.com/goph/emperror"
 	"github.com/mattn/go-isatty"
 	"github.com/mitchellh/go-homedir"
@@ -34,7 +34,7 @@ const orgIdKey = "organization.id"
 type Cli interface {
 	Out() io.Writer
 	Color() bool
-	Client() *client.APIClient
+	Client() *pipeline.APIClient
 	Context() Context
 }
 
@@ -46,7 +46,7 @@ type Context interface {
 type banzaiCli struct {
 	out        io.Writer
 	ctx        Context
-	client     *client.APIClient
+	client     *pipeline.APIClient
 	clientOnce sync.Once
 }
 
@@ -77,16 +77,16 @@ func (c *banzaiCli) Interactive() bool {
 	return viper.GetBool("formatting.force-interactive")
 }
 
-func (c *banzaiCli) Client() *client.APIClient {
+func (c *banzaiCli) Client() *pipeline.APIClient {
 	c.clientOnce.Do(func() {
-		config := client.NewConfiguration()
+		config := pipeline.NewConfiguration()
 		config.BasePath = viper.GetString("pipeline.basepath")
 		config.UserAgent = "banzai-cli/1.0.0/go"
 		config.HTTPClient = oauth2.NewClient(nil, oauth2.StaticTokenSource(
 			&oauth2.Token{AccessToken: viper.GetString("pipeline.token")},
 		))
 
-		c.client = client.NewAPIClient(config)
+		c.client = pipeline.NewAPIClient(config)
 	})
 
 	return c.client

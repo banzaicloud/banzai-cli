@@ -26,8 +26,8 @@ import (
 const orgIdKey = "organization.id"
 
 func searchOrganizationId(name string) int32 {
-	pipeline := InitPipeline()
-	orgs, _, err := pipeline.OrganizationsApi.ListOrgs(context.Background())
+	client := InitPipeline()
+	orgs, _, err := client.OrganizationsApi.ListOrgs(context.Background())
 	if err != nil {
 		cli.LogAPIError("list organizations", err, nil)
 		return 0

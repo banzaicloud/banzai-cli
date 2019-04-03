@@ -23,9 +23,9 @@ import (
 	"strings"
 
 	"github.com/antihax/optional"
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
-	"github.com/banzaicloud/pipeline/client"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -62,7 +62,7 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 func runCreate(banzaiCli cli.Cli, options createOptions) {
 	orgID := input.GetOrganization(banzaiCli)
 
-	out := client.CreateClusterRequest{}
+	out := pipeline.CreateClusterRequest{}
 
 	if isInteractive() {
 		var content string
@@ -104,10 +104,10 @@ func runCreate(banzaiCli cli.Cli, options createOptions) {
 				cloud    string
 				property interface{}
 			}{
-				"acsk": {cloud: "alibaba", property: new(client.CreateAkcsPropertiesAkcs)},
-				"aks":  {cloud: "azure", property: new(client.CreateAksPropertiesAks)},
-				"eks":  {cloud: "amazon", property: new(client.CreateEksPropertiesEks)},
-				"gke":  {cloud: "google", property: new(client.CreateEksPropertiesEks)},
+				"acsk": {cloud: "alibaba", property: new(pipeline.CreateAckPropertiesAcsk)},
+				"aks":  {cloud: "azure", property: new(pipeline.CreateAksPropertiesAks)},
+				"eks":  {cloud: "amazon", property: new(pipeline.CreateEksPropertiesEks)},
+				"gke":  {cloud: "google", property: new(pipeline.CreateEksPropertiesEks)},
 				"oke":  {cloud: "oracle", property: map[string]interface{}{}},
 			}
 
@@ -127,7 +127,7 @@ func runCreate(banzaiCli cli.Cli, options createOptions) {
 			}
 		}
 		if out.SecretId == "" && out.SecretName == "" {
-			secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &client.GetSecretsOpts{Type_: optional.NewString(out.Cloud)})
+			secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{Type_: optional.NewString(out.Cloud)})
 
 			if err != nil {
 				log.Errorf("could not list secrets: %v", err)
@@ -215,5 +215,5 @@ func validateClusterCreateRequest(val interface{}) error {
 	decoder := json.NewDecoder(strings.NewReader(str))
 	decoder.DisallowUnknownFields()
 
-	return emperror.Wrap(decoder.Decode(&client.CreateClusterRequest{}), "not a valid JSON request")
+	return emperror.Wrap(decoder.Decode(&pipeline.CreateClusterRequest{}), "not a valid JSON request")
 }

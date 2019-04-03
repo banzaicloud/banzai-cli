@@ -19,10 +19,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/format"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
-	"github.com/banzaicloud/pipeline/client"
 	"github.com/goph/emperror"
 	"github.com/spf13/cobra"
 )
@@ -68,7 +68,7 @@ func runGet(banzaiCli cli.Cli, options getOptions) error {
 	orgID := input.GetOrganization(banzaiCli)
 	id := options.id
 	if id == "" {
-		secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &client.GetSecretsOpts{})
+		secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{})
 		if err != nil {
 			return emperror.Wrap(err, "could not list secrets")
 		}
