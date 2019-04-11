@@ -182,11 +182,20 @@ func runCreate(banzaiCli cli.Cli, options createOptions) {
 		if !create {
 			log.Fatal("cluster creation cancelled")
 		}
-	} else {
-		// non-tty: read stdin
-		raw, err := ioutil.ReadAll(os.Stdin)
+	} else { // non-interactive
+		var raw []byte
+		var err error
+		filename := options.file
+
+		if filename != "" {
+			raw, err = ioutil.ReadFile(filename)
+		} else {
+			raw, err = ioutil.ReadAll(os.Stdin)
+			filename = "stdin"
+		}
+
 		if err != nil {
-			log.Fatalf("failed to read stdin: %v", err)
+			log.Fatalf("failed to read %s: %v", filename, err)
 		}
 
 		if err := unmarshal(raw, &out); err != nil {
