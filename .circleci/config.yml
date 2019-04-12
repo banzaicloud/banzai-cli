@@ -134,7 +134,9 @@ jobs:
                 image: circleci/golang:1.12
                 environment:
                     GOFLAGS: -mod=readonly
-                    GO111MODULE: on
+
+                    # Required for packr
+                    GO111MODULE: "on"
 
         steps:
             - checkout
@@ -164,7 +166,7 @@ jobs:
 
 workflows:
     version: 2
-    build:
+    ci:
         jobs:
             -
                 build:
