@@ -26,6 +26,8 @@ import (
 // AddCommands adds all the commands from cli/command to the root command
 func AddCommands(cmd *cobra.Command, banzaiCli cli.Cli) {
 	cmd.AddCommand(
+		NewLoginCommand(banzaiCli),
+
 		cluster.NewClusterCommand(banzaiCli),
 		form.NewFormCommand(banzaiCli),
 		organization.NewOrganizationCommand(banzaiCli),

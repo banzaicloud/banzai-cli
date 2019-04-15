@@ -15,30 +15,22 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path"
 
-	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command"
-	"github.com/banzaicloud/banzai-cli/pkg/formatting"
-	"github.com/goph/emperror"
-	"github.com/mattn/go-isatty"
 	"github.com/mitchellh/go-homedir"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"golang.org/x/oauth2"
-	"gopkg.in/yaml.v2"
 )
 
 var rootOptions struct {
 	CfgFile string
 	Output  string
 }
-var BanzaiContext string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -107,20 +99,6 @@ func init() {
 	command.AddCommands(rootCmd, cli)
 }
 
-func isColor() bool {
-	if isatty.IsTerminal(os.Stdout.Fd()) {
-		return !viper.GetBool("formatting.no-color")
-	}
-	return viper.GetBool("formatting.force-color")
-}
-
-func isInteractive() bool {
-	if isatty.IsTerminal(os.Stdout.Fd()) && isatty.IsTerminal(os.Stdin.Fd()) {
-		return !viper.GetBool("formatting.no-interactive")
-	}
-	return viper.GetBool("formatting.force-interactive")
-}
-
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	if rootOptions.CfgFile != "" {
@@ -145,65 +123,5 @@ func initConfig() {
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		log.Debug("Using config file:", viper.ConfigFileUsed())
-	}
-}
-
-// WriteConfig write config to existing or default file
-func WriteConfig() error {
-	log.Debug("writing config")
-	if err := viper.WriteConfig(); err != nil {
-		log.Infof("failed to write config: %v", err)
-		home, _ := homedir.Dir()
-		configPath := path.Join(home, ".banzai")
-		os.MkdirAll(configPath, os.ModePerm)
-		configPath = path.Join(configPath, "config.yaml")
-		if err := viper.WriteConfigAs(configPath); err != nil {
-			return emperror.Wrap(err, "failed to write config")
-		} else {
-			log.Infof("config created at %v", configPath)
-		}
-	}
-	return nil
-}
-
-func InitPipeline() *pipeline.APIClient {
-	config := pipeline.NewConfiguration()
-	config.BasePath = viper.GetString("pipeline.basepath")
-	config.UserAgent = "banzai-cli/1.0.0/go"
-	config.HTTPClient = oauth2.NewClient(nil, oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: viper.GetString("pipeline.token")},
-	))
-
-	return pipeline.NewAPIClient(config)
-}
-
-func Out(data interface{}, fields []string) {
-	switch rootOptions.Output {
-	case "json":
-		bytes, err := json.MarshalIndent(data, "", "  ")
-		if err != nil {
-			log.Fatalf("can't marshal output: %v", err)
-		}
-		fmt.Printf("%s\n", bytes)
-
-	case "yaml":
-		bytes, err := yaml.Marshal(data)
-		if err != nil {
-			log.Fatalf("can't marshal output: %v", err)
-		}
-		fmt.Printf("%s\n", bytes)
-
-	default:
-		table := formatting.NewTable(data, fields)
-		out := table.Format(isColor())
-		fmt.Println(out)
-	}
-}
-
-func logAPIError(action string, err error, request interface{}) {
-	if err, ok := err.(pipeline.GenericOpenAPIError); ok {
-		log.Printf("failed to %s: %v (err %[2]T, request=%+v, response=%s)", action, err, request, err.Body())
-	} else {
-		log.Printf("failed to %s: %v", action, err)
 	}
 }
