@@ -19,6 +19,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"path/filepath"
 	"sync"
 
 	"github.com/goph/emperror"
@@ -34,6 +35,7 @@ const orgIdKey = "organization.id"
 type Cli interface {
 	Out() io.Writer
 	Color() bool
+	Interactive() bool
 	Client() *pipeline.APIClient
 	Context() Context
 }
@@ -111,16 +113,38 @@ func (c *banzaiContext) SetOrganizationID(id int32) {
 func (c *banzaiContext) save() {
 	log.Debug("writing config")
 
-	if err := viper.WriteConfig(); err != nil {
-		log.Infof("failed to write config: %v", err)
+	if viper.ConfigFileUsed() == "" {
+		log.Debug("no config file defined, falling back to default location $HOME/.banzai")
+
 		home, _ := homedir.Dir()
 		configPath := path.Join(home, ".banzai")
-		os.MkdirAll(configPath, os.ModePerm)
-		configPath = path.Join(configPath, "config.yaml")
-		if err := viper.WriteConfigAs(configPath); err != nil {
-			log.Fatal(emperror.Wrap(err, "failed to write config"))
-		} else {
-			log.Infof("config created at %v", configPath)
+		err := os.MkdirAll(configPath, os.ModePerm)
+		if err != nil {
+			log.Fatal(emperror.Wrap(err, "failed to create config dir"))
 		}
+
+		configPath = path.Join(configPath, "config.yaml")
+		err = viper.WriteConfigAs(configPath)
+		if err != nil {
+			log.Fatal(emperror.Wrap(err, "failed to write config"))
+		}
+
+		log.Infof("config created at %v", configPath)
+		return
+	}
+
+	if _, err := os.Stat(filepath.Dir(viper.ConfigFileUsed())); os.IsNotExist(err) {
+		log.Debug("creating config dir")
+
+		configPath := filepath.Dir(viper.ConfigFileUsed())
+		err := os.MkdirAll(configPath, os.ModePerm)
+		if err != nil {
+			log.Fatal(emperror.Wrap(err, "failed to create config dir"))
+		}
+	}
+
+	err := viper.WriteConfig()
+	if err != nil {
+		log.Fatalf("failed to write config: %v", err)
 	}
 }
