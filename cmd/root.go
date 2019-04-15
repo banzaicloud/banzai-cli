@@ -126,6 +126,9 @@ func initConfig() {
 	if rootOptions.CfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(rootOptions.CfgFile)
+	} else if envCfg := os.Getenv("BANZAICONFIG"); envCfg != "" {
+		// Use config file from BANZAICONFIG env var.
+		viper.SetConfigFile(envCfg)
 	} else {
 		// Find home directory.
 		home, err := homedir.Dir()
