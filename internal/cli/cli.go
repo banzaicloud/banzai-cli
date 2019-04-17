@@ -137,7 +137,7 @@ func (c *banzaiContext) save() {
 		log.Debug("creating config dir")
 
 		configPath := filepath.Dir(viper.ConfigFileUsed())
-		err := os.MkdirAll(configPath, os.ModePerm)
+		err := os.MkdirAll(configPath, 0700)
 		if err != nil {
 			log.Fatal(emperror.Wrap(err, "failed to create config dir"))
 		}
