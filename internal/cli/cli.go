@@ -123,7 +123,7 @@ func (c *banzaiContext) save() {
 			log.Fatal(emperror.Wrap(err, "failed to create config dir"))
 		}
 
-		configPath = path.Join(configPath, "config.yaml")
+		configPath = filepath.Join(configPath, "config.yaml")
 		err = viper.WriteConfigAs(configPath)
 		if err != nil {
 			log.Fatal(emperror.Wrap(err, "failed to write config"))
