@@ -20,6 +20,7 @@ Usage:
 
 Available Commands:
   cluster      Manage clusters
+  controlplane Manage controlplane
   form         Open forms from config, persist provided values and generate templates
   help         Help about any command
   login        Configure and log in to a Banzai Cloud context
