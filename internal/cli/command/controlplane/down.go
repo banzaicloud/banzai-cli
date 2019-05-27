@@ -41,7 +41,7 @@ func NewDownCommand() *cobra.Command {
 
 	flags := cmd.Flags()
 
-	flags.StringVarP(&options.file, "file", "f", "", "Control Plane descriptor file")
+	flags.StringVarP(&options.file, "file", "f", "values.yaml", "Control Plane descriptor file")
 
 	return cmd
 }
