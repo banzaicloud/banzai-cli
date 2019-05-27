@@ -214,11 +214,24 @@ func ClusterShell(cmd *cobra.Command, args []string) {
 		commandArgs = args[1:]
 	}
 
+	org, _, err := pipeline.OrganizationsApi.GetOrg(context.Background(), orgId)
+	if err != nil {
+		log.Fatalf("could not get organization: %v", err)
+	}
+
 	log.Printf("Running %v %v", shell, strings.Join(args, " "))
 	c := exec.Command(shell, commandArgs...)
 	c.Stdin = os.Stdin
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
+	c.Env = append(
+		os.Environ(),
+		fmt.Sprintf("BANZAI_CURRENT_ORG_ID=%d", orgId),
+		fmt.Sprintf("BANZAI_CURRENT_ORG_NAME=%s", org.Name),
+		fmt.Sprintf("BANZAI_CURRENT_CLUSTER_ID=%d", id),
+		fmt.Sprintf("BANZAI_CURRENT_CLUSTER_NAME=%s", cluster.Name),
+	)
+
 	if err := c.Run(); err != nil {
 		log.Errorf("Failed to run command: %v", err)
 	}
