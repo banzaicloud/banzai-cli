@@ -184,11 +184,6 @@ func ClusterShell(cmd *cobra.Command, args []string) {
 		log.Fatalf("could not close temporary file: %v", err)
 	}
 
-	// customize shell prompt
-	os.Setenv("PS1", fmt.Sprintf("[%s]$ ", chalk.Bold.TextStyle(cluster.Name)))
-	// export the temporary config file's name for k8s commands
-	os.Setenv("KUBECONFIG", tmpfile.Name())
-
 	var commandArgs []string
 	shell := os.Getenv("SHELL")
 	if shell == "" {
@@ -214,11 +209,30 @@ func ClusterShell(cmd *cobra.Command, args []string) {
 		commandArgs = args[1:]
 	}
 
+	org, _, err := pipeline.OrganizationsApi.GetOrg(context.Background(), orgId)
+	if err != nil {
+		log.Fatalf("could not get organization: %v", err)
+	}
+
 	log.Printf("Running %v %v", shell, strings.Join(args, " "))
 	c := exec.Command(shell, commandArgs...)
 	c.Stdin = os.Stdin
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
+	c.Env = append(
+		os.Environ(),
+		// customize shell prompt
+		fmt.Sprintf("PS1=[%s]$ ", chalk.Bold.TextStyle(cluster.Name)),
+
+		// export the temporary config file's name for k8s commands
+		fmt.Sprintf("KUBECONFIG=%s", tmpfile.Name()),
+
+		fmt.Sprintf("BANZAI_CURRENT_ORG_ID=%d", orgId),
+		fmt.Sprintf("BANZAI_CURRENT_ORG_NAME=%s", org.Name),
+		fmt.Sprintf("BANZAI_CURRENT_CLUSTER_ID=%d", id),
+		fmt.Sprintf("BANZAI_CURRENT_CLUSTER_NAME=%s", cluster.Name),
+	)
+
 	if err := c.Run(); err != nil {
 		log.Errorf("Failed to run command: %v", err)
 	}
