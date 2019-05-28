@@ -79,6 +79,7 @@ func init() {
 
 	flags.Int32("organization", 0, "organization id")
 	_ = viper.BindPFlag("organization.id", flags.Lookup("organization"))
+	viper.BindEnv("organization.id", "BANZAI_CURRENT_ORG_ID")
 
 	flags.Bool("no-color", false, "never display color output")
 	_ = viper.BindPFlag("formatting.no-color", flags.Lookup("no-color"))
@@ -117,8 +118,6 @@ func initConfig() {
 		viper.AddConfigPath(path.Join(home, ".banzai"))
 		viper.SetConfigName("config")
 	}
-
-	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
