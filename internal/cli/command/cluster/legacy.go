@@ -279,5 +279,6 @@ func GetClusterId(org int32, ask bool) int32 {
 func init() {
 	clusterShellCmd.PersistentFlags().Int32("cluster", 0, "cluster id")
 	viper.BindPFlag(clusterIdKey, clusterShellCmd.PersistentFlags().Lookup("cluster"))
+	viper.BindEnv(clusterIdKey, "BANZAI_CURRENT_CLUSTER_ID")
 	clusterShellCmd.PersistentFlags().StringVar(&clusterOptions.Name, "cluster-name", "", "cluster name")
 }
