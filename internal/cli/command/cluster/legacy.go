@@ -17,14 +17,17 @@ package cluster
 import (
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/goph/emperror"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -153,7 +156,29 @@ var clusterShellCmd = &cobra.Command{
 	Run:     ClusterShell,
 }
 
+func writeConfig(ctx context.Context, client *pipeline.APIClient, orgId, id int32, tmpfile io.WriteCloser) (retry bool, err error) {
+	config, response, clusterErr := client.ClustersApi.GetClusterConfig(ctx, orgId, id)
+	if clusterErr != nil {
+		retry = response.StatusCode == 400
+		err = emperror.Wrap(clusterErr, "could not get cluster config")
+		return
+	}
+
+	if _, err = tmpfile.Write([]byte(config.Data)); err != nil {
+		err = emperror.Wrap(err, "could not write temporary file")
+		return
+	}
+
+	if err = tmpfile.Close(); err != nil {
+		err = emperror.Wrap(err, "could not close temporary file")
+	}
+	return
+}
+
 func ClusterShell(cmd *cobra.Command, args []string) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	pipeline := InitPipeline()
 	orgId := GetOrgId(true)
 	id := GetClusterId(orgId, true)
@@ -161,14 +186,9 @@ func ClusterShell(cmd *cobra.Command, args []string) {
 		log.Fatalf("no cluster selected")
 	}
 
-	cluster, _, err := pipeline.ClustersApi.GetCluster(context.Background(), orgId, id)
+	cluster, _, err := pipeline.ClustersApi.GetCluster(ctx, orgId, id)
 	if err != nil {
 		log.Fatalf("could not get cluster details: %v", err)
-	}
-
-	config, _, err := pipeline.ClustersApi.GetClusterConfig(context.Background(), orgId, id)
-	if err != nil {
-		log.Fatalf("could not get cluster config: %v", err)
 	}
 
 	tmpfile, err := ioutil.TempFile("", "kubeconfig") // mode is 0600 by default
@@ -177,21 +197,15 @@ func ClusterShell(cmd *cobra.Command, args []string) {
 	}
 	defer os.Remove(tmpfile.Name())
 
-	if _, err := tmpfile.Write([]byte(config.Data)); err != nil {
-		log.Fatalf("could not write temporary file: %v", err)
-	}
-	if err := tmpfile.Close(); err != nil {
-		log.Fatalf("could not close temporary file: %v", err)
-	}
-
 	var commandArgs []string
 	shell := os.Getenv("SHELL")
 	if shell == "" {
 		shell = "sh"
 	}
 
-	if len(args) == 0 {
-		// run interactive shell
+	interactive := len(args) == 0
+
+	if interactive {
 		switch path.Base(shell) {
 		case "zsh": // zsh (at least my config) overrides PS1 :(
 			fallthrough
@@ -209,7 +223,35 @@ func ClusterShell(cmd *cobra.Command, args []string) {
 		commandArgs = args[1:]
 	}
 
-	org, _, err := pipeline.OrganizationsApi.GetOrg(context.Background(), orgId)
+	retry, err := writeConfig(ctx, pipeline, orgId, id, tmpfile)
+	if err != nil {
+		if !interactive || !retry {
+			log.Fatalf("%v", err)
+		}
+
+		go func() {
+			for {
+				retry, err := writeConfig(ctx, pipeline, orgId, id, tmpfile)
+				if err != nil {
+					if !retry {
+						log.Fatalf("%v", err)
+					}
+					log.Warningf("cluster config is still not available. retrying in 30 seconds")
+				} else {
+					log.Infof("cluster config successfully written")
+					return
+				}
+
+				select {
+				case <-time.After(30 * time.Second):
+				case <-ctx.Done():
+					return
+				}
+			}
+		}()
+	}
+
+	org, _, err := pipeline.OrganizationsApi.GetOrg(ctx, orgId)
 	if err != nil {
 		log.Fatalf("could not get organization: %v", err)
 	}
