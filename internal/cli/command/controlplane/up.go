@@ -16,6 +16,7 @@ package controlplane
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -23,6 +24,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/goph/emperror"
 	"github.com/mattn/go-isatty"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -42,21 +44,21 @@ func NewUpCommand() *cobra.Command {
 		Use:     "up",
 		Aliases: []string{"c"},
 		Short:   "Create a controlplane",
-		Long:    "Create controlplane based on json stdin or interactive session",
+		Long:    "Create controlplane based on json stdin or interactive session in the current Kubernetes context. The current working directory will be used for storing the applied configuration and deployment status.",
 		Args:    cobra.NoArgs,
-		Run: func(cmd *cobra.Command, args []string) {
-			runUp(options)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runUp(options)
 		},
 	}
 
 	flags := cmd.Flags()
 
-	flags.StringVarP(&options.file, "file", "f", "values.yaml", "Control Plane descriptor file")
+	flags.StringVarP(&options.file, "file", "f", valuesDefault, "Input control plane descriptor file")
 
 	return cmd
 }
 
-func runUp(options createOptions) {
+func runUp(options createOptions) error {
 	var out map[string]interface{}
 
 	filename := options.file
@@ -69,8 +71,8 @@ func runUp(options createOptions) {
 				_ = survey.AskOne(
 					&survey.Input{
 						Message: "Load a JSON or YAML file:",
-						Default: "values.yaml",
-						Help:    "Give either a relative or an absolute path to a file containing a JSON or YAML Control Plane creation descriptor. Leave empty to cancel.",
+						Default: valuesDefault,
+						Help:    "Give either a relative or an absolute path to a file containing a JSON or YAML control plane descriptor. Leave empty to cancel.",
 					},
 					&filename,
 					nil,
@@ -89,7 +91,7 @@ func runUp(options createOptions) {
 				continue
 			} else {
 				if err := unmarshal(raw, &out); err != nil {
-					log.Fatalf("failed to parse control plane descriptor: %v", err)
+					return emperror.Wrap(err, "failed to parse control plane descriptor")
 				}
 
 				break
@@ -112,7 +114,8 @@ func runUp(options createOptions) {
 			}
 
 			_ = survey.AskOne(&survey.Editor{Message: "controlplane descriptor:", Default: content, HideDefault: true, AppendDefault: true}, &content, nil)
-			if err := json.Unmarshal([]byte(content), &out); err != nil {
+			out = make(map[string]interface{})
+			if err := unmarshal([]byte(content), &out); err != nil {
 				log.Errorf("can't parse descriptor: %v", err)
 			}
 		}
@@ -128,7 +131,7 @@ func runUp(options createOptions) {
 		)
 
 		if !create {
-			log.Fatal("controlplane creation cancelled")
+			return errors.New("controlplane creation cancelled")
 		}
 	} else { // non-interactive
 		var raw []byte
@@ -142,19 +145,56 @@ func runUp(options createOptions) {
 		}
 
 		if err != nil {
-			log.Fatalf("failed to read %s: %v", filename, err)
+			return emperror.Wrapf(err, "failed to read %q", filename)
 		}
 
 		if err := unmarshal(raw, &out); err != nil {
-			log.Fatalf("failed to parse controlplane descriptor: %v", err)
+			return emperror.Wrap(err, "failed to parse controlplane descriptor")
 		}
 	}
 
-	log.Info("controlplane is being created")
-
-	if err := runInternal("apply", filename); err != nil {
-		log.Fatalf("controlplane creation failed: %v", err)
+	// create temp dir for the files to attach
+	dir, err := ioutil.TempDir(".", "tmp")
+	if err != nil {
+		return emperror.Wrap(err, "failed to create temporary directory")
 	}
+	defer os.RemoveAll(dir)
+
+	// write values to temp file
+	values, err := json.MarshalIndent(out, "", "  ")
+	if err != nil {
+		return emperror.Wrap(err, "failed to masrshal values file")
+	}
+
+	valuesName, err := filepath.Abs(filepath.Join(dir, "values"))
+	if err != nil {
+		return emperror.Wrap(err, "failed to construct values file name")
+	}
+
+	if err := ioutil.WriteFile(valuesName, values, 0600); err != nil {
+		return emperror.Wrapf(err, "failed to write temporary file %q", valuesName)
+	}
+
+	if err := ioutil.WriteFile(filename, values, 0600); err != nil {
+		return emperror.Wrapf(err, "failed to write values.yaml file %q", filename)
+	}
+
+	kubeconfigName, err := filepath.Abs(filepath.Join(dir, "kubeconfig"))
+	if err != nil {
+		return emperror.Wrap(err, "failed to construct kubeconfig file name")
+	}
+
+	if err := copyKubeconfig(kubeconfigName); err != nil {
+		return emperror.Wrap(err, "failed to copy Kubeconfig")
+	}
+
+	tfdir, err := filepath.Abs("./.tfstate")
+	if err != nil {
+		return emperror.Wrap(err, "failed to construct tfstate directory path")
+	}
+
+	log.Info("controlplane is being created")
+	return emperror.Wrap(runInternal("apply", valuesName, kubeconfigName, tfdir), "controlplane creation failed")
 }
 
 func isInteractive() bool {
@@ -164,22 +204,7 @@ func isInteractive() bool {
 	return viper.GetBool("formatting.force-interactive")
 }
 
-func runInternal(command, valuesFile string) error {
-
-	kubeconfig := os.Getenv("KUBECONFIG")
-	if kubeconfig == "" {
-		kubeconfig = os.Getenv("HOME") + "/.kube/config"
-	}
-
-	pwd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-
-	valuesFile, err = filepath.Abs(valuesFile)
-	if err != nil {
-		return err
-	}
+func runInternal(command, valuesFile, kubeconfigFile, tfdir string) error {
 
 	infoCmd := exec.Command("docker", "info", "-f", "{{eq .OperatingSystem \"Docker Desktop\"}}")
 
@@ -192,16 +217,21 @@ func runInternal(command, valuesFile string) error {
 
 	args := []string{
 		"run", "-it", "--rm",
-		"-v", fmt.Sprintf("%s:/root/.kube/config", kubeconfig),
-		"-v", fmt.Sprintf("%s/.tfstate:/tfstate", pwd),
-		"-v", fmt.Sprintf("%s:/terraform/values.yaml", valuesFile),
+		"-v", fmt.Sprintf("%s:/root/.kube/config", kubeconfigFile),
+		"-v", fmt.Sprintf("%s:/tfstate", tfdir),
 		"-e", fmt.Sprintf("IS_DOCKER_FOR_MAC=%s", isDockerForMac),
 		"--entrypoint", "/terraform/entrypoint.sh",
+	}
+
+	if valuesFile != "" {
+		args = append(args, "-v", fmt.Sprintf("%s:/terraform/values.yaml", valuesFile))
+	}
+
+	args = append(args,
 		"banzaicloud/cp-installer:latest",
 		command,
 		"-state=/tfstate/terraform.tfstate", // workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/271
-		"-parallelism=1",
-	}
+		"-parallelism=1")
 
 	log.Infof("docker %v", args)
 

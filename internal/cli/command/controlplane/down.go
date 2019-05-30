@@ -15,11 +15,12 @@
 package controlplane
 
 import (
-	"encoding/json"
-	"fmt"
+	"errors"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
+	"github.com/goph/emperror"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/AlecAivazis/survey.v1"
@@ -27,73 +28,22 @@ import (
 
 // NewDownCommand creates a new cobra.Command for `banzai clontrolplane down`.
 func NewDownCommand() *cobra.Command {
-	options := createOptions{}
-
 	cmd := &cobra.Command{
 		Use:   "down",
 		Short: "Destroy the controlplane",
 		Long:  "Destroy a controlplane based on json stdin or interactive session",
 		Args:  cobra.NoArgs,
-		Run: func(cmd *cobra.Command, args []string) {
-			runDestroy(options)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runDestroy()
 		},
 	}
-
-	flags := cmd.Flags()
-
-	flags.StringVarP(&options.file, "file", "f", "values.yaml", "Control Plane descriptor file")
 
 	return cmd
 }
 
-func runDestroy(options createOptions) {
-	var out map[string]interface{}
-
-	filename := options.file
+func runDestroy() error {
 
 	if isInteractive() {
-		var content string
-
-		for {
-			if filename == "" {
-				_ = survey.AskOne(
-					&survey.Input{
-						Message: "Load a JSON or YAML file:",
-						Default: "values.yaml",
-						Help:    "Give either a relative or an absolute path to a file containing a JSON or YAML Control Plane creation descriptor. Leave empty to cancel.",
-					},
-					&filename,
-					nil,
-				)
-				if filename == "skip" || filename == "" {
-					break
-				}
-			}
-
-			if raw, err := ioutil.ReadFile(filename); err != nil {
-
-				log.Errorf("failed to read file %q: %v", filename, err)
-
-				filename = "" // reset fileName so that we can ask for one
-
-				continue
-			} else {
-				if err := unmarshal(raw, &out); err != nil {
-					log.Fatalf("failed to parse control plane descriptor: %v", err)
-				}
-
-				break
-			}
-		}
-
-		if bytes, err := json.MarshalIndent(out, "", "  "); err != nil {
-			log.Debugf("descriptor: %#v", out)
-			log.Fatalf("failed to marshal descriptor: %v", err)
-		} else {
-			content = string(bytes)
-			_, _ = fmt.Fprintf(os.Stderr, "The current state of the descriptor:\n\n%s\n", content)
-		}
-
 		var destroy bool
 		_ = survey.AskOne(
 			&survey.Confirm{
@@ -105,31 +55,36 @@ func runDestroy(options createOptions) {
 		)
 
 		if !destroy {
-			log.Fatal("controlplane destroy cancelled")
-		}
-	} else { // non-interactive
-		var raw []byte
-		var err error
-
-		if filename != "" {
-			raw, err = ioutil.ReadFile(filename)
-		} else {
-			raw, err = ioutil.ReadAll(os.Stdin)
-			filename = "stdin"
-		}
-
-		if err != nil {
-			log.Fatalf("failed to read %s: %v", filename, err)
-		}
-
-		if err := unmarshal(raw, &out); err != nil {
-			log.Fatalf("failed to parse controlplane descriptor: %v", err)
+			return errors.New("controlplane destroy cancelled")
 		}
 	}
 
-	log.Info("controlplane is being destroy")
-
-	if err := runInternal("destroy", filename); err != nil {
-		log.Fatalf("controlplane destroy failed: %v", err)
+	// create temp dir for the files to attach
+	dir, err := ioutil.TempDir(".", "tmp")
+	if err != nil {
+		return emperror.Wrapf(err, "failed to create temporary directory")
 	}
+	defer os.RemoveAll(dir)
+
+	kubeconfigName, err := filepath.Abs(filepath.Join(dir, "kubeconfig"))
+	if err != nil {
+		return emperror.Wrap(err, "failed to construct kubeconfig file name")
+	}
+
+	if err := copyKubeconfig(kubeconfigName); err != nil {
+		return emperror.Wrap(err, "failed to copy Kubeconfig")
+	}
+
+	tfdir, err := filepath.Abs("./.tfstate")
+	if err != nil {
+		return emperror.Wrap(err, "failed to construct tfstate directory path")
+	}
+
+	valuesName, err := filepath.Abs(valuesDefault)
+	if err != nil {
+		return emperror.Wrap(err, "failed to construct values file name")
+	}
+
+	log.Info("controlplane is being destroyed")
+	return emperror.Wrap(runInternal("destroy", valuesName, kubeconfigName, tfdir), "controlplane destroy failed")
 }
