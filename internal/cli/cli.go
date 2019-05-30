@@ -15,12 +15,13 @@
 package cli
 
 import (
-	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"io"
 	"os"
 	"path"
 	"path/filepath"
 	"sync"
+
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 
 	"github.com/goph/emperror"
 	"github.com/mattn/go-isatty"

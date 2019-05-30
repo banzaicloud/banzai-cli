@@ -17,6 +17,7 @@ package command
 import (
 	"errors"
 	"fmt"
+
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/spf13/cobra"

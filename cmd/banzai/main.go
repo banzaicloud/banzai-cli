@@ -19,9 +19,9 @@ import "github.com/banzaicloud/banzai-cli/cmd"
 // Provisioned by ldflags
 // nolint: gochecknoglobals
 var (
-	version    string
-	commitHash string
-	buildDate  string
+	version         string
+	commitHash      string
+	buildDate       string
 	pipelineVersion string
 )
 
