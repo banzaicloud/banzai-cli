@@ -99,8 +99,7 @@ func runUp(options createOptions) error {
 		}
 
 		if bytes, err := json.MarshalIndent(out, "", "  "); err != nil {
-			log.Errorf("failed to marshal descriptor: %v", err)
-			log.Debugf("descriptor: %#v", out)
+			return emperror.Wrapf(err, "failed to marshal descriptor")
 		} else {
 			content = string(bytes)
 			_, _ = fmt.Fprintf(os.Stderr, "The current state of the descriptor:\n\n%s\n", content)
