@@ -219,7 +219,7 @@ func runInternal(command, valuesFile, kubeconfigFile, tfdir string) error {
 		"-state=/tfstate/terraform.tfstate", // workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/271
 		"-parallelism=1")
 
-	log.Infof("docker %v", args)
+	log.Info("docker ", strings.Join(args, " "))
 
 	cmd := exec.Command("docker", args...)
 
