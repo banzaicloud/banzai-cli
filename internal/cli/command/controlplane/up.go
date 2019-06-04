@@ -98,26 +98,11 @@ func runUp(options createOptions) error {
 			}
 		}
 
-		for {
-			if bytes, err := json.MarshalIndent(out, "", "  "); err != nil {
-				log.Errorf("failed to marshal descriptor: %v", err)
-				log.Debugf("descriptor: %#v", out)
-			} else {
-				content = string(bytes)
-				_, _ = fmt.Fprintf(os.Stderr, "The current state of the descriptor:\n\n%s\n", content)
-			}
-
-			var open bool
-			_ = survey.AskOne(&survey.Confirm{Message: "Do you want to edit the controlplane descriptor in your text editor?"}, &open, nil)
-			if !open {
-				break
-			}
-
-			_ = survey.AskOne(&survey.Editor{Message: "controlplane descriptor:", Default: content, HideDefault: true, AppendDefault: true}, &content, nil)
-			out = make(map[string]interface{})
-			if err := unmarshal([]byte(content), &out); err != nil {
-				log.Errorf("can't parse descriptor: %v", err)
-			}
+		if bytes, err := json.MarshalIndent(out, "", "  "); err != nil {
+			return emperror.Wrapf(err, "failed to marshal descriptor")
+		} else {
+			content = string(bytes)
+			_, _ = fmt.Fprintf(os.Stderr, "The current state of the descriptor:\n\n%s\n", content)
 		}
 
 		var create bool
@@ -233,7 +218,7 @@ func runInternal(command, valuesFile, kubeconfigFile, tfdir string) error {
 		"-state=/tfstate/terraform.tfstate", // workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/271
 		"-parallelism=1")
 
-	log.Infof("docker %v", args)
+	log.Info("docker ", strings.Join(args, " "))
 
 	cmd := exec.Command("docker", args...)
 
