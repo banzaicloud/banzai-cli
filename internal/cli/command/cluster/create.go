@@ -63,7 +63,7 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 func runCreate(banzaiCli cli.Cli, options createOptions) error {
 	orgID := input.GetOrganization(banzaiCli)
 
-	out := pipeline.CreateClusterRequest{}
+	out := map[string]interface{}{}
 
 	if isInteractive() {
 		var content string
@@ -100,16 +100,85 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 			}
 		}
 
-		if out.Properties == nil || len(out.Properties) == 0 {
-			providers := map[string]struct {
-				cloud    string
-				property interface{}
-			}{
-				"acsk": {cloud: "alibaba", property: new(pipeline.CreateAckPropertiesAcsk)},
-				"aks":  {cloud: "azure", property: new(pipeline.CreateAksPropertiesAks)},
-				"eks":  {cloud: "amazon", property: new(pipeline.CreateEksPropertiesEks)},
-				"gke":  {cloud: "google", property: new(pipeline.CreateEksPropertiesEks)},
-				"oke":  {cloud: "oracle", property: map[string]interface{}{}},
+		if out["cloud"] == nil && out["type"] == nil {
+			providers := map[string]interface{}{
+				"pke-on-aws": pipeline.CreateClusterRequest{
+					Cloud:    "amazon",
+					Location: "westus2",
+					Properties: map[string]interface{}{
+						"pke": pipeline.CreatePkeProperties{
+							ClusterTopology: pipeline.CreatePkePropertiesClusterTopology{
+								NodePools: []pipeline.NodePoolsPke{
+									{
+										Name:     "master",
+										Roles:    []string{"master", "worker"},
+										Provider: "amazon",
+										ProviderConfig: map[string]interface{}{
+											"autoScalingGroup": map[string]interface{}{
+												"instanceType": "c5.large",
+												"spotPrice":    "",
+												"size": map[string]interface{}{
+													"desired": 1,
+													"min":     1,
+													"max":     1,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				"pke-on-azure": pipeline.CreatePkeOnAzureClusterRequest{
+					Type:     "pke-on-azure",
+					Location: "us-east-2",
+					Nodepools: []pipeline.PkeOnAzureNodePool{
+						{
+							Name:         "master",
+							Roles:        []string{"master", "worker"},
+							Autoscaling:  false,
+							MinCount:     1,
+							MaxCount:     1,
+							Count:        1,
+							InstanceType: "Standard_D2s_v3",
+						},
+					},
+					Kubernetes: pipeline.CreatePkeClusterKubernetes{
+						Version: "1.14.2",
+						Rbac:    true,
+					},
+				},
+				"ack": pipeline.CreateClusterRequest{
+					Cloud: "alibaba",
+					Properties: map[string]interface{}{
+						"ack": pipeline.CreateAckPropertiesAck{},
+					},
+				},
+				"aks": pipeline.CreateClusterRequest{
+					Cloud: "azure",
+					Properties: map[string]interface{}{
+						"aks": pipeline.CreateAksPropertiesAks{},
+					},
+				},
+				"eks": pipeline.CreateClusterRequest{
+					Cloud: "amazon",
+					Properties: map[string]interface{}{
+						"eks": pipeline.CreateEksPropertiesEks{},
+					},
+				},
+				"gke": pipeline.CreateClusterRequest{
+					Cloud: "google",
+					Properties: map[string]interface{}{
+						"gke": pipeline.CreateGkePropertiesGke{},
+					},
+				},
+				"oke": pipeline.CreateClusterRequest{
+					Cloud: "oracle",
+					Properties: map[string]interface{}{
+						"oke": pipeline.CreateUpdateOkePropertiesOke{},
+					},
+				},
 			}
 
 			providerNames := make([]string, 0, len(providers))
@@ -123,29 +192,86 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 			_ = survey.AskOne(&survey.Select{Message: "Provider:", Help: "Select the provider to use", Options: providerNames}, &providerName, nil)
 
 			if provider, ok := providers[providerName]; ok {
-				out.Properties = map[string]interface{}{providerName: provider.property}
-				out.Cloud = provider.cloud
+				marshalled, err := json.Marshal(provider)
+				if err != nil {
+					return emperror.Wrap(err, "failed to marshal request template")
+				}
+
+				unmarshal(marshalled, &out)
 			}
 		}
-		if out.SecretId == "" && out.SecretName == "" {
-			secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{Type_: optional.NewString(out.Cloud)})
+
+		cloud, ok := out["cloud"].(string)
+		if !ok || cloud == "" {
+			Type, _ := out["type"].(string)
+			switch Type {
+			case "pke-on-azure":
+				cloud = "azure"
+			default:
+				return errors.New("couldn't determine cloud provider from request")
+			}
+		}
+
+		var secretID string
+		if id, ok := out["secretId"].(string); id != "" && ok {
+			secretID = id
+		} else if name, ok := out["secretName"].(string); name != "" && ok {
+			// get ID from Name + validate
+
+			secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{Type_: optional.NewString(cloud)})
+			if err != nil {
+				return emperror.Wrap(err, "could not list secrets")
+			}
+
+			for _, secret := range secrets {
+				if secret.Name == name {
+					secretID = secret.Id
+					break
+				}
+			}
+			if secretID == "" {
+				return errors.New(fmt.Sprintf("can't find %s secret %q", cloud, name))
+			}
+		} else {
+			// offer secret choices
+
+			secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{Type_: optional.NewString(cloud)})
 
 			if err != nil {
 				log.Errorf("could not list secrets: %v", err)
 			} else {
 				secretNames := make([]string, len(secrets))
+				secretIDs := make(map[string]string)
 
 				for i, secret := range secrets {
 					secretNames[i] = secret.Name
+					secretIDs[secret.Name] = secret.Id
 				}
 
-				_ = survey.AskOne(&survey.Select{Message: "Secret:", Help: "Select the secret to use for creating cloud resources", Options: secretNames}, &out.SecretName, nil)
+				var name string
+				if err = survey.AskOne(&survey.Select{Message: "Secret:", Help: "Select the secret to use for creating cloud resources", Options: secretNames}, &name, nil); err == nil {
+					out["secretName"] = name
+					secretID = secretIDs[name]
+				} else {
+					log.Errorf("no secret set: %v", err)
+				}
 			}
 		}
 
-		if out.Name == "" {
-			name := fmt.Sprintf("%s%s%d", os.Getenv("USER"), out.Cloud, os.Getpid())
-			_ = survey.AskOne(&survey.Input{Message: "Cluster name:", Default: name}, &out.Name, nil)
+		if out["name"] == nil || out["name"] == "" {
+			name := fmt.Sprintf("%s%d", os.Getenv("USER"), os.Getpid())
+			_ = survey.AskOne(&survey.Input{Message: "Cluster name:", Default: name}, &name, nil)
+			out["name"] = name
+		}
+
+		if out["type"] == "pke-on-azure" && out["resourceGroup"] == "" {
+			rgs, _, err := banzaiCli.Client().InfoApi.GetResourceGroups(context.Background(), orgID, secretID)
+			var rg string
+			if err = survey.AskOne(&survey.Select{Message: "Resource group:", Options: rgs}, &rg, nil); err == nil {
+				out["resourceGroup"] = rg
+			} else {
+				log.Error("no resource group selected")
+			}
 		}
 
 		for {
@@ -172,7 +298,7 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 		var create bool
 		_ = survey.AskOne(
 			&survey.Confirm{
-				Message: fmt.Sprintf("Do you want to CREATE the cluster %q now?", out.Name),
+				Message: fmt.Sprintf("Do you want to CREATE the cluster %q now?", out["name"]),
 			},
 			&create,
 			nil,
@@ -186,12 +312,14 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 		var err error
 		filename := options.file
 
-		if filename != "" {
+		if filename != "" && filename != "-" {
 			raw, err = ioutil.ReadFile(filename)
 		} else {
 			raw, err = ioutil.ReadAll(os.Stdin)
 			filename = "stdin"
 		}
+
+		log.Debugf("%d bytes read", len(raw))
 
 		if err != nil {
 			return emperror.WrapWith(err, fmt.Sprintf("failed to read %q", filename), "filename", filename)
@@ -214,7 +342,7 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 	}
 
 	log.Info("cluster is being created")
-	log.Infof("you can check its status with the command `banzai cluster get %q`", out.Name)
+	log.Infof("you can check its status with the command `banzai cluster get %q`", out["name"])
 	Out1(cluster, []string{"Id", "Name"})
 	return nil
 }
@@ -222,11 +350,28 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 func validateClusterCreateRequest(val interface{}) error {
 	str, ok := val.(string)
 	if !ok {
-		return errors.New("value is not a string")
+		if bytes, ok := val.([]byte); ok {
+			str = string(bytes)
+		} else {
+			return errors.New("value is not a string or []byte")
+		}
 	}
 
 	decoder := json.NewDecoder(strings.NewReader(str))
+
+	var typer struct{ Type string }
+	err := decoder.Decode(&typer)
+	if err != nil {
+		return emperror.Wrap(err, "invalid JSON request")
+	}
+
+	decoder = json.NewDecoder(strings.NewReader(str))
 	decoder.DisallowUnknownFields()
 
-	return emperror.Wrap(decoder.Decode(&pipeline.CreateClusterRequest{}), "not a valid JSON request")
+	if typer.Type == "" {
+		err = decoder.Decode(&pipeline.CreateClusterRequest{})
+	} else {
+		err = decoder.Decode(&pipeline.CreateClusterRequestV2{})
+	}
+	return emperror.Wrap(err, "invalid request")
 }
