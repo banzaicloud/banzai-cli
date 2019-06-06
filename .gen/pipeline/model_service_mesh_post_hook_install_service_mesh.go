@@ -3,7 +3,7 @@
  *
  * Pipeline v0.3.0 swagger
  *
- * API version: 0.15.4
+ * API version: 0.21.2
  * Contact: info@banzaicloud.com
  */
 
@@ -13,4 +13,6 @@ package pipeline
 
 type ServiceMeshPostHookInstallServiceMesh struct {
 	Mtls bool `json:"mtls,omitempty"`
+	AutoSidecarInjectNamespaces []string `json:"autoSidecarInjectNamespaces,omitempty"`
+	BypassEgressTraffic bool `json:"bypassEgressTraffic,omitempty"`
 }

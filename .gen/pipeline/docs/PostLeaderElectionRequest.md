@@ -1,9 +1,10 @@
-# UpdateAckPropertiesAcsk
+# PostLeaderElectionRequest
 
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**NodePools** | [**map[string]NodePoolsAck**](NodePoolsACK.md) |  | 
+**Hostname** | **string** |  | 
+**Ip** | **string** |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
