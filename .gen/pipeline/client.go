@@ -3,7 +3,7 @@
  *
  * Pipeline v0.3.0 swagger
  *
- * API version: 0.15.4
+ * API version: 0.21.2
  * Contact: info@banzaicloud.com
  */
 
@@ -39,7 +39,7 @@ var (
 	xmlCheck  = regexp.MustCompile("(?i:[application|text]/xml)")
 )
 
-// APIClient manages communication with the Pipeline API API v0.15.4
+// APIClient manages communication with the Pipeline API API v0.21.2
 // In most cases there should be only one, shared, APIClient.
 type APIClient struct {
 	cfg    *Configuration
@@ -47,7 +47,23 @@ type APIClient struct {
 
 	// API Services
 
+	ArkApi *ArkApiService
+
+	ArkBackupsApi *ArkBackupsApiService
+
+	ArkBucketsApi *ArkBucketsApiService
+
+	ArkRestoresApi *ArkRestoresApiService
+
+	ArkSchedulesApi *ArkSchedulesApiService
+
 	AuthApi *AuthApiService
+
+	ClustergroupDeploymentsApi *ClustergroupDeploymentsApiService
+
+	ClustergroupFeaturesApi *ClustergroupFeaturesApiService
+
+	ClustergroupsApi *ClustergroupsApiService
 
 	ClustersApi *ClustersApiService
 
@@ -106,7 +122,15 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.common.client = c
 
 	// API Services
+	c.ArkApi = (*ArkApiService)(&c.common)
+	c.ArkBackupsApi = (*ArkBackupsApiService)(&c.common)
+	c.ArkBucketsApi = (*ArkBucketsApiService)(&c.common)
+	c.ArkRestoresApi = (*ArkRestoresApiService)(&c.common)
+	c.ArkSchedulesApi = (*ArkSchedulesApiService)(&c.common)
 	c.AuthApi = (*AuthApiService)(&c.common)
+	c.ClustergroupDeploymentsApi = (*ClustergroupDeploymentsApiService)(&c.common)
+	c.ClustergroupFeaturesApi = (*ClustergroupFeaturesApiService)(&c.common)
+	c.ClustergroupsApi = (*ClustergroupsApiService)(&c.common)
 	c.ClustersApi = (*ClustersApiService)(&c.common)
 	c.CommonApi = (*CommonApiService)(&c.common)
 	c.DeploymentsApi = (*DeploymentsApiService)(&c.common)

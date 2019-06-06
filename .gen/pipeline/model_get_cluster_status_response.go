@@ -3,7 +3,7 @@
  *
  * Pipeline v0.3.0 swagger
  *
- * API version: 0.15.4
+ * API version: 0.21.2
  * Contact: info@banzaicloud.com
  */
 
@@ -17,6 +17,7 @@ type GetClusterStatusResponse struct {
 	Name string `json:"name,omitempty"`
 	Cloud string `json:"cloud,omitempty"`
 	Distribution string `json:"distribution,omitempty"`
+	Version string `json:"version,omitempty"`
 	Spot bool `json:"spot,omitempty"`
 	Location string `json:"location,omitempty"`
 	Id int32 `json:"id,omitempty"`
@@ -25,8 +26,11 @@ type GetClusterStatusResponse struct {
 	Servicemesh bool `json:"servicemesh,omitempty"`
 	Securityscan bool `json:"securityscan,omitempty"`
 	CreatedAt string `json:"createdAt,omitempty"`
+	StartedAt string `json:"startedAt,omitempty"`
 	CreatorName string `json:"creatorName,omitempty"`
 	CreatorId int32 `json:"creatorId,omitempty"`
 	Region string `json:"region,omitempty"`
+	// The lifespan of the cluster expressed in minutes after which it is automatically deleted. Zero value means the cluster is never automatically deleted.
+	TtlMinutes int32 `json:"ttlMinutes,omitempty"`
 	NodePools map[string]NodePoolStatus `json:"nodePools,omitempty"`
 }
