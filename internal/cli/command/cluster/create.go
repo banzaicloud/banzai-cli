@@ -42,13 +42,14 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := createOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "create",
-		Aliases: []string{"c"},
-		Short:   "Create a cluster",
-		Long:    "Create cluster based on json stdin or interactive session",
-		Args:    cobra.NoArgs,
-		Run: func(cmd *cobra.Command, args []string) {
-			runCreate(banzaiCli, options)
+		Use:          "create",
+		Aliases:      []string{"c"},
+		Short:        "Create a cluster",
+		Long:         "Create cluster based on json stdin or interactive session",
+		SilenceUsage: true,
+		Args:         cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runCreate(banzaiCli, options)
 		},
 	}
 
@@ -59,7 +60,7 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	return cmd
 }
 
-func runCreate(banzaiCli cli.Cli, options createOptions) {
+func runCreate(banzaiCli cli.Cli, options createOptions) error {
 	orgID := input.GetOrganization(banzaiCli)
 
 	out := pipeline.CreateClusterRequest{}
@@ -92,7 +93,7 @@ func runCreate(banzaiCli cli.Cli, options createOptions) {
 				continue
 			} else {
 				if err := unmarshal(raw, &out); err != nil {
-					log.Fatalf("failed to parse CreateClusterRequest: %v", err)
+					return emperror.Wrap(err, "failed to parse CreateClusterRequest")
 				}
 
 				break
@@ -162,9 +163,7 @@ func runCreate(banzaiCli cli.Cli, options createOptions) {
 				break
 			}
 
-			///fmt.Printf("BEFORE>>>\n%v<<<\n", content)
 			_ = survey.AskOne(&survey.Editor{Message: "Create cluster request:", Default: content, HideDefault: true, AppendDefault: true}, &content, validateClusterCreateRequest)
-			///fmt.Printf("AFTER>>>\n%v<<<\n", content)
 			if err := json.Unmarshal([]byte(content), &out); err != nil {
 				log.Errorf("can't parse request: %v", err)
 			}
@@ -180,7 +179,7 @@ func runCreate(banzaiCli cli.Cli, options createOptions) {
 		)
 
 		if !create {
-			log.Fatal("cluster creation cancelled")
+			return errors.New("cluster creation cancelled")
 		}
 	} else { // non-interactive
 		var raw []byte
@@ -195,11 +194,15 @@ func runCreate(banzaiCli cli.Cli, options createOptions) {
 		}
 
 		if err != nil {
-			log.Fatalf("failed to read %s: %v", filename, err)
+			return emperror.WrapWith(err, fmt.Sprintf("failed to read %q", filename), "filename", filename)
+		}
+
+		if err := validateClusterCreateRequest(raw); err != nil {
+			return emperror.Wrap(err, "failed to parse create cluster request")
 		}
 
 		if err := unmarshal(raw, &out); err != nil {
-			log.Fatalf("failed to parse CreateClusterRequest: %v", err)
+			return emperror.Wrap(err, "failed to unmarshal create cluster request")
 		}
 	}
 
@@ -207,12 +210,13 @@ func runCreate(banzaiCli cli.Cli, options createOptions) {
 	cluster, _, err := banzaiCli.Client().ClustersApi.CreateCluster(context.Background(), orgID, out)
 	if err != nil {
 		cli.LogAPIError("create cluster", err, out)
-		log.Fatalf("failed to create cluster: %v", err)
+		return emperror.Wrap(err, "failed to create cluster")
 	}
 
 	log.Info("cluster is being created")
 	log.Infof("you can check its status with the command `banzai cluster get %q`", out.Name)
 	Out1(cluster, []string{"Id", "Name"})
+	return nil
 }
 
 func validateClusterCreateRequest(val interface{}) error {
