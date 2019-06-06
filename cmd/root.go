@@ -35,7 +35,7 @@ var rootOptions struct {
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:              "banzai",
-	Short:            "A command line client for the Banzai Pipeline platform.",
+	Short:            "A command line client for the Banzai Cloud Pipeline platform.",
 	PersistentPreRun: preRun,
 }
 
