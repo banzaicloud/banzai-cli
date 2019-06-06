@@ -66,246 +66,9 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 	out := map[string]interface{}{}
 
 	if isInteractive() {
-		var content string
-		var fileName = options.file
-
-		for {
-			if fileName == "" {
-				_ = survey.AskOne(
-					&survey.Input{
-						Message: "Load a JSON or YAML file:",
-						Default: "skip",
-						Help:    "Give either a relative or an absolute path to a file containing a JSON or YAML Cluster creation request. Leave empty to cancel.",
-					},
-					&fileName,
-					nil,
-				)
-				if fileName == "skip" || fileName == "" {
-					break
-				}
-			}
-
-			if raw, err := ioutil.ReadFile(fileName); err != nil {
-				fileName = "" // reset fileName so that we can ask for one
-
-				log.Errorf("failed to read file %q: %v", fileName, err)
-
-				continue
-			} else {
-				if err := unmarshal(raw, &out); err != nil {
-					return emperror.Wrap(err, "failed to parse CreateClusterRequest")
-				}
-
-				break
-			}
-		}
-
-		if out["cloud"] == nil && out["type"] == nil {
-			providers := map[string]interface{}{
-				"pke-on-aws": pipeline.CreateClusterRequest{
-					Cloud:    "amazon",
-					Location: "westus2",
-					Properties: map[string]interface{}{
-						"pke": pipeline.CreatePkeProperties{
-							ClusterTopology: pipeline.CreatePkePropertiesClusterTopology{
-								NodePools: []pipeline.NodePoolsPke{
-									{
-										Name:     "master",
-										Roles:    []string{"master", "worker"},
-										Provider: "amazon",
-										ProviderConfig: map[string]interface{}{
-											"autoScalingGroup": map[string]interface{}{
-												"instanceType": "c5.large",
-												"spotPrice":    "",
-												"size": map[string]interface{}{
-													"desired": 1,
-													"min":     1,
-													"max":     1,
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-				"pke-on-azure": pipeline.CreatePkeOnAzureClusterRequest{
-					Type:     "pke-on-azure",
-					Location: "us-east-2",
-					Nodepools: []pipeline.PkeOnAzureNodePool{
-						{
-							Name:         "master",
-							Roles:        []string{"master", "worker"},
-							Autoscaling:  false,
-							MinCount:     1,
-							MaxCount:     1,
-							Count:        1,
-							InstanceType: "Standard_D2s_v3",
-						},
-					},
-					Kubernetes: pipeline.CreatePkeClusterKubernetes{
-						Version: "1.14.2",
-						Rbac:    true,
-					},
-				},
-				"ack": pipeline.CreateClusterRequest{
-					Cloud: "alibaba",
-					Properties: map[string]interface{}{
-						"ack": pipeline.CreateAckPropertiesAck{},
-					},
-				},
-				"aks": pipeline.CreateClusterRequest{
-					Cloud: "azure",
-					Properties: map[string]interface{}{
-						"aks": pipeline.CreateAksPropertiesAks{},
-					},
-				},
-				"eks": pipeline.CreateClusterRequest{
-					Cloud: "amazon",
-					Properties: map[string]interface{}{
-						"eks": pipeline.CreateEksPropertiesEks{},
-					},
-				},
-				"gke": pipeline.CreateClusterRequest{
-					Cloud: "google",
-					Properties: map[string]interface{}{
-						"gke": pipeline.CreateGkePropertiesGke{},
-					},
-				},
-				"oke": pipeline.CreateClusterRequest{
-					Cloud: "oracle",
-					Properties: map[string]interface{}{
-						"oke": pipeline.CreateUpdateOkePropertiesOke{},
-					},
-				},
-			}
-
-			providerNames := make([]string, 0, len(providers))
-
-			for provider := range providers {
-				providerNames = append(providerNames, provider)
-			}
-
-			var providerName string
-
-			_ = survey.AskOne(&survey.Select{Message: "Provider:", Help: "Select the provider to use", Options: providerNames}, &providerName, nil)
-
-			if provider, ok := providers[providerName]; ok {
-				marshalled, err := json.Marshal(provider)
-				if err != nil {
-					return emperror.Wrap(err, "failed to marshal request template")
-				}
-
-				unmarshal(marshalled, &out)
-			}
-		}
-
-		cloud, ok := out["cloud"].(string)
-		if !ok || cloud == "" {
-			Type, _ := out["type"].(string)
-			switch Type {
-			case "pke-on-azure":
-				cloud = "azure"
-			default:
-				return errors.New("couldn't determine cloud provider from request")
-			}
-		}
-
-		var secretID string
-		if id, ok := out["secretId"].(string); id != "" && ok {
-			secretID = id
-		} else if name, ok := out["secretName"].(string); name != "" && ok {
-			// get ID from Name + validate
-
-			secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{Type_: optional.NewString(cloud)})
-			if err != nil {
-				return emperror.Wrap(err, "could not list secrets")
-			}
-
-			for _, secret := range secrets {
-				if secret.Name == name {
-					secretID = secret.Id
-					break
-				}
-			}
-			if secretID == "" {
-				return errors.New(fmt.Sprintf("can't find %s secret %q", cloud, name))
-			}
-		} else {
-			// offer secret choices
-
-			secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{Type_: optional.NewString(cloud)})
-
-			if err != nil {
-				log.Errorf("could not list secrets: %v", err)
-			} else {
-				secretNames := make([]string, len(secrets))
-				secretIDs := make(map[string]string)
-
-				for i, secret := range secrets {
-					secretNames[i] = secret.Name
-					secretIDs[secret.Name] = secret.Id
-				}
-
-				var name string
-				if err = survey.AskOne(&survey.Select{Message: "Secret:", Help: "Select the secret to use for creating cloud resources", Options: secretNames}, &name, nil); err == nil {
-					out["secretName"] = name
-					secretID = secretIDs[name]
-				} else {
-					log.Errorf("no secret set: %v", err)
-				}
-			}
-		}
-
-		if out["name"] == nil || out["name"] == "" {
-			name := fmt.Sprintf("%s%d", os.Getenv("USER"), os.Getpid())
-			_ = survey.AskOne(&survey.Input{Message: "Cluster name:", Default: name}, &name, nil)
-			out["name"] = name
-		}
-
-		if out["type"] == "pke-on-azure" && out["resourceGroup"] == "" {
-			rgs, _, err := banzaiCli.Client().InfoApi.GetResourceGroups(context.Background(), orgID, secretID)
-			var rg string
-			if err = survey.AskOne(&survey.Select{Message: "Resource group:", Options: rgs}, &rg, nil); err == nil {
-				out["resourceGroup"] = rg
-			} else {
-				log.Error("no resource group selected")
-			}
-		}
-
-		for {
-			if bytes, err := json.MarshalIndent(out, "", "  "); err != nil {
-				log.Errorf("failed to marshal request: %v", err)
-				log.Debugf("Request: %#v", out)
-			} else {
-				content = string(bytes)
-				_, _ = fmt.Fprintf(os.Stderr, "The current state of the request:\n\n%s\n", content)
-			}
-
-			var open bool
-			_ = survey.AskOne(&survey.Confirm{Message: "Do you want to edit the cluster request in your text editor?"}, &open, nil)
-			if !open {
-				break
-			}
-
-			_ = survey.AskOne(&survey.Editor{Message: "Create cluster request:", Default: content, HideDefault: true, AppendDefault: true}, &content, validateClusterCreateRequest)
-			if err := json.Unmarshal([]byte(content), &out); err != nil {
-				log.Errorf("can't parse request: %v", err)
-			}
-		}
-
-		var create bool
-		_ = survey.AskOne(
-			&survey.Confirm{
-				Message: fmt.Sprintf("Do you want to CREATE the cluster %q now?", out["name"]),
-			},
-			&create,
-			nil,
-		)
-
-		if !create {
-			return errors.New("cluster creation cancelled")
+		err := buildInteractiveCreateRequest(banzaiCli, options, orgID, out)
+		if err != nil {
+			return err
 		}
 	} else { // non-interactive
 		var raw []byte
@@ -374,4 +137,264 @@ func validateClusterCreateRequest(val interface{}) error {
 		err = decoder.Decode(&pipeline.CreateClusterRequestV2{})
 	}
 	return emperror.Wrap(err, "invalid request")
+}
+
+func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, orgID int32, out map[string]interface{}) error {
+	var content string
+	var fileName = options.file
+
+	for {
+		if fileName == "" {
+			_ = survey.AskOne(
+				&survey.Input{
+					Message: "Load a JSON or YAML file:",
+					Default: "skip",
+					Help:    "Give either a relative or an absolute path to a file containing a JSON or YAML Cluster creation request. Leave empty to cancel.",
+				},
+				&fileName,
+				nil,
+			)
+			if fileName == "skip" || fileName == "" {
+				break
+			}
+		}
+
+		if raw, err := ioutil.ReadFile(fileName); err != nil {
+			fileName = "" // reset fileName so that we can ask for one
+
+			log.Errorf("failed to read file %q: %v", fileName, err)
+
+			continue
+		} else {
+			if err := unmarshal(raw, &out); err != nil {
+				return emperror.Wrap(err, "failed to parse CreateClusterRequest")
+			}
+
+			break
+		}
+	}
+
+	if out["cloud"] == nil && out["type"] == nil {
+		err := buildDefaultRequest(out)
+		if err != nil {
+			return err
+		}
+	}
+
+	cloud, ok := out["cloud"].(string)
+	if !ok || cloud == "" {
+		Type, _ := out["type"].(string)
+		switch Type {
+		case "pke-on-azure":
+			cloud = "azure"
+		default:
+			return errors.New("couldn't determine cloud provider from request")
+		}
+	}
+
+	secretID, err := buildSecretChoice(banzaiCli, orgID, cloud, out)
+	if err != nil {
+		return err
+	}
+
+	if out["name"] == nil || out["name"] == "" {
+		name := fmt.Sprintf("%s%d", os.Getenv("USER"), os.Getpid())
+		_ = survey.AskOne(&survey.Input{Message: "Cluster name:", Default: name}, &name, nil)
+		out["name"] = name
+	}
+
+	if out["type"] == "pke-on-azure" && out["resourceGroup"] == "" {
+		rgs, _, err := banzaiCli.Client().InfoApi.GetResourceGroups(context.Background(), orgID, secretID)
+		if err != nil {
+			return emperror.Wrap(err, "can't list resource groups")
+		}
+
+		var rg string
+		if err = survey.AskOne(&survey.Select{Message: "Resource group:", Options: rgs}, &rg, nil); err == nil {
+			out["resourceGroup"] = rg
+		} else {
+			log.Error("no resource group selected")
+		}
+	}
+
+	for {
+		if bytes, err := json.MarshalIndent(out, "", "  "); err != nil {
+			log.Errorf("failed to marshal request: %v", err)
+			log.Debugf("Request: %#v", out)
+		} else {
+			content = string(bytes)
+			_, _ = fmt.Fprintf(os.Stderr, "The current state of the request:\n\n%s\n", content)
+		}
+
+		var open bool
+		_ = survey.AskOne(&survey.Confirm{Message: "Do you want to edit the cluster request in your text editor?"}, &open, nil)
+		if !open {
+			break
+		}
+
+		_ = survey.AskOne(&survey.Editor{Message: "Create cluster request:", Default: content, HideDefault: true, AppendDefault: true}, &content, validateClusterCreateRequest)
+		if err := json.Unmarshal([]byte(content), &out); err != nil {
+			log.Errorf("can't parse request: %v", err)
+		}
+	}
+
+	var create bool
+	_ = survey.AskOne(
+		&survey.Confirm{
+			Message: fmt.Sprintf("Do you want to CREATE the cluster %q now?", out["name"]),
+		},
+		&create,
+		nil,
+	)
+
+	if !create {
+		return errors.New("cluster creation cancelled")
+	}
+
+	return nil
+}
+func getProviders() map[string]interface{} {
+	return map[string]interface{}{
+		"pke-on-aws": pipeline.CreateClusterRequest{
+			Cloud:    "amazon",
+			Location: "westus2",
+			Properties: map[string]interface{}{
+				"pke": pipeline.CreatePkeProperties{
+					ClusterTopology: pipeline.CreatePkePropertiesClusterTopology{
+						NodePools: []pipeline.NodePoolsPke{
+							{
+								Name:     "master",
+								Roles:    []string{"master", "worker"},
+								Provider: "amazon",
+								ProviderConfig: map[string]interface{}{
+									"autoScalingGroup": map[string]interface{}{
+										"instanceType": "c5.large",
+										"spotPrice":    "",
+										"size": map[string]interface{}{
+											"desired": 1,
+											"min":     1,
+											"max":     1,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"pke-on-azure": pipeline.CreatePkeOnAzureClusterRequest{
+			Type:     "pke-on-azure",
+			Location: "us-east-2",
+			Nodepools: []pipeline.PkeOnAzureNodePool{
+				{
+					Name:         "master",
+					Roles:        []string{"master", "worker"},
+					Autoscaling:  false,
+					MinCount:     1,
+					MaxCount:     1,
+					Count:        1,
+					InstanceType: "Standard_D2s_v3",
+				},
+			},
+			Kubernetes: pipeline.CreatePkeClusterKubernetes{
+				Version: "1.14.2",
+				Rbac:    true,
+			},
+		},
+		"ack": pipeline.CreateClusterRequest{
+			Cloud: "alibaba",
+			Properties: map[string]interface{}{
+				"ack": pipeline.CreateAckPropertiesAck{},
+			},
+		},
+		"aks": pipeline.CreateClusterRequest{
+			Cloud: "azure",
+			Properties: map[string]interface{}{
+				"aks": pipeline.CreateAksPropertiesAks{},
+			},
+		},
+		"eks": pipeline.CreateClusterRequest{
+			Cloud: "amazon",
+			Properties: map[string]interface{}{
+				"eks": pipeline.CreateEksPropertiesEks{},
+			},
+		},
+		"gke": pipeline.CreateClusterRequest{
+			Cloud: "google",
+			Properties: map[string]interface{}{
+				"gke": pipeline.CreateGkePropertiesGke{},
+			},
+		},
+		"oke": pipeline.CreateClusterRequest{
+			Cloud: "oracle",
+			Properties: map[string]interface{}{
+				"oke": pipeline.CreateUpdateOkePropertiesOke{},
+			},
+		},
+	}
+}
+
+func buildDefaultRequest(out map[string]interface{}) error {
+	providers := getProviders()
+	providerNames := make([]string, 0, len(providers))
+
+	for provider := range providers {
+		providerNames = append(providerNames, provider)
+	}
+
+	var providerName string
+
+	_ = survey.AskOne(&survey.Select{Message: "Provider:", Help: "Select the provider to use", Options: providerNames}, &providerName, nil)
+
+	if provider, ok := providers[providerName]; ok {
+		marshalled, err := json.Marshal(provider)
+		if err != nil {
+			return emperror.Wrap(err, "failed to marshal request template")
+		}
+
+		unmarshal(marshalled, &out)
+	}
+	return nil
+}
+
+func buildSecretChoice(banzaiCli cli.Cli, orgID int32, cloud string, out map[string]interface{}) (string, error) {
+
+	if id, ok := out["secretId"].(string); id != "" && ok {
+		return id, nil
+	}
+
+	secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{Type_: optional.NewString(cloud)})
+	if err != nil {
+		return "", emperror.Wrap(err, "could not list secrets")
+	}
+
+	// get ID from Name + validate
+	if name, ok := out["secretName"].(string); name != "" && ok {
+
+		for _, secret := range secrets {
+			if secret.Name == name {
+				return secret.Id, nil
+			}
+		}
+		return "", errors.New(fmt.Sprintf("can't find %s secret %q", cloud, name))
+	}
+
+	// offer secret choices
+
+	secretNames := make([]string, len(secrets))
+	secretIDs := make(map[string]string)
+
+	for i, secret := range secrets {
+		secretNames[i] = secret.Name
+		secretIDs[secret.Name] = secret.Id
+	}
+
+	var name string
+	if err = survey.AskOne(&survey.Select{Message: "Secret:", Help: "Select the secret to use for creating cloud resources", Options: secretNames}, &name, nil); err != nil {
+		return "", emperror.Wrap(err, "no secret set")
+	}
+	out["secretName"] = name
+	return secretIDs[name], nil
+
 }
