@@ -278,7 +278,7 @@ func getProviders() map[string]interface{} {
 	return map[string]interface{}{
 		"pke-on-aws": pipeline.CreateClusterRequest{
 			Cloud:    "amazon",
-			Location: "westus2",
+			Location: "us-east-2",
 			Properties: map[string]interface{}{
 				"pke": pipeline.CreatePkeProperties{
 					ClusterTopology: pipeline.CreatePkePropertiesClusterTopology{
@@ -306,7 +306,7 @@ func getProviders() map[string]interface{} {
 		},
 		"pke-on-azure": pipeline.CreatePkeOnAzureClusterRequest{
 			Type:     "pke-on-azure",
-			Location: "us-east-2",
+			Location: "westus2",
 			Nodepools: []pipeline.PkeOnAzureNodePool{
 				{
 					Name:         "master",
@@ -330,13 +330,15 @@ func getProviders() map[string]interface{} {
 			},
 		},
 		"aks": pipeline.CreateClusterRequest{
-			Cloud: "azure",
+			Cloud:    "azure",
+			Location: "westus2",
 			Properties: map[string]interface{}{
 				"aks": pipeline.CreateAksPropertiesAks{},
 			},
 		},
 		"eks": pipeline.CreateClusterRequest{
-			Cloud: "amazon",
+			Cloud:    "amazon",
+			Location: "us-east-2",
 			Properties: map[string]interface{}{
 				"eks": pipeline.CreateEksPropertiesEks{},
 			},
@@ -417,5 +419,4 @@ func buildSecretChoice(banzaiCli cli.Cli, orgID int32, cloud string, out map[str
 	}
 	out["secretName"] = name
 	return secretIDs[name], nil
-
 }
