@@ -102,6 +102,7 @@ var clusterDeleteCmd = &cobra.Command{
 	Use:     "delete NAME",
 	Aliases: []string{"del", "rm"},
 	Short:   "Delete a cluster",
+	Long:    "Delete a cluster. The cluster to delete is identified either by its name or the numerical ID. In case of interactive mode banzai CLI will prompt for a confirmation.",
 	Run:     ClusterDelete,
 	Args:    cobra.ExactArgs(1),
 }
@@ -150,10 +151,28 @@ func ClusterDelete(cmd *cobra.Command, args []string) {
 }
 
 var clusterShellCmd = &cobra.Command{
-	Use:     "shell [command]",
-	Aliases: []string{"sh", "k"},
-	Short:   "Start a shell or run a command with the cluster configured as kubectl context",
 	Run:     ClusterShell,
+	Use:     "shell [command]",
+	Aliases: []string{"sh"},
+	Short:   "Start a shell or run a command with the cluster configured as kubectl context",
+	Long: "The banzai CLI's cluster shell command starts your default shell, or runs your specified program on your local machine within the Kubernetes context of your cluster. " +
+		"You can either run the command without arguments to interactively select a cluster, and get an interactive shell, select the cluster with the --cluster-name flag, or specify the command to run.",
+	Example: `
+			$ banzai cluster sh
+			? Cluster: docs-example
+			[docs-example]$ helm list
+			...
+			[docs-example]$ kubectl get nodes
+			...
+			[docs-example]$ exit
+			INFO[0026] Command exited successfully
+
+			$ banzai cluster shell --cluster-name docs-example kubectl get nodes
+			INFO[0000] Running kubectl kubectl get nodes
+			NAME                                    STATUS   ROLES    AGE   VERSION
+			gke-docs-example-pool1-7a602b82-62w8    Ready    <none>   43m   v1.10.11-gke.1
+			gke-docs-example-system-a16f163c-dvwj   Ready    <none>   43m   v1.10.11-gke.1
+			INFO[0001] Command exited successfully`,
 }
 
 func writeConfig(ctx context.Context, client *pipeline.APIClient, orgId, id int32, tmpfile io.WriteCloser) (retry bool, err error) {
@@ -261,8 +280,7 @@ func ClusterShell(cmd *cobra.Command, args []string) {
 	c.Stdin = os.Stdin
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
-	c.Env = append(
-		os.Environ(),
+	env := []string{
 		// customize shell prompt
 		fmt.Sprintf("PS1=[%s]$ ", chalk.Bold.TextStyle(cluster.Name)),
 
@@ -273,7 +291,10 @@ func ClusterShell(cmd *cobra.Command, args []string) {
 		fmt.Sprintf("BANZAI_CURRENT_ORG_NAME=%s", org.Name),
 		fmt.Sprintf("BANZAI_CURRENT_CLUSTER_ID=%d", id),
 		fmt.Sprintf("BANZAI_CURRENT_CLUSTER_NAME=%s", cluster.Name),
-	)
+	}
+
+	log.Debug("Environment: %s", strings.Join(env, " "))
+	c.Env = append(os.Environ(), env...)
 
 	if err := c.Run(); err != nil {
 		log.Errorf("Failed to run command: %v", err)

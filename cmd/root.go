@@ -73,7 +73,7 @@ func init() {
 
 	flags := rootCmd.PersistentFlags()
 
-	flags.StringVar(&rootOptions.CfgFile, "config", "", "config file (default is $HOME/.banzai/config.yaml)")
+	flags.StringVar(&rootOptions.CfgFile, "config", "", "config file (default is $BANZAICONFIG or $HOME/.banzai/config.yaml)")
 	//flags.StringVarP(&BanzaiContext, "context", "c", "default", "name of Banzai Cloud context to use")
 	flags.StringVarP(&rootOptions.Output, "output", "o", "default", "output format (default|yaml|json)")
 
