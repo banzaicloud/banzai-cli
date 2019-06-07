@@ -98,58 +98,6 @@ func ClusterGet(cmd *cobra.Command, args []string) {
 	Out1(detailed, []string{"Id", "Name", "Distribution", "Status", "CreatorName", "CreatedAt", "StatusMessage"})
 }
 
-var clusterDeleteCmd = &cobra.Command{
-	Use:     "delete NAME",
-	Aliases: []string{"del", "rm"},
-	Short:   "Delete a cluster",
-	Long:    "Delete a cluster. The cluster to delete is identified either by its name or the numerical ID. In case of interactive mode banzai CLI will prompt for a confirmation.",
-	Run:     ClusterDelete,
-	Args:    cobra.ExactArgs(1),
-}
-
-func ClusterDelete(cmd *cobra.Command, args []string) {
-	pipeline := InitPipeline()
-	orgId := GetOrgId(true)
-	clusters, _, err := pipeline.ClustersApi.ListClusters(context.Background(), orgId)
-	if err != nil {
-		cli.LogAPIError("list clusters", err, orgId)
-		log.Fatalf("could not list clusters: %v", err)
-	}
-	var id int32
-	for _, cluster := range clusters {
-		if cluster.Name == args[0] || fmt.Sprintf("%d", cluster.Id) == args[0] {
-			id = cluster.Id
-			break
-		}
-	}
-	if id == 0 {
-		log.Fatalf("cluster %q could not be found", args[0])
-	}
-
-	if isInteractive() {
-		if cluster, _, err := pipeline.ClustersApi.GetCluster(context.Background(), orgId, id); err != nil {
-			cli.LogAPIError("get cluster", err, id)
-		} else {
-			Out1(cluster, []string{"Id", "Name", "Distribution", "Status", "CreatorName", "CreatedAt", "StatusMessage"})
-		}
-		confirmed := false
-		survey.AskOne(&survey.Confirm{Message: "Do you want to DELETE the cluster?"}, &confirmed, nil)
-		if !confirmed {
-			log.Fatal("deletion cancelled")
-		}
-	}
-	if cluster, _, err := pipeline.ClustersApi.DeleteCluster(context.Background(), orgId, id, nil); err != nil {
-		cli.LogAPIError("get cluster", err, id)
-	} else {
-		log.Printf("Deleting cluster %v", cluster)
-	}
-	if cluster, _, err := pipeline.ClustersApi.GetCluster(context.Background(), orgId, id); err != nil {
-		cli.LogAPIError("get cluster", err, id)
-	} else {
-		Out1(cluster, []string{"Id", "Name", "Distribution", "Status", "CreatorName", "CreatedAt", "StatusMessage"})
-	}
-}
-
 var clusterShellCmd = &cobra.Command{
 	Run:     ClusterShell,
 	Use:     "shell [command]",
