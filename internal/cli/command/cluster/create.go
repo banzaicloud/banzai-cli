@@ -35,7 +35,9 @@ import (
 )
 
 type createOptions struct {
-	file string
+	file     string
+	wait     bool
+	interval int
 }
 
 // NewCreateCommand creates a new cobra.Command for `banzai cluster create`.
@@ -57,6 +59,8 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	flags := cmd.Flags()
 
 	flags.StringVarP(&options.file, "file", "f", "", "Cluster descriptor file")
+	flags.BoolVarP(&options.wait, "wait", "w", false, "Wait for cluster creation")
+	flags.IntVarP(&options.interval, "interval", "i", 10, "Interval in seconds for polling cluster status")
 
 	return cmd
 }
@@ -106,8 +110,24 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 	}
 
 	log.Info("cluster is being created")
-	log.Infof("you can check its status with the command `banzai cluster get %q`", out["name"])
-	Out1(cluster, []string{"Id", "Name"})
+	if options.wait {
+		for {
+			cluster, _, err := banzaiCli.Client().ClustersApi.GetCluster(context.Background(), orgID, cluster.Id)
+			if err != nil {
+				cli.LogAPIError("create cluster", err, out)
+			} else {
+				Out1(cluster, []string{"Id", "Name", "Status", "StatusMessage"})
+				if cluster.Status != "CREATING" {
+					return nil
+				}
+
+				time.Sleep(time.Duration(options.interval) * time.Second)
+			}
+		}
+	} else {
+		log.Infof("you can check its status with the command `banzai cluster get %q`", out["name"])
+		Out1(cluster, []string{"Id", "Name"})
+	}
 	return nil
 }
 
