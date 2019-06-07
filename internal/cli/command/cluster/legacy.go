@@ -101,7 +101,7 @@ func ClusterGet(cmd *cobra.Command, args []string) {
 var clusterShellCmd = &cobra.Command{
 	Run:     ClusterShell,
 	Use:     "shell [command]",
-	Aliases: []string{"sh"},
+	Aliases: []string{"sh", "exec"},
 	Short:   "Start a shell or run a command with the cluster configured as kubectl context",
 	Long: "The banzai CLI's cluster shell command starts your default shell, or runs your specified program on your local machine within the Kubernetes context of your cluster. " +
 		"You can either run the command without arguments to interactively select a cluster, and get an interactive shell, select the cluster with the --cluster-name flag, or specify the command to run.",
