@@ -43,7 +43,7 @@ var clusterOptions struct {
 
 var clusterListCmd = &cobra.Command{
 	Use:     "list",
-	Aliases: []string{"l"},
+	Aliases: []string{"l", "ls"},
 	Short:   "List clusters",
 	Run:     ClusterList,
 }
@@ -61,7 +61,7 @@ func ClusterList(cmd *cobra.Command, args []string) {
 
 var clusterGetCmd = &cobra.Command{
 	Use:     "get NAME",
-	Aliases: []string{"g"},
+	Aliases: []string{"g", "show"},
 	Short:   "Get cluster details",
 	Run:     ClusterGet,
 	Args:    cobra.ExactArgs(1),

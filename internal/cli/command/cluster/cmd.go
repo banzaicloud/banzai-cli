@@ -23,7 +23,7 @@ import (
 func NewClusterCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "cluster",
-		Aliases: []string{"clusters", "c"},
+		Aliases: []string{"clusters", "c", "cl"},
 		Short:   "Manage clusters",
 	}
 
