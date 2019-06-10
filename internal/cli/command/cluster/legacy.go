@@ -241,7 +241,7 @@ func ClusterShell(cmd *cobra.Command, args []string) {
 		fmt.Sprintf("BANZAI_CURRENT_CLUSTER_NAME=%s", cluster.Name),
 	}
 
-	log.Debug("Environment: %s", strings.Join(env, " "))
+	log.Debugf("Environment: %s", strings.Join(env, " "))
 	c.Env = append(os.Environ(), env...)
 
 	if err := c.Run(); err != nil {

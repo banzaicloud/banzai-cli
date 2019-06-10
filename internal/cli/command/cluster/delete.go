@@ -53,7 +53,7 @@ func NewDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 	return cmd
 }
 
-func runDelete(banzaiCli cli.Cli, options deleteOptions, args []string) error {
+func runDelete(_ cli.Cli, options deleteOptions, args []string) error {
 	client := InitPipeline()
 	orgId := GetOrgId(true)
 	clusters, _, err := client.ClustersApi.ListClusters(context.Background(), orgId)
