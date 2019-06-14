@@ -53,9 +53,9 @@ func NewDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 	return cmd
 }
 
-func runDelete(_ cli.Cli, options deleteOptions, args []string) error {
-	client := InitPipeline()
-	orgId := GetOrgId(true)
+func runDelete(banzaiCli cli.Cli, options deleteOptions, args []string) error {
+	client := banzaiCli.Client()
+	orgId := banzaiCli.Context().OrganizationID()
 	clusters, _, err := client.ClustersApi.ListClusters(context.Background(), orgId)
 	if err != nil {
 		cli.LogAPIError("list clusters", err, orgId)
@@ -72,7 +72,7 @@ func runDelete(_ cli.Cli, options deleteOptions, args []string) error {
 		return errors.New(fmt.Sprintf("cluster %q could not be found", args[0]))
 	}
 
-	if isInteractive() {
+	if banzaiCli.Interactive() {
 		if cluster, _, err := client.ClustersApi.GetCluster(context.Background(), orgId, id); err != nil {
 			cli.LogAPIError("get cluster", err, id)
 		} else {
