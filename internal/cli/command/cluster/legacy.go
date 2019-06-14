@@ -28,6 +28,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/goph/emperror"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -99,14 +100,14 @@ func ClusterGet(cmd *cobra.Command, args []string) {
 }
 
 var clusterShellCmd = &cobra.Command{
-	Run:     ClusterShell,
+	RunE:    ClusterShell,
 	Use:     "shell [command]",
-	Aliases: []string{"sh", "exec"},
+	Aliases: []string{"sh"},
 	Short:   "Start a shell or run a command with the cluster configured as kubectl context",
 	Long: "The banzai CLI's cluster shell command starts your default shell, or runs your specified program on your local machine within the Kubernetes context of your cluster. " +
 		"You can either run the command without arguments to interactively select a cluster, and get an interactive shell, select the cluster with the --cluster-name flag, or specify the command to run.",
 	Example: `
-			$ banzai cluster sh
+			$ banzai cluster shell
 			? Cluster: docs-example
 			[docs-example]$ helm list
 			...
@@ -142,7 +143,7 @@ func writeConfig(ctx context.Context, client *pipeline.APIClient, orgId, id int3
 	return
 }
 
-func ClusterShell(cmd *cobra.Command, args []string) {
+func ClusterShell(cmd *cobra.Command, args []string) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -150,17 +151,17 @@ func ClusterShell(cmd *cobra.Command, args []string) {
 	orgId := GetOrgId(true)
 	id := GetClusterId(orgId, true)
 	if id == 0 {
-		log.Fatalf("no cluster selected")
+		return errors.New("no cluster selected")
 	}
 
 	cluster, _, err := pipeline.ClustersApi.GetCluster(ctx, orgId, id)
 	if err != nil {
-		log.Fatalf("could not get cluster details: %v", err)
+		return emperror.Wrap(err, "could not get cluster details")
 	}
 
 	tmpfile, err := ioutil.TempFile("", "kubeconfig") // mode is 0600 by default
 	if err != nil {
-		log.Fatalf("could not write temporary file: %v", err)
+		return emperror.Wrap(err, "could not write temporary file")
 	}
 	defer os.Remove(tmpfile.Name())
 
@@ -193,7 +194,7 @@ func ClusterShell(cmd *cobra.Command, args []string) {
 	retry, err := writeConfig(ctx, pipeline, orgId, id, tmpfile)
 	if err != nil {
 		if !interactive || !retry {
-			log.Fatalf("%v", err)
+			return emperror.Wrap(err, "writing kubeconfig")
 		}
 
 		go func() {
@@ -220,7 +221,7 @@ func ClusterShell(cmd *cobra.Command, args []string) {
 
 	org, _, err := pipeline.OrganizationsApi.GetOrg(ctx, orgId)
 	if err != nil {
-		log.Fatalf("could not get organization: %v", err)
+		return emperror.Wrap(err, "could not get organization")
 	}
 
 	log.Printf("Running %v %v", shell, strings.Join(args, " "))
@@ -245,9 +246,17 @@ func ClusterShell(cmd *cobra.Command, args []string) {
 	c.Env = append(os.Environ(), env...)
 
 	if err := c.Run(); err != nil {
-		log.Errorf("Failed to run command: %v", err)
+		wrapped := emperror.Wrap(err, "failed to run command")
+
+		if err, ok := err.(interface{ ExitCode() int }); ok {
+			log.Error(wrapped)
+			os.Exit(err.ExitCode())
+		}
+
+		return wrapped
 	}
 	log.Printf("Command exited successfully")
+	return nil
 }
 
 func GetClusterId(org int32, ask bool) int32 {
