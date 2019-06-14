@@ -191,7 +191,7 @@ func isInteractive() bool {
 
 func runInternal(command, valuesFile, kubeconfigFile, tfdir string) error {
 
-	infoCmd := exec.Command("docker", "info", "-f", "{{eq .OperatingSystem \"Docker Desktop\"}}")
+	infoCmd := exec.Command("docker", "info", "-f", "{{or (eq .OperatingSystem \"Docker Desktop\") (eq .OperatingSystem \"Docker for Mac\")}}")
 
 	infoOuput, err := infoCmd.Output()
 	if err != nil {
