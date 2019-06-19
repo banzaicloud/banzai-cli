@@ -96,7 +96,7 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 			}
 
 			if orgID, orgFound = orgs[options.orgName]; !orgFound {
-				return errors.New(fmt.Sprintf("organization %q doesn't exist", options.orgName))
+				return errors.Errorf("organization %q doesn't exist", options.orgName)
 			}
 		} else if banzaiCli.Interactive() {
 			orgID = input.AskOrganization(banzaiCli)
