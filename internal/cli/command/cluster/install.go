@@ -19,21 +19,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewClusterCommand returns a cobra command for `cluster` subcommands.
-func NewClusterCommand(banzaiCli cli.Cli) *cobra.Command {
+// NewInstallCommand returns a cobra command for `install` subcommands.
+func NewInstallCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "cluster",
-		Aliases: []string{"clusters", "c", "cl"},
-		Short:   "Manage clusters",
+		Use:     "install",
+		Aliases: []string{"i"},
+		Short:   "Manage cluster installs",
 	}
 
 	cmd.AddCommand(
-		clusterListCmd,
-		clusterGetCmd,
-		NewCreateCommand(banzaiCli),
-		clusterShellCmd,
-		NewDeleteCommand(banzaiCli),
-		NewInstallCommand(banzaiCli),
+		NewSecretInstallCommand(banzaiCli),
 	)
 
 	return cmd
