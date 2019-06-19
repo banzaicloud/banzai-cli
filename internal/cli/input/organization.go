@@ -19,6 +19,7 @@ import (
 	"log"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/goph/emperror"
 	"gopkg.in/AlecAivazis/survey.v1"
 )
 
@@ -58,17 +59,16 @@ func GetOrganization(banzaiCli cli.Cli) int32 {
 
 // GetOrganizations returns a map with the list of organizations
 // where the key is the organization name and the value is the id
-func GetOrganizations(banzaiCli cli.Cli) map[string]int32 {
+func GetOrganizations(banzaiCli cli.Cli) (map[string]int32, error) {
 	orgs, _, err := banzaiCli.Client().OrganizationsApi.ListOrgs(context.Background())
 	if err != nil {
-		log.Fatalf("could not list organizations: %v", err)
+		return nil, emperror.Wrap(err, "could not list organizations")
 	}
-
 
 	orgMap := make(map[string]int32, len(orgs))
 	for _, org := range orgs {
 		orgMap[org.Name] = org.Id
 	}
 
-	return orgMap
+	return orgMap, nil
 }

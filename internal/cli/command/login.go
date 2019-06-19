@@ -15,15 +15,15 @@
 package command
 
 import (
-	"errors"
 	"fmt"
-	"log"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
+	"github.com/goph/emperror"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gopkg.in/AlecAivazis/survey.v1"
+	"github.com/pkg/errors"
 )
 
 type loginOptions struct {
@@ -90,10 +90,13 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 		var orgFound bool
 
 		if options.orgName != "" {
-			orgs := input.GetOrganizations(banzaiCli)
+			orgs, err := input.GetOrganizations(banzaiCli)
+			if err != nil {
+				return emperror.Wrap(err, "could not get organizations")
+			}
 
 			if orgID, orgFound = orgs[options.orgName]; !orgFound {
-				log.Fatalf("organization with name %q not exists", options.orgName)
+				return errors.New(fmt.Sprintf("organization %q doesn't exist", options.orgName))
 			}
 		}
 
