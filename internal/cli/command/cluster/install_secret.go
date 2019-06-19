@@ -152,7 +152,7 @@ func buildInteractiveInstallSecretRequest(options installSecretOptions, out *pip
 				&survey.Input{
 					Message: "Load a JSON or YAML file:",
 					Default: "skip",
-					Help:    "Give either a relative or an absolute path to a file containing a JSON or YAML Cluster creation request. Leave empty to cancel.",
+					Help:    "Give either a relative or an absolute path to a file containing a JSON or YAML secret installation request. Leave empty to cancel.",
 				},
 				&fileName,
 				nil,
