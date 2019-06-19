@@ -17,6 +17,7 @@ package command
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
@@ -26,7 +27,9 @@ import (
 )
 
 type loginOptions struct {
-	token string
+	token    string
+	endpoint string
+	orgName  string
 }
 
 // NewLoginCommand returns a cobra command for logging in.
@@ -47,12 +50,17 @@ func NewLoginCommand(banzaiCli cli.Cli) *cobra.Command {
 	flags := cmd.Flags()
 
 	flags.StringVarP(&options.token, "token", "t", "", "Pipeline token to save")
+	flags.StringVarP(&options.endpoint, "endpoint", "e", "", "Pipeline API endpoint to save")
+	flags.StringVarP(&options.orgName, "organization", "", "", "name of the default organization for current context")
 
 	return cmd
 }
 
 func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 	endpoint := viper.GetString("pipeline.basepath")
+	if options.endpoint != "" {
+		endpoint = options.endpoint
+	}
 	token := options.token
 
 	if banzaiCli.Interactive() {
@@ -79,6 +87,15 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 		viper.Set("pipeline.basepath", endpoint)
 
 		var orgID int32
+		var orgFound bool
+
+		if options.orgName != "" {
+			orgs := input.GetOrganizations(banzaiCli)
+
+			if orgID, orgFound = orgs[options.orgName]; !orgFound {
+				log.Fatalf("organization with name %q not exists", options.orgName)
+			}
+		}
 
 		if banzaiCli.Interactive() {
 			orgID = input.AskOrganization(banzaiCli)
