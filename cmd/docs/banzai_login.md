@@ -13,8 +13,9 @@ banzai login [flags]
 ### Options
 
 ```
-  -h, --help           help for login
-  -t, --token string   Pipeline token to save
+  -e, --endpoint string   Pipeline API endpoint to save
+  -h, --help              help for login
+  -t, --token string      Pipeline token to save
 ```
 
 ### Options inherited from parent commands
