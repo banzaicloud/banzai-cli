@@ -75,6 +75,11 @@ endif
 build-release: LDFLAGS += -w
 build-release: pre-build build ## Build a binary without debug information
 
+.PHONY: generate-banzai-cli-docs
+generate-banzai-cli-docs: ## Generate documentation for Banzai CLI
+	rm -rf cmd/docs/*.md
+	cd cmd/docs/ && go run -v generate.go
+
 .PHONY: check
 check: test lint ## Run tests and linters
 

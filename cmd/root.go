@@ -34,9 +34,10 @@ var rootOptions struct {
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:              "banzai",
-	Short:            "A command line client for the Banzai Cloud Pipeline platform.",
-	PersistentPreRun: preRun,
+	Use:               "banzai",
+	Short:             "A command line client for the Banzai Cloud Pipeline platform.",
+	PersistentPreRun:  preRun,
+	DisableAutoGenTag: true,
 }
 
 func preRun(cmd *cobra.Command, args []string) {
@@ -44,6 +45,7 @@ func preRun(cmd *cobra.Command, args []string) {
 		log.SetLevel(log.DebugLevel)
 	}
 }
+
 
 // Init is a temporary function to set initial values in the root cmd.
 func Init(version string, commitHash string, buildDate string, pipelineVersion string) {
@@ -56,6 +58,11 @@ func Init(version string, commitHash string, buildDate string, pipelineVersion s
 		buildDate,
 		pipelineVersion,
 	))
+}
+
+// GetRootCommand returns the cli root command
+func GetRootCommand() *cobra.Command {
+	return rootCmd
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
