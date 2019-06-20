@@ -51,7 +51,7 @@ func NewLoginCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	flags.StringVarP(&options.token, "token", "t", "", "Pipeline token to save")
 	flags.StringVarP(&options.endpoint, "endpoint", "e", "", "Pipeline API endpoint to save")
-	flags.StringVarP(&options.orgName, "organization", "", "", "name of the default organization for current context")
+	flags.StringVarP(&options.orgName, "organization", "", "", "Name of the organization to select as default")
 
 	return cmd
 }
