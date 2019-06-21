@@ -234,6 +234,7 @@ func buildInteractiveCreateSecretRequest(banzaiCli cli.Cli, options createSecret
 			// request validation just in case of cloud types
 			prompt := &survey.Confirm{
 				Message: "Do you want to validate this secret?",
+				Default: true,
 			}
 			_ = survey.AskOne(prompt, &options.validate, nil)
 		}
