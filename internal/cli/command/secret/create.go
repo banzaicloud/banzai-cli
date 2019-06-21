@@ -87,7 +87,8 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 		Use:     "create",
 		Aliases: []string{"c"},
 		Short:   "Create secret",
-		Long:    "Create secret",
+		Long:    "Create secret based on json stdin or interactive session",
+		SilenceUsage: true,
 		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runCreateSecret(banzaiCli, options)
