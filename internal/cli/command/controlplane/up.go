@@ -24,6 +24,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	"github.com/goph/emperror"
 	"github.com/mattn/go-isatty"
 	log "github.com/sirupsen/logrus"
@@ -90,7 +91,7 @@ func runUp(options createOptions) error {
 
 				continue
 			} else {
-				if err := unmarshal(raw, &out); err != nil {
+				if err := utils.Unmarshal(raw, &out); err != nil {
 					return emperror.Wrap(err, "failed to parse control plane descriptor")
 				}
 
@@ -133,7 +134,7 @@ func runUp(options createOptions) error {
 			return emperror.Wrapf(err, "failed to read %q", filename)
 		}
 
-		if err := unmarshal(raw, &out); err != nil {
+		if err := utils.Unmarshal(raw, &out); err != nil {
 			return emperror.Wrap(err, "failed to parse controlplane descriptor")
 		}
 	}

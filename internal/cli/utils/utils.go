@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cluster
+package utils
 
 import (
 	"bytes"
@@ -22,7 +22,7 @@ import (
 	"github.com/goph/emperror"
 )
 
-func unmarshal(raw []byte, data interface{}) error {
+func Unmarshal(raw []byte, data interface{}) error {
 	decoder := json.NewDecoder(bytes.NewReader(raw))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(data); err == nil {
