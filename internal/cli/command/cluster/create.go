@@ -27,6 +27,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
+	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -97,7 +98,7 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 			return emperror.Wrap(err, "failed to parse create cluster request")
 		}
 
-		if err := unmarshal(raw, &out); err != nil {
+		if err := utils.Unmarshal(raw, &out); err != nil {
 			return emperror.Wrap(err, "failed to unmarshal create cluster request")
 		}
 	}
@@ -187,7 +188,7 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 
 			continue
 		} else {
-			if err := unmarshal(raw, &out); err != nil {
+			if err := utils.Unmarshal(raw, &out); err != nil {
 				return emperror.Wrap(err, "failed to parse CreateClusterRequest")
 			}
 
@@ -376,7 +377,7 @@ func buildDefaultRequest(out map[string]interface{}) error {
 			return emperror.Wrap(err, "failed to marshal request template")
 		}
 
-		unmarshal(marshalled, &out)
+		utils.Unmarshal(marshalled, &out)
 	}
 	return nil
 }

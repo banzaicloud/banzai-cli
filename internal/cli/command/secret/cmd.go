@@ -31,6 +31,7 @@ func NewSecretCommand(banzaiCli cli.Cli) *cobra.Command {
 		NewListCommand(banzaiCli),
 		NewGetCommand(banzaiCli),
 		NewDeleteCommand(banzaiCli),
+		NewCreateCommand(banzaiCli),
 	)
 
 	return cmd

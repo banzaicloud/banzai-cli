@@ -26,6 +26,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
+	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -95,7 +96,7 @@ func runInstallSecret(banzaiCli cli.Cli, options installSecretOptions) error {
 			return emperror.Wrap(err, "failed to parse create cluster request")
 		}
 
-		if err := unmarshal(raw, &out); err != nil {
+		if err := utils.Unmarshal(raw, &out); err != nil {
 			return emperror.Wrap(err, "failed to unmarshal create cluster request")
 		}
 
@@ -169,7 +170,7 @@ func buildInteractiveInstallSecretRequest(options installSecretOptions, out *pip
 
 			continue
 		} else {
-			if err := unmarshal(raw, &out); err != nil {
+			if err := utils.Unmarshal(raw, &out); err != nil {
 				return emperror.Wrap(err, "failed to parse InstallSecretRequest")
 			}
 
