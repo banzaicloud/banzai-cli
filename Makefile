@@ -21,7 +21,7 @@ endif
 TEST_FORMAT = short-verbose
 endif
 
-PIPELINE_VERSION = 0.21.2
+PIPELINE_VERSION = 0.23.0
 
 # Dependency versions
 GOTESTSUM_VERSION = 0.3.3
