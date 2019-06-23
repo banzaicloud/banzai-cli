@@ -24,30 +24,29 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type getOptions struct {
+type getDeploymentOptions struct {
 	deploymentOptions
 
-	deploymentName string
-
+	deploymentReleaseName string
 }
 
 // NewDeploymentGetCommand returns a `*cobra.Command` for `banzai cluster deployment get` subcommand.
 func NewDeploymentGetCommand(banzaiCli cli.Cli) *cobra.Command {
-	options := getOptions{}
+	options := getDeploymentOptions{}
 
 	cmd := &cobra.Command{
-		Use:           "get NAME",
+		Use:           "get RELEASE-NAME",
 		Short:         "Get deployment details",
-		Long:          "In order to display deployment current values and notes use --output=(json|yaml)",
+		Long:          "Get the details of a deployment identified by deployment release name. In order to display deployment current values and notes use --output=(json|yaml)",
 		Args:          cobra.ExactArgs(1),
 		Aliases:       []string{"g", "show"},
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			options.format, _ = cmd.Flags().GetString("output")
-			options.deploymentName = args[0]
+			options.deploymentReleaseName = args[0]
 
-			return runGet(banzaiCli, options)
+			return runGetDeployment(banzaiCli, options)
 		},
 		Example: `
 			$ banzai cluster deployment get dns
@@ -71,13 +70,13 @@ func NewDeploymentGetCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	flags := cmd.Flags()
 
-	flags.StringVarP(&options.clusterName, "cluster-name", "n", "", "Name of the cluster to get deployments from. Specify either --cluster-name or --cluster. In interactive mode the CLI prompts the user to select a cluster")
-	flags.Int32VarP(&options.clusterID, "cluster", "", 0, "ID of the cluster to get deployments from. Specify either --cluster-name or --cluster. In interactive mode the CLI prompts the user to select a cluster")
+	flags.StringVarP(&options.clusterName, "cluster-name", "n", "", "Name of the cluster to get deployment from. Specify either --cluster-name or --cluster. In interactive mode the CLI prompts the user to select a cluster")
+	flags.Int32VarP(&options.clusterID, "cluster", "", 0, "ID of the cluster to get deployment from. Specify either --cluster-name or --cluster. In interactive mode the CLI prompts the user to select a cluster")
 
 	return cmd
 }
 
-func runGet(banzaiCli cli.Cli, options getOptions) error {
+func runGetDeployment(banzaiCli cli.Cli, options getDeploymentOptions) error {
 	orgID := input.GetOrganization(banzaiCli)
 
 	clusterID, err := getClusterID(banzaiCli, orgID, options.deploymentOptions)
@@ -85,7 +84,7 @@ func runGet(banzaiCli cli.Cli, options getOptions) error {
 		return err
 	}
 
-	deployment, _, err := banzaiCli.Client().DeploymentsApi.GetDeployment(context.Background(), orgID, clusterID,options.deploymentName, nil)
+	deployment, _, err := banzaiCli.Client().DeploymentsApi.GetDeployment(context.Background(), orgID, clusterID,options.deploymentReleaseName, nil)
 	if err != nil {
 		return emperror.Wrap(err, "could not get deployment details")
 	}

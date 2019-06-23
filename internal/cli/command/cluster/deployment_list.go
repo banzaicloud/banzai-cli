@@ -25,13 +25,13 @@ import (
 )
 
 
-type listOptions struct {
+type listDeploymentOptions struct {
 	deploymentOptions
 }
 
 // NewDeploymentListCommand returns a `*cobra.Command` for `banzai cluster deployment list` subcommand.
 func NewDeploymentListCommand(banzaiCli cli.Cli) *cobra.Command {
-	options := listOptions{}
+	options := listDeploymentOptions{}
 
 	cmd := &cobra.Command{
 		Use:           "list",
@@ -43,7 +43,7 @@ func NewDeploymentListCommand(banzaiCli cli.Cli) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			options.format, _ = cmd.Flags().GetString("output")
 
-			return runList(banzaiCli, options)
+			return runListDeployments(banzaiCli, options)
 		},
 		Example: `
 				$ banzai cluster deployment ls
@@ -82,7 +82,7 @@ func NewDeploymentListCommand(banzaiCli cli.Cli) *cobra.Command {
 	return cmd
 }
 
-func runList(banzaiCli cli.Cli, options listOptions) error {
+func runListDeployments(banzaiCli cli.Cli, options listDeploymentOptions) error {
 	orgID := input.GetOrganization(banzaiCli)
 
 	clusterID, err := getClusterID(banzaiCli, orgID, options.deploymentOptions)

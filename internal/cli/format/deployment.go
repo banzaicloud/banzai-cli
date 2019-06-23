@@ -20,12 +20,12 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli/output"
 )
 
-func DeploymentsWrite(out io.Writer, format string, color bool, data interface{}) error {
+func deploymentWrite(out io.Writer, format string, color bool, data interface{}, fields []string) error {
 	ctx := &output.Context{
 		Out:    out,
 		Color:  color,
 		Format: format,
-		Fields: []string{"Namespace", "ReleaseName", "Status", "Version", "UpdatedAt", "CreatedAt", "ChartName", "ChartVersion"},
+		Fields: fields,
 	}
 
 	if format == "json" || format == "yaml" {
@@ -40,7 +40,20 @@ func DeploymentsWrite(out io.Writer, format string, color bool, data interface{}
 	return nil
 }
 
+
+func DeploymentsWrite(out io.Writer, format string, color bool, data interface{}) error {
+	fields := []string{"Namespace", "ReleaseName", "Status", "Version", "UpdatedAt", "CreatedAt", "ChartName", "ChartVersion"}
+
+	return deploymentWrite(out, format, color, data, fields)
+}
+
 func DeploymentWrite(out io.Writer, format string, color bool, data interface{}) error {
 	return DeploymentsWrite(out, format, color, []interface{}{data})
+}
+
+func DeploymentDeletedWrite(out io.Writer, format string, color bool, data interface{}) error {
+	fields := []string{"Name", "Status", "Message"}
+
+	return deploymentWrite(out, format, color, []interface{}{data}, fields)
 }
 

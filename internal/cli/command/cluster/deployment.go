@@ -25,9 +25,11 @@ import (
 )
 
 type deploymentOptions struct {
-	clusterName    string
-	clusterID      int32
+	clusterName string
+	clusterID   int32
 
+	// https://github.com/golang/lint/issues/433
+	// nolint: structcheck
 	format string
 }
 
@@ -41,6 +43,7 @@ func NewDeploymentCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	cmd.AddCommand(NewDeploymentListCommand(banzaiCli))
 	cmd.AddCommand(NewDeploymentGetCommand(banzaiCli))
+	cmd.AddCommand(NewDeploymentDeleteCommand(banzaiCli))
 
 	return cmd
 }
