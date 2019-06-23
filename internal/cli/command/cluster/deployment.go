@@ -15,9 +15,21 @@
 package cluster
 
 import (
+	"context"
+
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/banzaicloud/banzai-cli/internal/cli/input"
+	"github.com/goph/emperror"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
+
+type deploymentOptions struct {
+	clusterName    string
+	clusterID      int32
+
+	format string
+}
 
 // NewDeploymentCommand returns a `*cobra.Command` for `banzai cluster deployment` subcommands.
 func NewDeploymentCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -28,6 +40,50 @@ func NewDeploymentCommand(banzaiCli cli.Cli) *cobra.Command {
 	}
 
 	cmd.AddCommand(NewDeploymentListCommand(banzaiCli))
+	cmd.AddCommand(NewDeploymentGetCommand(banzaiCli))
+
 	return cmd
+}
+
+// getClusterID returns the ID of the cluster selected by user either through command line flags
+// or through the interactive prompt
+func getClusterID(banzaiCli cli.Cli, orgID int32, options deploymentOptions) (int32, error) {
+	var clusterID int32
+	var err error
+
+	if banzaiCli.Interactive() {
+		clusterID, err = input.AskCluster(banzaiCli, orgID, options.clusterID, options.clusterName)
+		if err != nil {
+			return 0, emperror.Wrap(err, "could not ask for a cluster")
+		}
+	} else if options.clusterID > 0 {
+		// check if cluster exists
+		_, err = banzaiCli.Client().ClustersApi.GetClusterStatus(context.Background(), orgID, options.clusterID)
+		if err == nil {
+			clusterID = options.clusterID
+		}
+	} else if options.clusterName != "" {
+		// check if cluster exists
+		clusters, _, err := banzaiCli.Client().ClustersApi.ListClusters(context.Background(), orgID)
+		if err != nil {
+			cli.LogAPIError("list clusters", err, orgID)
+			return 0, emperror.Wrap(err, "could not list clusters")
+		}
+
+		for _, cluster := range clusters {
+			if cluster.Name == options.clusterName {
+				clusterID = cluster.Id
+				break
+			}
+		}
+	} else {
+		return 0, errors.New("No cluster is specified. Use the --cluster or --cluster-name option or run the CLI in interactive mode")
+	}
+
+	if clusterID == 0 {
+		return 0, errors.New("cluster could not be found")
+	}
+
+	return clusterID, nil
 }
 

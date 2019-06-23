@@ -25,13 +25,22 @@ func DeploymentsWrite(out io.Writer, format string, color bool, data interface{}
 		Out:    out,
 		Color:  color,
 		Format: format,
-		Fields: []string{"Namespace", "ReleaseName", "Status", "Version", "ChartName", "ChartVersion"},
+		Fields: []string{"Namespace", "ReleaseName", "Status", "Version", "UpdatedAt", "CreatedAt", "ChartName", "ChartVersion"},
+	}
+
+	if format == "json" || format == "yaml" {
+		ctx.Fields = append(ctx.Fields, "Values", "Notes")
 	}
 
 	err := output.Output(ctx, data)
 	if err != nil {
-
+		return err
 	}
 
 	return nil
 }
+
+func DeploymentWrite(out io.Writer, format string, color bool, data interface{}) error {
+	return DeploymentsWrite(out, format, color, []interface{}{data})
+}
+
