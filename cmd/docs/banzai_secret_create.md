@@ -4,7 +4,7 @@ Create secret
 
 ### Synopsis
 
-Create secret
+Create a secret in Pipeline's secret store interactively, or based on a json request from stdin or a file
 
 ```
 banzai secret create [flags]
@@ -28,21 +28,35 @@ banzai secret create [flags]
 
 	Create secret with flags
 	---
-	$ banzai secret create --name mysecretname --type password --tags=cli
+	$ banzai secret create --name mysecretname --type password --tag=cli --tag=my-application
 	? Set 'username' field: myusername
 	? Set 'password' field: mypassword
+
+	Create secret via json
+	---
+	$ banzai secret create <<EOF
+	> {
+	>	"name": "mysecretname",
+	>	"type": "password",
+	>	"values": {
+	>		"username": "myusername",
+	>		"password": "mypassword"
+	>	},
+	>	"tags":[ "cli", "my-application" ]
+	> }
+	> EOF
 		
 ```
 
 ### Options
 
 ```
-  -f, --file string        Secret creation descriptor file
-  -h, --help               help for create
-  -n, --name string        Name of the secret
-      --tags stringArray   Tags to add to the secret
-  -t, --type string        Type of the secret
-  -v, --validate string    Secret validation (true|false)
+  -f, --file string       Secret creation descriptor file
+  -h, --help              help for create
+  -n, --name string       Name of the secret
+      --tag stringArray   Tags to add to the secret
+  -t, --type string       Type of the secret
+  -v, --validate string   Secret validation (true|false)
 ```
 
 ### Options inherited from parent commands
