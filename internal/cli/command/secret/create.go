@@ -26,6 +26,7 @@ import (
 	"github.com/antihax/optional"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/banzaicloud/banzai-cli/internal/cli/format"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	"github.com/goph/emperror"
@@ -50,11 +51,12 @@ type createSecretOptions struct {
 	secretType string
 	tags       []string
 	validate   string
+	format     string
 }
 
 // secretFieldQuestion contains all necessary field for a secret question (any type except generic)
 type secretFieldQuestion struct {
-	input     *survey.Input
+	input     *survey.Password
 	name      string
 	output    string
 	validator survey.Validator
@@ -80,18 +82,33 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	Create secret with flags
 	---
-	$ banzai secret create --name mysecretname --type password --tags=cli
+	$ banzai secret create --name mysecretname --type password --tag=cli --tag=my-application
 	? Set 'username' field: myusername
 	? Set 'password' field: mypassword
+
+	Create secret via json
+	---
+	$ banzai secret create <<EOF
+	> {
+	>	"name": "mysecretname",
+	>	"type": "password",
+	>	"values": {
+	>		"username": "myusername",
+	>		"password": "mypassword"
+	>	},
+	>	"tags":[ "cli", "my-application" ]
+	> }
+	> EOF
 		`,
-		Use:     "create",
-		Aliases: []string{"c"},
-		Short:   "Create secret",
-		Long:    "Create secret based on json stdin or interactive session",
+		Use:          "create",
+		Aliases:      []string{"c"},
+		Short:        "Create secret",
+		Long:         "Create a secret in Pipeline's secret store interactively, or based on a json request from stdin or a file",
 		SilenceUsage: true,
-		Args:    cobra.ExactArgs(0),
+		Args:         cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runCreateSecret(banzaiCli, options)
+			options.format, _ = cmd.Flags().GetString("output")
+			return runCreateSecret(banzaiCli, &options)
 		},
 	}
 
@@ -100,14 +117,14 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	flags.StringVarP(&options.file, "file", "f", "", "Secret creation descriptor file")
 	flags.StringVarP(&options.secretName, "name", "n", "", "Name of the secret")
 	flags.StringVarP(&options.secretType, "type", "t", "", "Type of the secret")
-	flags.StringArrayVarP(&options.tags, "tags", "", []string{}, "Tags to add to the secret")
+	flags.StringArrayVarP(&options.tags, "tag", "", []string{}, "Tags to add to the secret")
 	flags.StringVarP(&options.validate, "validate", "v", "", "Secret validation (true|false)")
 
 	return cmd
 }
 
 // runCreateSecret starts to get secret properties from the user via file or survey
-func runCreateSecret(banzaiCli cli.Cli, options createSecretOptions) error {
+func runCreateSecret(banzaiCli cli.Cli, options *createSecretOptions) error {
 	out := &pipeline.CreateSecretRequest{}
 
 	if err := getCreateSecretRequest(banzaiCli, options, out); err != nil {
@@ -130,12 +147,12 @@ func runCreateSecret(banzaiCli cli.Cli, options createSecretOptions) error {
 		return emperror.Wrap(err, "failed to create secret")
 	}
 
-	log.Infof("Secret (%s) created with ID: %s", out.Name, response.Id)
+	format.SecretWrite(banzaiCli.Out(), options.format, banzaiCli.Color(), response)
 
 	return nil
 }
 
-func getCreateSecretRequest(banzaiCli cli.Cli, options createSecretOptions, out *pipeline.CreateSecretRequest) error {
+func getCreateSecretRequest(banzaiCli cli.Cli, options *createSecretOptions, out *pipeline.CreateSecretRequest) error {
 	if banzaiCli.Interactive() {
 		return buildInteractiveCreateSecretRequest(banzaiCli, options, out)
 	} else {
@@ -193,7 +210,7 @@ func validateCreateSecretRequest(val interface{}) error {
 	return emperror.Wrap(decoder.Decode(&pipeline.CreateSecretRequest{}), "invalid request")
 }
 
-func buildInteractiveCreateSecretRequest(banzaiCli cli.Cli, options createSecretOptions, out *pipeline.CreateSecretRequest) error {
+func buildInteractiveCreateSecretRequest(banzaiCli cli.Cli, options *createSecretOptions, out *pipeline.CreateSecretRequest) error {
 
 	if len(options.file) != 0 {
 		if err := readCreateSecretRequestFromFile(options.file, out); err != nil {
@@ -212,11 +229,11 @@ func buildInteractiveCreateSecretRequest(banzaiCli cli.Cli, options createSecret
 		log.Fatalf("could not list secret types: %v", err)
 	}
 
-	surveySecretName(&options)
+	surveySecretName(options)
 
-	surveySecretType(&options, allowedTypes)
+	surveySecretType(options, allowedTypes)
 
-	if err := surveySecretFields(&options, allowedTypes, out); err != nil {
+	if err := surveySecretFields(options, allowedTypes, out); err != nil {
 		log.Fatalf("could not get secret fields: %v", err)
 	}
 
@@ -233,11 +250,17 @@ func buildInteractiveCreateSecretRequest(banzaiCli cli.Cli, options createSecret
 			options.secretType == TypeGoogle ||
 			options.secretType == TypeOracle {
 			// request validation just in case of cloud types
+			options.validate = "true"
+			var v bool
 			prompt := &survey.Confirm{
 				Message: "Do you want to validate this secret?",
+				Help:    "Pipeline can optionally try to connect to the cloud provider, and execute some basic tests.",
 				Default: true,
 			}
-			_ = survey.AskOne(prompt, &options.validate, nil)
+			_ = survey.AskOne(prompt, &v, nil)
+			if !v {
+				options.validate = "false"
+			}
 		}
 	}
 
@@ -254,7 +277,7 @@ func surveyGenericSecretType(out *pipeline.CreateSecretRequest) {
 		var key string
 		_ = survey.AskOne(
 			&survey.Input{
-				Message: "Set key field:",
+				Message: "Key of field:",
 			},
 			&key,
 			survey.Required,
@@ -264,7 +287,7 @@ func surveyGenericSecretType(out *pipeline.CreateSecretRequest) {
 		var value string
 		_ = survey.AskOne(
 			&survey.Input{
-				Message: "Set value field:",
+				Message: "Value of field:",
 			},
 			&value,
 			survey.Required,
@@ -340,8 +363,8 @@ func surveySecretFields(options *createSecretOptions, allowedTypes map[string]pi
 			// create question input
 			questions[index] = secretFieldQuestion{
 				name: f.Name,
-				input: &survey.Input{
-					Message: fmt.Sprintf("Set '%s' field:", f.Name),
+				input: &survey.Password{
+					Message: f.Name,
 					Help:    f.Description,
 				},
 				validator: v,
@@ -368,7 +391,7 @@ func surveySecretFields(options *createSecretOptions, allowedTypes map[string]pi
 }
 
 // surveyTags starts to get tag(s) for the secret until `skip`
-func surveyTags(options createSecretOptions) {
+func surveyTags(options *createSecretOptions) {
 
 	if options.tags == nil || len(options.tags) == 0 {
 		isTagAdd := false
