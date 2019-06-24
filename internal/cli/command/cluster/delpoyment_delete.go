@@ -21,7 +21,9 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli/format"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/goph/emperror"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 type deleteDeploymentOptions struct {
@@ -77,14 +79,20 @@ func runDeleteDeployment(banzaiCli cli.Cli, options deleteDeploymentOptions) err
 		return err
 	}
 
+	confirmed := false
+	survey.AskOne(&survey.Confirm{Message: "Do you want to DELETE the deployment?"}, &confirmed, nil)
+	if !confirmed {
+		return errors.New("deletion cancelled")
+	}
+
 	deployment, _, err := banzaiCli.Client().DeploymentsApi.DeleteDeployment(context.Background(), orgID, clusterID, options.deploymentReleaseName)
 	if err != nil {
 		return emperror.Wrap(err, "could not delete deployment")
 	}
 
-	err = format.DeploymentDeletedWrite(banzaiCli.Out(), options.format, banzaiCli.Color(), deployment)
+	err = format.DeploymentDeleteResponseWrite(banzaiCli.Out(), options.format, banzaiCli.Color(), deployment)
 	if err != nil {
-		return emperror.Wrap(err, "cloud not print out deployment status")
+		return emperror.Wrap(err, "cloud not print out deployment deletion status")
 	}
 
 	return nil

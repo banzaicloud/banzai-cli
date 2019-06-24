@@ -15,10 +15,14 @@
 package cluster
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
+	"github.com/ghodss/yaml"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -43,6 +47,7 @@ func NewDeploymentCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	cmd.AddCommand(NewDeploymentListCommand(banzaiCli))
 	cmd.AddCommand(NewDeploymentGetCommand(banzaiCli))
+	cmd.AddCommand(NewDeploymentCreateCommand(banzaiCli))
 	cmd.AddCommand(NewDeploymentDeleteCommand(banzaiCli))
 
 	return cmd
@@ -88,5 +93,25 @@ func getClusterID(banzaiCli cli.Cli, orgID int32, options deploymentOptions) (in
 	}
 
 	return clusterID, nil
+}
+
+func unmarshalCreateUpdateDeploymentRequest(data []byte) (*pipeline.CreateUpdateDeploymentRequest, error) {
+	req := pipeline.CreateUpdateDeploymentRequest{}
+
+	// try json
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	var errJSON error
+	if errJSON = decoder.Decode(&req); errJSON == nil {
+		return &req, nil
+	}
+
+	// try yaml
+	var errYaml error
+	if errYaml = yaml.Unmarshal(data, &req); errYaml == nil {
+		return &req, nil
+	}
+
+	return nil, errors.Errorf("JSON unmarshal failed: %v, YAML unmarshal failed: %v ", errJSON, errYaml)
 }
 

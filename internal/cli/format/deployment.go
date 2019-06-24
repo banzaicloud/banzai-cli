@@ -51,8 +51,14 @@ func DeploymentWrite(out io.Writer, format string, color bool, data interface{})
 	return DeploymentsWrite(out, format, color, []interface{}{data})
 }
 
-func DeploymentDeletedWrite(out io.Writer, format string, color bool, data interface{}) error {
+func DeploymentDeleteResponseWrite(out io.Writer, format string, color bool, data interface{}) error {
 	fields := []string{"Name", "Status", "Message"}
+
+	return deploymentWrite(out, format, color, []interface{}{data}, fields)
+}
+
+func DeploymentCreateUpdateResponseWrite(out io.Writer, format string, color bool, data interface{}) error {
+	fields := []string{"ReleaseName", "Notes"}
 
 	return deploymentWrite(out, format, color, []interface{}{data}, fields)
 }

@@ -28,5 +28,8 @@ Manage deployments
 ### SEE ALSO
 
 * [banzai cluster](banzai_cluster.md)	 - Manage clusters
+* [banzai cluster deployment create](banzai_cluster_deployment_create.md)	 - Creates a deployment
+* [banzai cluster deployment delete](banzai_cluster_deployment_delete.md)	 - Delete a deployment
+* [banzai cluster deployment get](banzai_cluster_deployment_get.md)	 - Get deployment details
 * [banzai cluster deployment list](banzai_cluster_deployment_list.md)	 - List deployments
 
