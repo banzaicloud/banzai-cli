@@ -24,9 +24,7 @@ import (
 )
 
 // AskCluster prompts the user for a cluster
-// defaultClusterID is id of the cluster to be preselected in the show cluster list user can select a cluster from
-// defaultClusterName is the name of the cluster to be preselected in the show cluster list user can select a cluster from
-func AskCluster(banzaiCli cli.Cli, orgID int32, defaultClusterID int32, defaultClusterName string) (int32, error) {
+func AskCluster(banzaiCli cli.Cli, orgID int32) (int32, error) {
 	var clusterID int32
 
 	clusters, _, err := banzaiCli.Client().ClustersApi.ListClusters(context.Background(), orgID)
@@ -39,23 +37,13 @@ func AskCluster(banzaiCli cli.Cli, orgID int32, defaultClusterID int32, defaultC
 		return 0, errors.New("no clusters found in the current organization")
 	}
 
-	preSelectCluster := ""
-
-	for _, cluster := range clusters {
-		if cluster.Id == defaultClusterID || cluster.Name == defaultClusterName {
-			preSelectCluster = cluster.Name
-			break
-		}
-	}
-
-
 	clusterSurveyInput := make([]string, len(clusters))
 	for i, cluster := range clusters {
 		clusterSurveyInput[i] = cluster.Name
 	}
 
 	clusterName := ""
-	err = survey.AskOne(&survey.Select{Message: "Cluster", Options: clusterSurveyInput, Default: preSelectCluster}, &clusterName, survey.Required)
+	err = survey.AskOne(&survey.Select{Message: "Cluster", Options: clusterSurveyInput}, &clusterName, survey.Required)
 	if err != nil {
 		return 0, emperror.Wrap(err, "error occurred while selecting cluster")
 	}

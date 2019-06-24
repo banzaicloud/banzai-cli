@@ -21,7 +21,7 @@ banzai cluster deployment delete RELEASE-NAME [flags]
 			Name  			 Status  Message            
 			test-deployment  200     Deployment deleted!
 
-			$ banzai cluster deployment delete test-deployment --cluster-name pke-cluster-1 --no-interactive
+			$ banzai cluster deployment delete test-deployment --cluster-name pke-cluster-1
 			Name  			 Status  Message            
 			test-deployment  200     Deployment deleted!
 ```

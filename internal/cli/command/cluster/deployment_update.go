@@ -25,20 +25,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type createDeploymentOptions struct {
+type updateDeploymentOptions struct {
 	deploymentOptions
 
-	file string
+	file        string
+	releaseName string
 }
 
-// NewDeploymentCreateCommand returns a `*cobra.Command` for `banzai cluster deployment create` subcommand.
-func NewDeploymentCreateCommand(banzaiCli cli.Cli) *cobra.Command {
-	options := createDeploymentOptions{}
+// NewDeploymentUpdateCommand returns a `*cobra.Command` for `banzai cluster deployment create` subcommand.
+func NewDeploymentUpdateCommand(banzaiCli cli.Cli) *cobra.Command {
+	options := updateDeploymentOptions{}
 
 	cmd := &cobra.Command{
-		Use:           "create",
-		Short:         "Creates a deployment",
-		Long:          "Creates a deployment based on deployment descriptor JSON read from stdin or file.",
+		Use:           "update",
+		Short:         "Updates a deployment",
+		Long:          "Updates a deployment identified by release name using a deployment descriptor JSON read from stdin or file.",
 		Args:          cobra.MaximumNArgs(1),
 		Aliases:       []string{"c"},
 		SilenceUsage:  true,
@@ -46,45 +47,43 @@ func NewDeploymentCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			options.format, _ = cmd.Flags().GetString("output")
 
-			return runCreateDeployment(banzaiCli, options)
+			return runUpdateDeployment(banzaiCli, options)
 		},
 		Example: `
-        # Create deployment from file using interactive mode
+		# Update deployment from file using interactive mode
         ----------------------------------------------------
-        $ banzai cluster deployment create
-        ? Cluster  [Use arrows to move, type to filter]
-        > pke-cluster-1
-        ? Load a JSON or YAML file: [? for help] /var/tmp/wordpress.json
+        $ banzai cluster deployment update
+        ? Cluster pke-cluster-1
+        ? Release name  [Use arrows to move, type to filter]
+        > hazelcast-1
+        exacerbated-narwhal
+        luminous-hare
 
-        ReleaseName       Notes
-        torpid-armadillo  V29yZHByZXNzIGRlcGxveW1lbnQgbm90ZXMK
+        ? Load a JSON or YAML file: [? for help] /var/tmp/hazelcast.json
 
+        ReleaseName  Notes
+        hazelcast-1  aGF6ZWxjYXN0LTEgcmVsZWFzZQo=
 
-        # Create deployment from stdin
+        # Update deployment from stdin
         ------------------------------
-        $ banzai cluster deployment create --cluster-name pke-cluster-1 -f -<<EOF
+        $ banzai cluster deployment update --cluster-name pke-cluster-1 --release-name hazelcast-1 -f -<<EOF
         > {
-        >   "name": "stable/wordpress",
-        >   "releasename": "",
-        >   "namespace": "default",
-        >   "version": "5.12.4",
-        >   "dryRun": false
+        >     "name": "stable/hazelcast",
+        >     "version": "1.3.3",
+        >     "reuseValues": true,
+        >     "values": {
+        >         "cluster": {
+        >             "memberCount": 5
+        >         }
+        >     } 
         > }
         > EOF
 
-        ReleaseName       Notes
-        lumbering-lizard  V29yZHByZXNzIGRlcGxveW1lbnQgbm90ZXMK  
+        $ echo '{"name":"stable/hazelcast","version":"1.3.3","reuseValues":true,"values":{"cluster":{"memberCount":5}}}' | banzai cluster deployment update --cluster-name pke-cluster-1 --release-name hazelcast-1
 
-        $ echo '{"name":"stable/wordpress","releasename":"my-wordpress-1"}' |  banzai cluster deployment create --cluster-name pke-cluster-1
-        ReleaseName     Notes
-        my-wordpress-1  V29yZHByZXNzIGRlcGxveW1lbnQgbm90ZXMK
-
-        # Create deployment from file
+        # Update deployment from file
         -----------------------------
-        $ banzai cluster deployment create --cluster-name pke-cluster-1 --file /var/tmp/wordpress.json --no-interactive
-
-        ReleaseName         Notes
-        eyewitness-opossum  V29yZHByZXNzIGRlcGxveW1lbnQgbm90ZXMK`,
+        $ banzai cluster deployment update --cluster-name pke-cluster-1 --release-name hazelcast-1 -f /var/tmp/hazelcast.json`,
 	}
 
 	flags := cmd.Flags()
@@ -92,11 +91,12 @@ func NewDeploymentCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	flags.StringVarP(&options.clusterName, "cluster-name", "n", "", "Name of the cluster to delete deployment from. Specify either --cluster-name or --cluster. In interactive mode the CLI prompts the user to select a cluster")
 	flags.Int32VarP(&options.clusterID, "cluster", "", 0, "ID of the cluster to delete deployment from. Specify either --cluster-name or --cluster. In interactive mode the CLI prompts the user to select a cluster")
 	flags.StringVarP(&options.file, "file", "f", "", "Deployment descriptor file")
+	flags.StringVarP(&options.releaseName, "release-name", "r", "", "Deployment release name")
 
 	return cmd
 }
 
-func runCreateDeployment(banzaiCli cli.Cli, options createDeploymentOptions) error {
+func runUpdateDeployment(banzaiCli cli.Cli, options updateDeploymentOptions) error {
 	orgID := input.GetOrganization(banzaiCli)
 
 	clusterID, err := getClusterID(banzaiCli, orgID, options.deploymentOptions)
@@ -104,24 +104,32 @@ func runCreateDeployment(banzaiCli cli.Cli, options createDeploymentOptions) err
 		return err
 	}
 
+	releaseName, err := getReleaseName(banzaiCli, orgID, clusterID, options.releaseName)
+	if err != nil {
+		return err
+	}
+
 	req, err := buildCreateUpdateDeploymentRequest(banzaiCli, options.file)
 	if err != nil {
-		return emperror.Wrap(err, "could not prepare deployment creation request")
+		return emperror.Wrap(err, "could not prepare deployment update request")
 	}
 
 	if req == nil {
 		return errors.New("missing deployment descriptor")
 	}
 
-	response, _, err := banzaiCli.Client().DeploymentsApi.CreateDeployment(context.Background(), orgID, clusterID, *req)
+	response, _, err := banzaiCli.Client().DeploymentsApi.UpdateDeployment(context.Background(), orgID, clusterID, releaseName, *req)
 	if err != nil {
-		return emperror.Wrap(err, "could not create deployment")
+		return emperror.Wrap(err, "could not update deployment")
 	}
 
 	err = format.DeploymentCreateUpdateResponseWrite(banzaiCli.Out(), options.format, banzaiCli.Color(), response)
 	if err != nil {
-		return emperror.Wrap(err, "cloud not print out deployment create response")
+		return emperror.Wrap(err, "cloud not print out deployment update response")
 	}
 
 	return nil
 }
+
+
+

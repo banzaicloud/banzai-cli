@@ -21,12 +21,12 @@ banzai cluster deployment get RELEASE-NAME [flags]
 			Namespace        ReleaseName  Status    Version  UpdatedAt             CreatedAt             ChartName     ChartVersion
 			pipeline-system  dns          DEPLOYED  1        2019-06-23T06:52:24Z  2019-06-23T06:52:24Z  external-dns  1.6.2 
 
-			$ banzai cluster deployment get dns --cluster-name pke-cluster-1 --no-interactive
+			$ banzai cluster deployment get dns --cluster-name pke-cluster-1
 			
 			Namespace        ReleaseName  Status    Version  UpdatedAt             CreatedAt             ChartName     ChartVersion
 			pipeline-system  dns          DEPLOYED  1        2019-06-23T06:52:24Z  2019-06-23T06:52:24Z  external-dns  1.6.2
 
-			$ banzai cluster deployment get dns --cluster 1846 --no-interactive
+			$ banzai cluster deployment get dns --cluster 1846
 			
 			Namespace        ReleaseName  Status    Version  UpdatedAt             CreatedAt             ChartName     ChartVersion
 			pipeline-system  dns          DEPLOYED  1        2019-06-23T06:52:24Z  2019-06-23T06:52:24Z  external-dns  1.6.2 

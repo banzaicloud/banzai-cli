@@ -57,7 +57,7 @@ func NewDeploymentListCommand(banzaiCli cli.Cli) *cobra.Command {
 				pipeline-system  hpa-operator    DEPLOYED  1        2019-06-23T06:52:29Z  2019-06-23T06:52:29Z  hpa-operator                  0.0.10      
 				kube-system      autoscaler      DEPLOYED  1        2019-06-23T06:52:28Z  2019-06-23T06:52:28Z  cluster-autoscaler            0.12.3      
 
-				$ banzai cluster deployment ls --cluster-name pke-cluster-1 --no-interactive
+				$ banzai cluster deployment ls --cluster-name pke-cluster-1
 
 				Namespace        ReleaseName     Status    Version  UpdatedAt             CreatedAt             ChartName                     ChartVersion
 				pipeline-system  anchore         DEPLOYED  1        2019-06-23T06:53:00Z  2019-06-23T06:53:00Z  anchore-policy-validator      0.3.5       
@@ -65,7 +65,7 @@ func NewDeploymentListCommand(banzaiCli cli.Cli) *cobra.Command {
 				pipeline-system  hpa-operator    DEPLOYED  1        2019-06-23T06:52:29Z  2019-06-23T06:52:29Z  hpa-operator                  0.0.10      
 				kube-system      autoscaler      DEPLOYED  1        2019-06-23T06:52:28Z  2019-06-23T06:52:28Z  cluster-autoscaler            0.12.3
 
-				$ banzai cluster deployment ls --cluster 1846 --no-interactive
+				$ banzai cluster deployment ls --cluster 1846
 
 				Namespace        ReleaseName     Status    Version  UpdatedAt             CreatedAt             ChartName                     ChartVersion
 				pipeline-system  anchore         DEPLOYED  1        2019-06-23T06:53:00Z  2019-06-23T06:53:00Z  anchore-policy-validator      0.3.5       

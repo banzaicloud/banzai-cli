@@ -44,9 +44,9 @@ banzai cluster deployment create [flags]
         ReleaseName     Notes
         my-wordpress-1  V29yZHByZXNzIGRlcGxveW1lbnQgbm90ZXMK
 
-        # Create deployment from file using non interactive mode
-        --------------------------------------------------------
-        $ build/banzai cluster deployment create --cluster-name pke-cluster-1 --file /var/tmp/wordpress.json --no-interactive
+        # Create deployment from file
+        -----------------------------
+        $ banzai cluster deployment create --cluster-name pke-cluster-1 --file /var/tmp/wordpress.json --no-interactive
 
         ReleaseName         Notes
         eyewitness-opossum  V29yZHByZXNzIGRlcGxveW1lbnQgbm90ZXMK

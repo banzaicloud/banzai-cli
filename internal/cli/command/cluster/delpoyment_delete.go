@@ -29,7 +29,7 @@ import (
 type deleteDeploymentOptions struct {
 	deploymentOptions
 
-	deploymentReleaseName string
+	releaseName string
 }
 
 // NewDeploymentDeleteCommand returns a `*cobra.Command` for `banzai cluster deployment delete` subcommand.
@@ -46,7 +46,7 @@ func NewDeploymentDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			options.format, _ = cmd.Flags().GetString("output")
-			options.deploymentReleaseName = args[0]
+			options.releaseName = args[0]
 
 			return runDeleteDeployment(banzaiCli, options)
 		},
@@ -58,7 +58,7 @@ func NewDeploymentDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 			Name  			 Status  Message            
 			test-deployment  200     Deployment deleted!
 
-			$ banzai cluster deployment delete test-deployment --cluster-name pke-cluster-1 --no-interactive
+			$ banzai cluster deployment delete test-deployment --cluster-name pke-cluster-1
 			Name  			 Status  Message            
 			test-deployment  200     Deployment deleted!`,
 	}
@@ -79,13 +79,18 @@ func runDeleteDeployment(banzaiCli cli.Cli, options deleteDeploymentOptions) err
 		return err
 	}
 
+	releaseName, err := getReleaseName(banzaiCli, orgID, clusterID, options.releaseName)
+	if err != nil {
+		return err
+	}
+
 	confirmed := false
 	survey.AskOne(&survey.Confirm{Message: "Do you want to DELETE the deployment?"}, &confirmed, nil)
 	if !confirmed {
 		return errors.New("deletion cancelled")
 	}
 
-	deployment, _, err := banzaiCli.Client().DeploymentsApi.DeleteDeployment(context.Background(), orgID, clusterID, options.deploymentReleaseName)
+	deployment, _, err := banzaiCli.Client().DeploymentsApi.DeleteDeployment(context.Background(), orgID, clusterID, releaseName)
 	if err != nil {
 		return emperror.Wrap(err, "could not delete deployment")
 	}

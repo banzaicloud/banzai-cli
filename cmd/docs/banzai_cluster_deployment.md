@@ -32,4 +32,5 @@ Manage deployments
 * [banzai cluster deployment delete](banzai_cluster_deployment_delete.md)	 - Delete a deployment
 * [banzai cluster deployment get](banzai_cluster_deployment_get.md)	 - Get deployment details
 * [banzai cluster deployment list](banzai_cluster_deployment_list.md)	 - List deployments
+* [banzai cluster deployment update](banzai_cluster_deployment_update.md)	 - Updates a deployment
 
