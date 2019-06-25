@@ -32,4 +32,5 @@ Manage secrets
 * [banzai secret delete](banzai_secret_delete.md)	 - Delete one or more secrets
 * [banzai secret get](banzai_secret_get.md)	 - Get a secret
 * [banzai secret list](banzai_secret_list.md)	 - List secrets
+* [banzai secret update](banzai_secret_update.md)	 - Update secret
 

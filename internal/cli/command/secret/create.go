@@ -62,7 +62,7 @@ type secretFieldQuestion struct {
 	validator survey.Validator
 }
 
-// NewCreateCommand returns a cobra command for `banzai create create` command
+// NewCreateCommand returns a cobra command for `banzai secret create` command
 func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := createSecretOptions{}
 
@@ -73,8 +73,8 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	$ banzai secret create
 	? Secret name mysecretname
 	? Choose secret type: password
-	? Set 'username' field: myusername
-	? Set 'password' field: mypassword
+	? username myusername
+	? password mypassword
 	? Do you want to add tag(s) to this secret? Yes
 	? Tag: tag1
 	? Tag: tag2
@@ -83,8 +83,8 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	Create secret with flags
 	---
 	$ banzai secret create --name mysecretname --type password --tag=cli --tag=my-application
-	? Set 'username' field: myusername
-	? Set 'password' field: mypassword
+	? username myusername
+	? password mypassword
 
 	Create secret via json
 	---
@@ -237,20 +237,26 @@ func buildInteractiveCreateSecretRequest(banzaiCli cli.Cli, options *createSecre
 		log.Fatalf("could not get secret fields: %v", err)
 	}
 
-	surveyTags(options)
+	options.tags = surveyTags(options.tags)
 
 	out.Name = options.secretName
 	out.Type = options.secretType
 	out.Tags = options.tags
 
-	if len(options.validate) == 0 {
-		if options.secretType == TypeAmazon ||
-			options.secretType == TypeAzure ||
-			options.secretType == TypeAlibaba ||
-			options.secretType == TypeGoogle ||
-			options.secretType == TypeOracle {
+	options.validate = confirmValidation(options.validate, options.secretType)
+
+	return nil
+}
+
+func confirmValidation(validate string, secretType string) string {
+	if len(validate) == 0 {
+		if secretType == TypeAmazon ||
+			secretType == TypeAzure ||
+			secretType == TypeAlibaba ||
+			secretType == TypeGoogle ||
+			secretType == TypeOracle {
 			// request validation just in case of cloud types
-			options.validate = "true"
+			validate = "true"
 			var v bool
 			prompt := &survey.Confirm{
 				Message: "Do you want to validate this secret?",
@@ -259,12 +265,12 @@ func buildInteractiveCreateSecretRequest(banzaiCli cli.Cli, options *createSecre
 			}
 			_ = survey.AskOne(prompt, &v, nil)
 			if !v {
-				options.validate = "false"
+				validate = "false"
 			}
 		}
 	}
 
-	return nil
+	return validate
 }
 
 // surveyGenericSecretType starts to get fields (key/value pair) for generic secret
@@ -391,9 +397,9 @@ func surveySecretFields(options *createSecretOptions, allowedTypes map[string]pi
 }
 
 // surveyTags starts to get tag(s) for the secret until `skip`
-func surveyTags(options *createSecretOptions) {
+func surveyTags(tags []string) []string {
 
-	if options.tags == nil || len(options.tags) == 0 {
+	if tags == nil || len(tags) == 0 {
 		isTagAdd := false
 		prompt := &survey.Confirm{
 			Message: "Do you want to add tag(s) to this secret?",
@@ -414,14 +420,14 @@ func surveyTags(options *createSecretOptions) {
 				)
 
 				if tag == "skip" {
-					return
+					return tags
 				}
 
-				options.tags = append(options.tags, tag)
+				tags = append(tags, tag)
 			}
 		}
 	}
-
+	return tags
 }
 
 func getValidationFlag(validation string) optional.Bool {

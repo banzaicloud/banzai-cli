@@ -1,40 +1,51 @@
-## banzai secret create
+## banzai secret update
 
-Create secret
+Update secret
 
 ### Synopsis
 
-Create a secret in Pipeline's secret store interactively, or based on a json request from stdin or a file
+Update an existing secret in Pipeline's secret store interactively, or based on a json request from stdin or a file
 
 ```
-banzai secret create [flags]
+banzai secret update [flags]
 ```
 
 ### Examples
 
 ```
 
-	Create secret
+	Update secret
 	---
-	$ banzai secret create
-	? Secret name mysecretname
-	? Choose secret type: password
+	$ banzai secret update
+	? Select secret: mysecret
+	? Do you want modify fields of secret? Yes
+	? Select field to modify: username
 	? username myusername
+	? Select field to modify: password
 	? password mypassword
+	? Select field to modify: skip
+	? Do you want modify tags of secret? Yes
+	? Do you want delete any tag of secret? Yes
+	? Select tag(s) you want to delete: cli
 	? Do you want to add tag(s) to this secret? Yes
-	? Tag: tag1
-	? Tag: tag2
+	? Tag: banzai
 	? Tag: skip
+	? Do you want to validate this secret? Yes
 
-	Create secret with flags
+	Update secret with flags
 	---
-	$ banzai secret create --name mysecretname --type password --tag=cli --tag=my-application
+	$ banzai secret update --name mysecret --validate false
+	? Do you want modify fields of secret? Yes
+	? Select field to modify: username
 	? username myusername
+	? Select field to modify: password
 	? password mypassword
-
+	? Select field to modify: skip
+	? Do you want modify tags of secret? No
+	
 	Create secret via json
 	---
-	$ banzai secret create <<EOF
+	$ banzai secret update <<EOF
 	> {
 	>	"name": "mysecretname",
 	>	"type": "password",
@@ -42,20 +53,21 @@ banzai secret create [flags]
 	>		"username": "myusername",
 	>		"password": "mypassword"
 	>	},
-	>	"tags":[ "cli", "my-application" ]
+	>	"tags":[ "cli", "my-application" ],
+	> 	"version": 1
 	> }
 	> EOF
-		
+
+
 ```
 
 ### Options
 
 ```
-  -f, --file string       Secret creation descriptor file
-  -h, --help              help for create
+  -f, --file string       Secret update descriptor file
+  -h, --help              help for update
+  -i, --id string         identification of the secret
   -n, --name string       Name of the secret
-      --tag stringArray   Tags to add to the secret
-  -t, --type string       Type of the secret
   -v, --validate string   Secret validation (true|false)
 ```
 
