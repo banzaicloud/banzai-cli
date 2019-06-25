@@ -29,6 +29,7 @@ import (
 type listOptions struct {
 	format     string
 	secretType string
+	all        bool
 }
 
 // NewListCommand creates a new cobra.Command for `banzai secret list`.
@@ -49,6 +50,7 @@ func NewListCommand(banzaiCli cli.Cli) *cobra.Command {
 	flags := cmd.Flags()
 
 	flags.StringVarP(&options.secretType, "type", "t", "", "Filter list to the given type")
+	flags.BoolVarP(&options.all, "all", "a", false, "Filter list to the given type")
 
 	return cmd
 }
@@ -65,5 +67,12 @@ func runList(banzaiCli cli.Cli, options listOptions) {
 		log.Fatalf("could not list secrets: %v", err)
 	}
 
-	format.SecretsWrite(banzaiCli.Out(), options.format, banzaiCli.Color(), secrets)
+	var filteredSecrets []pipeline.SecretItem
+	if options.all {
+		filteredSecrets = secrets
+	} else {
+		filteredSecrets = filterOutHiddenSecrets(secrets)
+	}
+
+	format.SecretsWrite(banzaiCli.Out(), options.format, banzaiCli.Color(), filteredSecrets)
 }
