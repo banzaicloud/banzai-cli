@@ -33,4 +33,5 @@ Manage secrets
 * [banzai secret get](banzai_secret_get.md)	 - Get a secret
 * [banzai secret install](banzai_secret_install.md)	 - Install a secret to a cluster
 * [banzai secret list](banzai_secret_list.md)	 - List secrets
+* [banzai secret update](banzai_secret_update.md)	 - Update secret
 
