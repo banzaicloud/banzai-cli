@@ -1,4 +1,4 @@
-## banzai cluster deployment get
+## banzai deployment get
 
 Get deployment details
 
@@ -7,26 +7,26 @@ Get deployment details
 Get the details of a deployment identified by deployment release name. In order to display deployment current values and notes use --output=(json|yaml)
 
 ```
-banzai cluster deployment get RELEASE-NAME [flags]
+banzai deployment get RELEASE-NAME [flags]
 ```
 
 ### Examples
 
 ```
 
-			$ banzai cluster deployment get dns
+			$ banzai deployment get dns
 			? Cluster  [Use arrows to move, type to filter]
 			> pke-cluster-1
 			
 			Namespace        ReleaseName  Status    Version  UpdatedAt             CreatedAt             ChartName     ChartVersion
 			pipeline-system  dns          DEPLOYED  1        2019-06-23T06:52:24Z  2019-06-23T06:52:24Z  external-dns  1.6.2 
 
-			$ banzai cluster deployment get dns --cluster-name pke-cluster-1
+			$ banzai deployment get dns --cluster-name pke-cluster-1
 			
 			Namespace        ReleaseName  Status    Version  UpdatedAt             CreatedAt             ChartName     ChartVersion
 			pipeline-system  dns          DEPLOYED  1        2019-06-23T06:52:24Z  2019-06-23T06:52:24Z  external-dns  1.6.2
 
-			$ banzai cluster deployment get dns --cluster 1846
+			$ banzai deployment get dns --cluster 1846
 			
 			Namespace        ReleaseName  Status    Version  UpdatedAt             CreatedAt             ChartName     ChartVersion
 			pipeline-system  dns          DEPLOYED  1        2019-06-23T06:52:24Z  2019-06-23T06:52:24Z  external-dns  1.6.2 
@@ -56,5 +56,5 @@ banzai cluster deployment get RELEASE-NAME [flags]
 
 ### SEE ALSO
 
-* [banzai cluster deployment](banzai_cluster_deployment.md)	 - Manage deployments
+* [banzai deployment](banzai_deployment.md)	 - Manage deployments
 

@@ -32,6 +32,7 @@ import (
 )
 
 const orgIdKey = "organization.id"
+const clusterIdKey = "cluster.id"
 
 type Cli interface {
 	Out() io.Writer
@@ -44,6 +45,7 @@ type Cli interface {
 type Context interface {
 	OrganizationID() int32
 	SetOrganizationID(id int32)
+	ClusterID() int32
 }
 
 type banzaiCli struct {
@@ -110,6 +112,11 @@ func (c *banzaiContext) SetOrganizationID(id int32) {
 
 	c.save()
 }
+
+func (c *banzaiContext) ClusterID() int32 {
+	return viper.GetInt32(clusterIdKey)
+}
+
 
 func (c *banzaiContext) save() {
 	log.Debug("writing config")

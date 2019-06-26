@@ -1,4 +1,4 @@
-## banzai cluster deployment create
+## banzai deployment create
 
 Creates a deployment
 
@@ -7,7 +7,7 @@ Creates a deployment
 Creates a deployment based on deployment descriptor JSON read from stdin or file.
 
 ```
-banzai cluster deployment create [flags]
+banzai deployment create [flags]
 ```
 
 ### Examples
@@ -16,7 +16,7 @@ banzai cluster deployment create [flags]
 
         # Create deployment from file using interactive mode
         ----------------------------------------------------
-        $ banzai cluster deployment create
+        $ banzai deployment create
         ? Cluster  [Use arrows to move, type to filter]
         > pke-cluster-1
         ? Load a JSON or YAML file: [? for help] /var/tmp/wordpress.json
@@ -27,7 +27,7 @@ banzai cluster deployment create [flags]
 
         # Create deployment from stdin
         ------------------------------
-        $ banzai cluster deployment create --cluster-name pke-cluster-1 -f -<<EOF
+        $ banzai deployment create --cluster-name pke-cluster-1 -f -<<EOF
         > {
         >   "name": "stable/wordpress",
         >   "releasename": "",
@@ -40,13 +40,13 @@ banzai cluster deployment create [flags]
         ReleaseName       Notes
         lumbering-lizard  V29yZHByZXNzIGRlcGxveW1lbnQgbm90ZXMK  
 
-        $ echo '{"name":"stable/wordpress","releasename":"my-wordpress-1"}' |  banzai cluster deployment create --cluster-name pke-cluster-1
+        $ echo '{"name":"stable/wordpress","releasename":"my-wordpress-1"}' |  banzai deployment create --cluster-name pke-cluster-1
         ReleaseName     Notes
         my-wordpress-1  V29yZHByZXNzIGRlcGxveW1lbnQgbm90ZXMK
 
         # Create deployment from file
         -----------------------------
-        $ banzai cluster deployment create --cluster-name pke-cluster-1 --file /var/tmp/wordpress.json --no-interactive
+        $ banzai deployment create --cluster-name pke-cluster-1 --file /var/tmp/wordpress.json --no-interactive
 
         ReleaseName         Notes
         eyewitness-opossum  V29yZHByZXNzIGRlcGxveW1lbnQgbm90ZXMK
@@ -76,5 +76,5 @@ banzai cluster deployment create [flags]
 
 ### SEE ALSO
 
-* [banzai cluster deployment](banzai_cluster_deployment.md)	 - Manage deployments
+* [banzai deployment](banzai_deployment.md)	 - Manage deployments
 

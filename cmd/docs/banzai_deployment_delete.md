@@ -1,4 +1,4 @@
-## banzai cluster deployment delete
+## banzai deployment delete
 
 Delete a deployment
 
@@ -7,21 +7,21 @@ Delete a deployment
 Delete a deployment identified by deployment release name.
 
 ```
-banzai cluster deployment delete RELEASE-NAME [flags]
+banzai deployment delete RELEASE-NAME [flags]
 ```
 
 ### Examples
 
 ```
 
-			$ banzai cluster deployment delete test-deployment
+			$ banzai deployment delete test-deployment
 			? Cluster  [Use arrows to move, type to filter]
 			> pke-cluster-1
 
 			Name  			 Status  Message            
 			test-deployment  200     Deployment deleted!
 
-			$ banzai cluster deployment delete test-deployment --cluster-name pke-cluster-1
+			$ banzai deployment delete test-deployment --cluster-name pke-cluster-1
 			Name  			 Status  Message            
 			test-deployment  200     Deployment deleted!
 ```
@@ -49,5 +49,5 @@ banzai cluster deployment delete RELEASE-NAME [flags]
 
 ### SEE ALSO
 
-* [banzai cluster deployment](banzai_cluster_deployment.md)	 - Manage deployments
+* [banzai deployment](banzai_deployment.md)	 - Manage deployments
 

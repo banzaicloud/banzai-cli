@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cluster
+package deployment
 
 import (
 	"context"
@@ -29,7 +29,7 @@ type listDeploymentOptions struct {
 	deploymentOptions
 }
 
-// NewDeploymentListCommand returns a `*cobra.Command` for `banzai cluster deployment list` subcommand.
+// NewDeploymentListCommand returns a `*cobra.Command` for `banzai deployment list` subcommand.
 func NewDeploymentListCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := listDeploymentOptions{}
 
@@ -46,7 +46,7 @@ func NewDeploymentListCommand(banzaiCli cli.Cli) *cobra.Command {
 			return runListDeployments(banzaiCli, options)
 		},
 		Example: `
-				$ banzai cluster deployment ls
+				$ banzai deployment ls
 
 				? Cluster  [Use arrows to move, type to filter]
 				> pke-cluster-1
@@ -57,7 +57,7 @@ func NewDeploymentListCommand(banzaiCli cli.Cli) *cobra.Command {
 				pipeline-system  hpa-operator    DEPLOYED  1        2019-06-23T06:52:29Z  2019-06-23T06:52:29Z  hpa-operator                  0.0.10      
 				kube-system      autoscaler      DEPLOYED  1        2019-06-23T06:52:28Z  2019-06-23T06:52:28Z  cluster-autoscaler            0.12.3      
 
-				$ banzai cluster deployment ls --cluster-name pke-cluster-1
+				$ banzai deployment ls --cluster-name pke-cluster-1
 
 				Namespace        ReleaseName     Status    Version  UpdatedAt             CreatedAt             ChartName                     ChartVersion
 				pipeline-system  anchore         DEPLOYED  1        2019-06-23T06:53:00Z  2019-06-23T06:53:00Z  anchore-policy-validator      0.3.5       
@@ -65,7 +65,7 @@ func NewDeploymentListCommand(banzaiCli cli.Cli) *cobra.Command {
 				pipeline-system  hpa-operator    DEPLOYED  1        2019-06-23T06:52:29Z  2019-06-23T06:52:29Z  hpa-operator                  0.0.10      
 				kube-system      autoscaler      DEPLOYED  1        2019-06-23T06:52:28Z  2019-06-23T06:52:28Z  cluster-autoscaler            0.12.3
 
-				$ banzai cluster deployment ls --cluster 1846
+				$ banzai deployment ls --cluster 1846
 
 				Namespace        ReleaseName     Status    Version  UpdatedAt             CreatedAt             ChartName                     ChartVersion
 				pipeline-system  anchore         DEPLOYED  1        2019-06-23T06:53:00Z  2019-06-23T06:53:00Z  anchore-policy-validator      0.3.5       

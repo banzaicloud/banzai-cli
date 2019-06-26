@@ -1,4 +1,4 @@
-## banzai cluster deployment update
+## banzai deployment update
 
 Updates a deployment
 
@@ -7,7 +7,7 @@ Updates a deployment
 Updates a deployment identified by release name using a deployment descriptor JSON read from stdin or file.
 
 ```
-banzai cluster deployment update [flags]
+banzai deployment update [flags]
 ```
 
 ### Examples
@@ -16,7 +16,7 @@ banzai cluster deployment update [flags]
 
 		# Update deployment from file using interactive mode
         ----------------------------------------------------
-        $ banzai cluster deployment update
+        $ banzai deployment update
         ? Cluster pke-cluster-1
         ? Release name  [Use arrows to move, type to filter]
         > hazelcast-1
@@ -30,7 +30,7 @@ banzai cluster deployment update [flags]
 
         # Update deployment from stdin
         ------------------------------
-        $ banzai cluster deployment update --cluster-name pke-cluster-1 --release-name hazelcast-1 -f -<<EOF
+        $ banzai deployment update --cluster-name pke-cluster-1 --release-name hazelcast-1 -f -<<EOF
         > {
         >     "name": "stable/hazelcast",
         >     "version": "1.3.3",
@@ -43,11 +43,11 @@ banzai cluster deployment update [flags]
         > }
         > EOF
 
-        $ echo '{"name":"stable/hazelcast","version":"1.3.3","reuseValues":true,"values":{"cluster":{"memberCount":5}}}' | banzai cluster deployment update --cluster-name pke-cluster-1 --release-name hazelcast-1
+        $ echo '{"name":"stable/hazelcast","version":"1.3.3","reuseValues":true,"values":{"cluster":{"memberCount":5}}}' | banzai deployment update --cluster-name pke-cluster-1 --release-name hazelcast-1
 
         # Update deployment from file
         -----------------------------
-        $ banzai cluster deployment update --cluster-name pke-cluster-1 --release-name hazelcast-1 -f /var/tmp/hazelcast.json
+        $ banzai deployment update --cluster-name pke-cluster-1 --release-name hazelcast-1 -f /var/tmp/hazelcast.json
 ```
 
 ### Options
@@ -75,5 +75,5 @@ banzai cluster deployment update [flags]
 
 ### SEE ALSO
 
-* [banzai cluster deployment](banzai_cluster_deployment.md)	 - Manage deployments
+* [banzai deployment](banzai_deployment.md)	 - Manage deployments
 

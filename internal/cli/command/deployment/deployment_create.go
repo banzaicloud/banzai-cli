@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cluster
+package deployment
 
 import (
 	"context"
@@ -31,7 +31,7 @@ type createDeploymentOptions struct {
 	file string
 }
 
-// NewDeploymentCreateCommand returns a `*cobra.Command` for `banzai cluster deployment create` subcommand.
+// NewDeploymentCreateCommand returns a `*cobra.Command` for `banzai deployment create` subcommand.
 func NewDeploymentCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := createDeploymentOptions{}
 
@@ -51,7 +51,7 @@ func NewDeploymentCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 		Example: `
         # Create deployment from file using interactive mode
         ----------------------------------------------------
-        $ banzai cluster deployment create
+        $ banzai deployment create
         ? Cluster  [Use arrows to move, type to filter]
         > pke-cluster-1
         ? Load a JSON or YAML file: [? for help] /var/tmp/wordpress.json
@@ -62,7 +62,7 @@ func NewDeploymentCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 
         # Create deployment from stdin
         ------------------------------
-        $ banzai cluster deployment create --cluster-name pke-cluster-1 -f -<<EOF
+        $ banzai deployment create --cluster-name pke-cluster-1 -f -<<EOF
         > {
         >   "name": "stable/wordpress",
         >   "releasename": "",
@@ -75,13 +75,13 @@ func NewDeploymentCreateCommand(banzaiCli cli.Cli) *cobra.Command {
         ReleaseName       Notes
         lumbering-lizard  V29yZHByZXNzIGRlcGxveW1lbnQgbm90ZXMK  
 
-        $ echo '{"name":"stable/wordpress","releasename":"my-wordpress-1"}' |  banzai cluster deployment create --cluster-name pke-cluster-1
+        $ echo '{"name":"stable/wordpress","releasename":"my-wordpress-1"}' |  banzai deployment create --cluster-name pke-cluster-1
         ReleaseName     Notes
         my-wordpress-1  V29yZHByZXNzIGRlcGxveW1lbnQgbm90ZXMK
 
         # Create deployment from file
         -----------------------------
-        $ banzai cluster deployment create --cluster-name pke-cluster-1 --file /var/tmp/wordpress.json --no-interactive
+        $ banzai deployment create --cluster-name pke-cluster-1 --file /var/tmp/wordpress.json --no-interactive
 
         ReleaseName         Notes
         eyewitness-opossum  V29yZHByZXNzIGRlcGxveW1lbnQgbm90ZXMK`,

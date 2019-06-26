@@ -24,6 +24,7 @@ A command line client for the Banzai Cloud Pipeline platform.
 
 * [banzai cluster](banzai_cluster.md)	 - Manage clusters
 * [banzai controlplane](banzai_controlplane.md)	 - Manage controlplane
+* [banzai deployment](banzai_deployment.md)	 - Manage deployments
 * [banzai form](banzai_form.md)	 - Open forms from config, persist provided values and generate templates
 * [banzai login](banzai_login.md)	 - Configure and log in to a Banzai Cloud context
 * [banzai organization](banzai_organization.md)	 - List and select organizations

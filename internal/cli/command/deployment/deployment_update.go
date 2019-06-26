@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cluster
+package deployment
 
 import (
 	"context"
@@ -32,7 +32,7 @@ type updateDeploymentOptions struct {
 	releaseName string
 }
 
-// NewDeploymentUpdateCommand returns a `*cobra.Command` for `banzai cluster deployment create` subcommand.
+// NewDeploymentUpdateCommand returns a `*cobra.Command` for `banzai deployment create` subcommand.
 func NewDeploymentUpdateCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := updateDeploymentOptions{}
 
@@ -52,7 +52,7 @@ func NewDeploymentUpdateCommand(banzaiCli cli.Cli) *cobra.Command {
 		Example: `
 		# Update deployment from file using interactive mode
         ----------------------------------------------------
-        $ banzai cluster deployment update
+        $ banzai deployment update
         ? Cluster pke-cluster-1
         ? Release name  [Use arrows to move, type to filter]
         > hazelcast-1
@@ -66,7 +66,7 @@ func NewDeploymentUpdateCommand(banzaiCli cli.Cli) *cobra.Command {
 
         # Update deployment from stdin
         ------------------------------
-        $ banzai cluster deployment update --cluster-name pke-cluster-1 --release-name hazelcast-1 -f -<<EOF
+        $ banzai deployment update --cluster-name pke-cluster-1 --release-name hazelcast-1 -f -<<EOF
         > {
         >     "name": "stable/hazelcast",
         >     "version": "1.3.3",
@@ -79,11 +79,11 @@ func NewDeploymentUpdateCommand(banzaiCli cli.Cli) *cobra.Command {
         > }
         > EOF
 
-        $ echo '{"name":"stable/hazelcast","version":"1.3.3","reuseValues":true,"values":{"cluster":{"memberCount":5}}}' | banzai cluster deployment update --cluster-name pke-cluster-1 --release-name hazelcast-1
+        $ echo '{"name":"stable/hazelcast","version":"1.3.3","reuseValues":true,"values":{"cluster":{"memberCount":5}}}' | banzai deployment update --cluster-name pke-cluster-1 --release-name hazelcast-1
 
         # Update deployment from file
         -----------------------------
-        $ banzai cluster deployment update --cluster-name pke-cluster-1 --release-name hazelcast-1 -f /var/tmp/hazelcast.json`,
+        $ banzai deployment update --cluster-name pke-cluster-1 --release-name hazelcast-1 -f /var/tmp/hazelcast.json`,
 	}
 
 	flags := cmd.Flags()

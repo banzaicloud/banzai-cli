@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cluster
+package deployment
 
 import (
 	"bytes"
@@ -63,6 +63,10 @@ func NewDeploymentCommand(banzaiCli cli.Cli) *cobra.Command {
 func getClusterID(banzaiCli cli.Cli, orgID int32, options deploymentOptions) (int32, error) {
 	var clusterID int32
 	var err error
+
+	if options.clusterID == 0 && banzaiCli.Context().ClusterID() != 0 {
+		options.clusterID = banzaiCli.Context().ClusterID()
+	}
 
 	if banzaiCli.Interactive() &&  options.clusterID == 0 && options.clusterName == "" {
 		clusterID, err = input.AskCluster(banzaiCli, orgID)

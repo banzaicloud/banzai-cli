@@ -1,4 +1,4 @@
-## banzai cluster deployment
+## banzai deployment
 
 Manage deployments
 
@@ -27,10 +27,10 @@ Manage deployments
 
 ### SEE ALSO
 
-* [banzai cluster](banzai_cluster.md)	 - Manage clusters
-* [banzai cluster deployment create](banzai_cluster_deployment_create.md)	 - Creates a deployment
-* [banzai cluster deployment delete](banzai_cluster_deployment_delete.md)	 - Delete a deployment
-* [banzai cluster deployment get](banzai_cluster_deployment_get.md)	 - Get deployment details
-* [banzai cluster deployment list](banzai_cluster_deployment_list.md)	 - List deployments
-* [banzai cluster deployment update](banzai_cluster_deployment_update.md)	 - Updates a deployment
+* [banzai](banzai.md)	 - A command line client for the Banzai Cloud Pipeline platform.
+* [banzai deployment create](banzai_deployment_create.md)	 - Creates a deployment
+* [banzai deployment delete](banzai_deployment_delete.md)	 - Delete a deployment
+* [banzai deployment get](banzai_deployment_get.md)	 - Get deployment details
+* [banzai deployment list](banzai_deployment_list.md)	 - List deployments
+* [banzai deployment update](banzai_deployment_update.md)	 - Updates a deployment
 

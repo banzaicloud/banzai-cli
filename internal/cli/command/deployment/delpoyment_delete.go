@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cluster
+package deployment
 
 import (
 	"context"
@@ -51,14 +51,14 @@ func NewDeploymentDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 			return runDeleteDeployment(banzaiCli, options)
 		},
 		Example: `
-			$ banzai cluster deployment delete test-deployment
+			$ banzai deployment delete test-deployment
 			? Cluster  [Use arrows to move, type to filter]
 			> pke-cluster-1
 
 			Name  			 Status  Message            
 			test-deployment  200     Deployment deleted!
 
-			$ banzai cluster deployment delete test-deployment --cluster-name pke-cluster-1
+			$ banzai deployment delete test-deployment --cluster-name pke-cluster-1
 			Name  			 Status  Message            
 			test-deployment  200     Deployment deleted!`,
 	}

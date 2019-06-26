@@ -87,6 +87,7 @@ func init() {
 	flags.Int32("organization", 0, "organization id")
 	_ = viper.BindPFlag("organization.id", flags.Lookup("organization"))
 	viper.BindEnv("organization.id", "BANZAI_CURRENT_ORG_ID")
+	viper.BindEnv("cluster.id", "BANZAI_CURRENT_CLUSTER_ID")
 
 	flags.Bool("no-color", false, "never display color output")
 	_ = viper.BindPFlag("formatting.no-color", flags.Lookup("no-color"))

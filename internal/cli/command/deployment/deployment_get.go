@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cluster
+package deployment
 
 import (
 	"context"
@@ -30,7 +30,7 @@ type getDeploymentOptions struct {
 	deploymentReleaseName string
 }
 
-// NewDeploymentGetCommand returns a `*cobra.Command` for `banzai cluster deployment get` subcommand.
+// NewDeploymentGetCommand returns a `*cobra.Command` for `banzai deployment get` subcommand.
 func NewDeploymentGetCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := getDeploymentOptions{}
 
@@ -49,19 +49,19 @@ func NewDeploymentGetCommand(banzaiCli cli.Cli) *cobra.Command {
 			return runGetDeployment(banzaiCli, options)
 		},
 		Example: `
-			$ banzai cluster deployment get dns
+			$ banzai deployment get dns
 			? Cluster  [Use arrows to move, type to filter]
 			> pke-cluster-1
 			
 			Namespace        ReleaseName  Status    Version  UpdatedAt             CreatedAt             ChartName     ChartVersion
 			pipeline-system  dns          DEPLOYED  1        2019-06-23T06:52:24Z  2019-06-23T06:52:24Z  external-dns  1.6.2 
 
-			$ banzai cluster deployment get dns --cluster-name pke-cluster-1
+			$ banzai deployment get dns --cluster-name pke-cluster-1
 			
 			Namespace        ReleaseName  Status    Version  UpdatedAt             CreatedAt             ChartName     ChartVersion
 			pipeline-system  dns          DEPLOYED  1        2019-06-23T06:52:24Z  2019-06-23T06:52:24Z  external-dns  1.6.2
 
-			$ banzai cluster deployment get dns --cluster 1846
+			$ banzai deployment get dns --cluster 1846
 			
 			Namespace        ReleaseName  Status    Version  UpdatedAt             CreatedAt             ChartName     ChartVersion
 			pipeline-system  dns          DEPLOYED  1        2019-06-23T06:52:24Z  2019-06-23T06:52:24Z  external-dns  1.6.2 
