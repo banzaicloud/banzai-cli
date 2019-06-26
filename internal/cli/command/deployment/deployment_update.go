@@ -37,15 +37,16 @@ func NewDeploymentUpdateCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := updateDeploymentOptions{}
 
 	cmd := &cobra.Command{
-		Use:           "update",
-		Short:         "Updates a deployment",
-		Long:          "Updates a deployment identified by release name using a deployment descriptor JSON read from stdin or file.",
-		Args:          cobra.MaximumNArgs(1),
-		Aliases:       []string{"c"},
-		SilenceUsage:  true,
-		SilenceErrors: true,
+		Use:     "update",
+		Short:   "Updates a deployment",
+		Long:    "Updates a deployment identified by release name using a deployment descriptor JSON read from stdin or file.",
+		Args:    cobra.MaximumNArgs(1),
+		Aliases: []string{"c"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			options.format, _ = cmd.Flags().GetString("output")
+
+			cmd.SilenceUsage = true
+			cmd.SilenceErrors = true
 
 			return runUpdateDeployment(banzaiCli, options)
 		},

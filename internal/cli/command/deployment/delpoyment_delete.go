@@ -37,16 +37,17 @@ func NewDeploymentDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := deleteDeploymentOptions{}
 
 	cmd := &cobra.Command{
-		Use:           "delete RELEASE-NAME",
-		Short:         "Delete a deployment",
-		Long:          "Delete a deployment identified by deployment release name.",
-		Args:          cobra.ExactArgs(1),
-		Aliases:       []string{"del", "rm"},
-		SilenceUsage:  true,
-		SilenceErrors: true,
+		Use:     "delete RELEASE-NAME",
+		Short:   "Delete a deployment",
+		Long:    "Delete a deployment identified by deployment release name.",
+		Args:    cobra.ExactArgs(1),
+		Aliases: []string{"del", "rm"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			options.format, _ = cmd.Flags().GetString("output")
 			options.releaseName = args[0]
+
+			cmd.SilenceUsage = true
+			cmd.SilenceErrors = true
 
 			return runDeleteDeployment(banzaiCli, options)
 		},

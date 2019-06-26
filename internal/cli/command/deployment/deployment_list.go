@@ -34,14 +34,15 @@ func NewDeploymentListCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := listDeploymentOptions{}
 
 	cmd := &cobra.Command{
-		Use:           "list",
-		Short:         "List deployments",
-		Args:          cobra.NoArgs,
-		Aliases:       []string{"l", "ls"},
-		SilenceUsage:  true,
-		SilenceErrors: true,
+		Use:     "list",
+		Short:   "List deployments",
+		Args:    cobra.NoArgs,
+		Aliases: []string{"l", "ls"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			options.format, _ = cmd.Flags().GetString("output")
+
+			cmd.SilenceUsage = true
+			cmd.SilenceErrors = true
 
 			return runListDeployments(banzaiCli, options)
 		},

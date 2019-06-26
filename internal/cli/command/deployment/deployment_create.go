@@ -36,15 +36,16 @@ func NewDeploymentCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := createDeploymentOptions{}
 
 	cmd := &cobra.Command{
-		Use:           "create",
-		Short:         "Creates a deployment",
-		Long:          "Creates a deployment based on deployment descriptor JSON read from stdin or file.",
-		Args:          cobra.MaximumNArgs(1),
-		Aliases:       []string{"c"},
-		SilenceUsage:  true,
-		SilenceErrors: true,
+		Use:     "create",
+		Short:   "Creates a deployment",
+		Long:    "Creates a deployment based on deployment descriptor JSON read from stdin or file.",
+		Args:    cobra.MaximumNArgs(1),
+		Aliases: []string{"c"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			options.format, _ = cmd.Flags().GetString("output")
+
+			cmd.SilenceUsage = true
+			cmd.SilenceErrors = true
 
 			return runCreateDeployment(banzaiCli, options)
 		},

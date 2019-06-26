@@ -35,16 +35,17 @@ func NewDeploymentGetCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := getDeploymentOptions{}
 
 	cmd := &cobra.Command{
-		Use:           "get RELEASE-NAME",
-		Short:         "Get deployment details",
-		Long:          "Get the details of a deployment identified by deployment release name. In order to display deployment current values and notes use --output=(json|yaml)",
-		Args:          cobra.ExactArgs(1),
-		Aliases:       []string{"g", "show"},
-		SilenceUsage:  true,
-		SilenceErrors: true,
+		Use:     "get RELEASE-NAME",
+		Short:   "Get deployment details",
+		Long:    "Get the details of a deployment identified by deployment release name. In order to display deployment current values and notes use --output=(json|yaml)",
+		Args:    cobra.ExactArgs(1),
+		Aliases: []string{"g", "show"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			options.format, _ = cmd.Flags().GetString("output")
 			options.deploymentReleaseName = args[0]
+
+			cmd.SilenceUsage = true
+			cmd.SilenceErrors = true
 
 			return runGetDeployment(banzaiCli, options)
 		},
@@ -64,8 +65,7 @@ func NewDeploymentGetCommand(banzaiCli cli.Cli) *cobra.Command {
 			$ banzai deployment get dns --cluster 1846
 			
 			Namespace        ReleaseName  Status    Version  UpdatedAt             CreatedAt             ChartName     ChartVersion
-			pipeline-system  dns          DEPLOYED  1        2019-06-23T06:52:24Z  2019-06-23T06:52:24Z  external-dns  1.6.2 
-`,
+			pipeline-system  dns          DEPLOYED  1        2019-06-23T06:52:24Z  2019-06-23T06:52:24Z  external-dns  1.6.2`,
 	}
 
 	flags := cmd.Flags()
