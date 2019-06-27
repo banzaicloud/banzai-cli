@@ -29,8 +29,7 @@ banzai deployment get RELEASE-NAME [flags]
 			$ banzai deployment get dns --cluster 1846
 			
 			Namespace        ReleaseName  Status    Version  UpdatedAt             CreatedAt             ChartName     ChartVersion
-			pipeline-system  dns          DEPLOYED  1        2019-06-23T06:52:24Z  2019-06-23T06:52:24Z  external-dns  1.6.2 
-
+			pipeline-system  dns          DEPLOYED  1        2019-06-23T06:52:24Z  2019-06-23T06:52:24Z  external-dns  1.6.2
 ```
 
 ### Options

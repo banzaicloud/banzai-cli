@@ -69,7 +69,10 @@ func NewDeploymentCreateCommand(banzaiCli cli.Cli) *cobra.Command {
         >   "releasename": "",
         >   "namespace": "default",
         >   "version": "5.12.4",
-        >   "dryRun": false
+        >   "dryRun": false,
+        >   "values": {
+        >		"replicaCount": 2
+        >   }
         > }
         > EOF
 
