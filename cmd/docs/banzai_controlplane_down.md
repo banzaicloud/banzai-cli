@@ -13,7 +13,9 @@ banzai controlplane down [flags]
 ### Options
 
 ```
-  -h, --help   help for down
+  -h, --help               help for down
+      --image-pull         Pull cp-installer image even if it's present locally (default true)
+      --image-tag string   Tag of banzaicloud/cp-installer Docker image to use (default "latest")
 ```
 
 ### Options inherited from parent commands

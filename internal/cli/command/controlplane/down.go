@@ -26,22 +26,32 @@ import (
 	"gopkg.in/AlecAivazis/survey.v1"
 )
 
+type destroyOptions struct {
+	controlPlaneInstallerOptions
+}
+
 // NewDownCommand creates a new cobra.Command for `banzai clontrolplane down`.
 func NewDownCommand() *cobra.Command {
+	options := destroyOptions{}
+
 	cmd := &cobra.Command{
 		Use:   "down",
 		Short: "Destroy the controlplane",
 		Long:  "Destroy a controlplane based on json stdin or interactive session",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runDestroy()
+			return runDestroy(options)
 		},
 	}
+
+	flags := cmd.Flags()
+
+	bindInstallerFlags(flags, &options.controlPlaneInstallerOptions)
 
 	return cmd
 }
 
-func runDestroy() error {
+func runDestroy(options destroyOptions) error {
 
 	if isInteractive() {
 		var destroy bool
@@ -86,5 +96,5 @@ func runDestroy() error {
 	}
 
 	log.Info("controlplane is being destroyed")
-	return emperror.Wrap(runInternal("destroy", valuesName, kubeconfigName, tfdir), "controlplane destroy failed")
+	return emperror.Wrap(runInternal("destroy", valuesName, kubeconfigName, tfdir, options.controlPlaneInstallerOptions), "controlplane destroy failed")
 }
