@@ -23,6 +23,7 @@ require (
 	github.com/skratchdot/open-golang v0.0.0-20190104022628-a2dfa6d0dab6
 	github.com/spf13/afero v1.2.1 // indirect
 	github.com/spf13/cobra v0.0.3
+	github.com/spf13/pflag v1.0.3
 	github.com/spf13/viper v1.3.1
 	github.com/ttacon/chalk v0.0.0-20140724125006-76b3c8b611de
 	golang.org/x/oauth2 v0.0.0-20190212230446-3e8b2be13635

@@ -13,8 +13,10 @@ banzai controlplane up [flags]
 ### Options
 
 ```
-  -f, --file string   Input control plane descriptor file (default "values.yaml")
-  -h, --help          help for up
+  -f, --file string        Input control plane descriptor file (default "values.yaml")
+  -h, --help               help for up
+      --image-pull         Pull cp-installer image even if it's present locally (default true)
+      --image-tag string   Tag of banzaicloud/cp-installer Docker image to use (default "latest")
 ```
 
 ### Options inherited from parent commands

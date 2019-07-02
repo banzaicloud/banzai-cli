@@ -35,6 +35,7 @@ import (
 
 type createOptions struct {
 	file string
+	controlPlaneInstallerOptions
 }
 
 // NewUpCommand creates a new cobra.Command for `banzai clontrolplane up`.
@@ -55,6 +56,8 @@ func NewUpCommand() *cobra.Command {
 	flags := cmd.Flags()
 
 	flags.StringVarP(&options.file, "file", "f", valuesDefault, "Input control plane descriptor file")
+
+	bindInstallerFlags(flags, &options.controlPlaneInstallerOptions)
 
 	return cmd
 }
@@ -180,7 +183,7 @@ func runUp(options createOptions) error {
 	}
 
 	log.Info("controlplane is being created")
-	return emperror.Wrap(runInternal("apply", valuesName, kubeconfigName, tfdir), "controlplane creation failed")
+	return emperror.Wrap(runInternal("apply", valuesName, kubeconfigName, tfdir, options.controlPlaneInstallerOptions), "controlplane creation failed")
 }
 
 func isInteractive() bool {
@@ -190,7 +193,7 @@ func isInteractive() bool {
 	return viper.GetBool("formatting.force-interactive")
 }
 
-func runInternal(command, valuesFile, kubeconfigFile, tfdir string) error {
+func runInternal(command, valuesFile, kubeconfigFile, tfdir string, installerOptions controlPlaneInstallerOptions) error {
 
 	infoCmd := exec.Command("docker", "info", "-f", "{{or (eq .OperatingSystem \"Docker Desktop\") (eq .OperatingSystem \"Docker for Mac\")}}")
 
@@ -200,6 +203,12 @@ func runInternal(command, valuesFile, kubeconfigFile, tfdir string) error {
 	}
 
 	isDockerForMac := strings.Trim(string(infoOuput), "\n")
+
+	if installerOptions.pullInstaller {
+		if err := installerOptions.pullDockerImage(); err != nil {
+			return emperror.Wrap(err, "failed to pull cp-installer")
+		}
+	}
 
 	args := []string{
 		"run", "-it", "--rm",
@@ -214,7 +223,7 @@ func runInternal(command, valuesFile, kubeconfigFile, tfdir string) error {
 	}
 
 	args = append(args,
-		"banzaicloud/cp-installer:latest",
+		fmt.Sprintf("banzaicloud/cp-installer:%s", installerOptions.installerTag),
 		command,
 		"-state=/tfstate/terraform.tfstate", // workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/271
 		"-parallelism=1")
