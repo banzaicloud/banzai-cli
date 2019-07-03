@@ -40,7 +40,6 @@ func deploymentWrite(out io.Writer, format string, color bool, data interface{},
 	return nil
 }
 
-
 func DeploymentsWrite(out io.Writer, format string, color bool, data interface{}) error {
 	fields := []string{"Namespace", "ReleaseName", "Status", "Version", "UpdatedAt", "CreatedAt", "ChartName", "ChartVersion"}
 
@@ -63,3 +62,8 @@ func DeploymentCreateUpdateResponseWrite(out io.Writer, format string, color boo
 	return deploymentWrite(out, format, color, []interface{}{data}, fields)
 }
 
+func HelmReposWrite(out io.Writer, format string, color bool, data interface{}) error {
+	fields := []string{"Name", "Url"}
+
+	return deploymentWrite(out, format, color, data, fields)
+}

@@ -24,7 +24,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-
 type listDeploymentOptions struct {
 	deploymentOptions
 }
@@ -90,7 +89,6 @@ func runListDeployments(banzaiCli cli.Cli, options listDeploymentOptions) error 
 	if err != nil {
 		return err
 	}
-
 
 	deployments, _, err := banzaiCli.Client().DeploymentsApi.ListDeployments(context.Background(), orgID, clusterID, nil)
 	if err != nil {

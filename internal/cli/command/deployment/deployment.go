@@ -44,9 +44,9 @@ type deploymentOptions struct {
 // NewDeploymentCommand returns a `*cobra.Command` for `banzai cluster deployment` subcommands.
 func NewDeploymentCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:           "deployment",
-		Aliases:       []string{"deployments", "deploy"},
-		Short:         "Manage deployments",
+		Use:     "deployment",
+		Aliases: []string{"deployments", "deploy"},
+		Short:   "Manage deployments",
 	}
 
 	cmd.AddCommand(NewDeploymentListCommand(banzaiCli))
@@ -54,6 +54,7 @@ func NewDeploymentCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd.AddCommand(NewDeploymentCreateCommand(banzaiCli))
 	cmd.AddCommand(NewDeploymentUpdateCommand(banzaiCli))
 	cmd.AddCommand(NewDeploymentDeleteCommand(banzaiCli))
+	cmd.AddCommand(NewDeploymentRepoCommand(banzaiCli))
 
 	return cmd
 }
@@ -68,7 +69,7 @@ func getClusterID(banzaiCli cli.Cli, orgID int32, options deploymentOptions) (in
 		options.clusterID = banzaiCli.Context().ClusterID()
 	}
 
-	if banzaiCli.Interactive() &&  options.clusterID == 0 && options.clusterName == "" {
+	if banzaiCli.Interactive() && options.clusterID == 0 && options.clusterName == "" {
 		clusterID, err = input.AskCluster(banzaiCli, orgID)
 		if err != nil {
 			return 0, emperror.Wrap(err, "could not ask for a cluster")
@@ -104,7 +105,6 @@ func getClusterID(banzaiCli cli.Cli, orgID int32, options deploymentOptions) (in
 	return clusterID, nil
 }
 
-
 // getReleaseName returns the release name passed in if exists.
 // If the release name passed in is empty than prompts the user interactively
 // for a release name.
@@ -127,7 +127,6 @@ func getReleaseName(banzaiCli cli.Cli, orgID, clusterID int32, releaseName strin
 	} else {
 		return "", errors.New("No release name is specified!")
 	}
-
 
 	return name, nil
 }
@@ -170,7 +169,7 @@ func buildCreateUpdateDeploymentRequest(banzaiCli cli.Cli, fileName string) (*pi
 		}
 	} else {
 		if raw, err = ioutil.ReadAll(os.Stdin); err != nil {
-			return nil, emperror.Wrap(err, "failed to read from stdin",)
+			return nil, emperror.Wrap(err, "failed to read from stdin")
 		}
 	}
 
@@ -180,7 +179,6 @@ func buildCreateUpdateDeploymentRequest(banzaiCli cli.Cli, fileName string) (*pi
 	}
 
 	return req, nil
-
 
 }
 
@@ -203,4 +201,3 @@ func unmarshalCreateUpdateDeploymentRequest(data []byte) (*pipeline.CreateUpdate
 
 	return nil, errors.Errorf("JSON unmarshal failed: %v, YAML unmarshal failed: %v ", errJSON, errYaml)
 }
-
