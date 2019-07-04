@@ -242,10 +242,14 @@ func ClusterShell(cmd *cobra.Command, args []string) error {
 		fmt.Sprintf("BANZAI_CURRENT_CLUSTER_NAME=%s", cluster.Name),
 	}
 
+	helmEnv, err := setClusterHelm(tmpfile.Name(), orgId, id)
+	if err != nil {
+		return err
+	}
+	env = append(env, helmEnv...)
+
 	log.Debugf("Environment: %s", strings.Join(env, " "))
 	c.Env = append(os.Environ(), env...)
-
-	setClusterHelm(tmpfile.Name())
 
 	if err := c.Run(); err != nil {
 		wrapped := emperror.Wrap(err, "failed to run command")
