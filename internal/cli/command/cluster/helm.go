@@ -76,12 +76,12 @@ func setClusterHelm(kubeconfig string, orgId, id int32) ([]string, error) {
 		return nil, emperror.WrapWith(err, "failed to create config dir", "helmhome", helmHome)
 	}
 
-	suffix := "tar.gz"
+	postfix := "tar.gz"
 	if runtime.GOOS == "windows" {
-		suffix = "zip"
+		postfix = "zip"
 	}
 
-	helmURL := fmt.Sprintf("https://get.helm.sh/helm-%s-%s-%s.%s", version, runtime.GOOS, runtime.GOARCH, suffix)
+	helmURL := fmt.Sprintf("https://get.helm.sh/helm-%s-%s-%s.%s", version, runtime.GOOS, runtime.GOARCH, postfix)
 	if err := downloadClusterHelm(helmURL, helmPath); err != nil {
 		return nil, err
 	}
