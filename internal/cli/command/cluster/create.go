@@ -26,6 +26,7 @@ import (
 	"github.com/antihax/optional"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/banzaicloud/banzai-cli/internal/cli/format"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	"github.com/goph/emperror"
@@ -71,7 +72,7 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 
 	out := map[string]interface{}{}
 
-	if isInteractive() {
+	if banzaiCli.Interactive() {
 		err := buildInteractiveCreateRequest(banzaiCli, options, orgID, out)
 		if err != nil {
 			return err
@@ -117,7 +118,7 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 			if err != nil {
 				cli.LogAPIError("create cluster", err, out)
 			} else {
-				Out1(cluster, []string{"Id", "Name", "Status", "StatusMessage"})
+				format.ClusterShortWrite(banzaiCli, cluster)
 				if cluster.Status != "CREATING" {
 					return nil
 				}
@@ -127,7 +128,7 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 		}
 	} else {
 		log.Infof("you can check its status with the command `banzai cluster get %q`", out["name"])
-		Out1(cluster, []string{"Id", "Name"})
+		format.ClusterShortWrite(banzaiCli, cluster)
 	}
 	return nil
 }

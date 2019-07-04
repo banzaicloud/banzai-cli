@@ -39,6 +39,7 @@ type Cli interface {
 	Interactive() bool
 	Client() *pipeline.APIClient
 	Context() Context
+	OutputFormat() string
 }
 
 type Context interface {
@@ -70,6 +71,10 @@ func (c *banzaiCli) Color() bool {
 	}
 
 	return viper.GetBool("formatting.force-color")
+}
+
+func (c *banzaiCli) OutputFormat() string {
+	return viper.GetString("output.format")
 }
 
 func (c *banzaiCli) Interactive() bool {

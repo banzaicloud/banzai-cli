@@ -19,6 +19,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const clusterIdKey = "cluster.id"
+
 // NewClusterCommand returns a cobra command for `cluster` subcommands.
 func NewClusterCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
@@ -28,12 +30,12 @@ func NewClusterCommand(banzaiCli cli.Cli) *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		clusterListCmd,
-		clusterGetCmd,
 		NewCreateCommand(banzaiCli),
-		clusterShellCmd,
+		NewShellCommand(banzaiCli),
 		NewDeleteCommand(banzaiCli),
 		NewInstallCommand(banzaiCli),
+		NewGetCommand(banzaiCli),
+		NewListCommand(banzaiCli),
 	)
 
 	return cmd

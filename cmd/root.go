@@ -46,7 +46,6 @@ func preRun(cmd *cobra.Command, args []string) {
 	}
 }
 
-
 // Init is a temporary function to set initial values in the root cmd.
 func Init(version string, commitHash string, buildDate string, pipelineVersion string) {
 	rootCmd.Version = version
@@ -83,6 +82,7 @@ func init() {
 	flags.StringVar(&rootOptions.CfgFile, "config", "", "config file (default is $BANZAICONFIG or $HOME/.banzai/config.yaml)")
 	//flags.StringVarP(&BanzaiContext, "context", "c", "default", "name of Banzai Cloud context to use")
 	flags.StringVarP(&rootOptions.Output, "output", "o", "default", "output format (default|yaml|json)")
+	_ = viper.BindPFlag("output.format", flags.Lookup("output"))
 
 	flags.Int32("organization", 0, "organization id")
 	_ = viper.BindPFlag("organization.id", flags.Lookup("organization"))

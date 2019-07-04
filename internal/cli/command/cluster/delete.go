@@ -16,11 +16,11 @@ package cluster
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/antihax/optional"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/banzaicloud/banzai-cli/internal/cli/format"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -30,25 +30,26 @@ import (
 
 type deleteOptions struct {
 	force bool
+	Context
 }
 
 func NewDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := deleteOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "delete NAME",
+		Use:     "delete [--cluster=ID | [--cluster-name=]NAME]",
 		Aliases: []string{"del", "rm"},
 		Short:   "Delete a cluster",
 		Long:    "Delete a cluster. The cluster to delete is identified either by its name or the numerical ID. In case of interactive mode banzai CLI will prompt for a confirmation.",
-		Args:    cobra.ExactArgs(1),
+		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runDelete(banzaiCli, options, args)
 		},
 	}
 
 	flags := cmd.Flags()
-
 	flags.BoolVarP(&options.force, "force", "f", false, "Allow non-graceful cluster deletion")
+	options.Context = NewClusterContext(cmd, banzaiCli, "delete")
 
 	return cmd
 }
@@ -56,27 +57,16 @@ func NewDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 func runDelete(banzaiCli cli.Cli, options deleteOptions, args []string) error {
 	client := banzaiCli.Client()
 	orgId := banzaiCli.Context().OrganizationID()
-	clusters, _, err := client.ClustersApi.ListClusters(context.Background(), orgId)
-	if err != nil {
-		cli.LogAPIError("list clusters", err, orgId)
-		return emperror.Wrap(err, "could not list clusters")
+	if err := options.Init(args...); err != nil {
+		return err
 	}
-	var id int32
-	for _, cluster := range clusters {
-		if cluster.Name == args[0] || fmt.Sprintf("%d", cluster.Id) == args[0] {
-			id = cluster.Id
-			break
-		}
-	}
-	if id == 0 {
-		return errors.New(fmt.Sprintf("cluster %q could not be found", args[0]))
-	}
+	id := options.ClusterID()
 
 	if banzaiCli.Interactive() {
 		if cluster, _, err := client.ClustersApi.GetCluster(context.Background(), orgId, id); err != nil {
-			cli.LogAPIError("get cluster", err, id)
+			return emperror.Wrap(err, "failed to get cluster details")
 		} else {
-			Out1(cluster, []string{"Id", "Name", "Distribution", "Status", "CreatorName", "CreatedAt", "StatusMessage"})
+			format.ClusterWrite(banzaiCli, cluster)
 		}
 		confirmed := false
 		survey.AskOne(&survey.Confirm{Message: "Do you want to DELETE the cluster?"}, &confirmed, nil)
@@ -93,7 +83,7 @@ func runDelete(banzaiCli cli.Cli, options deleteOptions, args []string) error {
 	if cluster, _, err := client.ClustersApi.GetCluster(context.Background(), orgId, id); err != nil {
 		cli.LogAPIError("get cluster", err, id)
 	} else {
-		Out1(cluster, []string{"Id", "Name", "Distribution", "Status", "CreatorName", "CreatedAt", "StatusMessage"})
+		format.ClusterWrite(banzaiCli, cluster)
 	}
 	return nil
 }
