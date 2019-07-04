@@ -245,6 +245,8 @@ func ClusterShell(cmd *cobra.Command, args []string) error {
 	log.Debugf("Environment: %s", strings.Join(env, " "))
 	c.Env = append(os.Environ(), env...)
 
+	setClusterHelm(tmpfile.Name())
+
 	if err := c.Run(); err != nil {
 		wrapped := emperror.Wrap(err, "failed to run command")
 
