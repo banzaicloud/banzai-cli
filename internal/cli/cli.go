@@ -40,6 +40,7 @@ type Cli interface {
 	Client() *pipeline.APIClient
 	Context() Context
 	OutputFormat() string
+	Home() string
 }
 
 type Context interface {
@@ -63,6 +64,17 @@ func NewCli(out io.Writer) Cli {
 
 func (c *banzaiCli) Out() io.Writer {
 	return c.out
+}
+
+func (c *banzaiCli) Home() string {
+	// TODO use dir from config
+	home, err := homedir.Dir()
+	if err != nil {
+		log.Errorf("failed to find home directory, falling back to /tmp: %v", err)
+		home = "/tmp"
+	}
+
+	return filepath.Join(home, ".banzai")
 }
 
 func (c *banzaiCli) Color() bool {

@@ -32,7 +32,6 @@ import (
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/goph/emperror"
-	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -102,13 +101,7 @@ func runHelm(banzaiCli cli.Cli, options helmOptions, args []string) error {
 		return err
 	}
 
-	// TODO use dir from config
-	home, err := homedir.Dir()
-	if err != nil {
-		return emperror.Wrap(err, "can't compose the default config file path")
-	}
-
-	bindir := filepath.Join(home, ".banzai/bin")
+	bindir := filepath.Join(banzaiCli.Home(), "bin")
 	if err := os.MkdirAll(bindir, 0755); err != nil {
 		return emperror.Wrapf(err, "failed to create %q directory", bindir)
 	}
@@ -128,7 +121,7 @@ func runHelm(banzaiCli cli.Cli, options helmOptions, args []string) error {
 	}
 
 	org := banzaiCli.Context().OrganizationID()
-	helmHome := filepath.Join(home, fmt.Sprintf(".banzai/helm/org-%d", org))
+	helmHome := filepath.Join(banzaiCli.Home(), fmt.Sprintf("helm/org-%d", org))
 	helmRepos := filepath.Join(helmHome, "repository")
 	if err := os.MkdirAll(helmRepos, 0755); err != nil {
 		return emperror.Wrapf(err, "failed to create %q directory", bindir)
@@ -138,7 +131,24 @@ func runHelm(banzaiCli cli.Cli, options helmOptions, args []string) error {
 		return emperror.Wrap(err, "failed to sync Helm repositories")
 	}
 
-	env := append(os.Environ(), fmt.Sprintf("HELM_HOME=%s", helmHome))
+	env := os.Environ()
+	envs := make(map[string]string, len(env))
+	for _, pair := range env {
+		parts := strings.SplitN(pair, "=", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		envs[parts[0]] = parts[1]
+	}
+
+	envs["HELM_HOME"] = helmHome
+
+	env = make([]string, 0, len(envs))
+	for k, v := range envs {
+		env = append(env, fmt.Sprintf("%s=%s", k, v))
+	}
+
+	log.Debugf("Environment: %v", envs)
 	return emperror.Wrap(syscall.Exec(name, append([]string{"helm"}, args...), env), "failed to exec helm")
 }
 
