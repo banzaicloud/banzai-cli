@@ -17,15 +17,18 @@ package cluster
 import (
 	"archive/tar"
 	"compress/gzip"
+	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"syscall"
+	"time"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/goph/emperror"
@@ -33,10 +36,10 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	yaml "gopkg.in/yaml.v2"
 )
 
 type helmOptions struct {
-	Context
 }
 
 func NewHelmCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -50,7 +53,6 @@ func NewHelmCommand(banzaiCli cli.Cli) *cobra.Command {
 			return runHelm(banzaiCli, options, args)
 		},
 	}
-	options.Context = NewClusterContext(cmd, banzaiCli, "get")
 
 	return cmd
 }
@@ -95,16 +97,10 @@ func writeHelm(url, name string) error {
 }
 
 func runHelm(banzaiCli cli.Cli, options helmOptions, args []string) error {
-	c := exec.Command("kubectl", "get", "deployment", "-n", "kube-system", "-o", "jsonpath={.items[0].spec.template.spec.containers[0].image}", "-l", "app=helm")
-	out, err := c.Output()
+	version, err := tillerVersion()
 	if err != nil {
-		return emperror.Wrap(err, "failed to determine version of Tiller on the cluster")
+		return err
 	}
-	parts := strings.Split(string(out), ":")
-	if len(parts) != 2 {
-		return errors.Errorf("failed to parse Tiller image name %q", out)
-	}
-	version := parts[1] // TODO check format
 
 	// TODO use dir from config
 	home, err := homedir.Dir()
@@ -112,13 +108,13 @@ func runHelm(banzaiCli cli.Cli, options helmOptions, args []string) error {
 		return emperror.Wrap(err, "can't compose the default config file path")
 	}
 
-	bindir := path.Join(home, ".banzai/bin")
+	bindir := filepath.Join(home, ".banzai/bin")
 	if err := os.MkdirAll(bindir, 0755); err != nil {
 		return emperror.Wrapf(err, "failed to create %q directory", bindir)
 	}
 
 	url := fmt.Sprintf("https://get.helm.sh/helm-%s-%s-amd64.tar.gz", version, runtime.GOOS)
-	name := path.Join(bindir, fmt.Sprintf("helm-%s", version))
+	name := filepath.Join(bindir, fmt.Sprintf("helm-%s", version))
 
 	if _, err := os.Stat(name); err != nil {
 		log.Infof("Downloading helm %s...", version)
@@ -131,5 +127,89 @@ func runHelm(banzaiCli cli.Cli, options helmOptions, args []string) error {
 		log.Infof("Helm %s downloaded successfully", version)
 	}
 
-	return nil
+	org := banzaiCli.Context().OrganizationID()
+	helmHome := filepath.Join(home, fmt.Sprintf(".banzai/helm/org-%d", org))
+	helmRepos := filepath.Join(helmHome, "repository")
+	if err := os.MkdirAll(helmRepos, 0755); err != nil {
+		return emperror.Wrapf(err, "failed to create %q directory", bindir)
+	}
+
+	if err := dumpRepositories(banzaiCli, helmRepos); err != nil {
+		return emperror.Wrap(err, "failed to sync Helm repositories")
+	}
+
+	env := append(os.Environ(), fmt.Sprintf("HELM_HOME=%s", helmHome))
+	return emperror.Wrap(syscall.Exec(name, append([]string{"helm"}, args...), env), "failed to exec helm")
+}
+
+// helmRepo is an item of the repositories config of Helm
+type helmRepo struct {
+	Name  string
+	URL   string `yaml:"url"`
+	Cache string
+}
+
+// helmRepo is the simplified structure of the repositories config of Helm
+type helmRepos struct {
+	ApiVersion   string `yaml:"apiVersion"`
+	Repositories []helmRepo
+	Generated    time.Time
+}
+
+func dumpRepositories(banzaiCli cli.Cli, reposdir string) error {
+	filename := filepath.Join(reposdir, "repositories.yaml")
+	if _, err := os.Stat(filename); err == nil {
+		return nil
+	}
+
+	log.Infof("Creating Helm home for organization")
+	org := banzaiCli.Context().OrganizationID()
+	pipeline := banzaiCli.Client()
+	repos, _, err := pipeline.HelmApi.HelmListRepos(context.Background(), org)
+	if err != nil {
+		return emperror.Wrap(err, "failed to get list of Helm repositories")
+	}
+
+	cachedir := filepath.Join(reposdir, "cache")
+	if err := os.MkdirAll(cachedir, 0755); err != nil {
+		return emperror.Wrap(err, "failed to create helm cache directory")
+	}
+
+	config := helmRepos{ApiVersion: "v1", Repositories: make([]helmRepo, len(repos)), Generated: time.Now()}
+	empty, _ := yaml.Marshal(struct {
+		Entries    map[string]interface{}
+		ApiVersion string
+		Generated  time.Time
+	}{ApiVersion: "v1"})
+	for i, repo := range repos {
+		cache := filepath.Join(cachedir, fmt.Sprintf("%s-index.yaml", repo.Name)) // this is hardcoded in helm
+		if _, err := os.Stat(cache); err != nil {
+			err := ioutil.WriteFile(cache, empty, 0644)
+			if err != nil {
+				return emperror.Wrap(err, "failed to write initial repository config")
+			}
+		}
+		config.Repositories[i] = helmRepo{Name: repo.Name, URL: repo.Url, Cache: cache}
+	}
+
+	content, err := yaml.Marshal(config)
+	if err != nil {
+		return emperror.Wrap(err, "failed to marshal Helm repositories list")
+	}
+
+	return emperror.Wrap(ioutil.WriteFile(filename, content, 0644), "failed to write repository list")
+}
+
+func tillerVersion() (string, error) {
+	c := exec.Command("kubectl", "get", "deployment", "-n", "kube-system", "-o", "jsonpath={.items[0].spec.template.spec.containers[0].image}", "-l", "app=helm")
+	out, err := c.Output()
+	if err != nil {
+		return "", emperror.Wrap(err, "failed to determine version of Tiller on the cluster")
+	}
+	parts := strings.Split(string(out), ":")
+	if len(parts) != 2 {
+		return "", errors.Errorf("failed to parse Tiller image name %q", out)
+	}
+	version := parts[1] // TODO check format
+	return version, nil
 }
