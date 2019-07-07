@@ -30,6 +30,7 @@ func NewBucketCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	cmd.AddCommand(
 		NewListCommand(banzaiCli),
+		NewGetCommand(banzaiCli),
 	)
 
 	return cmd
