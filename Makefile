@@ -22,6 +22,7 @@ TEST_FORMAT = short-verbose
 endif
 
 PIPELINE_VERSION = 0.21.2
+CLOUDINFO_VERSION = 0.7.1
 
 # Dependency versions
 GOTESTSUM_VERSION = 0.3.3
@@ -141,6 +142,17 @@ generate-pipeline-client: ## Generate client from Pipeline OpenAPI spec
 	-i /local/pipeline-openapi.yaml \
 	-g go \
 	-o /local/.gen/pipeline
+
+.PHONY: generate-cloudinfo-client
+generate-cloudinfo-client: ## Generate client from Cloudinfo OpenAPI spec
+	curl https://raw.githubusercontent.com/banzaicloud/cloudinfo/${CLOUDINFO_VERSION}/api/openapi-spec/cloudinfo.yaml | sed "s/version: .*/version: ${CLOUDINFO_VERSION}/" > cloudinfo-openapi.yaml
+	rm -rf .gen/cloudinfo
+	docker run --rm -v ${PWD}:/local banzaicloud/openapi-generator-cli:${OPENAPI_GENERATOR_VERSION} generate \
+	--additional-properties packageName=cloudinfo \
+	--additional-properties withGoCodegenComment=true \
+	-i /local/cloudinfo-openapi.yaml \
+	-g go \
+	-o /local/.gen/cloudinfo
 
 bin/goreleaser: bin/goreleaser-${GORELEASER_VERSION}
 	@ln -sf goreleaser-${GORELEASER_VERSION} bin/goreleaser

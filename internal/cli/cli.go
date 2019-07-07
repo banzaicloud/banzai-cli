@@ -25,6 +25,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/banzaicloud/banzai-cli/.gen/cloudinfo"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 
 	"github.com/goph/emperror"
@@ -43,6 +44,7 @@ type Cli interface {
 	Interactive() bool
 	Client() *pipeline.APIClient
 	HTTPTransport() *http.Transport
+	CloudinfoClient() *cloudinfo.APIClient
 	Context() Context
 	OutputFormat() string
 	Home() string
@@ -55,9 +57,15 @@ type Context interface {
 }
 
 type banzaiCli struct {
-	out        io.Writer
-	client     *pipeline.APIClient
-	clientOnce sync.Once
+	out                 io.Writer
+	client              *pipeline.APIClient
+	clientOnce          sync.Once
+	out                 io.Writer
+	ctx                 Context
+	client              *pipeline.APIClient
+	clientOnce          sync.Once
+	cloudinfoClient     *cloudinfo.APIClient
+	cloudinfoClientOnce sync.Once
 }
 
 func NewCli(out io.Writer) Cli {
@@ -152,6 +160,22 @@ func (c *banzaiCli) HTTPTransport() *http.Transport {
 	}
 
 	return http.DefaultTransport.(*http.Transport)
+}
+
+func (c *banzaiCli) CloudinfoClient() *cloudinfo.APIClient {
+	c.cloudinfoClientOnce.Do(func() {
+		config := cloudinfo.NewConfiguration()
+		config.BasePath = viper.GetString("cloudinfo.basepath")
+		config.UserAgent = "banzai-cli/1.0.0/go"
+
+		c.cloudinfoClient = cloudinfo.NewAPIClient(config)
+	})
+
+	return c.cloudinfoClient
+}
+
+func (c *banzaiCli) Context() Context {
+	return c.ctx
 }
 
 func (c *banzaiCli) Context() Context {
