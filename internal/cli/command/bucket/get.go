@@ -22,6 +22,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/format"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
+	"github.com/banzaicloud/banzai-cli/internal/cli/output"
 )
 
 type getBucketOptions struct {
@@ -91,7 +92,7 @@ func runGet(banzaiCli cli.Cli, o getBucketOptions) error {
 		return err
 	}
 
-	if bucket.Cloud == "" && banzaiCli.OutputFormat() == "default" {
+	if bucket.Cloud == "" && banzaiCli.OutputFormat() == output.OutputFormatDefault {
 		if o.name != "" {
 			log.Infof("no such bucket: %s", o.name)
 		} else {

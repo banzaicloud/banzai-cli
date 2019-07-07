@@ -21,6 +21,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/format"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
+	"github.com/banzaicloud/banzai-cli/internal/cli/output"
 )
 
 type listBucketsOptions struct {
@@ -64,14 +65,14 @@ func runList(banzaiCli cli.Cli, o listBucketsOptions) error {
 	}
 
 	if len(buckets) < 1 {
-		if banzaiCli.OutputFormat() == "default" {
+		if banzaiCli.OutputFormat() == output.OutputFormatDefault {
 			log.Info("No buckets were found")
 		}
 		return nil
 	}
 
 	for i, b := range buckets {
-		if banzaiCli.OutputFormat() != "default" {
+		if banzaiCli.OutputFormat() != output.OutputFormatDefault {
 			continue
 		}
 		b.Name = b.formattedName()

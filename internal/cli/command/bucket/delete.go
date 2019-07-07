@@ -28,6 +28,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/format"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
+	"github.com/banzaicloud/banzai-cli/internal/cli/output"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 )
 
@@ -99,7 +100,7 @@ func runDelete(banzaiCli cli.Cli, o deleteBucketsOptions) error {
 		return err
 	}
 
-	if bucket.Cloud == "" && banzaiCli.OutputFormat() == "default" {
+	if bucket.Cloud == "" && banzaiCli.OutputFormat() == output.OutputFormatDefault {
 		if o.name != "" {
 			log.Infof("no such bucket: %s", o.name)
 		} else {
