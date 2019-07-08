@@ -4,7 +4,7 @@ Install a secret to a cluster
 
 ### Synopsis
 
-Install a particular secret to a cluster's namespace.
+Install a particular secret from Pipeline as a Kubernetes secret to a cluster.
 
 ```
 banzai secret install [flags]
@@ -16,7 +16,7 @@ banzai secret install [flags]
 
 		Install secret
 		-----
-		$ banzai secret install --name mysecretname --cluster myClusterName <<EOF
+		$ banzai secret install --name mysecretname --cluster-name myClusterName <<EOF
 		> {
 		> 	"namespace": "default",
 		> 	"spec": {
@@ -32,11 +32,12 @@ banzai secret install [flags]
 ### Options
 
 ```
-  -c, --cluster string   Name or ID of the cluster to install the secret
-  -f, --file string      Template descriptor file
-  -h, --help             help for install
-  -m, --merge            Set true to merge existing secret
-  -n, --name string      Name of the secret to install
+      --cluster int32         ID of cluster to install secret on
+      --cluster-name string   Name of cluster to install secret on
+  -f, --file string           Template descriptor file
+  -h, --help                  help for install
+  -m, --merge                 Merge fields to an existing Kubernetes secret
+  -n, --name string           Name of the Pipeline secret to use
 ```
 
 ### Options inherited from parent commands
