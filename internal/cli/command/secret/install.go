@@ -21,12 +21,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/banzaicloud/banzai-cli/internal/cli/input"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
@@ -38,23 +37,22 @@ import (
 type installSecretOptions struct {
 	file       string
 	secretName string
-	cluster    string
 	merge      bool
+	cluster.Context
 }
 
 func NewInstallCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := installSecretOptions{}
 
 	cmd := &cobra.Command{
-		Use:          "install",
-		Aliases:      []string{"i"},
-		Short:        "Install a secret to a cluster",
-		Long:         "Install a particular secret to a cluster's namespace.",
-		SilenceUsage: true,
+		Use:     "install",
+		Aliases: []string{"i"},
+		Short:   "Install a secret to a cluster",
+		Long:    "Install a particular secret from Pipeline as a Kubernetes secret to a cluster.",
 		Example: `
 		Install secret
 		-----
-		$ banzai secret install --name mysecretname --cluster myClusterName <<EOF
+		$ banzai secret install --name mysecretname --cluster-name myClusterName <<EOF
 		> {
 		> 	"namespace": "default",
 		> 	"spec": {
@@ -65,8 +63,10 @@ func NewInstallCommand(banzaiCli cli.Cli) *cobra.Command {
 		> }
 		> EOF
 		`,
-		Args:         cobra.NoArgs,
+		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
+			cmd.SilenceErrors = true
 			return runInstallSecret(banzaiCli, options)
 		},
 	}
@@ -74,15 +74,20 @@ func NewInstallCommand(banzaiCli cli.Cli) *cobra.Command {
 	flags := cmd.Flags()
 
 	flags.StringVarP(&options.file, "file", "f", "", "Template descriptor file")
-	flags.StringVarP(&options.secretName, "name", "n", "", "Name of the secret to install")
-	flags.StringVarP(&options.cluster, "cluster", "c", "", "Name or ID of the cluster to install the secret")
-	flags.BoolVarP(&options.merge, "merge", "m", false, "Set true to merge existing secret")
+	flags.StringVarP(&options.secretName, "name", "n", "", "Name of the Pipeline secret to use")
+	flags.BoolVarP(&options.merge, "merge", "m", false, "Merge fields to an existing Kubernetes secret")
+	options.Context = cluster.NewClusterContext(cmd, banzaiCli, "install secret on")
 
 	return cmd
 }
 
 func runInstallSecret(banzaiCli cli.Cli, options installSecretOptions) error {
 	out := &pipeline.InstallSecretRequest{}
+
+	if err := options.Init(); err != nil {
+		return emperror.Wrap(err, "failed to select cluster")
+	}
+
 
 	if banzaiCli.Interactive() {
 		err := buildInteractiveInstallSecretRequest(options, out)
@@ -118,37 +123,21 @@ func runInstallSecret(banzaiCli cli.Cli, options installSecretOptions) error {
 
 	}
 
-	log.Debugf("install secret request: %#v", out)
+	orgID := banzaiCli.Context().OrganizationID()
+	clusterID := options.ClusterID()
+	log.Debugf("sending install secret request: %#v", out)
 
-	// find cluster
-	orgID := input.GetOrganization(banzaiCli)
-	clusters, _, err := banzaiCli.Client().ClustersApi.ListClusters(context.Background(), orgID)
-	if err != nil {
-		cli.LogAPIError("list clusters", err, orgID)
-		log.Fatalf("could not list clusters: %v", err)
-	}
-	var clusterId int32
-	var clusterName string
-	for _, cluster := range clusters {
-		if strconv.Itoa(int(cluster.Id)) == options.cluster || cluster.Name == options.cluster {
-			clusterId = cluster.Id
-			clusterName = cluster.Name
-			break
-		}
-	}
-
-	_, response, err := banzaiCli.Client().ClustersApi.InstallSecret(context.Background(), orgID, clusterId, options.secretName, *out)
+	_, response, err := banzaiCli.Client().ClustersApi.InstallSecret(context.Background(), orgID, clusterID, options.secretName, *out)
 	if response != nil && response.StatusCode == http.StatusConflict {
-		log.Infof("Secret (%s) already installed to cluster (%s)", options.secretName, clusterName)
+		log.Infof("Secret (%s) already installed to cluster (%s)", options.secretName, options.ClusterName())
 
 		if options.merge {
-			log.Info("path secret")
-			if _, _, err = banzaiCli.Client().ClustersApi.MergeSecret(context.Background(), orgID, clusterId, options.secretName, *out); err != nil {
+			if _, _, err = banzaiCli.Client().ClustersApi.MergeSecret(context.Background(), orgID, clusterID, options.secretName, *out); err != nil {
 				cli.LogAPIError("merge secret", err, out)
 				return emperror.Wrap(err, "failed to merge secret")
 			}
 		} else {
-			return errors.New("set -merge flag to true to merge existing secret")
+			return errors.New("set --merge flag to merge existing secret")
 		}
 	}
 
@@ -188,7 +177,7 @@ func buildInteractiveInstallSecretRequest(options installSecretOptions, out *pip
 
 			continue
 		} else {
-			if err := utils.Unmarshal(raw, &out); err != nil {
+			if err := utils.Unmarshal(raw, out); err != nil {
 				return emperror.Wrap(err, "failed to parse InstallSecretRequest")
 			}
 
