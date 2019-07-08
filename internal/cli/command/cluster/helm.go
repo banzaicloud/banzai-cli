@@ -58,7 +58,7 @@ func NewHelmCommand(banzaiCli cli.Cli) *cobra.Command {
 
 func writeHelm(url, name string) error {
 
-	tgz, err := http.Get(url)
+	tgz, err := http.Get(url) // #nosec
 	if err != nil {
 		return emperror.Wrapf(err, "failed to download helm from %q", url)
 	}
