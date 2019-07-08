@@ -82,12 +82,19 @@ func NewInstallCommand(banzaiCli cli.Cli) *cobra.Command {
 }
 
 func runInstallSecret(banzaiCli cli.Cli, options installSecretOptions) error {
-	out := &pipeline.InstallSecretRequest{}
+
+	if options.secretName == "" {
+		return errors.New("secret name is not specified (--name)") // TODO: ask from existing secrets
+	}
 
 	if err := options.Init(); err != nil {
 		return emperror.Wrap(err, "failed to select cluster")
 	}
 
+	out := &pipeline.InstallSecretRequest{
+		Namespace:        "default",
+		SourceSecretName: options.secretName, // set defaults explicitly
+	}
 
 	if banzaiCli.Interactive() {
 		err := buildInteractiveInstallSecretRequest(options, out)
