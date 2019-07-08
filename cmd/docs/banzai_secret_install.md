@@ -1,4 +1,4 @@
-## banzai cluster install secret
+## banzai secret install
 
 Install a secret to a cluster
 
@@ -7,17 +7,36 @@ Install a secret to a cluster
 Install a particular secret to a cluster's namespace.
 
 ```
-banzai cluster install secret [flags]
+banzai secret install [flags]
+```
+
+### Examples
+
+```
+
+		Install secret
+		-----
+		$ banzai secret install --name mysecretname --cluster myClusterName <<EOF
+		> {
+		> 	"namespace": "default",
+		> 	"spec": {
+		> 		"ROOT_USER": {
+		> 			"source": "AWS_ACCESS_KEY_ID"
+		> 		}
+		> 	}
+		> }
+		> EOF
+		
 ```
 
 ### Options
 
 ```
-  -c, --cluster-name string   Name of the cluster to install the secret
-  -f, --file string           Template descriptor file
-  -h, --help                  help for secret
-  -m, --merge                 Set true to merge existing secret
-  -s, --secret-name string    Name of the secret to install
+  -c, --cluster string   Name or ID of the cluster to install the secret
+  -f, --file string      Template descriptor file
+  -h, --help             help for install
+  -m, --merge            Set true to merge existing secret
+  -n, --name string      Name of the secret to install
 ```
 
 ### Options inherited from parent commands
@@ -35,5 +54,5 @@ banzai cluster install secret [flags]
 
 ### SEE ALSO
 
-* [banzai cluster install](banzai_cluster_install.md)	 - Manage cluster installs
+* [banzai secret](banzai_secret.md)	 - Manage secrets
 

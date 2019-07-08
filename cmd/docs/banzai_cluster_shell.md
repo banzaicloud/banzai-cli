@@ -34,8 +34,8 @@ banzai cluster shell [command] [flags]
 ### Options
 
 ```
-      --cluster int32         cluster id
-      --cluster-name string   cluster name
+      --cluster int32         ID of cluster to run a shell for
+      --cluster-name string   Name of cluster to run a shell for
   -h, --help                  help for shell
 ```
 

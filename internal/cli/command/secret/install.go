@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cluster
+package secret
 
 import (
 	"context"
@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
@@ -35,21 +36,36 @@ import (
 )
 
 type installSecretOptions struct {
-	file        string
-	secretName  string
-	clusterName string
-	merge       bool
+	file       string
+	secretName string
+	cluster    string
+	merge      bool
 }
 
-func NewSecretInstallCommand(banzaiCli cli.Cli) *cobra.Command {
+func NewInstallCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := installSecretOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "secret",
-		Aliases: []string{"s"},
-		Short:   "Install a secret to a cluster",
-		Long:    "Install a particular secret to a cluster's namespace.",
-		Args:    cobra.ExactArgs(0),
+		Use:          "install",
+		Aliases:      []string{"i"},
+		Short:        "Install a secret to a cluster",
+		Long:         "Install a particular secret to a cluster's namespace.",
+		SilenceUsage: true,
+		Example: `
+		Install secret
+		-----
+		$ banzai secret install --name mysecretname --cluster myClusterName <<EOF
+		> {
+		> 	"namespace": "default",
+		> 	"spec": {
+		> 		"ROOT_USER": {
+		> 			"source": "AWS_ACCESS_KEY_ID"
+		> 		}
+		> 	}
+		> }
+		> EOF
+		`,
+		Args:         cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runInstallSecret(banzaiCli, options)
 		},
@@ -58,8 +74,8 @@ func NewSecretInstallCommand(banzaiCli cli.Cli) *cobra.Command {
 	flags := cmd.Flags()
 
 	flags.StringVarP(&options.file, "file", "f", "", "Template descriptor file")
-	flags.StringVarP(&options.secretName, "secret-name", "s", "", "Name of the secret to install")
-	flags.StringVarP(&options.clusterName, "cluster-name", "c", "", "Name of the cluster to install the secret")
+	flags.StringVarP(&options.secretName, "name", "n", "", "Name of the secret to install")
+	flags.StringVarP(&options.cluster, "cluster", "c", "", "Name or ID of the cluster to install the secret")
 	flags.BoolVarP(&options.merge, "merge", "m", false, "Set true to merge existing secret")
 
 	return cmd
@@ -112,16 +128,18 @@ func runInstallSecret(banzaiCli cli.Cli, options installSecretOptions) error {
 		log.Fatalf("could not list clusters: %v", err)
 	}
 	var clusterId int32
+	var clusterName string
 	for _, cluster := range clusters {
-		if cluster.Name == options.clusterName {
+		if strconv.Itoa(int(cluster.Id)) == options.cluster || cluster.Name == options.cluster {
 			clusterId = cluster.Id
+			clusterName = cluster.Name
 			break
 		}
 	}
 
 	_, response, err := banzaiCli.Client().ClustersApi.InstallSecret(context.Background(), orgID, clusterId, options.secretName, *out)
 	if response != nil && response.StatusCode == http.StatusConflict {
-		log.Infof("Secret (%s) already installed to cluster (%s)", options.secretName, options.clusterName)
+		log.Infof("Secret (%s) already installed to cluster (%s)", options.secretName, clusterName)
 
 		if options.merge {
 			log.Info("path secret")

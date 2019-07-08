@@ -31,7 +31,6 @@ Manage clusters
 * [banzai cluster create](banzai_cluster_create.md)	 - Create a cluster
 * [banzai cluster delete](banzai_cluster_delete.md)	 - Delete a cluster
 * [banzai cluster get](banzai_cluster_get.md)	 - Get cluster details
-* [banzai cluster install](banzai_cluster_install.md)	 - Manage cluster installs
 * [banzai cluster list](banzai_cluster_list.md)	 - List clusters
 * [banzai cluster shell](banzai_cluster_shell.md)	 - Start a shell or run a command with the cluster configured as kubectl context
 

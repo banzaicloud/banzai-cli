@@ -7,13 +7,15 @@ Get cluster details
 Get cluster details
 
 ```
-banzai cluster get NAME [flags]
+banzai cluster get [--cluster=ID | [--cluster-name=]NAME] [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for get
+      --cluster int32         ID of cluster to get
+      --cluster-name string   Name of cluster to get
+  -h, --help                  help for get
 ```
 
 ### Options inherited from parent commands
