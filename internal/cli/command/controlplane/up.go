@@ -123,18 +123,9 @@ func runUp(options createOptions) error {
 			return errors.New("controlplane creation cancelled")
 		}
 	} else { // non-interactive
-		var raw []byte
-		var err error
-
-		if filename != "" {
-			raw, err = ioutil.ReadFile(filename)
-		} else {
-			raw, err = ioutil.ReadAll(os.Stdin)
-			filename = "stdin"
-		}
-
+		filename, raw, err := utils.ReadFileOrStdin(filename)
 		if err != nil {
-			return emperror.Wrapf(err, "failed to read %q", filename)
+			return emperror.WrapWith(err, fmt.Sprintf("failed to read %q", filename), "filename", filename)
 		}
 
 		if err := utils.Unmarshal(raw, &out); err != nil {

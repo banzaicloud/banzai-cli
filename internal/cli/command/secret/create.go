@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"strings"
 
 	"github.com/antihax/optional"
@@ -161,16 +160,7 @@ func getCreateSecretRequest(banzaiCli cli.Cli, options *createSecretOptions, out
 }
 
 func readFileAndValidate(filename string, out *pipeline.CreateSecretRequest) error {
-	var raw []byte
-	var err error
-
-	if filename != "" && filename != "-" {
-		raw, err = ioutil.ReadFile(filename)
-	} else {
-		raw, err = ioutil.ReadAll(os.Stdin)
-		filename = "stdin"
-	}
-
+	filename, raw, err := utils.ReadFileOrStdin(filename)
 	if err != nil {
 		return emperror.WrapWith(err, fmt.Sprintf("failed to read %q", filename), "filename", filename)
 	}

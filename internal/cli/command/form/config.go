@@ -16,9 +16,9 @@ package form
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 
+	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	"github.com/ghodss/yaml"
 	"github.com/goph/emperror"
 )
@@ -109,22 +109,13 @@ func (f Field) validate() error {
 	return nil
 }
 
-func readConfig(fileName string) (file ConfigFile, err error) {
-	var fileContent []byte
-
-	if fileName == "-" {
-		fileContent, err = ioutil.ReadAll(os.Stdin)
-		if err != nil {
-			return file, err
-		}
-	} else {
-		fileContent, err = ioutil.ReadFile(fileName)
-		if err != nil {
-			return file, err
-		}
+func readConfig(filename string) (file ConfigFile, err error) {
+	filename, raw, err := utils.ReadFileOrStdin(filename)
+	if err != nil {
+		return file, emperror.WrapWith(err, fmt.Sprintf("failed to read %q", filename), "filename", filename)
 	}
 
-	err = yaml.Unmarshal(fileContent, &file)
+	err = yaml.Unmarshal(raw, &file)
 	if err != nil {
 		return file, emperror.Wrap(err, "invalid format")
 	}
