@@ -46,6 +46,7 @@ type Cli interface {
 type Context interface {
 	OrganizationID() int32
 	SetOrganizationID(id int32)
+	SetToken(token string)
 }
 
 type banzaiCli struct {
@@ -124,6 +125,12 @@ func (c *banzaiContext) OrganizationID() int32 {
 
 func (c *banzaiContext) SetOrganizationID(id int32) {
 	viper.Set(orgIdKey, id)
+
+	c.save()
+}
+
+func (c *banzaiContext) SetToken(token string) {
+	viper.Set("pipeline.token", token)
 
 	c.save()
 }

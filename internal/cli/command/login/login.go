@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package command
+package login
 
 import (
 	"fmt"
@@ -20,10 +20,10 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/goph/emperror"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gopkg.in/AlecAivazis/survey.v1"
-	"github.com/pkg/errors"
 )
 
 type loginOptions struct {
@@ -83,8 +83,8 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 	}
 
 	if token != "" {
-		viper.Set("pipeline.token", token)
 		viper.Set("pipeline.basepath", endpoint)
+		viper.Set("pipeline.token", token)
 
 		var orgID int32
 		var orgFound bool
@@ -104,8 +104,9 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 
 		banzaiCli.Context().SetOrganizationID(orgID)
 	} else {
-		// nolint: stylecheck
-		return errors.New("Password login is not implemented yet. Please either set a pipeline token aquired from https://beta.banzaicloud.io/pipeline/api/v1/token in the environment variable PIPELINE_TOKEN or as pipeline.token in ~/.banzai/config.yaml. You can also use the `banzai login -t $TOKEN` command.")
+		viper.Set("pipeline.basepath", endpoint)
+
+		return runServer(banzaiCli, endpoint)
 	}
 
 	return nil
