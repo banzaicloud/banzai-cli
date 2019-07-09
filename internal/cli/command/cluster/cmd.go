@@ -36,6 +36,7 @@ func NewClusterCommand(banzaiCli cli.Cli) *cobra.Command {
 		NewInstallCommand(banzaiCli),
 		NewGetCommand(banzaiCli),
 		NewListCommand(banzaiCli),
+		NewHelmCommand(banzaiCli),
 	)
 
 	return cmd
