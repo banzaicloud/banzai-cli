@@ -323,23 +323,15 @@ func renderClosingTemplate(w io.Writer) {
 }
 
 const closingTemplate = `
+<!DOCTYPE html>
+<html>
 <head>
-<style>
-/* make pre wrap */
-pre {
-white-space: pre-wrap;       /* css-3 */
-white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
-white-space: -pre-wrap;      /* Opera 4-6 */
-white-space: -o-pre-wrap;    /* Opera 7 */
-word-wrap: break-word;       /* Internet Explorer 5.5+ */
-}
-</style>
-</head>
 <script type="text/javascript">
 	setTimeout(function () { window.location.href = "https://beta.banzaicloud.io/docs/"; }, 5000);
 </script>
+</head>
 <body>
-	<h4>You have successfully authenticated to Pipeline. Please close this page and return to your terminal. We will redicret you to the documentation otherwise.</h4>
+	<h4>You have successfully authenticated to Pipeline. Please close this page and return to your terminal. We will redirect you to the documentation otherwise.</h4>
 </body>
 </html>
 `
