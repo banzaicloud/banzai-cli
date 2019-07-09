@@ -80,20 +80,20 @@ func GetManagedBuckets(banzaiCli cli.Cli, orgID int32, cloud, location string) (
 }
 
 // GetManagedBucket gets a managed bucket from Pipeline
-func GetManagedBucket(banzaiCli cli.Cli, orgID int32, name, cloud, location, storageAccount string) (Bucket, error) {
+func GetManagedBucket(banzaiCli cli.Cli, orgID int32, name, cloud, location, storageAccount string) (bool, Bucket, error) {
 	var selectedBucket Bucket
 	var err error
 
 	buckets, err := GetManagedBuckets(banzaiCli, orgID, cloud, location)
 	if err != nil {
-		return selectedBucket, err
+		return false, selectedBucket, err
 	}
 
-	if len(buckets) < 1 {
-		return selectedBucket, nil
+	if len(buckets) < 1 && name == "" {
+		return false, selectedBucket, nil
 	}
 
-	if name == "" {
+	if name == "" && banzaiCli.Interactive() {
 		bucketSlice := make([]string, 0)
 		bucketNames := make(map[string]Bucket, 0)
 		for _, bucket := range buckets {
@@ -104,7 +104,7 @@ func GetManagedBucket(banzaiCli cli.Cli, orgID int32, name, cloud, location, sto
 		var selectedName string
 		err = survey.AskOne(&survey.Select{Message: getTitlesForBucketSelection(), Options: bucketSlice}, &selectedName, survey.Required)
 		if err != nil {
-			return selectedBucket, emperror.Wrap(err, "failed to select bucket")
+			return false, selectedBucket, emperror.Wrap(err, "failed to select bucket")
 		}
 		selectedBucket = bucketNames[selectedName]
 	} else {
@@ -118,7 +118,11 @@ func GetManagedBucket(banzaiCli cli.Cli, orgID int32, name, cloud, location, sto
 		}
 	}
 
-	return selectedBucket, nil
+	if selectedBucket.Cloud == "" {
+		return false, selectedBucket, errors.Errorf("no such bucket: %s", name)
+	}
+
+	return true, selectedBucket, nil
 }
 
 // ConvertBucketInfoToBucket converts pipeline.BucketInfo to Bucket

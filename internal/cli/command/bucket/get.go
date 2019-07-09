@@ -42,6 +42,8 @@ func NewGetCommand(banzaiCli cli.Cli) *cobra.Command {
 		Args:    cobra.MaximumNArgs(2),
 		Aliases: []string{"g"},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			var err error
+
 			cmd.SilenceErrors = true
 			cmd.SilenceUsage = true
 
@@ -61,9 +63,15 @@ func NewGetCommand(banzaiCli cli.Cli) *cobra.Command {
 					cmd.SilenceUsage = false
 					return errors.New("CLOUD argument or --cloud flag must be specified")
 				}
+			} else if o.name != "" && o.cloud == "" {
+				// Select cloud
+				o.cloud, err = input.AskCloud()
+				if err != nil {
+					return err
+				}
 			}
 
-			err := validateCloudAndLocation(banzaiCli, o.cloud, o.location)
+			err = validateCloudAndLocation(banzaiCli, o.cloud, o.location)
 			if err != nil {
 				return err
 			}
@@ -87,16 +95,14 @@ func NewGetCommand(banzaiCli cli.Cli) *cobra.Command {
 func runGet(banzaiCli cli.Cli, o getBucketOptions) error {
 	var err error
 
-	bucket, err := GetManagedBucket(banzaiCli, input.GetOrganization(banzaiCli), o.name, o.cloud, o.location, o.storageAccount)
+	found, bucket, err := GetManagedBucket(banzaiCli, input.GetOrganization(banzaiCli), o.name, o.cloud, o.location, o.storageAccount)
 	if err != nil {
 		return err
 	}
 
-	if bucket.Cloud == "" && banzaiCli.OutputFormat() == output.OutputFormatDefault {
-		if o.name != "" {
-			log.Infof("no such bucket: %s", o.name)
-		} else {
-			log.Infof("no buckets were found")
+	if !found {
+		if banzaiCli.OutputFormat() == output.OutputFormatDefault {
+			log.Infof("No buckets were found")
 		}
 		return nil
 	}

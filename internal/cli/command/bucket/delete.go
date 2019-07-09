@@ -50,6 +50,8 @@ func NewDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 		Args:    cobra.MaximumNArgs(2),
 		Aliases: []string{"d", "del"},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			var err error
+
 			cmd.SilenceErrors = true
 			cmd.SilenceUsage = true
 
@@ -69,9 +71,15 @@ func NewDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 					cmd.SilenceUsage = false
 					return errors.New("CLOUD argument or --cloud flag must be specified")
 				}
+			} else if o.name != "" && o.cloud == "" {
+				// Select cloud
+				o.cloud, err = input.AskCloud()
+				if err != nil {
+					return err
+				}
 			}
 
-			err := validateCloudAndLocation(banzaiCli, o.cloud, o.location)
+			err = validateCloudAndLocation(banzaiCli, o.cloud, o.location)
 			if err != nil {
 				return err
 			}
@@ -95,16 +103,14 @@ func NewDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 func runDelete(banzaiCli cli.Cli, o deleteBucketsOptions) error {
 	orgID := input.GetOrganization(banzaiCli)
 
-	bucket, err := GetManagedBucket(banzaiCli, orgID, o.name, o.cloud, o.location, o.storageAccount)
+	found, bucket, err := GetManagedBucket(banzaiCli, orgID, o.name, o.cloud, o.location, o.storageAccount)
 	if err != nil {
 		return err
 	}
 
-	if bucket.Cloud == "" && banzaiCli.OutputFormat() == output.OutputFormatDefault {
-		if o.name != "" {
-			log.Infof("no such bucket: %s", o.name)
-		} else {
-			log.Info("no buckets were found")
+	if !found {
+		if banzaiCli.OutputFormat() == output.OutputFormatDefault {
+			log.Infof("No buckets were found")
 		}
 		return nil
 	}
