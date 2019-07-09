@@ -17,6 +17,7 @@ package bucket
 import (
 	"context"
 	"fmt"
+	"os"
 	"strconv"
 	"time"
 
@@ -43,6 +44,8 @@ type createBucketsOptions struct {
 
 	storageAccount string
 	resourceGroup  string
+
+	wait bool
 }
 
 // NewCreateCommand creates a new cobra.Command for `banzai bucket create`.
@@ -106,6 +109,7 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	flags.StringVarP(&o.secretID, "secret-id", "s", "", "Secret ID of the used secret to create the bucket")
 	flags.StringVarP(&o.storageAccount, "storage-account", "", "", "Storage account for the bucket (must be specified for Azure)")
 	flags.StringVarP(&o.resourceGroup, "resource-group", "", "", "Resource group for the bucket (must be specified for Azure)")
+	flags.BoolVarP(&o.wait, "wait", "w", false, "Wait for bucket creation")
 
 	return cmd
 }
@@ -113,7 +117,7 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 func runCreate(banzaiCli cli.Cli, o createBucketsOptions) error {
 	var err error
 
-	defaultBucketName := fmt.Sprintf("bucket-%s", strconv.FormatInt(time.Now().UTC().Unix(), 10))
+	defaultBucketName := getDefaultBucketName()
 	orgID := input.GetOrganization(banzaiCli)
 
 	if o.cloud == "" {
@@ -169,7 +173,7 @@ func runCreate(banzaiCli cli.Cli, o createBucketsOptions) error {
 	}
 
 	if secret.Type != o.cloud {
-		return errors.Errorf("missmatch secret type '%s' versus cloud '%s'", secret.Type, o.cloud)
+		return errors.Errorf("mismatching secret type '%s' for cloud '%s'", secret.Type, o.cloud)
 	}
 
 	if o.cloud == input.CloudProviderAzure {
@@ -201,7 +205,7 @@ func runCreate(banzaiCli cli.Cli, o createBucketsOptions) error {
 
 	log.Infof("bucket create request accepted for %s on %s", response.Name, response.Cloud)
 
-	var done bool
+	done := !o.wait
 	var getBucketOpts pipeline.GetBucketOpts
 	if o.cloud == input.CloudProviderAzure {
 		getBucketOpts.Location = optional.NewString(o.location)
@@ -258,4 +262,12 @@ func getCreateBucketRequest(o createBucketsOptions) pipeline.CreateObjectStoreBu
 		Name:       o.name,
 		Properties: properties,
 	}
+}
+
+func getDefaultBucketName() string {
+	prefix := os.Getenv("USER")
+	if prefix == "" {
+		prefix = "bucket"
+	}
+	return fmt.Sprintf("%s-%s", prefix, strconv.FormatInt(time.Now().UTC().Unix(), 10))
 }

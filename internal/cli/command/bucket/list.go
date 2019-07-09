@@ -52,8 +52,8 @@ func NewListCommand(banzaiCli cli.Cli) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.StringVarP(&o.cloud, "cloud", "", "", "Cloud provider where the bucket resides")
-	flags.StringVarP(&o.location, "location", "l", "", "Location of the bucket")
+	flags.StringVarP(&o.cloud, "cloud", "", "", "Filter buckets by cloud provider where they reside")
+	flags.StringVarP(&o.location, "location", "l", "", "Filter buckets by location (region)")
 
 	return cmd
 }
@@ -71,12 +71,11 @@ func runList(banzaiCli cli.Cli, o listBucketsOptions) error {
 		return nil
 	}
 
-	for i, b := range buckets {
-		if banzaiCli.OutputFormat() != output.OutputFormatDefault {
-			continue
+	if banzaiCli.OutputFormat() == output.OutputFormatDefault {
+		for i, b := range buckets {
+			b.Name = b.formattedName()
+			buckets[i] = b
 		}
-		b.Name = b.formattedName()
-		buckets[i] = b
 	}
 
 	format.BucketWrite(banzaiCli, buckets)

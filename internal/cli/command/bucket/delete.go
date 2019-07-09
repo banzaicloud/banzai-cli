@@ -46,7 +46,7 @@ func NewDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "delete",
 		Short:   "Delete bucket",
-		Long:    "Delete Pipeline managed object storage bucket",
+		Long:    "Delete Pipeline managed object storage bucket. Be aware, it also deletes the bucket at the cloud provider",
 		Args:    cobra.MaximumNArgs(2),
 		Aliases: []string{"d", "del"},
 		RunE: func(cmd *cobra.Command, args []string) error {
