@@ -86,7 +86,6 @@ func runServer(banzaiCli cli.Cli, pipelineBasePath string) error {
 		a.client = http.DefaultClient
 	}
 
-	// TODO(ericchiang): Retry with backoff
 	ctx := oidc.ClientContext(context.Background(), a.client)
 	provider, err := oidc.NewProvider(ctx, issuerURL.String())
 	if err != nil {
@@ -243,7 +242,7 @@ func (a *app) handleCallback(w http.ResponseWriter, r *http.Request) {
 
 	pipelineURL, err := url.Parse(a.pipelineBasePath)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to parse Pipeline URL: %v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("failed to parse Pipeline URL: %v", err), http.StatusInternalServerError)
 		return
 	}
 
@@ -262,7 +261,7 @@ func (a *app) handleCallback(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := client.Post(pipelineURL.String(), writer.FormDataContentType(), reqBody)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to create Pipeline token: %v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("failed to create Pipeline token: %v", err), http.StatusInternalServerError)
 		return
 	}
 
@@ -270,7 +269,7 @@ func (a *app) handleCallback(w http.ResponseWriter, r *http.Request) {
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 400 {
 		body, _ := ioutil.ReadAll(resp.Body)
-		http.Error(w, fmt.Sprintf("Failed to create Pipeline token:\n%s", string(body)), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("failed to create Pipeline token:\n%s", string(body)), http.StatusInternalServerError)
 		return
 	}
 
