@@ -337,7 +337,7 @@ const closingTemplate = `
 <html>
 <head>
 <script type="text/javascript">
-	setTimeout(function () { window.location.href = "https://beta.banzaicloud.io/docs/"; }, 5000);
+	setTimeout(function () { window.location.href = "https://banzaicloud.com/docs/"; }, 5000);
 </script>
 </head>
 <body>
