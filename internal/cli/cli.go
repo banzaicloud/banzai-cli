@@ -41,17 +41,16 @@ type Cli interface {
 	Context() Context
 	OutputFormat() string
 	Home() string
+	SetToken(token string)
 }
 
 type Context interface {
 	OrganizationID() int32
 	SetOrganizationID(id int32)
-	SetToken(token string)
 }
 
 type banzaiCli struct {
 	out        io.Writer
-	ctx        Context
 	client     *pipeline.APIClient
 	clientOnce sync.Once
 }
@@ -59,7 +58,6 @@ type banzaiCli struct {
 func NewCli(out io.Writer) Cli {
 	return &banzaiCli{
 		out: out,
-		ctx: &banzaiContext{},
 	}
 }
 
@@ -114,28 +112,27 @@ func (c *banzaiCli) Client() *pipeline.APIClient {
 }
 
 func (c *banzaiCli) Context() Context {
-	return c.ctx
+	return c
 }
 
-type banzaiContext struct{}
-
-func (c *banzaiContext) OrganizationID() int32 {
+func (c *banzaiCli) OrganizationID() int32 {
 	return viper.GetInt32(orgIdKey)
 }
 
-func (c *banzaiContext) SetOrganizationID(id int32) {
+func (c *banzaiCli) SetOrganizationID(id int32) {
 	viper.Set(orgIdKey, id)
 
 	c.save()
 }
 
-func (c *banzaiContext) SetToken(token string) {
+func (c *banzaiCli) SetToken(token string) {
 	viper.Set("pipeline.token", token)
 
 	c.save()
+	c.clientOnce = sync.Once{}
 }
 
-func (c *banzaiContext) save() {
+func (c *banzaiCli) save() {
 	log.Debug("writing config")
 
 	if viper.ConfigFileUsed() == "" {
