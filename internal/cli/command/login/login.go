@@ -60,12 +60,10 @@ func NewLoginCommand(banzaiCli cli.Cli) *cobra.Command {
 
 func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 	endpoint := viper.GetString("pipeline.basepath")
+
 	if options.endpoint != "" {
 		endpoint = options.endpoint
-	}
-	token := options.token
-
-	if banzaiCli.Interactive() {
+	} else if banzaiCli.Interactive() {
 		_ = survey.AskOne(
 			&survey.Input{
 				Message: "Pipeline endpoint:",
@@ -73,8 +71,15 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 				Default: endpoint,
 			},
 			&endpoint, survey.Required)
+	}
 
-		if token == "" {
+	if endpoint == "" {
+		return errors.New("Please set Pipeline endpoint with --endpoint, or run the command interactively.")
+	}
+
+	token := options.token
+	if token == "" {
+		if banzaiCli.Interactive() {
 			_ = survey.AskOne(
 				&survey.Input{
 					Message: "Pipeline token:",
@@ -82,35 +87,39 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 					Help:    fmt.Sprintf("Login through a browser flow or copy your Pipeline access token from the token field of %s/api/v1/token", endpoint),
 				},
 				&token, nil)
+		} else {
+			return errors.New("Please set Pipeline token with --token, or run the command interactively.")
 		}
 	}
 
-	if token != "" && token != defaultLoginFlow {
-		viper.Set("pipeline.basepath", endpoint)
-		viper.Set("pipeline.token", token)
+	if token == "" || token == defaultLoginFlow {
+		var err error
+		token, err = runServer(banzaiCli, endpoint)
+		if err != nil {
+			return err
+		}
+	}
 
-		var orgID int32
+	viper.Set("pipeline.token", token)
+	viper.Set("pipeline.basepath", endpoint)
+
+	var orgID int32
+	if options.orgName != "" {
+		orgs, err := input.GetOrganizations(banzaiCli)
+		if err != nil {
+			return emperror.Wrap(err, "could not get organizations")
+		}
+
 		var orgFound bool
-
-		if options.orgName != "" {
-			orgs, err := input.GetOrganizations(banzaiCli)
-			if err != nil {
-				return emperror.Wrap(err, "could not get organizations")
-			}
-
-			if orgID, orgFound = orgs[options.orgName]; !orgFound {
-				return errors.Errorf("organization %q doesn't exist", options.orgName)
-			}
-		} else if banzaiCli.Interactive() {
-			orgID = input.AskOrganization(banzaiCli)
+		orgID, orgFound = orgs[options.orgName]
+		if !orgFound {
+			return errors.Errorf("organization %q doesn't exist", options.orgName)
 		}
-
-		banzaiCli.Context().SetOrganizationID(orgID)
-	} else {
-		viper.Set("pipeline.basepath", endpoint)
-
-		return runServer(banzaiCli, endpoint)
+	} else if banzaiCli.Interactive() {
+		orgID = input.AskOrganization(banzaiCli)
 	}
+
+	banzaiCli.Context().SetOrganizationID(orgID)
 
 	return nil
 }

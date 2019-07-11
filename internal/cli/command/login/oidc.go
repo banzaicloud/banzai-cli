@@ -33,7 +33,9 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/coreos/go-oidc"
 	"github.com/google/uuid"
+	"github.com/goph/emperror"
 	"github.com/pkg/browser"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )
@@ -60,14 +62,15 @@ type app struct {
 
 	banzaiCli cli.Cli
 
-	shutdownChan chan bool
+	tokenChan    chan string
+	shutdownChan chan struct{}
 }
 
-func runServer(banzaiCli cli.Cli, pipelineBasePath string) error {
+func runServer(banzaiCli cli.Cli, pipelineBasePath string) (string, error) {
 
 	issuerURL, err := url.Parse(pipelineBasePath)
 	if err != nil {
-		return fmt.Errorf("failed to parse pipelineBasePath: %v", err)
+		return "", fmt.Errorf("failed to parse pipelineBasePath: %v", err)
 	}
 
 	// detect localhost setup, and derive the issuer URL
@@ -92,7 +95,7 @@ func runServer(banzaiCli cli.Cli, pipelineBasePath string) error {
 	ctx := oidc.ClientContext(context.Background(), a.client)
 	provider, err := oidc.NewProvider(ctx, issuerURL.String())
 	if err != nil {
-		return fmt.Errorf("failed to query provider %q: %v", issuerURL.String(), err)
+		return "", fmt.Errorf("failed to query provider %q: %v", issuerURL.String(), err)
 	}
 
 	var s struct {
@@ -102,7 +105,7 @@ func runServer(banzaiCli cli.Cli, pipelineBasePath string) error {
 		ScopesSupported []string `json:"scopes_supported"`
 	}
 	if err := provider.Claims(&s); err != nil {
-		return fmt.Errorf("failed to parse provider scopes_supported: %v", err)
+		return "", fmt.Errorf("failed to parse provider scopes_supported: %v", err)
 	}
 
 	if len(s.ScopesSupported) == 0 {
@@ -125,8 +128,6 @@ func runServer(banzaiCli cli.Cli, pipelineBasePath string) error {
 	a.provider = provider
 	a.verifier = provider.Verifier(&oidc.Config{ClientID: a.clientID})
 
-	a.shutdownChan = make(chan bool)
-
 	http.HandleFunc("/", a.handleLogin)
 	http.HandleFunc("/login", a.handleLogin)
 	http.HandleFunc("/callback", a.handleCallback)
@@ -141,6 +142,9 @@ func runServer(banzaiCli cli.Cli, pipelineBasePath string) error {
 		}
 	}()
 
+	a.shutdownChan = make(chan struct{})
+	a.tokenChan = make(chan string, 1)
+
 	server := http.Server{
 		Addr: serverHost,
 	}
@@ -148,11 +152,17 @@ func runServer(banzaiCli cli.Cli, pipelineBasePath string) error {
 	go a.waitShutdown(&server)
 
 	err = server.ListenAndServe()
-	if err == http.ErrServerClosed {
-		return nil
-	}
+	<-a.shutdownChan
 
-	return err
+	select {
+	case token := <-a.tokenChan:
+		return token, nil
+	default:
+		if err == nil {
+			err = errors.New("login failed")
+		}
+		return "", err
+	}
 }
 
 func (a *app) oauth2Config(scopes []string) *oauth2.Config {
@@ -194,8 +204,10 @@ func (a *app) handleLogin(w http.ResponseWriter, r *http.Request) {
 
 func (a *app) handleCallback(w http.ResponseWriter, r *http.Request) {
 
+	pipelineToken := ""
 	defer func() {
-		a.shutdownChan <- true
+		a.shutdownChan <- struct{}{}
+		a.tokenChan <- pipelineToken
 	}()
 
 	var (
@@ -262,7 +274,7 @@ func (a *app) handleCallback(w http.ResponseWriter, r *http.Request) {
 	buff := new(bytes.Buffer)
 	json.Indent(buff, []byte(claims), "", "  ")
 
-	err = a.requestTokenFromPipeline(rawIDToken)
+	pipelineToken, err = a.requestTokenFromPipeline(rawIDToken)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to request Pipeline token: %v", err), http.StatusInternalServerError)
 		return
@@ -273,10 +285,10 @@ func (a *app) handleCallback(w http.ResponseWriter, r *http.Request) {
 	log.Info("successfully logged in")
 }
 
-func (a *app) requestTokenFromPipeline(rawIDToken string) error {
+func (a *app) requestTokenFromPipeline(rawIDToken string) (string, error) {
 	pipelineURL, err := url.Parse(a.pipelineBasePath)
 	if err != nil {
-		return err
+		return "", emperror.Wrap(err, "failed to parse Pipeline endpoint")
 	}
 
 	pipelineURL.Path = "/auth/dex/callback"
@@ -294,24 +306,23 @@ func (a *app) requestTokenFromPipeline(rawIDToken string) error {
 
 	resp, err := client.Post(pipelineURL.String(), writer.FormDataContentType(), reqBody)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 400 {
 		body, _ := ioutil.ReadAll(resp.Body)
-		return fmt.Errorf("request returned: %s", string(body))
+		return "", fmt.Errorf("request returned: %s", string(body))
 	}
 
 	for _, cookie := range resp.Cookies() {
 		if cookie.Name == "user_sess" {
-			a.banzaiCli.Context().SetToken(cookie.Value)
-			return nil
+			return cookie.Value, nil
 		}
 	}
 
-	return fmt.Errorf("failed to find user_sess cookie in Pipeline response")
+	return "", fmt.Errorf("failed to find user_sess cookie in Pipeline response")
 }
 
 func (a *app) waitShutdown(server *http.Server) {
@@ -326,6 +337,7 @@ func (a *app) waitShutdown(server *http.Server) {
 	}
 
 	server.Shutdown(context.Background())
+	close(a.shutdownChan)
 }
 
 func renderClosingTemplate(w io.Writer) {
