@@ -41,12 +41,12 @@ type Cli interface {
 	Context() Context
 	OutputFormat() string
 	Home() string
-	SetToken(token string)
 }
 
 type Context interface {
 	OrganizationID() int32
 	SetOrganizationID(id int32)
+	SetToken(token string)
 }
 
 type banzaiCli struct {
