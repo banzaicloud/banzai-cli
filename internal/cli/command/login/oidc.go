@@ -189,7 +189,7 @@ func (a *app) handleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	authCodeURL := ""
-	scopes = append(scopes, "openid", "profile", "email", "groups")
+	scopes = append(scopes, "openid", "profile", "email", "groups", "federated:id")
 	if r.FormValue("offline_access") != "yes" {
 		authCodeURL = a.oauth2Config(scopes).AuthCodeURL(a.oauthState)
 	} else if a.offlineAsScope {
