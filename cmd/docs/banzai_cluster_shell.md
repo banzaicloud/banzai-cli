@@ -34,9 +34,10 @@ banzai cluster shell [command] [flags]
 ### Options
 
 ```
-      --cluster int32         cluster id
-      --cluster-name string   cluster name
+      --cluster int32         ID of cluster to run a shell for
+      --cluster-name string   Name of cluster to run a shell for
   -h, --help                  help for shell
+      --wrap-helm             Wrap the helm command with a version that downloads the matching version and creates a custom helm home (default true)
 ```
 
 ### Options inherited from parent commands

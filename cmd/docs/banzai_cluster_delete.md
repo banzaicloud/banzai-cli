@@ -7,14 +7,16 @@ Delete a cluster
 Delete a cluster. The cluster to delete is identified either by its name or the numerical ID. In case of interactive mode banzai CLI will prompt for a confirmation.
 
 ```
-banzai cluster delete NAME [flags]
+banzai cluster delete [--cluster=ID | [--cluster-name=]NAME] [flags]
 ```
 
 ### Options
 
 ```
-  -f, --force   Allow non-graceful cluster deletion
-  -h, --help    help for delete
+      --cluster int32         ID of cluster to delete
+      --cluster-name string   Name of cluster to delete
+  -f, --force                 Allow non-graceful cluster deletion
+  -h, --help                  help for delete
 ```
 
 ### Options inherited from parent commands
