@@ -26,6 +26,8 @@ import (
 	"gopkg.in/AlecAivazis/survey.v1"
 )
 
+const defaultLoginFlow = "login with browser"
+
 type loginOptions struct {
 	token    string
 	endpoint string
@@ -76,13 +78,14 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 			_ = survey.AskOne(
 				&survey.Input{
 					Message: "Pipeline token:",
-					Help:    fmt.Sprintf("Please copy your Pipeline access token from the token field of %s/api/v1/token", endpoint),
+					Default: defaultLoginFlow,
+					Help:    fmt.Sprintf("Login through a browser flow or copy your Pipeline access token from the token field of %s/api/v1/token", endpoint),
 				},
-				&token, survey.Required)
+				&token, nil)
 		}
 	}
 
-	if token != "" {
+	if token != "" && token != defaultLoginFlow {
 		viper.Set("pipeline.basepath", endpoint)
 		viper.Set("pipeline.token", token)
 

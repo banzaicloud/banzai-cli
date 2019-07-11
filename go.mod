@@ -10,7 +10,7 @@ require (
 	github.com/gobuffalo/buffalo-plugins v1.13.0 // indirect
 	github.com/gobuffalo/meta v0.0.0-20190207205153-50a99e08b8cf // indirect
 	github.com/gobuffalo/packr/v2 v2.0.2
-	github.com/google/uuid v1.1.0 // indirect
+	github.com/google/uuid v1.1.0
 	github.com/goph/emperror v0.16.0
 	github.com/huandu/xstrings v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.7 // indirect
@@ -19,6 +19,7 @@ require (
 	github.com/mattn/go-isatty v0.0.4
 	github.com/microcosm-cc/bluemonday v1.0.2 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/pkg/browser v0.0.0-20180916011732-0a3d74bf9ce4
 	github.com/pkg/errors v0.8.1
 	github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35 // indirect
 	github.com/sirupsen/logrus v1.3.0

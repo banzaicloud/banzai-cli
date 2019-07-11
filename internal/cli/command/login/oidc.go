@@ -25,20 +25,20 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"os/exec"
 	"os/signal"
-	"runtime"
 	"strings"
 	"syscall"
 	"time"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/coreos/go-oidc"
+	"github.com/google/uuid"
+	"github.com/pkg/browser"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )
 
-const exampleAppState = "I wish to wash my irish wristwatch"
+const serverHost = "localhost:5555"
 
 type app struct {
 	clientID     string
@@ -47,6 +47,8 @@ type app struct {
 
 	verifier *oidc.IDTokenVerifier
 	provider *oidc.Provider
+
+	oauthState string
 
 	// Does the provider use "offline_access" scope to request a refresh token
 	// or does it use "access_type=offline" (e.g. Google)?
@@ -78,6 +80,7 @@ func runServer(banzaiCli cli.Cli, pipelineBasePath string) error {
 		redirectURI:      "http://localhost:5555/callback",
 		clientID:         "banzai-cli",
 		clientSecret:     "banzai-cli-secret",
+		oauthState:       uuid.New().String(),
 		pipelineBasePath: pipelineBasePath,
 		banzaiCli:        banzaiCli,
 	}
@@ -128,9 +131,28 @@ func runServer(banzaiCli cli.Cli, pipelineBasePath string) error {
 	http.HandleFunc("/login", a.handleLogin)
 	http.HandleFunc("/callback", a.handleCallback)
 
-	go open("http://127.0.0.1:5555")
-	go a.waitShutdown()
-	return http.ListenAndServe("127.0.0.1:5555", nil)
+	serverURL := fmt.Sprintf("http://%s", serverHost)
+	log.Infof("Opening web browser at %s", serverURL)
+	go func() {
+		time.Sleep(time.Second)
+		err := browser.OpenURL(serverURL)
+		if err != nil {
+			log.Errorf("failed to open URL: %s", err.Error())
+		}
+	}()
+
+	server := http.Server{
+		Addr: serverHost,
+	}
+
+	go a.waitShutdown(&server)
+
+	err = server.ListenAndServe()
+	if err == http.ErrServerClosed {
+		return nil
+	}
+
+	return err
 }
 
 func (a *app) oauth2Config(scopes []string) *oauth2.Config {
@@ -159,12 +181,12 @@ func (a *app) handleLogin(w http.ResponseWriter, r *http.Request) {
 	authCodeURL := ""
 	scopes = append(scopes, "openid", "profile", "email", "groups")
 	if r.FormValue("offline_access") != "yes" {
-		authCodeURL = a.oauth2Config(scopes).AuthCodeURL(exampleAppState)
+		authCodeURL = a.oauth2Config(scopes).AuthCodeURL(a.oauthState)
 	} else if a.offlineAsScope {
 		scopes = append(scopes, "offline_access")
-		authCodeURL = a.oauth2Config(scopes).AuthCodeURL(exampleAppState)
+		authCodeURL = a.oauth2Config(scopes).AuthCodeURL(a.oauthState)
 	} else {
-		authCodeURL = a.oauth2Config(scopes).AuthCodeURL(exampleAppState, oauth2.AccessTypeOffline)
+		authCodeURL = a.oauth2Config(scopes).AuthCodeURL(a.oauthState, oauth2.AccessTypeOffline)
 	}
 
 	http.Redirect(w, r, authCodeURL, http.StatusSeeOther)
@@ -195,8 +217,8 @@ func (a *app) handleCallback(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, fmt.Sprintf("no code in request: %q", r.Form), http.StatusBadRequest)
 			return
 		}
-		if state := r.FormValue("state"); state != exampleAppState {
-			http.Error(w, fmt.Sprintf("expected state %q got %q", exampleAppState, state), http.StatusBadRequest)
+		if state := r.FormValue("state"); state != a.oauthState {
+			http.Error(w, fmt.Sprintf("expected state %q got %q", a.oauthState, state), http.StatusBadRequest)
 			return
 		}
 		token, err = oauth2Config.Exchange(ctx, code)
@@ -292,25 +314,7 @@ func (a *app) requestTokenFromPipeline(rawIDToken string) error {
 	return fmt.Errorf("failed to find user_sess cookie in Pipeline response")
 }
 
-func open(url string) error {
-
-	var cmd string
-	var args []string
-
-	switch runtime.GOOS {
-	case "windows":
-		cmd = "cmd"
-		args = []string{"/c", "start"}
-	case "darwin":
-		cmd = "open"
-	default: // "linux", "freebsd", "openbsd", "netbsd"
-		cmd = "xdg-open"
-	}
-	args = append(args, url)
-	return exec.Command(cmd, args...).Start()
-}
-
-func (a *app) waitShutdown() {
+func (a *app) waitShutdown(server *http.Server) {
 	irqSig := make(chan os.Signal, 1)
 	signal.Notify(irqSig, syscall.SIGINT, syscall.SIGTERM)
 
@@ -318,10 +322,10 @@ func (a *app) waitShutdown() {
 	select {
 	case sig := <-irqSig:
 		log.Printf("Shutdown request (signal: %v)", sig)
-		os.Exit(0)
 	case <-a.shutdownChan:
-		os.Exit(0)
 	}
+
+	server.Shutdown(context.Background())
 }
 
 func renderClosingTemplate(w io.Writer) {
