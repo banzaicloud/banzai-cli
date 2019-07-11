@@ -15,10 +15,14 @@
 package login
 
 import (
+	"context"
 	"fmt"
+	"os"
 
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -29,9 +33,10 @@ import (
 const defaultLoginFlow = "login with browser"
 
 type loginOptions struct {
-	token    string
-	endpoint string
-	orgName  string
+	token     string
+	endpoint  string
+	orgName   string
+	permanent bool
 }
 
 // NewLoginCommand returns a cobra command for logging in.
@@ -54,6 +59,7 @@ func NewLoginCommand(banzaiCli cli.Cli) *cobra.Command {
 	flags.StringVarP(&options.token, "token", "t", "", "Pipeline token to save")
 	flags.StringVarP(&options.endpoint, "endpoint", "e", "", "Pipeline API endpoint to save")
 	flags.StringVarP(&options.orgName, "organization", "", "", "Name of the organization to select as default")
+	flags.BoolVarP(&options.permanent, "permanent", "", false, "Create permanent token (interactive login flow only)")
 
 	return cmd
 }
@@ -92,16 +98,41 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 		}
 	}
 
+	sessionToken := false
 	if token == "" || token == defaultLoginFlow {
 		var err error
 		token, err = runServer(banzaiCli, endpoint)
 		if err != nil {
 			return err
 		}
+
+		sessionToken = true
 	}
 
-	viper.Set("pipeline.token", token)
 	viper.Set("pipeline.basepath", endpoint)
+	banzaiCli.Context().SetToken(token)
+
+	if !options.permanent && banzaiCli.Interactive() {
+		_ = survey.AskOne(
+			&survey.Confirm{
+				Message: "Create permanent token?",
+				Help:    "Create a permanent token instead of saving the temporary one generated automatically.",
+			},
+			&options.permanent, nil)
+	}
+
+	if options.permanent {
+		err := createPermanentToken(banzaiCli)
+		if err != nil {
+			return emperror.Wrap(err, "failed to create permanent token")
+		}
+
+		if sessionToken {
+			if err := deleteToken(banzaiCli, token); err != nil {
+				return emperror.Wrap(err, "failed to delete session token")
+			}
+		}
+	}
 
 	var orgID int32
 	if options.orgName != "" {
@@ -122,4 +153,42 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 	banzaiCli.Context().SetOrganizationID(orgID)
 
 	return nil
+}
+
+func createPermanentToken(banzaiCli cli.Cli) error {
+
+	hostname, err := os.Hostname()
+	if err != nil || hostname == "" {
+		hostname = "unknown"
+	}
+
+	user := os.Getenv("USER")
+	if user == "" {
+		user = "unknown"
+	}
+
+	req := pipeline.TokenCreateRequest{Name: fmt.Sprintf("cli-%s-%s", hostname, user)}
+	permToken, _, err := banzaiCli.Client().AuthApi.CreateToken(context.Background(), req)
+	if err != nil {
+		return err
+	}
+
+	banzaiCli.Context().SetToken(permToken.Token)
+	return nil
+}
+
+func deleteToken(banzaiCli cli.Cli, secret string) error {
+	token, _ := jwt.Parse(secret, nil)
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return errors.New("can't parse old token")
+	}
+
+	id, ok := claims["jti"].(string)
+	if !ok {
+		return errors.New("can't find token id in secret")
+	}
+
+	_, err := banzaiCli.Client().AuthApi.DeleteToken(context.Background(), id)
+	return err
 }
