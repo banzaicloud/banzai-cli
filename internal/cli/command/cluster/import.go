@@ -19,6 +19,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 
@@ -29,6 +30,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 type importOptions struct {
@@ -62,16 +64,17 @@ func importCluster(banzaiCli cli.Cli, options importOptions) error {
 	orgId := banzaiCli.Context().OrganizationID()
 
 	if banzaiCli.Interactive() {
-		err := buildInteractiveImportRequest(banzaiCli, options, orgId)
+		var err error
+		options.kubeconfig, options.name, err = buildInteractiveImportRequest(banzaiCli, options, orgId)
 		if err != nil {
 			return err
 		}
+		options.kubeconfig = base64.StdEncoding.EncodeToString([]byte(options.kubeconfig))
 	} else {
 		filename, raw, err := utils.ReadFileOrStdin(options.file)
 		if err != nil {
 			return emperror.WrapWith(err, fmt.Sprintf("failed to read %q", filename), "filename", filename)
 		}
-
 		options.kubeconfig = base64.StdEncoding.EncodeToString(raw)
 	}
 
@@ -143,12 +146,29 @@ func importCluster(banzaiCli cli.Cli, options importOptions) error {
 	return nil
 }
 
-func buildInteractiveImportRequest(banzaiCli cli.Cli, options importOptions, orgId int32) error {
+func buildInteractiveImportRequest(banzaiCli cli.Cli, options importOptions, orgId int32) (kubeconfig, clusterName string, err error) {
 	_ = banzaiCli
 	_ = options
 	_ = orgId
 	// TODO: implement interactive version
-	return errors.New("use --no-interactive")
+	var fileName = options.file
+	if fileName != "" {
+		if raw, err := ioutil.ReadFile(fileName); err != nil {
+			return "", "", emperror.Wrap(err, "failed to read Kubernetes context YAML file")
+		} else {
+			kubeconfig = string(raw)
+		}
+	}
+
+	if kubeconfig == "" {
+		_ = survey.AskOne(&survey.Multiline{Message: "kubeconfig:", Default: ""}, &kubeconfig, nil)
+	}
+
+	name := fmt.Sprintf("%s%d", os.Getenv("USER"), os.Getpid())
+	_ = survey.AskOne(&survey.Input{Message: "Cluster name:", Default: name}, &name, nil)
+	clusterName = name
+
+	return kubeconfig, clusterName, nil
 }
 
 func validateSecretCreateRequest(req pkgPipeline.CreateSecretRequest) error {
