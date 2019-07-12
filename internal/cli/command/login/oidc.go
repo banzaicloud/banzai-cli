@@ -86,10 +86,9 @@ func runServer(banzaiCli cli.Cli, pipelineBasePath string) (string, error) {
 		oauthState:       uuid.New().String(),
 		pipelineBasePath: pipelineBasePath,
 		banzaiCli:        banzaiCli,
-	}
-
-	if a.client == nil {
-		a.client = http.DefaultClient
+		client: &http.Client{
+			Transport: banzaiCli.HTTPTransport(),
+		},
 	}
 
 	ctx := oidc.ClientContext(context.Background(), a.client)
@@ -298,13 +297,11 @@ func (a *app) requestTokenFromPipeline(rawIDToken string) (string, error) {
 	writer.WriteField("id_token", rawIDToken)
 	writer.Close()
 
-	client := &http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+	a.client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
-		},
 	}
 
-	resp, err := client.Post(pipelineURL.String(), writer.FormDataContentType(), reqBody)
+	resp, err := a.client.Post(pipelineURL.String(), writer.FormDataContentType(), reqBody)
 	if err != nil {
 		return "", err
 	}
