@@ -112,7 +112,7 @@ func (f Field) validate() error {
 func readConfig(filename string) (file ConfigFile, err error) {
 	filename, raw, err := utils.ReadFileOrStdin(filename)
 	if err != nil {
-		return file, emperror.WrapWith(err, fmt.Sprintf("failed to read %q", filename), "filename", filename)
+		return file, emperror.WrapWith(err, "failed to read", "filename", filename)
 	}
 
 	err = yaml.Unmarshal(raw, &file)

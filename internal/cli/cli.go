@@ -40,16 +40,17 @@ type Cli interface {
 	Client() *pipeline.APIClient
 	Context() Context
 	OutputFormat() string
+	Home() string
 }
 
 type Context interface {
 	OrganizationID() int32
 	SetOrganizationID(id int32)
+	SetToken(token string)
 }
 
 type banzaiCli struct {
 	out        io.Writer
-	ctx        Context
 	client     *pipeline.APIClient
 	clientOnce sync.Once
 }
@@ -57,12 +58,22 @@ type banzaiCli struct {
 func NewCli(out io.Writer) Cli {
 	return &banzaiCli{
 		out: out,
-		ctx: &banzaiContext{},
 	}
 }
 
 func (c *banzaiCli) Out() io.Writer {
 	return c.out
+}
+
+func (c *banzaiCli) Home() string {
+	// TODO use dir from config
+	home, err := homedir.Dir()
+	if err != nil {
+		log.Errorf("failed to find home directory, falling back to /tmp: %v", err)
+		home = "/tmp"
+	}
+
+	return filepath.Join(home, ".banzai")
 }
 
 func (c *banzaiCli) Color() bool {
@@ -101,22 +112,27 @@ func (c *banzaiCli) Client() *pipeline.APIClient {
 }
 
 func (c *banzaiCli) Context() Context {
-	return c.ctx
+	return c
 }
 
-type banzaiContext struct{}
-
-func (c *banzaiContext) OrganizationID() int32 {
+func (c *banzaiCli) OrganizationID() int32 {
 	return viper.GetInt32(orgIdKey)
 }
 
-func (c *banzaiContext) SetOrganizationID(id int32) {
+func (c *banzaiCli) SetOrganizationID(id int32) {
 	viper.Set(orgIdKey, id)
 
 	c.save()
 }
 
-func (c *banzaiContext) save() {
+func (c *banzaiCli) SetToken(token string) {
+	viper.Set("pipeline.token", token)
+
+	c.save()
+	c.clientOnce = sync.Once{}
+}
+
+func (c *banzaiCli) save() {
 	log.Debug("writing config")
 
 	if viper.ConfigFileUsed() == "" {

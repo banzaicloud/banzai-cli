@@ -15,6 +15,7 @@ banzai login [flags]
 ```
   -e, --endpoint string   Pipeline API endpoint to save
   -h, --help              help for login
+      --permanent         Create permanent token (interactive login flow only)
   -t, --token string      Pipeline token to save
 ```
 

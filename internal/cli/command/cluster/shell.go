@@ -21,7 +21,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -35,6 +35,7 @@ import (
 
 type shellOptions struct {
 	Context
+	wrapHelm bool
 }
 
 func NewShellCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -65,6 +66,8 @@ func NewShellCommand(banzaiCli cli.Cli) *cobra.Command {
 			gke-docs-example-system-a16f163c-dvwj   Ready    <none>   43m   v1.10.11-gke.1
 			INFO[0001] Command exited successfully`,
 	}
+
+	cmd.Flags().BoolVar(&options.wrapHelm, "wrap-helm", true, "Wrap the helm command with a version that downloads the matching version and creates a custom helm home")
 
 	options.Context = NewClusterContext(cmd, banzaiCli, "run a shell for")
 
@@ -117,7 +120,7 @@ func runShell(banzaiCli cli.Cli, options shellOptions, args []string) error {
 	interactive := len(args) == 0
 
 	if interactive {
-		switch path.Base(shell) {
+		switch filepath.Base(shell) {
 		case "zsh": // zsh (at least my config) overrides PS1 :(
 			fallthrough
 		case "bash":
@@ -172,21 +175,64 @@ func runShell(banzaiCli cli.Cli, options shellOptions, args []string) error {
 	c.Stdin = os.Stdin
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
-	env := []string{
-		// customize shell prompt
-		fmt.Sprintf("PS1=[%s]$ ", chalk.Bold.TextStyle(options.ClusterName())),
 
-		// export the temporary config file's name for k8s commands
-		fmt.Sprintf("KUBECONFIG=%s", tmpfile.Name()),
-
-		fmt.Sprintf("BANZAI_CURRENT_ORG_ID=%d", orgId),
-		fmt.Sprintf("BANZAI_CURRENT_ORG_NAME=%s", org.Name),
-		fmt.Sprintf("BANZAI_CURRENT_CLUSTER_ID=%d", id),
-		fmt.Sprintf("BANZAI_CURRENT_CLUSTER_NAME=%s", options.ClusterName()),
+	env := os.Environ()
+	envs := make(map[string]string, len(env))
+	for _, pair := range env {
+		parts := strings.SplitN(pair, "=", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		envs[parts[0]] = parts[1]
 	}
 
-	log.Debugf("Environment: %s", strings.Join(env, " "))
-	c.Env = append(os.Environ(), env...)
+	// customize shell prompt
+	envs["PS1"] = fmt.Sprintf("[%s]$ ", chalk.Bold.TextStyle(options.ClusterName()))
+
+	// export the temporary config file's name for k8s commands
+	envs["KUBECONFIG"] = tmpfile.Name()
+
+	envs["BANZAI_CURRENT_ORG_ID"] = fmt.Sprint(orgId)
+	envs["BANZAI_CURRENT_ORG_NAME"] = org.Name
+	envs["BANZAI_CURRENT_CLUSTER_ID"] = fmt.Sprint(id)
+	envs["BANZAI_CURRENT_CLUSTER_NAME"] = options.ClusterName()
+
+	if options.wrapHelm {
+		bindir := filepath.Join(banzaiCli.Home(), "bin")
+		if err := os.MkdirAll(bindir, 0755); err != nil {
+			return emperror.Wrapf(err, "failed to create %q directory", bindir)
+		}
+
+		if _, ok := envs["PATH"]; !ok {
+			envs["PATH"] = "/bin"
+		}
+
+		if strings.SplitN(envs["PATH"], ":", 2)[0] != bindir {
+			envs["PATH"] = bindir + ":" + envs["PATH"]
+		}
+
+		cmd := os.Args[0]
+		if strings.Contains(cmd, "/") {
+			cmd, err = filepath.Abs(cmd)
+			if err != nil {
+				return emperror.Wrap(err, "failed to construct command for banzai cli")
+			}
+		}
+
+		script := fmt.Sprintf(`#!/bin/sh
+exec %s cluster _helm -- "$@"
+`, cmd)
+
+		if err := ioutil.WriteFile(filepath.Join(bindir, "helm"), []byte(script), 0755); err != nil {
+			return emperror.Wrap(err, "failed to write helm wrapper script")
+		}
+	}
+
+	log.Debugf("Environment: %v", envs)
+	c.Env = make([]string, 0, len(envs))
+	for k, v := range envs {
+		c.Env = append(c.Env, fmt.Sprintf("%s=%s", k, v))
+	}
 
 	if err := c.Run(); err != nil {
 		wrapped := emperror.Wrap(err, "failed to run command")

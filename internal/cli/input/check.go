@@ -12,24 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cluster
+package input
 
 import (
+	"context"
+	"net/http"
+
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/spf13/cobra"
+	"github.com/goph/emperror"
 )
 
-// NewInstallCommand returns a cobra command for `install` subcommands.
-func NewInstallCommand(banzaiCli cli.Cli) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:     "install",
-		Aliases: []string{"i"},
-		Short:   "Manage cluster installs",
+func checkPipeline(banzaiCli cli.Cli) error {
+	_, response, err := banzaiCli.Client().UsersApi.GetCurrentUser(context.Background())
+	if err != nil && response.StatusCode == http.StatusNotFound {
+		return emperror.Wrap(err, "given URL is not a Pipeline endpoint")
 	}
 
-	cmd.AddCommand(
-		NewSecretInstallCommand(banzaiCli),
-	)
-
-	return cmd
+	return nil
 }

@@ -125,7 +125,7 @@ func runUp(options createOptions) error {
 	} else { // non-interactive
 		filename, raw, err := utils.ReadFileOrStdin(filename)
 		if err != nil {
-			return emperror.WrapWith(err, fmt.Sprintf("failed to read %q", filename), "filename", filename)
+			return emperror.WrapWith(err, "failed to read", "filename", filename)
 		}
 
 		if err := utils.Unmarshal(raw, &out); err != nil {

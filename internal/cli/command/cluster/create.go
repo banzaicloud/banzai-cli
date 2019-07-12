@@ -80,7 +80,7 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 	} else { // non-interactive
 		filename, raw, err := utils.ReadFileOrStdin(options.file)
 		if err != nil {
-			return emperror.WrapWith(err, fmt.Sprintf("failed to read %q", filename), "filename", filename)
+			return emperror.WrapWith(err, "failed to read", "filename", filename)
 		}
 
 		log.Debugf("%d bytes read", len(raw))

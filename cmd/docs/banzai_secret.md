@@ -31,5 +31,6 @@ Manage secrets
 * [banzai secret create](banzai_secret_create.md)	 - Create secret
 * [banzai secret delete](banzai_secret_delete.md)	 - Delete one or more secrets
 * [banzai secret get](banzai_secret_get.md)	 - Get a secret
+* [banzai secret install](banzai_secret_install.md)	 - Install a secret to a cluster
 * [banzai secret list](banzai_secret_list.md)	 - List secrets
 

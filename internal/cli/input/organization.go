@@ -25,6 +25,9 @@ import (
 
 // AskOrganization asks for an organization.
 func AskOrganization(banzaiCli cli.Cli) int32 {
+	if err := checkPipeline(banzaiCli); err != nil {
+		log.Fatal(err)
+	}
 	orgs, _, err := banzaiCli.Client().OrganizationsApi.ListOrgs(context.Background())
 	if err != nil {
 		log.Fatalf("could not list organizations: %v", err)

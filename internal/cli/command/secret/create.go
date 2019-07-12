@@ -18,7 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"strings"
 
@@ -162,7 +161,7 @@ func getCreateSecretRequest(banzaiCli cli.Cli, options *createSecretOptions, out
 func readFileAndValidate(filename string, out *pipeline.CreateSecretRequest) error {
 	filename, raw, err := utils.ReadFileOrStdin(filename)
 	if err != nil {
-		return emperror.WrapWith(err, fmt.Sprintf("failed to read %q", filename), "filename", filename)
+		return emperror.WrapWith(err, "failed to read", "filename", filename)
 	}
 
 	if err := validateCreateSecretRequest(raw); err != nil {

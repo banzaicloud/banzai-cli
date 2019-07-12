@@ -34,3 +34,5 @@ brew:
     description: Command-line interface for Banzai Cloud Pipeline platform
     test: |
         system "#{bin}/banzai --version"
+    dependencies:
+        - kubectl

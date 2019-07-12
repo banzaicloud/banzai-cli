@@ -73,7 +73,7 @@ func importCluster(banzaiCli cli.Cli, options importOptions) error {
 	} else {
 		filename, raw, err := utils.ReadFileOrStdin(options.file)
 		if err != nil {
-			return emperror.WrapWith(err, fmt.Sprintf("failed to read %q", filename), "filename", filename)
+			return emperror.WrapWith(err, "failed to read", "filename", filename)
 		}
 		options.kubeconfig = base64.StdEncoding.EncodeToString(raw)
 	}
