@@ -130,6 +130,7 @@ func (c *banzaiCli) HTTPTransport() *http.Transport {
 		}
 	}
 
+	/* #nosec G402 */
 	if skip || len(pemCerts) > 0 {
 		tls := &tls.Config{
 			InsecureSkipVerify: skip,
