@@ -27,7 +27,7 @@ PIPELINE_VERSION = 0.21.2
 GOTESTSUM_VERSION = 0.3.3
 GOLANGCI_VERSION = 1.16.0
 LICENSEI_VERSION = 0.1.0
-GORELEASER_VERSION = 0.98.0
+GORELEASER_VERSION = 0.112.2
 PACKR_VERSION = 2.0.8
 OPENAPI_GENERATOR_VERSION = PR1869
 
@@ -151,7 +151,7 @@ bin/goreleaser-${GORELEASER_VERSION}:
 
 .PHONY: release
 release: bin/goreleaser # Publish a release
-	bin/goreleaser release
+	bin/goreleaser release ${GORELEASERFLAGS}
 
 # release-%: TAG_PREFIX = v
 release-%:

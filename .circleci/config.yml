@@ -159,6 +159,12 @@ jobs:
                     name: Bundle assets
                     command: make client-bundle
 
+
+            -
+                run:
+                    name: Install RPM
+                    command: sudo apt install rpm --yes
+
             -
                 run:
                     name: Release

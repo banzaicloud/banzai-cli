@@ -12,12 +12,13 @@ builds:
         goarch:
             - amd64
 
-archive:
-    name_template: "banzai_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-    format_overrides:
-        -
-            goos: windows
-            format: zip
+archives:
+    -
+        name_template: "banzai_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+        format_overrides:
+            -
+                goos: windows
+                format: zip
 
 checksum:
     name_template: "banzai_checksums.txt"
@@ -25,14 +26,27 @@ checksum:
 changelog:
     skip: true
 
-brew:
-    github:
-        owner: banzaicloud
-        name: homebrew-tap
-    folder: Formula
-    homepage: https://banzaicloud.com/
-    description: Command-line interface for Banzai Cloud Pipeline platform
-    test: |
-        system "#{bin}/banzai --version"
-    dependencies:
-        - kubectl
+brews:
+    -
+        github:
+            owner: banzaicloud
+            name: homebrew-tap
+        folder: Formula
+        homepage: https://banzaicloud.com/
+        description: Command-line interface for Banzai Cloud Pipeline platform
+        test: |
+            system "#{bin}/banzai --version"
+        dependencies:
+            - kubectl
+
+nfpms:
+    -
+        vendor: Banzai Cloud
+        maintainer: Banzai Cloud <info@banzaicloud.com>
+        homepage: https://banzaicloud.com/
+        description: Command-line interface for Banzai Cloud Pipeline platform
+        formats:
+            - deb
+            - rpm
+        bindir: /usr/bin
+        license: Apache 2.0
