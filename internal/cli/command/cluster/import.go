@@ -19,11 +19,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 
-	pkgPipeline "github.com/banzaicloud/banzai-cli/.gen/pipeline"
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	"github.com/goph/emperror"
@@ -44,9 +43,10 @@ func NewImportCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := importOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "import",
-		Aliases: []string{"imp"},
-		Short:   "Manage cluster imports",
+		Use:   "import",
+		Short: "Import an existing cluster",
+		Example: `banzai cluster import --name myimportedcluster --kubeconfig=kube.conf
+kubectl config view --minify --raw | banzai cluster import -n myimportedcluster`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return importCluster(banzaiCli, options)
 		},
@@ -54,13 +54,13 @@ func NewImportCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.StringVarP(&options.name, "name", "n", "", "Name of the cluster")
-	flags.StringVarP(&options.file, "file", "f", "", "Cluster descriptor file")
+	flags.StringVarP(&options.file, "kubeconfig", "", "", "Kubeconfig file (with embed client cert/key for the user entry)")
 
 	return cmd
 }
 
 func importCluster(banzaiCli cli.Cli, options importOptions) error {
-	pipeline := banzaiCli.Client()
+	client := banzaiCli.Client()
 	orgId := banzaiCli.Context().OrganizationID()
 
 	if banzaiCli.Interactive() {
@@ -79,11 +79,12 @@ func importCluster(banzaiCli cli.Cli, options importOptions) error {
 	}
 
 	// Create kubernetes secret
-	req := pkgPipeline.CreateSecretRequest{}
+	req := pipeline.CreateSecretRequest{}
 	req.Name = options.name
 	req.Type = "kubernetes"
-	req.Values = make(map[string]interface{}, 1)
-	req.Values["K8Sconfig"] = options.kubeconfig
+	req.Values = map[string]interface{}{
+		"K8Sconfig": options.kubeconfig,
+	}
 
 	// Validate secret create request
 	if err := validateSecretCreateRequest(req); err != nil {
@@ -96,17 +97,17 @@ func importCluster(banzaiCli cli.Cli, options importOptions) error {
 		log.Errorf("failed to marshal request: %v", err)
 		log.Debugf("Request: %#v", req)
 	} else {
-		_, _ = fmt.Fprintf(os.Stderr, "The current state of the request:\n\n%s\n", bytes)
+		log.Debugf("The current state of the request:\n\n%s\n", bytes)
 	}
 
-	secret, resp, err := pipeline.SecretsApi.AddSecrets(context.Background(), orgId, req, nil)
+	secret, resp, err := client.SecretsApi.AddSecrets(context.Background(), orgId, req, nil)
 	if err != nil {
 		// Secret already exists
 		if resp != nil && resp.StatusCode == http.StatusConflict {
 			return emperror.WrapWith(err, "secret with this name is already created", "secret", req.Name)
 		}
 		// Generic error
-		if oerr, ok := err.(pkgPipeline.GenericOpenAPIError); ok {
+		if oerr, ok := err.(pipeline.GenericOpenAPIError); ok {
 			log.Errorf("secret creation error: %s", oerr.Body())
 		}
 
@@ -116,25 +117,26 @@ func importCluster(banzaiCli cli.Cli, options importOptions) error {
 	log.Debugf("Kubernetes config secret created with id: %s\n", secret.Id)
 
 	// Create cluster with kubernetes secret
-	body := make(map[string]interface{}, 4)
-	body["name"] = options.name
-	body["secretId"] = secret.Id
-	body["cloud"] = "kubernetes"
-	prop := make(map[string]interface{}, 1)
-	prop["kubernetes"] = make(map[string]interface{}, 0)
-	body["properties"] = prop
+	body := map[string]interface{}{
+		"name":     options.name,
+		"secretId": secret.Id,
+		"cloud":    "kubernetes",
+		"properties": map[string]interface{}{
+			"kubernetes": make(map[string]interface{}, 0),
+		},
+	}
 
 	if bytes, err := json.MarshalIndent(body, "", "  "); err != nil {
 		log.Errorf("failed to marshal request: %v", err)
 		log.Debugf("Request: %#v", req)
 	} else {
-		_, _ = fmt.Fprintf(os.Stderr, "The current state of the request:\n\n%s\n", bytes)
+		log.Debugf("The current state of the request:\n\n%s\n", bytes)
 	}
 
-	cluster, _, err := pipeline.ClustersApi.CreateCluster(context.Background(), orgId, body)
+	cluster, _, err := client.ClustersApi.CreateCluster(context.Background(), orgId, body)
 	if err != nil {
 		// Generic error
-		if oerr, ok := err.(pkgPipeline.GenericOpenAPIError); ok {
+		if oerr, ok := err.(pipeline.GenericOpenAPIError); ok {
 			log.Errorf("secret creation error: %s", oerr.Body())
 		}
 
@@ -146,22 +148,18 @@ func importCluster(banzaiCli cli.Cli, options importOptions) error {
 	return nil
 }
 
-func buildInteractiveImportRequest(banzaiCli cli.Cli, options importOptions, orgId int32) (kubeconfig, clusterName string, err error) {
-	_ = banzaiCli
-	_ = options
-	_ = orgId
-	// TODO: implement interactive version
+func buildInteractiveImportRequest(_ cli.Cli, options importOptions, _ int32) (kubeconfig, clusterName string, err error) {
 	var fileName = options.file
 	if fileName != "" {
-		if raw, err := ioutil.ReadFile(fileName); err != nil {
-			return "", "", emperror.Wrap(err, "failed to read Kubernetes context YAML file")
-		} else {
-			kubeconfig = string(raw)
+		filename, raw, err := utils.ReadFileOrStdin(fileName)
+		if err != nil {
+			return "", "", emperror.WrapWith(err, "failed to read", "filename", filename)
 		}
+		kubeconfig = string(raw)
 	}
 
 	if kubeconfig == "" {
-		_ = survey.AskOne(&survey.Multiline{Message: "kubeconfig:", Default: ""}, &kubeconfig, nil)
+		_ = survey.AskOne(&survey.Editor{Message: "kubeconfig:", Default: ""}, &kubeconfig, nil)
 	}
 
 	name := fmt.Sprintf("%s%d", os.Getenv("USER"), os.Getpid())
@@ -171,7 +169,7 @@ func buildInteractiveImportRequest(banzaiCli cli.Cli, options importOptions, org
 	return kubeconfig, clusterName, nil
 }
 
-func validateSecretCreateRequest(req pkgPipeline.CreateSecretRequest) error {
+func validateSecretCreateRequest(req pipeline.CreateSecretRequest) error {
 	if req.Name == "" {
 		return errors.New("cluster name must be specified")
 	}
