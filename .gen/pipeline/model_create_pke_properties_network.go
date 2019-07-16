@@ -3,7 +3,7 @@
  *
  * Pipeline v0.3.0 swagger
  *
- * API version: 0.21.2
+ * API version: 0.26.0
  * Contact: info@banzaicloud.com
  */
 
@@ -11,7 +11,7 @@
 
 package pipeline
 
-type CreatePkePropertiesClusterTopologyNetwork struct {
+type CreatePkePropertiesNetwork struct {
 	ApiServerAddress string `json:"apiServerAddress"`
 	ServiceCIDR string `json:"serviceCIDR"`
 	PodCIDR string `json:"podCIDR"`

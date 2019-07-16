@@ -3,7 +3,7 @@
  *
  * Pipeline v0.3.0 swagger
  *
- * API version: 0.21.2
+ * API version: 0.26.0
  * Contact: info@banzaicloud.com
  */
 
@@ -12,5 +12,8 @@
 package pipeline
 
 type CreatePkeProperties struct {
-	ClusterTopology CreatePkePropertiesClusterTopology `json:"clusterTopology"`
+	Network CreatePkePropertiesNetwork `json:"network"`
+	NodePools []NodePoolsPke `json:"nodePools"`
+	Kubernetes CreatePkePropertiesKubernetes `json:"kubernetes"`
+	Cri CreatePkePropertiesCri `json:"cri"`
 }

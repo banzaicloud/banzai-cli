@@ -3,7 +3,7 @@
  *
  * Pipeline v0.3.0 swagger
  *
- * API version: 0.21.2
+ * API version: 0.26.0
  * Contact: info@banzaicloud.com
  */
 
@@ -11,6 +11,7 @@
 
 package pipeline
 
-type CreatePkePropertiesClusterTopologyCri struct {
-	Runtime string `json:"runtime"`
+type CreatePkePropertiesKubernetes struct {
+	Version string `json:"version"`
+	Rbac CreatePkePropertiesKubernetesRbac `json:"rbac"`
 }
