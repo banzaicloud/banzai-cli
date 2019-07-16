@@ -60,10 +60,6 @@ type banzaiCli struct {
 	out                 io.Writer
 	client              *pipeline.APIClient
 	clientOnce          sync.Once
-	out                 io.Writer
-	ctx                 Context
-	client              *pipeline.APIClient
-	clientOnce          sync.Once
 	cloudinfoClient     *cloudinfo.APIClient
 	cloudinfoClientOnce sync.Once
 }
@@ -172,10 +168,6 @@ func (c *banzaiCli) CloudinfoClient() *cloudinfo.APIClient {
 	})
 
 	return c.cloudinfoClient
-}
-
-func (c *banzaiCli) Context() Context {
-	return c.ctx
 }
 
 func (c *banzaiCli) Context() Context {
