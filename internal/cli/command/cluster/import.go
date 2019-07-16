@@ -44,7 +44,8 @@ func NewImportCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "import",
-		Short: "Import an existing cluster",
+		Short: "Import an existing cluster (EXPERIMENTAL)",
+		Long:  "This is an experimental feature. You can import an existing Kubernetes cluster into Pipeline. Some Pipeline features may not work as expected.",
 		Example: `banzai cluster import --name myimportedcluster --kubeconfig=kube.conf
 kubectl config view --minify --raw | banzai cluster import -n myimportedcluster`,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -60,6 +61,9 @@ kubectl config view --minify --raw | banzai cluster import -n myimportedcluster`
 }
 
 func importCluster(banzaiCli cli.Cli, options importOptions) error {
+	log.Warnln("This is an EXPERIMENTAL feature.")
+	log.Warnln("Some Pipeline features may not work as expected.")
+
 	client := banzaiCli.Client()
 	orgId := banzaiCli.Context().OrganizationID()
 
