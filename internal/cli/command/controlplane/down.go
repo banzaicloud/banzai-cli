@@ -20,6 +20,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	"github.com/goph/emperror"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -30,8 +32,8 @@ type destroyOptions struct {
 	controlPlaneInstallerOptions
 }
 
-// NewDownCommand creates a new cobra.Command for `banzai clontrolplane down`.
-func NewDownCommand() *cobra.Command {
+// NewDownCommand creates a new cobra.Command for `banzai controlplane down`.
+func NewDownCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := destroyOptions{}
 
 	cmd := &cobra.Command{
@@ -40,7 +42,7 @@ func NewDownCommand() *cobra.Command {
 		Long:  "Destroy a controlplane based on json stdin or interactive session",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runDestroy(options)
+			return runDestroy(options, banzaiCli)
 		},
 	}
 
@@ -51,7 +53,7 @@ func NewDownCommand() *cobra.Command {
 	return cmd
 }
 
-func runDestroy(options destroyOptions) error {
+func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 
 	if isInteractive() {
 		var destroy bool
@@ -81,7 +83,24 @@ func runDestroy(options destroyOptions) error {
 		return emperror.Wrap(err, "failed to construct kubeconfig file name")
 	}
 
-	if err := copyKubeconfig(kubeconfigName); err != nil {
+	valuesName, err := filepath.Abs(valuesDefault)
+	if err != nil {
+		return emperror.Wrap(err, "failed to construct values file name")
+	}
+
+	var values map[string]interface{}
+	rawValues, err := ioutil.ReadFile(valuesName)
+	if err != nil {
+		return emperror.Wrap(err, "failed to read control plane descriptor")
+	}
+
+	if err := utils.Unmarshal(rawValues, &values); err != nil {
+		return emperror.Wrap(err, "failed to parse control plane descriptor")
+	}
+
+	kindCluster := isKINDClusterRequested(values)
+
+	if err := copyKubeconfig(banzaiCli, kubeconfigName, kindCluster); err != nil {
 		return emperror.Wrap(err, "failed to copy Kubeconfig")
 	}
 
@@ -90,11 +109,18 @@ func runDestroy(options destroyOptions) error {
 		return emperror.Wrap(err, "failed to construct tfstate directory path")
 	}
 
-	valuesName, err := filepath.Abs(valuesDefault)
+	log.Info("controlplane is being destroyed")
+	err = runInternal("destroy", valuesName, kubeconfigName, tfdir, options.controlPlaneInstallerOptions)
 	if err != nil {
-		return emperror.Wrap(err, "failed to construct values file name")
+		return emperror.Wrap(err, "control plane destroy failed")
 	}
 
-	log.Info("controlplane is being destroyed")
-	return emperror.Wrap(runInternal("destroy", valuesName, kubeconfigName, tfdir, options.controlPlaneInstallerOptions), "controlplane destroy failed")
+	if kindCluster {
+		err = deleteKINDCluster(banzaiCli)
+		if err != nil {
+			return emperror.Wrap(err, "KIND cluster destroy failed")
+		}
+	}
+
+	return nil
 }

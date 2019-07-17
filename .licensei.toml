@@ -13,4 +13,14 @@ ignored = [
     "github.com/magiconair/properties", # BSD-3
     "github.com/Masterminds/semver", # MIT
     "github.com/Masterminds/sprig", # MIT
+    "github.com/davecgh/go-spew", # ISC license
+    "github.com/gogo/protobuf", # BSD
+
+    # Vanity URLS :\
+    "google.golang.org/grpc",
+    "google.golang.org/genproto",
+    "cloud.google.com/go",
+    "google.golang.org/api",
+    "sigs.k8s.io/yaml",
+    "go.opencensus.io",
 ]
