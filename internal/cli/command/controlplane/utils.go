@@ -19,6 +19,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	"github.com/goph/emperror"
 	log "github.com/sirupsen/logrus"
@@ -27,10 +28,18 @@ import (
 const valuesDefault = "values.yaml"
 
 // copyKubeconfig copies current Kubeconfig to the named file to a place where it is more likely that it can be mounted to DfM
-func copyKubeconfig(kubeconfigName string) error {
+func copyKubeconfig(banzaCli cli.Cli, kubeconfigName string, kind bool) error {
 	kubeconfigSource := os.Getenv("KUBECONFIG")
 	if kubeconfigSource == "" {
-		kubeconfigSource = os.Getenv("HOME") + "/.kube/config"
+		if kind {
+			var err error
+			kubeconfigSource, err = getKINDKubeconfig(banzaCli)
+			if err != nil {
+				return emperror.Wrapf(err, "failed to find KIND kubeconfig")
+			}
+		} else {
+			kubeconfigSource = os.Getenv("HOME") + "/.kube/config"
+		}
 	}
 
 	kubeconfigContent, err := ioutil.ReadFile(kubeconfigSource)

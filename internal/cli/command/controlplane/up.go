@@ -24,6 +24,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	"github.com/goph/emperror"
 	"github.com/mattn/go-isatty"
@@ -38,8 +39,8 @@ type createOptions struct {
 	controlPlaneInstallerOptions
 }
 
-// NewUpCommand creates a new cobra.Command for `banzai clontrolplane up`.
-func NewUpCommand() *cobra.Command {
+// NewUpCommand creates a new cobra.Command for `banzai controlplane up`.
+func NewUpCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := createOptions{}
 
 	cmd := &cobra.Command{
@@ -49,7 +50,7 @@ func NewUpCommand() *cobra.Command {
 		Long:    "Create controlplane based on json stdin or interactive session in the current Kubernetes context. The current working directory will be used for storing the applied configuration and deployment status.",
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runUp(options)
+			return runUp(options, banzaiCli)
 		},
 	}
 
@@ -62,7 +63,7 @@ func NewUpCommand() *cobra.Command {
 	return cmd
 }
 
-func runUp(options createOptions) error {
+func runUp(options createOptions, banzaiCli cli.Cli) error {
 	var out map[string]interface{}
 
 	filename := options.file
@@ -142,6 +143,14 @@ func runUp(options createOptions) error {
 		}
 	}
 
+	kindCluster := isKINDClusterRequested(out)
+	if kindCluster {
+		err := ensureKINDCluster(banzaiCli)
+		if err != nil {
+			return emperror.Wrap(err, "failed to create KIND cluster")
+		}
+	}
+
 	// create temp dir for the files to attach
 	dir, err := ioutil.TempDir(".", "tmp")
 	if err != nil {
@@ -173,7 +182,7 @@ func runUp(options createOptions) error {
 		return emperror.Wrap(err, "failed to construct kubeconfig file name")
 	}
 
-	if err := copyKubeconfig(kubeconfigName); err != nil {
+	if err := copyKubeconfig(banzaiCli, kubeconfigName, kindCluster); err != nil {
 		return emperror.Wrap(err, "failed to copy Kubeconfig")
 	}
 
