@@ -24,16 +24,17 @@ import (
 	"time"
 
 	"github.com/antihax/optional"
-	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
-	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/banzaicloud/banzai-cli/internal/cli/format"
-	"github.com/banzaicloud/banzai-cli/internal/cli/input"
-	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/AlecAivazis/survey.v1"
+
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
+	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/banzaicloud/banzai-cli/internal/cli/format"
+	"github.com/banzaicloud/banzai-cli/internal/cli/input"
+	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 )
 
 type createOptions struct {
@@ -283,21 +284,19 @@ func getProviders() map[string]interface{} {
 			Location: "us-east-2",
 			Properties: map[string]interface{}{
 				"pke": pipeline.CreatePkeProperties{
-					ClusterTopology: pipeline.CreatePkePropertiesClusterTopology{
-						NodePools: []pipeline.NodePoolsPke{
-							{
-								Name:     "master",
-								Roles:    []string{"master", "worker"},
-								Provider: "amazon",
-								ProviderConfig: map[string]interface{}{
-									"autoScalingGroup": map[string]interface{}{
-										"instanceType": "c5.large",
-										"spotPrice":    "",
-										"size": map[string]interface{}{
-											"desired": 1,
-											"min":     1,
-											"max":     1,
-										},
+					NodePools: []pipeline.NodePoolsPke{
+						{
+							Name:     "master",
+							Roles:    []string{"master", "worker"},
+							Provider: "amazon",
+							ProviderConfig: map[string]interface{}{
+								"autoScalingGroup": map[string]interface{}{
+									"instanceType": "c5.large",
+									"spotPrice":    "",
+									"size": map[string]interface{}{
+										"desired": 1,
+										"min":     1,
+										"max":     1,
 									},
 								},
 							},

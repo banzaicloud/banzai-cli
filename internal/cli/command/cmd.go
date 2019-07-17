@@ -15,14 +15,16 @@
 package command
 
 import (
+	"github.com/spf13/cobra"
+
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/bucket"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/controlplane"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/form"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/login"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/organization"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/secret"
-	"github.com/spf13/cobra"
 )
 
 // AddCommands adds all the commands from cli/command to the root command
@@ -35,5 +37,6 @@ func AddCommands(cmd *cobra.Command, banzaiCli cli.Cli) {
 		organization.NewOrganizationCommand(banzaiCli),
 		secret.NewSecretCommand(banzaiCli),
 		controlplane.NewControlPlaneCommand(banzaiCli),
+		bucket.NewBucketCommand(banzaiCli),
 	)
 }
