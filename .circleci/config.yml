@@ -1,4 +1,8 @@
-version: 2
+version: 2.1
+
+
+orbs:
+  aws: circleci/aws-cli@0.1.13
 
 jobs:
     build:
@@ -170,6 +174,21 @@ jobs:
                     name: Release
                     command: make release
 
+    cdn-invalidate:
+        executor: aws/default
+        steps:
+            -
+                aws/install
+            -
+                aws/configure
+            -
+                run:
+                    name: Invalidate cloudfront edge cache
+                    command: |
+                     aws cloudfront create-invalidation \
+                       --distribution-id ${CDN_DISTRIBUTION_ID} \
+                       --paths "/downloads/banzai-cli/*"
+
 workflows:
     version: 2
     ci:
@@ -189,6 +208,15 @@ workflows:
                     requires:
                         - build
                         - frontend-build
+                    filters:
+                        tags:
+                            only: /^v?\d+\.\d+\.\d+(-\S*)?$/
+                        branches:
+                            ignore: /.*/
+            -
+                cdn-invalidate:
+                    requires:
+                        - release
                     filters:
                         tags:
                             only: /^v?\d+\.\d+\.\d+(-\S*)?$/
