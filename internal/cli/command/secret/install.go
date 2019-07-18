@@ -17,10 +17,8 @@ package secret
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
@@ -103,22 +101,12 @@ func runInstallSecret(banzaiCli cli.Cli, options installSecretOptions) error {
 		}
 	} else {
 		// non-interactive
-		var raw []byte
-		var err error
-		filename := options.file
-
-		if filename != "" && filename != "-" {
-			raw, err = ioutil.ReadFile(filename)
-		} else {
-			raw, err = ioutil.ReadAll(os.Stdin)
-			filename = "stdin"
+		filename, raw, err := utils.ReadFileOrStdin(options.file)
+		if err != nil {
+			return emperror.WrapWith(err, "failed to read", "filename", filename)
 		}
 
 		log.Debugf("%d bytes read", len(raw))
-
-		if err != nil {
-			return emperror.WrapWith(err, fmt.Sprintf("failed to read %q", filename), "filename", filename)
-		}
 
 		if err := validateInstallSecretRequest(raw); err != nil {
 			return emperror.Wrap(err, "failed to parse create cluster request")

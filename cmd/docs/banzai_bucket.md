@@ -1,15 +1,15 @@
-## banzai cluster
+## banzai bucket
 
-Manage clusters
+Manage buckets
 
 ### Synopsis
 
-Manage clusters
+Manage buckets
 
 ### Options
 
 ```
-  -h, --help   help for cluster
+  -h, --help   help for bucket
 ```
 
 ### Options inherited from parent commands
@@ -28,10 +28,8 @@ Manage clusters
 ### SEE ALSO
 
 * [banzai](banzai.md)	 - A command line client for the Banzai Cloud Pipeline platform.
-* [banzai cluster create](banzai_cluster_create.md)	 - Create a cluster
-* [banzai cluster delete](banzai_cluster_delete.md)	 - Delete a cluster
-* [banzai cluster get](banzai_cluster_get.md)	 - Get cluster details
-* [banzai cluster import](banzai_cluster_import.md)	 - Import an existing cluster (EXPERIMENTAL)
-* [banzai cluster list](banzai_cluster_list.md)	 - List clusters
-* [banzai cluster shell](banzai_cluster_shell.md)	 - Start a shell or run a command with the cluster configured as kubectl context
+* [banzai bucket create](banzai_bucket_create.md)	 - Create bucket
+* [banzai bucket delete](banzai_bucket_delete.md)	 - Delete bucket
+* [banzai bucket get](banzai_bucket_get.md)	 - Get bucket
+* [banzai bucket list](banzai_bucket_list.md)	 - List buckets
 

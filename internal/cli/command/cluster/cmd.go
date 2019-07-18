@@ -31,11 +31,12 @@ func NewClusterCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	cmd.AddCommand(
 		NewCreateCommand(banzaiCli),
-		NewShellCommand(banzaiCli),
 		NewDeleteCommand(banzaiCli),
 		NewGetCommand(banzaiCli),
-		NewListCommand(banzaiCli),
 		NewHelmCommand(banzaiCli),
+		NewImportCommand(banzaiCli),
+		NewListCommand(banzaiCli),
+		NewShellCommand(banzaiCli),
 	)
 
 	return cmd

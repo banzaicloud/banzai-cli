@@ -17,6 +17,8 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
+	"io/ioutil"
+	"os"
 
 	"github.com/ghodss/yaml"
 	"github.com/goph/emperror"
@@ -46,6 +48,18 @@ func Unmarshal(raw []byte, data interface{}) error {
 	}
 
 	return nil
+}
+
+func ReadFileOrStdin(filename string) (fname string, raw []byte, err error) {
+	if filename != "" && filename != "-" {
+		fname = filename
+		raw, err = ioutil.ReadFile(filename)
+		return
+	}
+
+	fname = "stdin"
+	raw, err = ioutil.ReadAll(os.Stdin)
+	return
 }
 
 // ConvertError converts generic HTTP error in JSON format returned by Pipeline API
