@@ -1,13 +1,15 @@
-:construction: This is a command line interface under heavy development for the [Banzai Cloud Pipeline](https://beta.banzaicloud.io/) platform.
+This is a command line interface under heavy development for the [Banzai Cloud Pipeline](https://beta.banzaicloud.io/) platform.
 
 ### Installation
 
-```
-$ go get github.com/banzaicloud/banzai-cli/cmd/banzai
-```
+Depending on your environment, you can install it using any of the following methods, using our [DEB](https://banzaicloud.com/downloads/banzai-cli/latest?format=deb) or [RPM](https://banzaicloud.com/downloads/banzai-cli/latest?format=rpm) packages, or binary tarballs for [Linux](https://banzaicloud.com/downloads/banzai-cli/latest?os=linux) and [macOS](https://banzaicloud.com/downloads/banzai-cli/latest?os=darwin).
 
 ```
 $ brew install banzaicloud/tap/banzai-cli
+```
+
+```
+$ go get github.com/banzaicloud/banzai-cli/cmd/banzai
 ```
 
 ### Use

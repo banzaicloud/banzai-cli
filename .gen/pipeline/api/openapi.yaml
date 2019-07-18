@@ -7,7 +7,7 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: Pipeline API
-  version: 0.21.2
+  version: 0.26.0
 servers:
 - url: http://localhost:9090
 tags:
@@ -4215,6 +4215,14 @@ paths:
         schema:
           type: string
         style: form
+      - description: The region to delete the bucket from. Required on Amazon, Oracle and Alibaba cloud providers.
+        explode: true
+        in: query
+        name: location
+        required: false
+        schema:
+          type: string
+        style: form
       responses:
         200:
           description: Storage bucket deleted successfully
@@ -5523,6 +5531,44 @@ paths:
       tags:
       - ark
   /api/v1/orgs/{orgId}/clusters/{id}/backupservice/status:
+    get:
+      description: Check ARK service status
+      operationId: CheckARKStatusGET
+      parameters:
+      - description: Organization identification
+        explode: false
+        in: path
+        name: orgId
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: simple
+      - description: Selected cluster identification (number)
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: simple
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackupServiceStatusResponse'
+          description: ARK service running
+        401:
+          description: Unauthorized
+        404:
+          description: ARK service not deployed
+      security:
+      - bearerAuth: []
+      summary: Check ARK service status
+      tags:
+      - ark
     head:
       description: Check ARK service status
       operationId: CheckARKStatus
@@ -7647,6 +7693,307 @@ paths:
       summary: Update Feature of Cluster Group
       tags:
       - clustergroup features
+  /api/v1/orgs/{orgId}/clusters/{id}/features:
+    get:
+      operationId: ListClusterFeatures
+      parameters:
+      - description: Organization ID
+        explode: false
+        in: path
+        name: orgId
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: simple
+      - description: Cluster ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: simple
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterFeatureList'
+          description: Success
+        401:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+          description: Unauthorized
+        404:
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Not found
+        500:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseError_500'
+          description: Internal server error
+      security:
+      - bearerAuth: []
+      summary: List enabled features of a cluster
+      tags:
+      - cluster features
+  /api/v1/orgs/{orgId}/clusters/{id}/features/{featureName}:
+    delete:
+      operationId: DeactivateClusterFeature
+      parameters:
+      - description: Organization ID
+        explode: false
+        in: path
+        name: orgId
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: simple
+      - description: Cluster ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: simple
+      - description: Feature name
+        explode: false
+        in: path
+        name: featureName
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        204:
+          description: No Content
+        401:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+          description: Unauthorized
+        404:
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Not found
+        500:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseError_500'
+          description: Internal server error
+      security:
+      - bearerAuth: []
+      summary: Deactivate a cluster feature
+      tags:
+      - cluster features
+    get:
+      operationId: ClusterFeatureDetails
+      parameters:
+      - description: Organization ID
+        explode: false
+        in: path
+        name: orgId
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: simple
+      - description: Cluster ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: simple
+      - description: Feature name
+        explode: false
+        in: path
+        name: featureName
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterFeatureDetails'
+          description: Success
+        401:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+          description: Unauthorized
+        404:
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Not found
+        500:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseError_500'
+          description: Internal server error
+      security:
+      - bearerAuth: []
+      summary: Get details of a cluster feature
+      tags:
+      - cluster features
+    post:
+      operationId: ActivateClusterFeature
+      parameters:
+      - description: Organization ID
+        explode: false
+        in: path
+        name: orgId
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: simple
+      - description: Cluster ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: simple
+      - description: Feature name
+        explode: false
+        in: path
+        name: featureName
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivateClusterFeatureRequest'
+        required: true
+      responses:
+        202:
+          description: Accepted
+        400:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseError_400'
+          description: Bad request
+        401:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+          description: Unauthorized
+        404:
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Not found
+        500:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseError_500'
+          description: Internal server error
+      security:
+      - bearerAuth: []
+      summary: Activate a cluster feature
+      tags:
+      - cluster features
+    put:
+      operationId: UpdateClusterFeature
+      parameters:
+      - description: Organization ID
+        explode: false
+        in: path
+        name: orgId
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: simple
+      - description: Cluster ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: simple
+      - description: Feature name
+        explode: false
+        in: path
+        name: featureName
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateClusterFeatureRequest'
+        required: true
+      responses:
+        202:
+          description: Accepted
+        400:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseError_400'
+          description: Bad request
+        401:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+          description: Unauthorized
+        404:
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Not found
+        500:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseError_500'
+          description: Internal server error
+      security:
+      - bearerAuth: []
+      summary: Update a cluster feature
+      tags:
+      - cluster features
 components:
   requestBodies:
     api.FeatureRequest:
@@ -7755,7 +8102,7 @@ components:
           properties:
             gke:
               master:
-                version: 0.21.2
+                version: 0.26.0
               nodePools:
                 pool1:
                   count: 1
@@ -7954,7 +8301,7 @@ components:
         properties:
           gke:
             master:
-              version: 0.21.2
+              version: 0.26.0
             nodePools:
               pool1:
                 count: 1
@@ -8002,7 +8349,7 @@ components:
           example:
             gke:
               master:
-                version: 0.21.2
+                version: 0.26.0
               nodePools:
                 pool1:
                   count: 1
@@ -8387,10 +8734,21 @@ components:
       type: string
     CreatePKEProperties:
       properties:
-        clusterTopology:
-          $ref: '#/components/schemas/CreatePKEProperties_clusterTopology'
+        network:
+          $ref: '#/components/schemas/CreatePKEProperties_network'
+        nodePools:
+          items:
+            $ref: '#/components/schemas/NodePoolsPKE'
+          type: array
+        kubernetes:
+          $ref: '#/components/schemas/CreatePKEProperties_kubernetes'
+        cri:
+          $ref: '#/components/schemas/CreatePKEProperties_cri'
       required:
-      - clusterTopology
+      - cri
+      - kubernetes
+      - network
+      - nodePools
       type: object
     NodePoolsPKE:
       properties:
@@ -8404,6 +8762,15 @@ components:
           items:
             type: string
           type: array
+        labels:
+          additionalProperties:
+            example: '{"example.io/label1":"value1"}'
+            type: string
+          description: user provided custom node labels to be placed onto the nodes of the node pool
+          type: object
+        autoscaling:
+          description: Enables/disables autoscaling of this node pool through Kubernetes cluster autoscaler.
+          type: boolean
         provider:
           example: amazon
           type: string
@@ -8414,7 +8781,7 @@ components:
             $ref: '#/components/schemas/PKEHosts'
           type: array
       required:
-      - hosts
+      - autoscaling
       - name
       - provider
       - providerConfig
@@ -8667,7 +9034,7 @@ components:
           example:
             google:
               master:
-                version: 0.21.2
+                version: 0.26.0
               nodePools:
                 pool1:
                   count: 2
@@ -8740,6 +9107,17 @@ components:
           example: 2
           format: int32
           type: integer
+        instanceType:
+          example: Standard_B2ms
+          type: string
+        labels:
+          additionalProperties:
+            example: '{"example.io/label1":"value1"}'
+            type: string
+          type: object
+        vnetSubnetID:
+          example: /subscriptions/12345678-1234-5678-1234-123456789abc/resourceGroups/your-resource-group-name/providers/Microsoft.Network/virtualNetworks/your-vnet-name/subnets/your-vnet-subnet-name
+          type: string
       required:
       - count
       type: object
@@ -8776,6 +9154,49 @@ components:
           type: string
       required:
       - count
+      type: object
+    UpdatePKEProperties:
+      properties:
+        pke:
+          $ref: '#/components/schemas/UpdatePKEProperties_pke'
+      required:
+      - pke
+      type: object
+    UpdateNodePoolsPKE:
+      properties:
+        instanceType:
+          description: Instance type for the nodes in the node pool. This field is ignored when existing node pool is updated as instance type can not be changed.
+          example: c4.large
+          type: string
+        spotPrice:
+          description: The spot price for a node in the node pool. Provide "" or "0" for on-demand nodes.
+          example: "0.2"
+          type: string
+        autoscaling:
+          description: Whether to enable Kubernetes cluster autoscaler for this node pool.
+          type: boolean
+        minCount:
+          description: If cluster autoscaler is enabled for this node pool it sets the minimum node count the cluster autoscaler can downscale the node pool to.
+          example: 1
+          format: int32
+          type: integer
+        maxCount:
+          description: If cluster autoscaler is enabled for this node pool it sets the maximum node count the cluster autoscaler can upscale the node pool to.
+          example: 2
+          format: int32
+          type: integer
+        count:
+          description: If cluster autoscaler is not enabled this specifies the desired ndoe count in the node pool. If cluster autoscaler is enabled this specifies the initial node count in the ndoe pool.
+          example: 1
+          format: int32
+          type: integer
+        subnets:
+          description: The subnet to create the node pool into. If this field is omitted than the subnet from the cluster level network configuration is used.
+          example:
+          - subnet-0d16a21e9655486af
+          items:
+            type: string
+          type: array
       type: object
     ClusterDelete_200:
       example:
@@ -9116,39 +9537,52 @@ components:
       type: object
     ListDeploymentsResponse:
       items:
-        properties:
-          releaseName:
-            example: pipeline
-            type: string
-          chart:
-            example: pipeline-cluster-ingress-0.0.1
-            type: string
-          chartName:
-            example: pipeline-cluster-ingress
-            type: string
-          chartVersion:
-            example: 0.0.1
-            type: string
-          version:
-            example: 1
-            format: int32
-            type: integer
-          updatedAt:
-            example: 2018-07-03T14:23:19+02:00
-            type: string
-          status:
-            example: DEPLOYED
-            type: string
-          namespace:
-            example: default
-            type: string
-          createdAt:
-            example: 2018-07-03T14:23:19+02:00
-            type: string
-          supported:
-            type: boolean
-        type: object
+        $ref: '#/components/schemas/ListDeploymentsResponseItem'
       type: array
+    ListDeploymentsResponseItem:
+      example:
+        createdAt: 2018-07-03T14:23:19+02:00
+        chartName: pipeline-cluster-ingress
+        chartVersion: 0.0.1
+        releaseName: pipeline
+        namespace: default
+        chart: pipeline-cluster-ingress-0.0.1
+        version: 1
+        updatedAt: 2018-07-03T14:23:19+02:00
+        status: DEPLOYED
+        supported: true
+      properties:
+        releaseName:
+          example: pipeline
+          type: string
+        chart:
+          example: pipeline-cluster-ingress-0.0.1
+          type: string
+        chartName:
+          example: pipeline-cluster-ingress
+          type: string
+        chartVersion:
+          example: 0.0.1
+          type: string
+        version:
+          example: 1
+          format: int32
+          type: integer
+        updatedAt:
+          example: 2018-07-03T14:23:19+02:00
+          type: string
+        status:
+          example: DEPLOYED
+          type: string
+        namespace:
+          example: default
+          type: string
+        createdAt:
+          example: 2018-07-03T14:23:19+02:00
+          type: string
+        supported:
+          type: boolean
+      type: object
     CreateUpdateDeploymentRequest:
       example:
         wait: true
@@ -9669,7 +10103,7 @@ components:
         properties:
           gke:
             master:
-              version: 0.21.2
+              version: 0.26.0
             nodeVersion: "1.10"
             nodePools:
               pool1:
@@ -9695,7 +10129,7 @@ components:
           example:
             gke:
               master:
-                version: 0.21.2
+                version: 0.26.0
               nodeVersion: "1.10"
               nodePools:
                 pool1:
@@ -9727,7 +10161,7 @@ components:
         properties:
           gke:
             master:
-              version: 0.21.2
+              version: 0.26.0
             nodeVersion: 1.8.7-gke.1
             nodePools:
               pool1:
@@ -9753,7 +10187,7 @@ components:
           example:
             gke:
               master:
-                version: 0.21.2
+                version: 0.26.0
               nodeVersion: 1.8.7-gke.1
               nodePools:
                 pool1:
@@ -9912,6 +10346,9 @@ components:
         error: Validation failed
         version: 1
         updatedAt: 2000-01-23T04:56:07.000+00:00
+        tags:
+        - repo:pipeline
+        - tag2
       properties:
         name:
           example: My-google-secret
@@ -9935,6 +10372,13 @@ components:
           example: 1
           format: int32
           type: integer
+        tags:
+          example:
+          - repo:pipeline
+          - tag2
+          items:
+            type: string
+          type: array
       required:
       - id
       - name
@@ -10415,8 +10859,10 @@ components:
         name: mybucket
         secretId: secretId
         properties:
-          alibaba:
+          amazon:
             location: eu-west-1
+          alibaba:
+            location: eu-central-1
           oracle:
             location: location
           google:
@@ -10442,8 +10888,10 @@ components:
       type: object
     CreateObjectStoreBucketProperties:
       example:
-        alibaba:
+        amazon:
           location: eu-west-1
+        alibaba:
+          location: eu-central-1
         oracle:
           location: location
         google:
@@ -10454,6 +10902,8 @@ components:
           storageAccount: mystorageaccount
       properties:
         alibaba:
+          $ref: '#/components/schemas/CreateAlibabaObjectStoreBucketProperties'
+        amazon:
           $ref: '#/components/schemas/CreateAmazonObjectStoreBucketProperties'
         azure:
           $ref: '#/components/schemas/CreateAzureObjectStoreBucketProperties'
@@ -10461,6 +10911,17 @@ components:
           $ref: '#/components/schemas/CreateGoogleObjectStoreBucketProperties'
         oracle:
           $ref: '#/components/schemas/CreateOracleObjectStoreBucketProperties'
+      type: object
+    CreateAlibabaObjectStoreBucketProperties:
+      example:
+        location: eu-central-1
+      nullable: true
+      properties:
+        location:
+          example: eu-central-1
+          type: string
+      required:
+      - location
       type: object
     CreateAmazonObjectStoreBucketProperties:
       example:
@@ -10537,18 +10998,22 @@ components:
       type: object
     BucketInfo:
       example:
+        cloud: amazon
         notes: There's no secret with this ID
+        oracle:
+          namespace: namespace
         managed: true
         name: mybucket
+        aks:
+          resourceGroup: resourceGroup
+          storageAccount: storageAccount
+        location: eu-west-1
         secret:
           accessId: cc051aeaf686444e2f125d0e79eb051aaaf4fb73384f7b0f8c89e84a0502dcef
           accessName: myaccesssecretname
           name: mysecretname
           id: cc051aeaf686444e2f125d0e79eb051aaaf4fb73384f7b0f8c89e84a0502dca1
         statusMessage: statusMessage
-        azure:
-          resourceGroup: resourceGroup
-          storageAccount: storageAccount
         status: CREATING
       properties:
         name:
@@ -10558,14 +11023,24 @@ components:
         managed:
           description: true if the bucket has been created via pipeline
           type: boolean
+        cloud:
+          description: cloud provider of the bucket
+          example: amazon
+          type: string
+        location:
+          description: location of the bucket
+          example: eu-west-1
+          type: string
         notes:
-          description: true if the bucket has been created via pipeline
+          description: notes for the bucket
           example: There's no secret with this ID
           type: string
         secret:
           $ref: '#/components/schemas/BucketInfo_secret'
-        azure:
+        aks:
           $ref: '#/components/schemas/AzureBlobStorageProps'
+        oracle:
+          $ref: '#/components/schemas/OracleStorageProps'
         status:
           description: the status of the bucket
           enum:
@@ -10580,6 +11055,7 @@ components:
           type: string
       required:
       - cloud
+      - location
       - managed
       - name
       - status
@@ -10685,6 +11161,15 @@ components:
       required:
       - resourceGroup
       - storageAccount
+      type: object
+    OracleStorageProps:
+      example:
+        namespace: namespace
+      properties:
+        namespace:
+          type: string
+      required:
+      - namespace
       type: object
     PodDetailsResponse:
       items:
@@ -12098,6 +12583,8 @@ components:
       $ref: '#/components/schemas/BackupResponse'
     CreateBackupBucketResponse:
       $ref: '#/components/schemas/BackupBucketResponse'
+    BackupServiceStatusResponse:
+      $ref: '#/components/schemas/BackupServiceResponse'
     ListBackupBucketsResponse:
       items:
         $ref: '#/components/schemas/BackupBucketResponse'
@@ -13134,6 +13621,69 @@ components:
         version:
           type: string
       type: object
+    BackupServiceResponse:
+      example:
+        enabled: true
+      properties:
+        enabled:
+          type: boolean
+      type: object
+    ClusterFeatureList:
+      additionalProperties:
+        $ref: '#/components/schemas/ClusterFeatureDetails'
+      type: object
+    ActivateClusterFeatureRequest:
+      example:
+        spec: '{}'
+      properties:
+        spec:
+          type: object
+      required:
+      - spec
+      type: object
+    ClusterFeatureDetails:
+      example:
+        output: '{}'
+        spec: '{}'
+        status: inactive
+      properties:
+        output:
+          type: object
+        spec:
+          type: object
+        status:
+          enum:
+          - inactive
+          - pending
+          - active
+          type: string
+      required:
+      - status
+      type: object
+    UpdateClusterFeatureRequest:
+      example:
+        spec: '{}'
+      properties:
+        spec:
+          type: object
+      required:
+      - spec
+      type: object
+    ClusterFeatureSpec:
+      type: object
+    ClusterFeatureNotFound:
+      properties:
+        code:
+          example: 404
+          format: int32
+          type: integer
+        message:
+          example: Cluster feature not found
+          type: string
+        error:
+          example: No cluster feature exists with this name
+          type: string
+      type: object
     CreatePKEClusterKubernetes_cri:
       properties:
         runtime:
@@ -13253,7 +13803,7 @@ components:
       required:
       - nodePools
       - version
-    CreatePKEProperties_clusterTopology_network:
+    CreatePKEProperties_network:
       properties:
         apiServerAddress:
           example: 10.240.0.204
@@ -13272,46 +13822,29 @@ components:
       - podCIDR
       - provider
       - serviceCIDR
-    CreatePKEProperties_clusterTopology_kubernetes_rbac:
+    CreatePKEProperties_kubernetes_rbac:
       properties:
         enabled:
           type: boolean
       required:
       - enabled
-    CreatePKEProperties_clusterTopology_kubernetes:
+    CreatePKEProperties_kubernetes:
       properties:
         version:
           example: v1.12.2
           type: string
         rbac:
-          $ref: '#/components/schemas/CreatePKEProperties_clusterTopology_kubernetes_rbac'
+          $ref: '#/components/schemas/CreatePKEProperties_kubernetes_rbac'
       required:
       - rbac
       - version
-    CreatePKEProperties_clusterTopology_cri:
+    CreatePKEProperties_cri:
       properties:
         runtime:
           example: containerd
           type: string
       required:
       - runtime
-    CreatePKEProperties_clusterTopology:
-      properties:
-        network:
-          $ref: '#/components/schemas/CreatePKEProperties_clusterTopology_network'
-        nodePools:
-          items:
-            $ref: '#/components/schemas/NodePoolsPKE'
-          type: array
-        kubernetes:
-          $ref: '#/components/schemas/CreatePKEProperties_clusterTopology_kubernetes'
-        cri:
-          $ref: '#/components/schemas/CreatePKEProperties_clusterTopology_cri'
-      required:
-      - cri
-      - kubernetes
-      - network
-      - nodePools
     AmazonAutoScalingGroup_size:
       properties:
         min:
@@ -13351,6 +13884,14 @@ components:
       properties:
         version:
           type: string
+    UpdatePKEProperties_pke:
+      properties:
+        nodePools:
+          additionalProperties:
+            $ref: '#/components/schemas/UpdateNodePoolsPKE'
+          type: object
+      required:
+      - nodePools
     ListNodesResponse_metadata:
       example:
         resourceVersion: "30123"

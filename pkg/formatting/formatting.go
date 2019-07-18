@@ -99,7 +99,8 @@ func NewTable(data interface{}, fields []string) *Table {
 func asSlice(slice interface{}) []interface{} {
 	s := reflect.ValueOf(slice)
 	if s.Kind() != reflect.Slice {
-		panic(fmt.Sprintf("got %T (%s) instead of a slice of struct", slice, s.Kind()))
+		slice = []interface{}{s}
+		s = reflect.ValueOf(slice)
 	}
 
 	ret := make([]interface{}, s.Len())

@@ -11,6 +11,11 @@
 /.gen/pipeline/.travis.yml
 /.gen/pipeline/git_push.sh
 
+# cloudinfo openapi files
+/cloudinfo-openapi.yaml
+/.gen/cloudinfo/.travis.yml
+/.gen/cloudinfo/git_push.sh
+
 # IDE integration
 /.vscode/*
 !/.vscode/tasks.json

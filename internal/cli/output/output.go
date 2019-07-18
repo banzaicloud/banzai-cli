@@ -19,9 +19,16 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/banzaicloud/banzai-cli/pkg/formatting"
 	"github.com/pkg/errors"
 	yaml "gopkg.in/yaml.v2"
+
+	"github.com/banzaicloud/banzai-cli/pkg/formatting"
+)
+
+const (
+	OutputFormatDefault = "default"
+	OutputFormatYAML    = "yaml"
+	OutputFormatJSON    = "json"
 )
 
 // Context contains parameters for formatting data.
@@ -40,7 +47,7 @@ func SingleOutput(ctx *Context, data interface{}) error {
 // Output writes a data slice in a specific format.
 func Output(ctx *Context, data interface{}) error {
 	switch ctx.Format {
-	case "json":
+	case OutputFormatJSON:
 		bytes, err := json.MarshalIndent(data, "", "  ")
 		if err != nil {
 			return errors.Wrap(err, "cannot marshal output")
@@ -50,7 +57,7 @@ func Output(ctx *Context, data interface{}) error {
 
 		return errors.Wrap(err, "cannot write output")
 
-	case "yaml":
+	case OutputFormatYAML:
 		bytes, err := yaml.Marshal(data)
 		if err != nil {
 			return errors.Wrap(err, "cannot marshal output")
@@ -60,7 +67,7 @@ func Output(ctx *Context, data interface{}) error {
 
 		return errors.Wrap(err, "cannot write output")
 
-	case "default":
+	case OutputFormatDefault:
 		table := formatting.NewTable(data, ctx.Fields)
 		formatted := table.Format(ctx.Color)
 

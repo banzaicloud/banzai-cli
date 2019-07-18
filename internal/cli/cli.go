@@ -15,12 +15,17 @@
 package cli
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"io"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
 	"sync"
 
+	"github.com/banzaicloud/banzai-cli/.gen/cloudinfo"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 
 	"github.com/goph/emperror"
@@ -38,6 +43,8 @@ type Cli interface {
 	Color() bool
 	Interactive() bool
 	Client() *pipeline.APIClient
+	HTTPTransport() *http.Transport
+	CloudinfoClient() *cloudinfo.APIClient
 	Context() Context
 	OutputFormat() string
 	Home() string
@@ -50,9 +57,11 @@ type Context interface {
 }
 
 type banzaiCli struct {
-	out        io.Writer
-	client     *pipeline.APIClient
-	clientOnce sync.Once
+	out                 io.Writer
+	client              *pipeline.APIClient
+	clientOnce          sync.Once
+	cloudinfoClient     *cloudinfo.APIClient
+	cloudinfoClientOnce sync.Once
 }
 
 func NewCli(out io.Writer) Cli {
@@ -105,10 +114,60 @@ func (c *banzaiCli) Client() *pipeline.APIClient {
 			&oauth2.Token{AccessToken: viper.GetString("pipeline.token")},
 		))
 
+		config.HTTPClient.Transport.(*oauth2.Transport).Base = c.HTTPTransport()
+
 		c.client = pipeline.NewAPIClient(config)
 	})
 
 	return c.client
+}
+
+func (c *banzaiCli) HTTPTransport() *http.Transport {
+	skip := viper.GetBool("pipeline.tls-skip-verify")
+	pemCerts := []byte(viper.GetString("pipeline.tls-ca-cert"))
+	if caFile := viper.GetString("pipeline.tls-ca-file"); len(pemCerts) == 0 && caFile != "" {
+		dat, err := ioutil.ReadFile(caFile)
+		if err != nil {
+			log.Errorf("failed to read CA certificate from %q: %v", caFile, err)
+		} else {
+			pemCerts = dat
+		}
+	}
+
+	/* #nosec G402 */
+	if skip || len(pemCerts) > 0 {
+		tls := &tls.Config{
+			InsecureSkipVerify: skip,
+		}
+
+		if len(pemCerts) > 0 {
+			tls.RootCAs = x509.NewCertPool()
+			ok := tls.RootCAs.AppendCertsFromPEM(pemCerts)
+			if !ok {
+				log.Error("failed to parse CA certificates")
+			} else {
+				log.Debugf("CA certs parsed (%d certs)", len(tls.RootCAs.Subjects()))
+			}
+		}
+
+		return &http.Transport{
+			TLSClientConfig: tls,
+		}
+	}
+
+	return http.DefaultTransport.(*http.Transport)
+}
+
+func (c *banzaiCli) CloudinfoClient() *cloudinfo.APIClient {
+	c.cloudinfoClientOnce.Do(func() {
+		config := cloudinfo.NewConfiguration()
+		config.BasePath = viper.GetString("cloudinfo.basepath")
+		config.UserAgent = "banzai-cli/1.0.0/go"
+
+		c.cloudinfoClient = cloudinfo.NewAPIClient(config)
+	})
+
+	return c.cloudinfoClient
 }
 
 func (c *banzaiCli) Context() Context {

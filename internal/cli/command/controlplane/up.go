@@ -227,5 +227,10 @@ func runInternal(command, valuesFile, kubeconfigFile, tfdir string, installerOpt
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	return cmd.Run()
+	err = cmd.Run()
+	if err == nil {
+		println("\nPipeline is ready, now you can login with: \x1b[1mbanzai login\x1b[0m")
+	}
+
+	return err
 }

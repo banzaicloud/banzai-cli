@@ -3,7 +3,7 @@
  *
  * Pipeline v0.3.0 swagger
  *
- * API version: 0.21.2
+ * API version: 0.26.0
  * Contact: info@banzaicloud.com
  */
 
@@ -22,4 +22,5 @@ type CreateSecretResponse struct {
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	UpdatedBy string `json:"updatedBy,omitempty"`
 	Version int32 `json:"version,omitempty"`
+	Tags []string `json:"tags,omitempty"`
 }

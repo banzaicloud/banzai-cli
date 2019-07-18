@@ -22,6 +22,9 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/goph/emperror"
+	"github.com/pkg/errors"
+
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 )
 
 func Unmarshal(raw []byte, data interface{}) error {
@@ -57,4 +60,22 @@ func ReadFileOrStdin(filename string) (fname string, raw []byte, err error) {
 	fname = "stdin"
 	raw, err = ioutil.ReadAll(os.Stdin)
 	return
+
+// ConvertError converts generic HTTP error in JSON format returned by Pipeline API
+func ConvertError(err error) error {
+	type Error struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+		Error   string `json:"error"`
+	}
+
+	if gerr, ok := errors.Cause(err).(pipeline.GenericOpenAPIError); ok {
+		var pipelineError Error
+		e := json.Unmarshal(gerr.Body(), &pipelineError)
+		if e == nil {
+			return errors.WithMessage(err, pipelineError.Error)
+		}
+	}
+
+	return err
 }
