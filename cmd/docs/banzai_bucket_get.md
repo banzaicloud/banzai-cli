@@ -1,17 +1,29 @@
-## banzai
+## banzai bucket get
 
-A command line client for the Banzai Cloud Pipeline platform.
+Get bucket
 
 ### Synopsis
 
-A command line client for the Banzai Cloud Pipeline platform.
+Get bucket
+
+```
+banzai bucket get NAME [[--cloud=]CLOUD]] [flags]
+```
 
 ### Options
 
 ```
+      --cloud string             Cloud provider for the bucket
+  -h, --help                     help for get
+  -l, --location string          Location (e.g. us-central1) for the bucket
+      --storage-account string   Storage account for the bucket (must be specified for Azure)
+```
+
+### Options inherited from parent commands
+
+```
       --color                use colors on non-tty outputs
       --config string        config file (default is $BANZAICONFIG or $HOME/.banzai/config.yaml)
-  -h, --help                 help for banzai
       --interactive          ask questions interactively even if stdin or stdout is non-tty
       --no-color             never display color output
       --no-interactive       never ask questions interactively
@@ -23,10 +35,4 @@ A command line client for the Banzai Cloud Pipeline platform.
 ### SEE ALSO
 
 * [banzai bucket](banzai_bucket.md)	 - Manage buckets
-* [banzai cluster](banzai_cluster.md)	 - Manage clusters
-* [banzai controlplane](banzai_controlplane.md)	 - Manage controlplane
-* [banzai form](banzai_form.md)	 - Open forms from config, persist provided values and generate templates
-* [banzai login](banzai_login.md)	 - Configure and log in to a Banzai Cloud context
-* [banzai organization](banzai_organization.md)	 - List and select organizations
-* [banzai secret](banzai_secret.md)	 - Manage secrets
 

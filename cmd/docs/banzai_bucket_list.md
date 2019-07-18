@@ -1,17 +1,28 @@
-## banzai
+## banzai bucket list
 
-A command line client for the Banzai Cloud Pipeline platform.
+List buckets
 
 ### Synopsis
 
-A command line client for the Banzai Cloud Pipeline platform.
+List buckets
+
+```
+banzai bucket list [flags]
+```
 
 ### Options
 
 ```
+      --cloud string      Filter buckets by cloud provider where they reside
+  -h, --help              help for list
+  -l, --location string   Filter buckets by location (region)
+```
+
+### Options inherited from parent commands
+
+```
       --color                use colors on non-tty outputs
       --config string        config file (default is $BANZAICONFIG or $HOME/.banzai/config.yaml)
-  -h, --help                 help for banzai
       --interactive          ask questions interactively even if stdin or stdout is non-tty
       --no-color             never display color output
       --no-interactive       never ask questions interactively
@@ -23,10 +34,4 @@ A command line client for the Banzai Cloud Pipeline platform.
 ### SEE ALSO
 
 * [banzai bucket](banzai_bucket.md)	 - Manage buckets
-* [banzai cluster](banzai_cluster.md)	 - Manage clusters
-* [banzai controlplane](banzai_controlplane.md)	 - Manage controlplane
-* [banzai form](banzai_form.md)	 - Open forms from config, persist provided values and generate templates
-* [banzai login](banzai_login.md)	 - Configure and log in to a Banzai Cloud context
-* [banzai organization](banzai_organization.md)	 - List and select organizations
-* [banzai secret](banzai_secret.md)	 - Manage secrets
 
