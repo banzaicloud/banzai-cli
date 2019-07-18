@@ -60,6 +60,7 @@ func ReadFileOrStdin(filename string) (fname string, raw []byte, err error) {
 	fname = "stdin"
 	raw, err = ioutil.ReadAll(os.Stdin)
 	return
+}
 
 // ConvertError converts generic HTTP error in JSON format returned by Pipeline API
 func ConvertError(err error) error {
