@@ -84,7 +84,7 @@ install_kubectl() {
     version=`download "https://storage.googleapis.com/kubernetes-release/release/stable.txt" 2>/dev/null`
     tmp=`tmp`
     trap "rm -r $tmp" EXIT
-    dl "https://storage.googleapis.com/kubernetes-release/release/${version}/bin/`os`/amd64/kubectl" >$tmp
+    download "https://storage.googleapis.com/kubernetes-release/release/${version}/bin/`os`/amd64/kubectl" $tmp/kubectl
     sudo install $tmp/kubectl "`path`/kubectl"
 }
 
