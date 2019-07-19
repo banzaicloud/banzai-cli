@@ -2,25 +2,33 @@ This is a command line interface under heavy development for the [Banzai Cloud P
 
 ### Installation
 
-Depending on your environment, you can install it using any of the following methods, using our [DEB](https://banzaicloud.com/downloads/banzai-cli/latest?format=deb) or [RPM](https://banzaicloud.com/downloads/banzai-cli/latest?format=rpm) packages, or binary tarballs for [Linux](https://banzaicloud.com/downloads/banzai-cli/latest?os=linux) and [macOS](https://banzaicloud.com/downloads/banzai-cli/latest?os=darwin).
-
-There is also a shell [script](scripts/getcli.sh) that selects one from the above mentioned methods:
+Use the following command to quickly install the CLI:
 
 ```
-$ curl https://getpipeline.sh/cli | sh [-s -- auto|deb|rpm|brew|tar|go|kubectl]
+$ curl https://getpipeline.sh/cli | sh
 ```
 
-You can also select the installation method (one of `auto`, `deb`, `rpm`, `brew`, `tar` or `go`) explicitly, for example:
+The [script](scripts/getcli.sh) automatically chooses the best distribution package based for your platform.
+
+Available packages:
+
+- [Debian package](https://banzaicloud.com/downloads/banzai-cli/latest?format=deb)
+- [RPM package](https://banzaicloud.com/downloads/banzai-cli/latest?format=rpm)
+- binary tarballs for [Linux](https://banzaicloud.com/downloads/banzai-cli/latest?os=linux) and [macOS](https://banzaicloud.com/downloads/banzai-cli/latest?os=darwin).
+
+You can also select the installation method (one of `auto`, `deb`, `rpm`, `brew`, `tar` or `go`) explicitly:
 
 ```
 $ curl https://getpipeline.sh/cli | sh -s -- deb
 ```
 
-You can directly use Homebrew or `go get` as well:
+On macOs, you can directly Homebrew:
 
 ```
 $ brew install banzaicloud/tap/banzai-cli
 ```
+
+Alternatively, fetch the source and compile it using `go get`:
 
 ```
 $ go get github.com/banzaicloud/banzai-cli/cmd/banzai
