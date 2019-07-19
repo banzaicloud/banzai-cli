@@ -11,7 +11,7 @@ endif
 	npm run build -- --prod
 
 node_modules/.auto: package-lock.json # install/update dependencies if needed
-	npm i
+	npm ci
 	@touch $@
 
 .PHONY: list
