@@ -60,7 +60,7 @@ install_deb() {
     tmp=`tmp`
     trap "rm -r $tmp" EXIT
     download "https://banzaicloud.com/downloads/banzai-cli/latest?format=deb" $tmp/banzai-cli.deb 
-    sudo dpkg -i $tmp/banzai-cli.deb
+    SUDO dpkg -i $tmp/banzai-cli.deb
 }
 
 install_tar() {
@@ -71,13 +71,13 @@ install_tar() {
     if [ -w $path ]; then
         install $tmp/banzai $path
     else
-        sudo install $tmp/banzai $path
+        SUDO install $tmp/banzai $path
     fi
 }
 
 install_go() {
     go get github.com/banzaicloud/banzai-cli/cmd/banzai
-    sudo install -m 755 ${GOPATH:-~/go}/bin/banzai "`path`/banzai"
+    SUDO install -m 755 ${GOPATH:-~/go}/bin/banzai "`path`/banzai"
 }
 
 install_kubectl() {
@@ -85,7 +85,7 @@ install_kubectl() {
     tmp=`tmp`
     trap "rm -r $tmp" EXIT
     download "https://storage.googleapis.com/kubernetes-release/release/${version}/bin/`os`/amd64/kubectl" $tmp/kubectl
-    sudo install $tmp/kubectl "`path`/kubectl"
+    SUDO install $tmp/kubectl "`path`/kubectl"
 }
 
 have() {
@@ -102,8 +102,15 @@ os() {
 }
 
 if [ "`whoami`" = root ]; then
-    sudo() {
+    SUDO() {
         "$@"
+    }
+else
+    SUDO() {
+        (
+            set -x
+            sudo "$@"
+        )
     }
 fi
 
