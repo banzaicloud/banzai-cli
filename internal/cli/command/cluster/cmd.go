@@ -19,8 +19,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const clusterIdKey = "cluster.id"
-
 // NewClusterCommand returns a cobra command for `cluster` subcommands.
 func NewClusterCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{

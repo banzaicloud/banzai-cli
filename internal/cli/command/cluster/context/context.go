@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cluster
+package clustercontext
 
 import (
 	"context"
@@ -37,6 +37,8 @@ type clusterContext struct {
 	name      string
 	banzaiCli cli.Cli
 }
+
+const clusterIdKey = "cluster.id"
 
 func NewClusterContext(cmd *cobra.Command, banzaiCli cli.Cli, verb string) Context {
 

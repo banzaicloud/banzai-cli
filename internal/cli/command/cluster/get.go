@@ -19,13 +19,14 @@ import (
 
 	pkgPipeline "github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/format"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 type getOptions struct {
-	Context
+	clustercontext.Context
 }
 
 func NewGetCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -40,7 +41,7 @@ func NewGetCommand(banzaiCli cli.Cli) *cobra.Command {
 			return runGet(banzaiCli, options, args)
 		},
 	}
-	options.Context = NewClusterContext(cmd, banzaiCli, "get")
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "get")
 
 	return cmd
 }
