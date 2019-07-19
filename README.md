@@ -4,6 +4,20 @@ This is a command line interface under heavy development for the [Banzai Cloud P
 
 Depending on your environment, you can install it using any of the following methods, using our [DEB](https://banzaicloud.com/downloads/banzai-cli/latest?format=deb) or [RPM](https://banzaicloud.com/downloads/banzai-cli/latest?format=rpm) packages, or binary tarballs for [Linux](https://banzaicloud.com/downloads/banzai-cli/latest?os=linux) and [macOS](https://banzaicloud.com/downloads/banzai-cli/latest?os=darwin).
 
+There is also a shell [script](scripts/getcli.sh) that selects one from the above mentioned methods:
+
+```
+$ curl https://getpipeline.sh/cli | sh [-s -- auto|deb|rpm|brew|tar|go|kubectl]
+```
+
+You can also select the installation method (one of `auto`, `deb`, `rpm`, `brew`, `tar` or `go`) explicitly, for example:
+
+```
+$ curl https://getpipeline.sh/cli | sh -s -- deb
+```
+
+You can directly use Homebrew or `go get` as well:
+
 ```
 $ brew install banzaicloud/tap/banzai-cli
 ```
