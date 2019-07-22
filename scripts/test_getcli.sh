@@ -10,6 +10,8 @@ f="$PWD/getcli.sh"
 docker run -v "$f:/cli" --rm centos sh -c "sh /cli && banzai --version"
 
 docker run -v "$f:/cli" --rm centos sh -c "sh </cli && banzai --version"
+docker run -v "$f:/cli" --rm opensuse/leap sh -c "zypper install -y curl; sh </cli && banzai --version"
+docker run -v "$f:/cli" --rm alpine sh -c "sh </cli && banzai --version"
 docker run -v "$f:/cli" --rm ubuntu sh -c "apt-get update; env TERM=dumb apt-get -y install --no-install-recommends ca-certificates wget; sh </cli && banzai --version"
 docker run -v "$f:/cli" --rm ubuntu:16.04 sh -c "apt-get update; env TERM=dumb apt-get -y install --no-install-recommends ca-certificates wget; sh </cli && banzai --version"
 docker run -v "$f:/cli" --rm debian sh -c "apt-get update; env TERM=dumb apt-get -y install --no-install-recommends ca-certificates curl; sh </cli && banzai --version"

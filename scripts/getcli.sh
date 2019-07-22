@@ -53,6 +53,10 @@ install_brew() {
 }
 
 install_rpm() {
+    if ! have curl; then
+        echo curl is needed by rpm to install remote packages >&2
+        exit 1
+    fi
     rpm -i "https://banzaicloud.com/downloads/banzai-cli/latest?format=rpm"
 }
 
