@@ -8,7 +8,7 @@ Use the following command to quickly install the CLI:
 $ curl https://getpipeline.sh/cli | sh
 ```
 
-The [script](scripts/getcli.sh) automatically chooses the best distribution package based for your platform.
+The [script](scripts/getcli.sh) automatically chooses the best distribution package for your platform.
 
 Available packages:
 
