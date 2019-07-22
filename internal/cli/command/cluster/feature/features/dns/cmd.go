@@ -12,34 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package feature
+package dns
 
 import (
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features/dns"
 	"github.com/spf13/cobra"
 )
 
-func NewFeatureCommand(banzaiCli cli.Cli) *cobra.Command {
-	options := listOptions{}
+func NewDNSCommand(banzaiCli cli.Cli) *cobra.Command {
+	options := getOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "feature",
-		Aliases: []string{"features", "feat", "ft"},
-		Short:   "Manage cluster features",
-		Args:    cobra.MaximumNArgs(1),
+		Use:   "dns",
+		Short: "Manage cluster DNS feature",
+		Args:  cobra.NoArgs,
 		RunE: func(_ *cobra.Command, args []string) error {
-			return runList(banzaiCli, options, args)
+			return runGet(banzaiCli, options, args)
 		},
 	}
 
-	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "list features")
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "manage DNS cluster feature of")
 
 	cmd.AddCommand(
-		NewListCommand(banzaiCli),
-		// NOTE: add feature commands here
-		dns.NewDNSCommand(banzaiCli),
+		NewGetCommand(banzaiCli),
 	)
 
 	return cmd
