@@ -35,6 +35,7 @@ func NewDNSCommand(banzaiCli cli.Cli) *cobra.Command {
 	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "manage DNS cluster feature of")
 
 	cmd.AddCommand(
+		NewDeactivateCommand(banzaiCli),
 		NewGetCommand(banzaiCli),
 	)
 
