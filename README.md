@@ -34,6 +34,13 @@ Alternatively, fetch the source and compile it using `go get`:
 $ go get github.com/banzaicloud/banzai-cli/cmd/banzai
 ```
 
+### Logging in
+
+To use the command you will have to log in.
+You can either log in intaractively using a web browser, or provide an API endpoint and a token manually.
+
+For interactive login, just run `banzai login`, and follow the instructions given.
+
 ### Use
 
 ```
@@ -65,3 +72,5 @@ Flags:
 
 Use "banzai [command] --help" for more information about a command.
 ```
+
+For more details, check the [official documentation](http://banzaicloud.com/docs/cli/).
