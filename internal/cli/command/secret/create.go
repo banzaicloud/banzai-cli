@@ -50,6 +50,7 @@ type createSecretOptions struct {
 	tags       []string
 	validate   string
 	format     string
+	magic      bool
 }
 
 // secretFieldQuestion contains all necessary field for a secret question (any type except generic)
@@ -117,6 +118,7 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	flags.StringVarP(&options.secretType, "type", "t", "", "Type of the secret")
 	flags.StringArrayVarP(&options.tags, "tag", "", []string{}, "Tags to add to the secret")
 	flags.StringVarP(&options.validate, "validate", "v", "", "Secret validation (true|false)")
+	flags.BoolVar(&options.magic, "magic", false, "Try to import credentials from local environment (AWS only for now)")
 
 	return cmd
 }
@@ -151,9 +153,24 @@ func runCreateSecret(banzaiCli cli.Cli, options *createSecretOptions) error {
 }
 
 func getCreateSecretRequest(banzaiCli cli.Cli, options *createSecretOptions, out *pipeline.CreateSecretRequest) error {
+	out.Name = options.secretName
+	out.Type = options.secretType
+	out.Tags = options.tags
+
 	if banzaiCli.Interactive() {
 		return buildInteractiveCreateSecretRequest(banzaiCli, options, out)
 	} else {
+
+		if values, err := importLocalCredential(banzaiCli, options); err != nil {
+			return err
+		} else if values != nil {
+			out.Values = values
+		}
+
+		if options.file == "" && options.magic {
+			return nil
+		}
+
 		return readFileAndValidate(options.file, out)
 	}
 }
@@ -201,15 +218,8 @@ func validateCreateSecretRequest(val interface{}) error {
 
 func buildInteractiveCreateSecretRequest(banzaiCli cli.Cli, options *createSecretOptions, out *pipeline.CreateSecretRequest) error {
 
-	if len(options.file) != 0 {
-		if err := readCreateSecretRequestFromFile(options.file, out); err != nil {
-			// failed to load file, we can ask the user via survey
-			cli.LogAPIError("create secret", err, out)
-		} else {
-			options.secretType = out.Type
-			options.secretName = out.Name
-			return nil
-		}
+	if options.file != "" {
+		return readCreateSecretRequestFromFile(options.file, out)
 	}
 
 	allowedTypes, _, err := banzaiCli.Client().SecretsApi.AllowedSecretsTypes(context.Background())
@@ -222,8 +232,15 @@ func buildInteractiveCreateSecretRequest(banzaiCli cli.Cli, options *createSecre
 
 	surveySecretType(options, allowedTypes)
 
-	if err := surveySecretFields(options, allowedTypes, out); err != nil {
-		log.Fatalf("could not get secret fields: %v", err)
+	out.Values, err = importLocalCredential(banzaiCli, options)
+	if err != nil {
+		return err
+	}
+
+	if out.Values == nil {
+		if err := surveySecretFields(options, allowedTypes, out); err != nil {
+			log.Fatalf("could not get secret fields: %v", err)
+		}
 	}
 
 	surveyTags(options)
@@ -420,4 +437,37 @@ func getValidationFlag(validation string) optional.Bool {
 	default:
 		return optional.NewBool(true)
 	}
+}
+
+func importLocalCredential(banzaiCli cli.Cli, options *createSecretOptions) (map[string]interface{}, error) {
+	if !banzaiCli.Interactive() && !options.magic {
+		return nil, nil
+	}
+
+	var id string
+	var values map[string]interface{}
+	var err error
+
+	switch options.secretType {
+	case TypeAmazon:
+		id, values, err = input.GetAmazonCredentials()
+	default:
+		if options.magic {
+			return nil, errors.New("unsupported secret type for local credential import")
+		}
+		return nil, nil
+	}
+
+	if values != nil && !options.magic && banzaiCli.Interactive() {
+		prompt := &survey.Confirm{
+			Message: fmt.Sprintf("Do you want to create the secret from your local credential (%s)?", id),
+			Help:    fmt.Sprintf("We can extract your local AWS credentials if you want."),
+		}
+		_ = survey.AskOne(prompt, &options.magic, nil)
+	}
+
+	if options.magic {
+		return values, err
+	}
+	return nil, nil
 }

@@ -18,7 +18,10 @@ import (
 	"context"
 
 	"github.com/antihax/optional"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/goph/emperror"
+	"github.com/pkg/errors"
 	"gopkg.in/AlecAivazis/survey.v1"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
@@ -48,4 +51,34 @@ func AskSecret(banzaiCli cli.Cli, orgID int32, cloud string) (string, error) {
 	}
 
 	return secretIds[secretName], nil
+}
+
+// GetAmazonCredentials extracts the local credentials from env vars and user profile
+func GetAmazonCredentials() (string, map[string]interface{}, error) {
+	/* create a new session, which is basically the same as the following, but may also contain a region
+	creds := credentials.NewChainCredentials(
+		[]credentials.Provider{
+			&credentials.EnvProvider{},
+			&credentials.SharedCredentialsProvider{},
+		}) */
+	session, err := session.NewSession(&aws.Config{})
+	if err != nil {
+		return "", nil, err
+
+	}
+
+	value, err := session.Config.Credentials.Get()
+	if err != nil {
+		return "", nil, err
+	}
+
+	if value.SessionToken != "" {
+		return "", nil, errors.New("AWS session tokens are not supported by Banzai Cloud Pipeline")
+	}
+
+	return value.AccessKeyID, map[string]interface{}{
+		"AWS_ACCESS_KEY_ID":     value.AccessKeyID,
+		"AWS_SECRET_ACCESS_KEY": value.SecretAccessKey,
+		"AWS_REGION":            session.Config.Region,
+	}, nil
 }
