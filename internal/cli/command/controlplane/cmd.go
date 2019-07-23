@@ -22,9 +22,9 @@ import (
 // NewControlPlaneCommand returns a cobra command for `controlplane` subcommands.
 func NewControlPlaneCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "controlplane",
-		Aliases: []string{"cp"},
-		Short:   "Manage controlplane",
+		Use:     "pipeline",
+		Aliases: []string{"cp", "controlplane"},
+		Short:   "Manage deployment of Banzai Cloud Pipeline instances",
 	}
 
 	cmd.AddCommand(
