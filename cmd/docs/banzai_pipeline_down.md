@@ -1,22 +1,22 @@
-## banzai controlplane up
+## banzai pipeline down
 
-Create a controlplane
+Destroy the controlplane
 
 ### Synopsis
 
-Create controlplane based on json stdin or interactive session in the current Kubernetes context. The current working directory will be used for storing the applied configuration and deployment status.
+Destroy a controlplane based on json stdin or interactive session
 
 ```
-banzai controlplane up [flags]
+banzai pipeline down [flags]
 ```
 
 ### Options
 
 ```
-  -f, --file string        Input control plane descriptor file (default "values.yaml")
-  -h, --help               help for up
+  -h, --help               help for down
       --image-pull         Pull cp-installer image even if it's present locally (default true)
       --image-tag string   Tag of banzaicloud/cp-installer Docker image to use (default "latest")
+      --workspace string   Name of directory for storing the applied configuration and deployment status
 ```
 
 ### Options inherited from parent commands
@@ -34,5 +34,5 @@ banzai controlplane up [flags]
 
 ### SEE ALSO
 
-* [banzai controlplane](banzai_controlplane.md)	 - Manage controlplane
+* [banzai pipeline](banzai_pipeline.md)	 - Manage deployment of Banzai Cloud Pipeline instances
 

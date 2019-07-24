@@ -1,15 +1,21 @@
-## banzai controlplane
+## banzai cluster feature dns get
 
-Manage controlplane
+Get details of the DNS feature for a cluster
 
 ### Synopsis
 
-Manage controlplane
+Get details of the DNS feature for a cluster
+
+```
+banzai cluster feature dns get [flags]
+```
 
 ### Options
 
 ```
-  -h, --help   help for controlplane
+      --cluster int32         ID of cluster to get DNS cluster feature details of
+      --cluster-name string   Name of cluster to get DNS cluster feature details of
+  -h, --help                  help for get
 ```
 
 ### Options inherited from parent commands
@@ -27,7 +33,5 @@ Manage controlplane
 
 ### SEE ALSO
 
-* [banzai](banzai.md)	 - A command line client for the Banzai Cloud Pipeline platform.
-* [banzai controlplane down](banzai_controlplane_down.md)	 - Destroy the controlplane
-* [banzai controlplane up](banzai_controlplane_up.md)	 - Create a controlplane
+* [banzai cluster feature dns](banzai_cluster_feature_dns.md)	 - Manage cluster DNS feature
 

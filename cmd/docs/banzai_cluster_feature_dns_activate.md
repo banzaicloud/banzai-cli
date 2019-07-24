@@ -1,23 +1,22 @@
-## banzai login
+## banzai cluster feature dns activate
 
-Configure and log in to a Banzai Cloud context
+Activate the DNS feature of a cluster
 
 ### Synopsis
 
-Configure and log in to a Banzai Cloud context
+Activate the DNS feature of a cluster
 
 ```
-banzai login [flags]
+banzai cluster feature dns activate [flags]
 ```
 
 ### Options
 
 ```
-  -e, --endpoint string   Pipeline API endpoint to save
-  -h, --help              help for login
-      --permanent         Create permanent token (interactive login flow only)
-      --skip-verify       Skip certificate verification and pin fingerprint
-  -t, --token string      Pipeline token to save
+      --cluster int32         ID of cluster to activate DNS cluster feature for
+      --cluster-name string   Name of cluster to activate DNS cluster feature for
+  -f, --file string           Feature specification file
+  -h, --help                  help for activate
 ```
 
 ### Options inherited from parent commands
@@ -35,5 +34,5 @@ banzai login [flags]
 
 ### SEE ALSO
 
-* [banzai](banzai.md)	 - A command line client for the Banzai Cloud Pipeline platform.
+* [banzai cluster feature dns](banzai_cluster_feature_dns.md)	 - Manage cluster DNS feature
 

@@ -1,15 +1,21 @@
-## banzai cluster
+## banzai cluster feature list
 
-Manage clusters
+List active (and pending) features of a cluster
 
 ### Synopsis
 
-Manage clusters
+List active (and pending) features of a cluster
+
+```
+banzai cluster feature list [flags]
+```
 
 ### Options
 
 ```
-  -h, --help   help for cluster
+      --cluster int32         ID of cluster to list features
+      --cluster-name string   Name of cluster to list features
+  -h, --help                  help for list
 ```
 
 ### Options inherited from parent commands
@@ -27,12 +33,5 @@ Manage clusters
 
 ### SEE ALSO
 
-* [banzai](banzai.md)	 - A command line client for the Banzai Cloud Pipeline platform.
-* [banzai cluster create](banzai_cluster_create.md)	 - Create a cluster
-* [banzai cluster delete](banzai_cluster_delete.md)	 - Delete a cluster
 * [banzai cluster feature](banzai_cluster_feature.md)	 - Manage cluster features
-* [banzai cluster get](banzai_cluster_get.md)	 - Get cluster details
-* [banzai cluster import](banzai_cluster_import.md)	 - Import an existing cluster (EXPERIMENTAL)
-* [banzai cluster list](banzai_cluster_list.md)	 - List clusters
-* [banzai cluster shell](banzai_cluster_shell.md)	 - Start a shell or run a command with the cluster configured as kubectl context
 

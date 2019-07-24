@@ -53,6 +53,7 @@ banzai secret create [flags]
 ```
   -f, --file string       Secret creation descriptor file
   -h, --help              help for create
+      --magic             Try to import credentials from local environment (AWS only for now)
   -n, --name string       Name of the secret
       --tag stringArray   Tags to add to the secret
   -t, --type string       Type of the secret
