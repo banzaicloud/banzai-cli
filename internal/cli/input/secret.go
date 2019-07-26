@@ -16,6 +16,8 @@ package input
 
 import (
 	"context"
+	"os/exec"
+	"path/filepath"
 
 	"github.com/antihax/optional"
 	"github.com/aws/aws-sdk-go/aws"
@@ -23,6 +25,9 @@ import (
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
 	"gopkg.in/AlecAivazis/survey.v1"
+	// "gopkg.in/yaml.v2" -- could not be used for kubernetes types
+	"github.com/ghodss/yaml"
+	v1 "k8s.io/client-go/tools/clientcmd/api/v1"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"

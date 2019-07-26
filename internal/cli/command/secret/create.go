@@ -35,12 +35,13 @@ import (
 )
 
 const (
-	TypeGeneric = "generic"
-	TypeAmazon  = "amazon"
-	TypeAzure   = "azure"
-	TypeAlibaba = "alibaba"
-	TypeGoogle  = "google"
-	TypeOracle  = "oracle"
+	TypeGeneric    = "generic"
+	TypeAmazon     = "amazon"
+	TypeAzure      = "azure"
+	TypeAlibaba    = "alibaba"
+	TypeGoogle     = "google"
+	TypeOracle     = "oracle"
+	TypeKubernetes = "kubernetes"
 )
 
 // createSecretOptions contains create secret flags for `banzai create secret` command
@@ -448,18 +449,25 @@ func getValidationFlag(validation string) optional.Bool {
 	}
 }
 
-func importLocalCredential(banzaiCli cli.Cli, options *createSecretOptions) (map[string]interface{}, error) {
+func importLocalCredential(banzaiCli cli.Cli, options *createSecretOptions) (map[string]string, error) {
 	if !banzaiCli.Interactive() && !options.magic {
 		return nil, nil
 	}
 
 	var id string
-	var values map[string]interface{}
+	var values map[string]string
 	var err error
 
 	switch options.secretType {
 	case TypeAmazon:
 		id, values, err = input.GetAmazonCredentials()
+	case TypeKubernetes:
+		var config string
+		id, config, err = input.GetCurrentKubecontext()
+
+		values = map[string]string{
+			"K8Sconfig": config,
+		}
 	default:
 		if options.magic {
 			return nil, errors.New("unsupported secret type for local credential import")
