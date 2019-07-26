@@ -23,7 +23,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strings"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/ghodss/yaml"
@@ -36,16 +35,6 @@ import (
 
 const version = "v0.4.0"
 const clusterName = "banzai"
-
-func isKINDClusterRequested(values map[string]interface{}) bool {
-	if provider, ok := values["provider"]; ok {
-		if providerMap, ok := provider.(map[string]interface{}); ok {
-			_, ok := providerMap["kind"]
-			return ok
-		}
-	}
-	return false
-}
 
 func isKINDInstalled(banzaiCli cli.Cli) bool {
 	path, err := findKINDPath(banzaiCli)
@@ -99,23 +88,7 @@ func downloadKIND(banzaiCli cli.Cli) error {
 	return emperror.Wrap(os.Rename(tempName, kindPath), "failed to move kind binary to its final place")
 }
 
-func getKINDKubeconfig(banzaiCli cli.Cli) (string, error) {
-	kindPath, err := findKINDPath(banzaiCli)
-	if err != nil {
-		return "", err
-	}
-
-	cmd := exec.Command(kindPath, "get", "kubeconfig-path", "--name", clusterName)
-
-	kubeconfig, err := cmd.Output()
-	if err != nil {
-		return "", err
-	}
-
-	return strings.Trim(string(kubeconfig), "\n"), nil
-}
-
-func ensureKINDCluster(banzaiCli cli.Cli) error {
+func ensureKINDCluster(banzaiCli cli.Cli, options cpContext, values map[string]interface{}) error {
 
 	if !isKINDInstalled(banzaiCli) {
 		log.Info("KIND binary (kind) is not available in $PATH, downloading it...")
@@ -166,8 +139,7 @@ func ensureKINDCluster(banzaiCli cli.Cli) error {
 		return emperror.Wrap(err, "failed to prepare KIND cluster config")
 	}
 
-	kindConfigFile := filepath.Join(banzaiCli.Home(), "kind-config.yaml")
-
+	kindConfigFile := filepath.Join(options.workspace, "kind-config.yaml")
 	err = ioutil.WriteFile(kindConfigFile, buff, 0600)
 	if err != nil {
 		return emperror.Wrap(err, "failed to write KIND cluster config")
@@ -183,7 +155,13 @@ func ensureKINDCluster(banzaiCli cli.Cli) error {
 		return emperror.Wrap(err, "failed to create KIND cluster")
 	}
 
-	return nil
+	cmd = exec.Command(kindPath, "get", "kubeconfig", "--name", clusterName)
+	kubeconfig, err := cmd.Output()
+	if err != nil {
+		return emperror.Wrap(err, "failed to get KIND kubeconfig")
+	}
+
+	return options.writeKubeconfig(kubeconfig)
 }
 
 func deleteKINDCluster(banzaiCli cli.Cli) error {

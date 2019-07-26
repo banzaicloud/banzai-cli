@@ -54,7 +54,7 @@ func AskSecret(banzaiCli cli.Cli, orgID int32, cloud string) (string, error) {
 }
 
 // GetAmazonCredentials extracts the local credentials from env vars and user profile
-func GetAmazonCredentials() (string, map[string]interface{}, error) {
+func GetAmazonCredentials() (string, map[string]string, error) {
 	/* create a new session, which is basically the same as the following, but may also contain a region
 	creds := credentials.NewChainCredentials(
 		[]credentials.Provider{
@@ -76,9 +76,39 @@ func GetAmazonCredentials() (string, map[string]interface{}, error) {
 		return "", nil, errors.New("AWS session tokens are not supported by Banzai Cloud Pipeline")
 	}
 
-	return value.AccessKeyID, map[string]interface{}{
+	out := map[string]string{
 		"AWS_ACCESS_KEY_ID":     value.AccessKeyID,
 		"AWS_SECRET_ACCESS_KEY": value.SecretAccessKey,
-		"AWS_REGION":            session.Config.Region,
-	}, nil
+	}
+	if session.Config.Region != nil {
+		out["AWS_REGION"] = *session.Config.Region
+	}
+
+	return value.AccessKeyID, out, nil
+}
+
+// GetCurrentKubecontext extracts the Kubernetes context selected locally
+func GetCurrentKubecontext() (string, string, error) {
+	c := exec.Command("kubectl", "config", "view", "--minify", "--raw")
+	out, err := c.Output()
+	if err != nil {
+		return "", "", emperror.Wrap(err, "failed to query current context from kubectl")
+	}
+
+	var parsed v1.Config
+	if err := yaml.Unmarshal(out, &parsed); err != nil {
+		return "", "", emperror.Wrap(err, "failed to parse local configuration")
+	}
+
+	if len(parsed.AuthInfos) != 1 {
+		return "", "", errors.New("kubernetes config doesn't contain a single user definition")
+	}
+	authConf := parsed.AuthInfos[0].AuthInfo.AuthProvider
+
+	if authConf != nil && authConf.Config["cmd-path"] != "" {
+		// TODO add support
+		return "", "", errors.Errorf("kubernetes authorization helpers (%s) are not supported", filepath.Base(authConf.Config["cmd-path"]))
+	}
+
+	return parsed.CurrentContext, string(out), nil
 }

@@ -165,7 +165,11 @@ func getCreateSecretRequest(banzaiCli cli.Cli, options *createSecretOptions, out
 		if values, err := importLocalCredential(banzaiCli, options); err != nil {
 			return err
 		} else if values != nil {
-			out.Values = values
+			// TODO fix openapi
+			out.Values = map[string]interface{}{}
+			for k, v := range values {
+				out.Values[k] = v
+			}
 		}
 
 		if options.file == "" && options.magic {
@@ -233,14 +237,18 @@ func buildInteractiveCreateSecretRequest(banzaiCli cli.Cli, options *createSecre
 
 	surveySecretType(options, allowedTypes)
 
-	out.Values, err = importLocalCredential(banzaiCli, options)
+	values, err := importLocalCredential(banzaiCli, options)
 	if err != nil {
 		return err
-	}
-
-	if out.Values == nil {
+	} else if values == nil {
 		if err := surveySecretFields(options, allowedTypes, out); err != nil {
 			log.Fatalf("could not get secret fields: %v", err)
+		}
+	} else {
+		// TODO fix openapi
+		out.Values = map[string]interface{}{}
+		for k, v := range values {
+			out.Values[k] = v
 		}
 	}
 

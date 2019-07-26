@@ -35,5 +35,6 @@ require (
 	gopkg.in/square/go-jose.v2 v2.3.1 // indirect
 	gopkg.in/yaml.v2 v2.2.2
 	k8s.io/apimachinery v0.0.0-20190404173353-6a84e37a896d
+	k8s.io/client-go v11.0.0+incompatible
 	sigs.k8s.io/kind v0.4.0
 )
