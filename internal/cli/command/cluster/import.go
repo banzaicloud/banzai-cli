@@ -24,6 +24,7 @@ import (
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
@@ -36,6 +37,7 @@ type importOptions struct {
 	name       string
 	file       string
 	kubeconfig string
+	magic      bool
 }
 
 // NewInstallCommand returns a cobra command for `install` subcommands.
@@ -56,6 +58,7 @@ kubectl config view --minify --raw | banzai cluster import -n myimportedcluster`
 	flags := cmd.Flags()
 	flags.StringVarP(&options.name, "name", "n", "", "Name of the cluster")
 	flags.StringVarP(&options.file, "kubeconfig", "", "", "Kubeconfig file (with embed client cert/key for the user entry)")
+	flags.BoolVar(&options.magic, "magic", false, "Import current local kubernetes context")
 
 	return cmd
 }
@@ -153,9 +156,13 @@ func importCluster(banzaiCli cli.Cli, options importOptions) error {
 }
 
 func buildInteractiveImportRequest(_ cli.Cli, options importOptions, _ int32) (kubeconfig, clusterName string, err error) {
-	var fileName = options.file
-	if fileName != "" {
-		filename, raw, err := utils.ReadFileOrStdin(fileName)
+	if options.magic {
+		clusterName, kubeconfig, err = input.GetCurrentKubecontext()
+		if err != nil {
+			return
+		}
+	} else if options.file != "" {
+		filename, raw, err := utils.ReadFileOrStdin(options.file)
 		if err != nil {
 			return "", "", emperror.WrapWith(err, "failed to read", "filename", filename)
 		}
@@ -166,11 +173,14 @@ func buildInteractiveImportRequest(_ cli.Cli, options importOptions, _ int32) (k
 		_ = survey.AskOne(&survey.Editor{Message: "kubeconfig:", Default: ""}, &kubeconfig, nil)
 	}
 
-	name := fmt.Sprintf("%s%d", os.Getenv("USER"), os.Getpid())
-	_ = survey.AskOne(&survey.Input{Message: "Cluster name:", Default: name}, &name, nil)
-	clusterName = name
+	if options.name != "" {
+		clusterName = options.name
+	} else if clusterName == "" {
+		clusterName = fmt.Sprintf("%s%d", os.Getenv("USER"), os.Getpid())
+	}
 
-	return kubeconfig, clusterName, nil
+	err = survey.AskOne(&survey.Input{Message: "Cluster name:", Default: clusterName}, &clusterName, nil)
+	return
 }
 
 func validateSecretCreateRequest(req pipeline.CreateSecretRequest) error {

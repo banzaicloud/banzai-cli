@@ -47,7 +47,7 @@ type Cli interface {
 	CloudinfoClient() *cloudinfo.APIClient
 	Context() Context
 	OutputFormat() string
-	Home() string
+	Home() string // Home is the path to the .banzai directory of the user
 }
 
 type Context interface {
