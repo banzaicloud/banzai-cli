@@ -79,12 +79,12 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 	}
 
 	switch values["provider"] {
-	case "kind":
+	case providerKind:
 		err = deleteKINDCluster(banzaiCli)
 		if err != nil {
 			return emperror.Wrap(err, "KIND cluster destroy failed")
 		}
-	case "ec2":
+	case providerEc2:
 		if err = destroyEC2Cluster(banzaiCli, options.cpContext); err != nil {
 			return err
 		}

@@ -35,6 +35,7 @@ import (
 
 const version = "v0.4.0"
 const clusterName = "banzai"
+const kindCmd = "kind"
 
 func isKINDInstalled(banzaiCli cli.Cli) bool {
 	path, err := findKINDPath(banzaiCli)
@@ -42,14 +43,14 @@ func isKINDInstalled(banzaiCli cli.Cli) bool {
 }
 
 func findKINDPath(banzaiCli cli.Cli) (string, error) {
-	path, err := exec.LookPath("kind")
+	path, err := exec.LookPath(kindCmd)
 	if err == nil {
 		return path, nil
 	} else if execErr := err.(*exec.Error); execErr.Err != exec.ErrNotFound {
 		return "", err
 	}
 
-	path = filepath.Join(banzaiCli.Home(), "bin", "kind")
+	path = filepath.Join(banzaiCli.Home(), "bin", kindCmd)
 	if _, err = os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
 			return "", nil
@@ -64,7 +65,7 @@ func downloadKIND(banzaiCli cli.Cli) error {
 
 	src := fmt.Sprintf("https://github.com/kubernetes-sigs/kind/releases/download/%s/kind-%s-amd64", version, runtime.GOOS)
 
-	kindPath := filepath.Join(banzaiCli.Home(), "bin", "kind")
+	kindPath := filepath.Join(banzaiCli.Home(), "bin", kindCmd)
 
 	resp, err := http.Get(src) // #nosec
 	if err != nil {
@@ -88,7 +89,7 @@ func downloadKIND(banzaiCli cli.Cli) error {
 	return emperror.Wrap(os.Rename(tempName, kindPath), "failed to move kind binary to its final place")
 }
 
-func ensureKINDCluster(banzaiCli cli.Cli, options cpContext, values map[string]interface{}) error {
+func ensureKINDCluster(banzaiCli cli.Cli, options cpContext) error {
 
 	if !isKINDInstalled(banzaiCli) {
 		log.Info("KIND binary (kind) is not available in $PATH, downloading it...")

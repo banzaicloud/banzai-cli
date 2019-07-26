@@ -93,16 +93,16 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 
 	if !options.kubeconfigExists() {
 		switch values["provider"] {
-		case "kind":
-			err := ensureKINDCluster(banzaiCli, options.cpContext, values)
+		case providerKind:
+			err := ensureKINDCluster(banzaiCli, options.cpContext)
 			if err != nil {
 				return emperror.Wrap(err, "failed to create KIND cluster")
 			}
 
-		case "ec2":
-			err := ensureEC2Cluster(banzaiCli, options.cpContext, values)
+		case providerEc2:
+			err := ensureEC2Cluster(banzaiCli, options.cpContext)
 			if err != nil {
-				return emperror.Wrap(err, "failed to create KIND cluster")
+				return emperror.Wrap(err, "failed to create EC2 cluster")
 			}
 		default:
 			return errors.New("could not find Kubeconfig in workspace")

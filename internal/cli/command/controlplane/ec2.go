@@ -27,7 +27,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func ensureEC2Cluster(banzaiCli cli.Cli, options cpContext, values map[string]interface{}) error {
+func ensureEC2Cluster(_ cli.Cli, options cpContext) error {
 	if options.kubeconfigExists() {
 		return nil
 	}
@@ -48,7 +48,7 @@ func ensureEC2Cluster(banzaiCli cli.Cli, options cpContext, values map[string]in
 	}
 	host := strings.Trim(string(hostBytes), "\n")
 
-	log.Info("retrieve kubernetes config from cluster")
+	log.Infof("retrieve kubernetes config from cluster %q", host)
 	cmd := exec.Command("ssh", "-l", "centos", "-i", filepath.Join(options.workspace, ".ssh/id_rsa"), host, "sudo", "cat", "/etc/kubernetes/admin.conf")
 	cmd.Stderr = os.Stderr
 	config, err := cmd.Output()
@@ -59,7 +59,7 @@ func ensureEC2Cluster(banzaiCli cli.Cli, options cpContext, values map[string]in
 	return options.writeKubeconfig(config)
 }
 
-func destroyEC2Cluster(banzaiCli cli.Cli, options cpContext) error {
+func destroyEC2Cluster(_ cli.Cli, options cpContext) error {
 	_, creds, err := input.GetAmazonCredentials()
 	if err != nil {
 		return emperror.Wrap(err, "failed to get AWS credentials")

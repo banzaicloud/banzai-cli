@@ -27,6 +27,12 @@ import (
 	"gopkg.in/AlecAivazis/survey.v1"
 )
 
+const (
+	providerK8s  = "k8s"
+	providerEc2  = "ec2"
+	providerKind = "kind"
+)
+
 type initOptions struct {
 	file     string
 	provider string
@@ -123,20 +129,20 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 
 		switch {
 		case provider == choices[0]:
-			options.provider = "ec2"
+			options.provider = providerEc2
 
 		case provider == choices[1]:
-			options.provider = "kind"
+			options.provider = providerKind
 
 		case provider == choices[2]:
-			options.provider = "k8s"
+			options.provider = providerK8s
 
 		}
 	}
 
 	out["provider"] = options.provider
 	switch options.provider {
-	case "ec2":
+	case providerEc2:
 		id, _, err := input.GetAmazonCredentials()
 		if err != nil {
 			log.Info("Please set your AWS credentials using aws-cli. See https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#cli-quick-configuration")
@@ -147,7 +153,7 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		if !confirmed {
 			return errors.New("cancelled")
 		}
-	case "k8s":
+	case providerK8s:
 		if err := options.writeKubeconfig([]byte(k8sConfig)); err != nil {
 			return err
 		}
