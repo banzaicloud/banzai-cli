@@ -282,6 +282,7 @@ func getProviders() map[string]interface{} {
 							ProviderConfig: map[string]interface{}{
 								"autoScalingGroup": map[string]interface{}{
 									"instanceType": "c5.large",
+									"zones":        []string{"us-east-2a"},
 									"spotPrice":    "",
 									"size": map[string]interface{}{
 										"desired": 1,
@@ -291,6 +292,15 @@ func getProviders() map[string]interface{} {
 								},
 							},
 						},
+					},
+					Kubernetes: pipeline.CreatePkePropertiesKubernetes{
+						Version: "v1.14.2",
+						Rbac: pipeline.CreatePkePropertiesKubernetesRbac{
+							Enabled: true,
+						},
+					},
+					Cri: pipeline.CreatePkePropertiesCri{
+						Runtime: "containerd",
 					},
 				},
 			},
