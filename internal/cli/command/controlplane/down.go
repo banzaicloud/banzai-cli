@@ -74,7 +74,7 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 	}
 
 	var values map[string]interface{}
-	if err := options.readValues(values); err != nil {
+	if err := options.readValues(&values); err != nil {
 		return err
 	}
 

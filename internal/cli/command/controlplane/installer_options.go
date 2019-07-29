@@ -100,7 +100,7 @@ func (c *cpContext) readValues(out interface{}) error {
 		return emperror.Wrap(err, "failed to read values file")
 	}
 
-	return emperror.Wrap(yaml.Unmarshal(raw, &out), "failed to parse values file")
+	return emperror.Wrap(yaml.Unmarshal(raw, out), "failed to parse values file")
 }
 
 func (c *cpContext) kubeconfigPath() string {
