@@ -24,9 +24,9 @@ import (
 
 func checkPipeline(banzaiCli cli.Cli) error {
 	_, response, err := banzaiCli.Client().UsersApi.GetCurrentUser(context.Background())
-	if err != nil && response.StatusCode == http.StatusNotFound {
+	if err != nil && response != nil && response.StatusCode == http.StatusNotFound {
 		return emperror.Wrap(err, "given URL is not a Pipeline endpoint")
 	}
 
-	return nil
+	return err
 }
