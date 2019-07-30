@@ -25,7 +25,7 @@ import (
 )
 
 type destroyOptions struct {
-	cpContext
+	*cpContext
 }
 
 // NewDownCommand creates a new cobra.Command for `banzai controlplane down`.
@@ -68,7 +68,7 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 	// TODO: check if there are any clusters are created with the pipeline instance
 
 	log.Info("controlplane is being destroyed")
-	err := runInternal("destroy", options.cpContext, nil)
+	err := runInternal("destroy", *options.cpContext, nil)
 	if err != nil {
 		return emperror.Wrap(err, "control plane destroy failed")
 	}
@@ -85,7 +85,7 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 			return emperror.Wrap(err, "KIND cluster destroy failed")
 		}
 	case providerEc2:
-		if err = destroyEC2Cluster(banzaiCli, options.cpContext); err != nil {
+		if err = destroyEC2Cluster(banzaiCli, *options.cpContext); err != nil {
 			return err
 		}
 	}

@@ -61,7 +61,7 @@ func (c *cpContext) pullDockerImage() error {
 	return cmd.Run()
 }
 
-func NewContext(cmd *cobra.Command, banzaiCli cli.Cli) cpContext {
+func NewContext(cmd *cobra.Command, banzaiCli cli.Cli) *cpContext {
 	ctx := cpContext{
 		banzaiCli: banzaiCli,
 	}
@@ -70,7 +70,7 @@ func NewContext(cmd *cobra.Command, banzaiCli cli.Cli) cpContext {
 	flags.StringVar(&ctx.installerTag, "image-tag", "latest", "Tag of banzaicloud/cp-installer Docker image to use")
 	flags.BoolVar(&ctx.pullInstaller, "image-pull", true, "Pull cp-installer image even if it's present locally")
 	flags.StringVar(&ctx.workspace, "workspace", "", "Name of directory for storing the applied configuration and deployment status")
-	return ctx
+	return &ctx
 }
 
 func (c *cpContext) valuesPath() string {

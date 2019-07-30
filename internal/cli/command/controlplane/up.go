@@ -31,7 +31,7 @@ import (
 
 type createOptions struct {
 	init bool
-	initOptions
+	*initOptions
 }
 
 // NewUpCommand creates a new cobra.Command for `banzai pipeline up`.
@@ -76,7 +76,7 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 			}
 		}
 		if options.init {
-			if err := runInit(options.initOptions, banzaiCli); err != nil {
+			if err := runInit(*options.initOptions, banzaiCli); err != nil {
 				return err
 			}
 		} else {
@@ -94,13 +94,13 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 	if !options.kubeconfigExists() {
 		switch values["provider"] {
 		case providerKind:
-			err := ensureKINDCluster(banzaiCli, options.cpContext)
+			err := ensureKINDCluster(banzaiCli, *options.cpContext)
 			if err != nil {
 				return emperror.Wrap(err, "failed to create KIND cluster")
 			}
 
 		case providerEc2:
-			err := ensureEC2Cluster(banzaiCli, options.cpContext)
+			err := ensureEC2Cluster(banzaiCli, *options.cpContext)
 			if err != nil {
 				return emperror.Wrap(err, "failed to create EC2 cluster")
 			}
@@ -110,7 +110,7 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 	}
 
 	log.Info("Deploying Banzai Cloud Pipeline to Kubernetes cluster...")
-	return emperror.Wrap(runInternal("apply", options.cpContext, nil), "controlplane creation failed")
+	return emperror.Wrap(runInternal("apply", *options.cpContext, nil), "controlplane creation failed")
 }
 
 func runInternal(command string, options cpContext, env map[string]string) error {

@@ -36,17 +36,17 @@ const (
 type initOptions struct {
 	file     string
 	provider string
-	cpContext
+	*cpContext
 }
 
-func newInitOptions(cmd *cobra.Command, banzaiCli cli.Cli) (options initOptions) {
+func newInitOptions(cmd *cobra.Command, banzaiCli cli.Cli) *initOptions {
 	cp := NewContext(cmd, banzaiCli)
-	options = initOptions{cpContext: cp}
+	options := initOptions{cpContext: cp}
 
 	flags := cmd.Flags()
 	flags.StringVarP(&options.file, "file", "f", "", "Input Banzai Cloud Pipeline instance descriptor file")
 	flags.StringVar(&options.provider, "provider", "", "Provider of the infrastructure for the deployment (k8s|kind|ec2)")
-	return
+	return &options
 }
 
 const initLongDescription = `
@@ -73,7 +73,7 @@ func NewInitCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	options := newInitOptions(cmd, banzaiCli)
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
-		return runInit(options, banzaiCli)
+		return runInit(*options, banzaiCli)
 	}
 
 	return cmd
