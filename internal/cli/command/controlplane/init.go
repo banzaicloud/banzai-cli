@@ -106,6 +106,11 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
+	// add defaults to values in case of missing values file
+	if options.file == "" {
+		out["tlsInsecure"] = true
+	}
+
 	k8sContext, k8sConfig, err := input.GetCurrentKubecontext()
 	if err != nil {
 		k8sContext = ""
