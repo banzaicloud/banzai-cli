@@ -134,6 +134,7 @@ func runInternal(command string, options cpContext, env map[string]string) error
 		"run", "-it", "--rm",
 		"-v", fmt.Sprintf("%s:/root", options.workspace),
 		"-e", fmt.Sprintf("IS_DOCKER_FOR_MAC=%s", isDockerForMac),
+		"-e", fmt.Sprintf("KUBECONFIG=%s", "/root/"+kubeconfigFilename),
 		"--entrypoint", "/terraform/entrypoint.sh",
 	}
 
@@ -146,8 +147,8 @@ func runInternal(command string, options cpContext, env map[string]string) error
 	args = append(args,
 		fmt.Sprintf("banzaicloud/cp-installer:%s", options.installerTag),
 		command,
-		"-state=/tfstate/terraform.tfstate", // workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/271
-		"-parallelism=1")
+		"-state=/root/terraform.tfstate",
+		"-parallelism=1") // workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/271
 
 	log.Info("docker ", strings.Join(args, " "))
 
