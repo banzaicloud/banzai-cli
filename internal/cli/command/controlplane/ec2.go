@@ -51,7 +51,7 @@ func ensureEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string) err
 	host := strings.Trim(string(hostBytes), "\n")
 
 	log.Infof("retrieve kubernetes config from cluster %q", host)
-	cmd := exec.Command("ssh", "-l", "centos", "-i", filepath.Join(options.workspace, idRsa), host, "sudo", "cat", "/etc/kubernetes/admin.conf")
+	cmd := exec.Command("ssh", "-oStrictHostKeyChecking=no", "-l", "centos", "-i", filepath.Join(options.workspace, idRsa), host, "sudo", "cat", "/etc/kubernetes/admin.conf")
 	cmd.Stderr = os.Stderr
 	config, err := cmd.Output()
 	if err != nil {

@@ -116,7 +116,14 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 	}
 
 	log.Info("Deploying Banzai Cloud Pipeline to Kubernetes cluster...")
-	return emperror.Wrap(runInternal("apply", *options.cpContext, env), "controlplane creation failed")
+	if err := runInternal("apply", *options.cpContext, env); err != nil {
+		return emperror.Wrap(err, "controlplane creation failed")
+	}
+
+	fmt.Fprintln(os.Stderr, "\nPipeline is ready, now you can login with: \x1b[1mbanzai login\x1b[0m")
+	// TODO add --endpoint to example command
+	return nil
+
 }
 
 func runInternal(command string, options cpContext, env map[string]string) error {
@@ -176,10 +183,5 @@ func runInstaller(command []string, options cpContext, env map[string]string) er
 	cmd.Stderr = os.Stderr
 
 	err = cmd.Run()
-	if err == nil {
-		println("\nPipeline is ready, now you can login with: \x1b[1mbanzai login\x1b[0m")
-		// TODO add --endpoint to example command
-	}
-
 	return err
 }
