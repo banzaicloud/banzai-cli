@@ -60,14 +60,3 @@ func ensureEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string) err
 
 	return options.writeKubeconfig(config)
 }
-
-func destroyEC2Cluster(_ cli.Cli, options cpContext) error {
-	_, creds, err := input.GetAmazonCredentials()
-	if err != nil {
-		return emperror.Wrap(err, "failed to get AWS credentials")
-	}
-
-	log.Info("Destroying Kubernetes cluster on AWS...")
-	err = runInternal("destroy-infra", options, creds)
-	return emperror.Wrap(err, "failed to destroy AWS infrastructure")
-}

@@ -18,6 +18,7 @@ import (
 	"errors"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/goph/emperror"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -48,6 +49,14 @@ func NewDownCommand(banzaiCli cli.Cli) *cobra.Command {
 }
 
 func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
+	if err := options.Init(); err != nil {
+		return err
+	}
+
+	var values map[string]interface{}
+	if err := options.readValues(&values); err != nil {
+		return err
+	}
 
 	if banzaiCli.Interactive() {
 		var destroy bool
@@ -67,15 +76,20 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 
 	// TODO: check if there are any clusters are created with the pipeline instance
 
-	log.Info("controlplane is being destroyed")
-	err := runInternal("destroy", *options.cpContext, nil)
-	if err != nil {
-		return emperror.Wrap(err, "control plane destroy failed")
+	var env map[string]string
+	switch values["provider"] {
+	case providerEc2:
+		_, creds, err := input.GetAmazonCredentials()
+		if err != nil {
+			return emperror.Wrap(err, "failed to get AWS credentials")
+		}
+		env = creds
 	}
 
-	var values map[string]interface{}
-	if err := options.readValues(&values); err != nil {
-		return err
+	log.Info("controlplane is being destroyed")
+	err := runInternal("destroy", *options.cpContext, env)
+	if err != nil {
+		return emperror.Wrap(err, "control plane destroy failed")
 	}
 
 	switch values["provider"] {
@@ -83,10 +97,6 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 		err = deleteKINDCluster(banzaiCli)
 		if err != nil {
 			return emperror.Wrap(err, "KIND cluster destroy failed")
-		}
-	case providerEc2:
-		if err = destroyEC2Cluster(banzaiCli, *options.cpContext); err != nil {
-			return err
 		}
 	}
 
