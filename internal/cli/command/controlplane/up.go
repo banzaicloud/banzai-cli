@@ -135,6 +135,7 @@ func runInternal(command string, options cpContext, env map[string]string) error
 		"-v", fmt.Sprintf("%s:/root", options.workspace),
 		"-e", fmt.Sprintf("IS_DOCKER_FOR_MAC=%s", isDockerForMac),
 		"-e", fmt.Sprintf("KUBECONFIG=%s", "/root/"+kubeconfigFilename),
+		"-e", fmt.Sprintf("VALUES_FILE=%s", "/root/"+valuesFilename),
 		"--entrypoint", "/terraform/entrypoint.sh",
 	}
 
