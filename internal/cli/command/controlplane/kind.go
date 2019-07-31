@@ -90,6 +90,9 @@ func downloadKIND(banzaiCli cli.Cli) error {
 }
 
 func ensureKINDCluster(banzaiCli cli.Cli, options cpContext) error {
+	if options.kubeconfigExists() {
+		return nil
+	}
 
 	if !isKINDInstalled(banzaiCli) {
 		log.Info("KIND binary (kind) is not available in $PATH, downloading it...")

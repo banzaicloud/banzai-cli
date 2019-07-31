@@ -27,6 +27,7 @@ import (
 	"gopkg.in/AlecAivazis/survey.v1"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 )
 
 type createOptions struct {
@@ -91,29 +92,46 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 		return err
 	}
 
-	if !options.kubeconfigExists() {
-		switch values["provider"] {
-		case providerKind:
-			err := ensureKINDCluster(banzaiCli, *options.cpContext)
-			if err != nil {
-				return emperror.Wrap(err, "failed to create KIND cluster")
-			}
+	var env map[string]string
+	switch values["provider"] {
+	case providerKind:
+		err := ensureKINDCluster(banzaiCli, *options.cpContext)
+		if err != nil {
+			return emperror.Wrap(err, "failed to create KIND cluster")
+		}
 
-		case providerEc2:
-			err := ensureEC2Cluster(banzaiCli, *options.cpContext)
-			if err != nil {
-				return emperror.Wrap(err, "failed to create EC2 cluster")
-			}
-		default:
+	case providerEc2:
+		_, creds, err := input.GetAmazonCredentials()
+		if err != nil {
+			return emperror.Wrap(err, "failed to get AWS credentials")
+		}
+		if err := ensureEC2Cluster(banzaiCli, *options.cpContext, creds); err != nil {
+			return emperror.Wrap(err, "failed to create EC2 cluster")
+		}
+		env = creds
+	default:
+		if !options.kubeconfigExists() {
 			return errors.New("could not find Kubeconfig in workspace")
 		}
 	}
 
 	log.Info("Deploying Banzai Cloud Pipeline to Kubernetes cluster...")
-	return emperror.Wrap(runInternal("apply", *options.cpContext, nil), "controlplane creation failed")
+	return emperror.Wrap(runInternal("apply", *options.cpContext, env), "controlplane creation failed")
 }
 
 func runInternal(command string, options cpContext, env map[string]string) error {
+	cmdEnv := map[string]string{"KUBECONFIG": "/root/" + kubeconfigFilename}
+	for k, v := range env {
+		cmdEnv[k] = v
+	}
+
+	cmd := []string{"/terraform/entrypoint.sh",
+		command,
+		"-parallelism=1"} // workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/271
+	return runInstaller(cmd, options, cmdEnv)
+}
+
+func runInstaller(command []string, options cpContext, env map[string]string) error {
 
 	infoCmd := exec.Command("docker", "info", "-f", "{{or (eq .OperatingSystem \"Docker Desktop\") (eq .OperatingSystem \"Docker for Mac\")}}")
 
@@ -134,9 +152,7 @@ func runInternal(command string, options cpContext, env map[string]string) error
 		"run", "-it", "--rm",
 		"-v", fmt.Sprintf("%s:/root", options.workspace),
 		"-e", fmt.Sprintf("IS_DOCKER_FOR_MAC=%s", isDockerForMac),
-		"-e", fmt.Sprintf("KUBECONFIG=%s", "/root/"+kubeconfigFilename),
 		"-e", fmt.Sprintf("VALUES_FILE=%s", "/root/"+valuesFilename),
-		"--entrypoint", "/terraform/entrypoint.sh",
 	}
 
 	envs := os.Environ()
@@ -145,11 +161,10 @@ func runInternal(command string, options cpContext, env map[string]string) error
 		envs = append(envs, fmt.Sprintf("%s=%s", key, value))
 	}
 
-	args = append(args,
-		fmt.Sprintf("banzaicloud/cp-installer:%s", options.installerTag),
-		command,
-		"-state=/root/terraform.tfstate",
-		"-parallelism=1") // workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/271
+	args = append(append(append(args,
+		fmt.Sprintf("banzaicloud/cp-installer:%s", options.installerTag)),
+		command...),
+		"-state=/root/terraform.tfstate")
 
 	log.Info("docker ", strings.Join(args, " "))
 

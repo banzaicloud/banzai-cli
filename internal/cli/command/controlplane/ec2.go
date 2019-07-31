@@ -22,34 +22,36 @@ import (
 	"strings"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/goph/emperror"
 	log "github.com/sirupsen/logrus"
 )
 
-func ensureEC2Cluster(_ cli.Cli, options cpContext) error {
+func ensureEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string) error {
+
 	if options.kubeconfigExists() {
 		return nil
 	}
 
-	_, creds, err := input.GetAmazonCredentials()
-	if err != nil {
-		return emperror.Wrap(err, "failed to get AWS credentials")
-	}
-
 	log.Info("Creating Kubernetes cluster on AWS...")
-	if err := runInternal("apply-infra", options, creds); err != nil {
+	const ec2Host = "ec2-host"
+	const idRsa = "id_rsa"
+	argv := []string{"terraform", "apply",
+		"-target", "module.aws_provider",
+		"-var", "values_file=/root/" + valuesFilename,
+		"-var", "instance_host_file=/root/" + ec2Host,
+		"-var", "id_rsa_file=/root/" + idRsa}
+	if err := runInstaller(argv, options, creds); err != nil {
 		return emperror.Wrap(err, "failed to create AWS infrastructure")
 	}
 
-	hostBytes, err := ioutil.ReadFile(filepath.Join(options.workspace, "ec2-host"))
+	hostBytes, err := ioutil.ReadFile(filepath.Join(options.workspace, ec2Host))
 	if err != nil {
 		return emperror.Wrap(err, "can't read host name of EC2 instance created")
 	}
 	host := strings.Trim(string(hostBytes), "\n")
 
 	log.Infof("retrieve kubernetes config from cluster %q", host)
-	cmd := exec.Command("ssh", "-l", "centos", "-i", filepath.Join(options.workspace, ".ssh/id_rsa"), host, "sudo", "cat", "/etc/kubernetes/admin.conf")
+	cmd := exec.Command("ssh", "-l", "centos", "-i", filepath.Join(options.workspace, idRsa), host, "sudo", "cat", "/etc/kubernetes/admin.conf")
 	cmd.Stderr = os.Stderr
 	config, err := cmd.Output()
 	if err != nil {
