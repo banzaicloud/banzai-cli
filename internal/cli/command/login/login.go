@@ -25,6 +25,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gopkg.in/AlecAivazis/survey.v1"
@@ -33,10 +34,11 @@ import (
 const defaultLoginFlow = "login with browser"
 
 type loginOptions struct {
-	token     string
-	endpoint  string
-	orgName   string
-	permanent bool
+	token      string
+	endpoint   string
+	orgName    string
+	permanent  bool
+	skipVerify bool
 }
 
 // NewLoginCommand returns a cobra command for logging in.
@@ -60,8 +62,13 @@ func NewLoginCommand(banzaiCli cli.Cli) *cobra.Command {
 	flags.StringVarP(&options.endpoint, "endpoint", "e", "", "Pipeline API endpoint to save")
 	flags.StringVarP(&options.orgName, "organization", "", "", "Name of the organization to select as default")
 	flags.BoolVarP(&options.permanent, "permanent", "", false, "Create permanent token (interactive login flow only)")
+	flags.BoolVar(&options.skipVerify, "skip-verify", false, "Skip certificate verification and pin fingerprint")
 
 	return cmd
+}
+
+func Login(banzaiCli cli.Cli, endpoint, orgName string, permanent bool, skipVerify bool) error {
+	return runLogin(banzaiCli, loginOptions{endpoint: endpoint, orgName: orgName, permanent: permanent, skipVerify: skipVerify})
 }
 
 func runLogin(banzaiCli cli.Cli, options loginOptions) error {
@@ -83,6 +90,28 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 		return errors.New("Please set Pipeline endpoint with --endpoint, or run the command interactively.")
 	}
 
+	log.Debugf("checking if endpoint is available: %q", endpoint)
+	fingerprint, err := cli.CheckPipelineEndpoint(endpoint)
+	if err != nil {
+		return err
+	}
+
+	if fingerprint != "" {
+		if !options.skipVerify && banzaiCli.Interactive() {
+			_ = survey.AskOne(
+				&survey.Confirm{
+					Message: "Failed to verify server certificate. Do you want to connect anyway?",
+					Help:    fmt.Sprintf("The following certificate fingerprint will be pinned: %v", fingerprint),
+				},
+				&options.skipVerify, nil)
+		}
+		if options.skipVerify {
+			log.Warnf("Could not verify server certificate. Pinning fingerprint %s.", fingerprint)
+		} else {
+			return errors.New("Could not verify server certificate")
+		}
+	}
+
 	token := options.token
 	if token == "" {
 		if banzaiCli.Interactive() {
@@ -98,6 +127,7 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 		}
 	}
 
+	banzaiCli.Context().SetFingerprint(fingerprint)
 	sessionToken := false
 	if token == "" || token == defaultLoginFlow {
 		var err error
