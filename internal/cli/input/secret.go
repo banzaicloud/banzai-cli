@@ -58,6 +58,24 @@ func AskSecret(banzaiCli cli.Cli, orgID int32, cloud string) (string, error) {
 	return secretIds[secretName], nil
 }
 
+const AwsRegionKey = "AWS_DEFAULT_REGION"
+
+// GetAmazonCredentials extracts the local credentials from env vars and user profile while ensuring a region
+func GetAmazonCredentialsRegion(defaultRegion string) (string, map[string]string, error) {
+	id, out, err := GetAmazonCredentials()
+	if err != nil {
+		return id, out, err
+	}
+
+	if out[AwsRegionKey] == "" {
+		if defaultRegion == "" {
+			return "", nil, errors.New("no default AWS region is set")
+		}
+		out[AwsRegionKey] = defaultRegion
+	}
+	return id, out, err
+}
+
 // GetAmazonCredentials extracts the local credentials from env vars and user profile
 func GetAmazonCredentials() (string, map[string]string, error) {
 	/* create a new session, which is basically the same as the following, but may also contain a region
@@ -86,7 +104,7 @@ func GetAmazonCredentials() (string, map[string]string, error) {
 		"AWS_SECRET_ACCESS_KEY": value.SecretAccessKey,
 	}
 	if session.Config.Region != nil {
-		out["AWS_REGION"] = *session.Config.Region
+		out[AwsRegionKey] = *session.Config.Region
 	}
 
 	return value.AccessKeyID, out, nil

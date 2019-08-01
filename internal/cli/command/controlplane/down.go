@@ -79,7 +79,7 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 	var env map[string]string
 	switch values["provider"] {
 	case providerEc2:
-		_, creds, err := input.GetAmazonCredentials()
+		_, creds, err := input.GetAmazonCredentialsRegion(defaultAwsRegion)
 		if err != nil {
 			return emperror.Wrap(err, "failed to get AWS credentials")
 		}

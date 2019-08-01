@@ -101,7 +101,7 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 		}
 
 	case providerEc2:
-		_, creds, err := input.GetAmazonCredentials()
+		_, creds, err := input.GetAmazonCredentialsRegion(defaultAwsRegion)
 		if err != nil {
 			return emperror.Wrap(err, "failed to get AWS credentials")
 		}

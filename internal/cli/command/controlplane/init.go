@@ -148,10 +148,15 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	out["provider"] = options.provider
 	switch options.provider {
 	case providerEc2:
-		id, _, err := input.GetAmazonCredentials()
+		id, _, err := input.GetAmazonCredentialsRegion("")
 		if err != nil {
-			log.Info("Please set your AWS credentials using aws-cli. See https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#cli-quick-configuration")
-			return emperror.Wrap(err, "failed to use local AWS credentials")
+			id, _, err = input.GetAmazonCredentialsRegion(defaultAwsRegion)
+			if err != nil {
+				log.Info("Please set your AWS credentials using aws-cli. See https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#cli-quick-configuration")
+				return emperror.Wrap(err, "failed to use local AWS credentials")
+			} else {
+				log.Infof("Using AWS region: %q", defaultAwsRegion)
+			}
 		}
 		var confirmed bool
 		_ = survey.AskOne(&survey.Confirm{Message: fmt.Sprintf("Do you want to use the following AWS access key: %s?", id)}, &confirmed, nil)

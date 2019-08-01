@@ -26,6 +26,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const defaultAwsRegion = "us-west-1"
+
 func ensureEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string) error {
 
 	if options.kubeconfigExists() {
