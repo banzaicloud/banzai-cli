@@ -18,6 +18,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/backyards"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/bucket"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/controlplane"
@@ -38,5 +39,6 @@ func AddCommands(cmd *cobra.Command, banzaiCli cli.Cli) {
 		secret.NewSecretCommand(banzaiCli),
 		controlplane.NewControlPlaneCommand(banzaiCli),
 		bucket.NewBucketCommand(banzaiCli),
+		backyards.NewBackyardsCommand(banzaiCli),
 	)
 }
