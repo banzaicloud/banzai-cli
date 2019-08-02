@@ -102,7 +102,7 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 		}
 
 	case providerEc2:
-		_, creds, err := input.GetAmazonCredentialsRegion(defaultAwsRegion)
+		_, creds, err := input.GetAmazonCredentials()
 		if err != nil {
 			return emperror.Wrap(err, "failed to get AWS credentials")
 		}
@@ -197,10 +197,6 @@ func runInstaller(command []string, options cpContext, env map[string]string) er
 		command...),
 		"-var", "workdir=/root",
 		"-state=/root/terraform.tfstate")
-
-	if env[input.AwsRegionKey] != "" {
-		args = append(args, "-var", "aws_region="+env[input.AwsRegionKey])
-	}
 
 	log.Info("docker ", strings.Join(args, " "))
 

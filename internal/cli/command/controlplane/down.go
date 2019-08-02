@@ -15,11 +15,10 @@
 package controlplane
 
 import (
-	"errors"
-
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/goph/emperror"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/AlecAivazis/survey.v1"
@@ -79,9 +78,19 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 	var env map[string]string
 	switch values["provider"] {
 	case providerEc2:
-		_, creds, err := input.GetAmazonCredentialsRegion(defaultAwsRegion)
+		id, creds, err := input.GetAmazonCredentials()
 		if err != nil {
 			return emperror.Wrap(err, "failed to get AWS credentials")
+		}
+
+		if valuesConfig, ok := values["providerConfig"]; ok {
+			if valuesConfig, ok := valuesConfig.(map[string]interface{}); ok {
+				if ak := valuesConfig["accessKey"]; ak != "" {
+					if ak != id {
+						return errors.Errorf("Current AWS access key %q differs from the one used earlier: %q", ak, id)
+					}
+				}
+			}
 		}
 		env = creds
 	}

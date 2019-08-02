@@ -130,7 +130,7 @@ func (c *cpContext) addressPath() string {
 }
 
 func (c *cpContext) readAddress() (string, error) {
-	path := c.kubeconfigPath()
+	path := c.addressPath()
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return "", emperror.Wrap(err, "can't read endpoint URL")
@@ -143,7 +143,7 @@ func (c *cpContext) ec2HostPath() string {
 }
 
 func (c *cpContext) readEc2Host() (string, error) {
-	path := c.kubeconfigPath()
+	path := c.ec2HostPath()
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return "", emperror.Wrap(err, "can't read address of created EC2 instance")
