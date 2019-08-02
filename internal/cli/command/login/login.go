@@ -77,13 +77,16 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 	if options.endpoint != "" {
 		endpoint = options.endpoint
 	} else if banzaiCli.Interactive() {
-		_ = survey.AskOne(
+		err := survey.AskOne(
 			&survey.Input{
 				Message: "Pipeline endpoint:",
 				Help:    "The API endpoint to use for accessing Pipeline",
 				Default: endpoint,
 			},
 			&endpoint, survey.Required)
+		if err != nil {
+			return emperror.Wrap(err, "no endpoint selected")
+		}
 	}
 
 	if endpoint == "" {
@@ -117,13 +120,16 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 	token := options.token
 	if token == "" {
 		if banzaiCli.Interactive() {
-			_ = survey.AskOne(
+			err := survey.AskOne(
 				&survey.Input{
 					Message: "Pipeline token:",
 					Default: defaultLoginFlow,
 					Help:    fmt.Sprintf("Login through a browser flow or copy your Pipeline access token from the token field of %s/api/v1/token", endpoint),
 				},
 				&token, nil)
+			if err != nil {
+				return emperror.Wrap(err, "no token selected")
+			}
 		} else {
 			return errors.New("Please set Pipeline token with --token, or run the command interactively.")
 		}
