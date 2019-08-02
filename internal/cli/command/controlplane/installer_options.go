@@ -34,6 +34,9 @@ const (
 	workspaceKey       = "installer.workspace"
 	valuesFilename     = "values.yaml"
 	kubeconfigFilename = "Kubeconfig"
+	ec2HostFilename    = "ec2-host"
+	sshkeyFilename     = "id_rsa"
+	addressFilename    = "cp-address"
 )
 
 type cpContext struct {
@@ -116,6 +119,36 @@ func (c *cpContext) writeKubeconfig(outBytes []byte) error {
 	path := c.kubeconfigPath()
 	log.Debugf("writing kubeconfig file to %q", path)
 	return emperror.Wrap(ioutil.WriteFile(path, outBytes, 0600), "failed to write kubeconfig file")
+}
+
+func (c *cpContext) sshkeyPath() string {
+	return filepath.Join(c.workspace, sshkeyFilename)
+}
+
+func (c *cpContext) addressPath() string {
+	return filepath.Join(c.workspace, addressFilename)
+}
+
+func (c *cpContext) readAddress() (string, error) {
+	path := c.kubeconfigPath()
+	bytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "", emperror.Wrap(err, "can't read endpoint URL")
+	}
+	return strings.Trim(string(bytes), "\n"), nil
+}
+
+func (c *cpContext) ec2HostPath() string {
+	return filepath.Join(c.workspace, ec2HostFilename)
+}
+
+func (c *cpContext) readEc2Host() (string, error) {
+	path := c.kubeconfigPath()
+	bytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "", emperror.Wrap(err, "can't read address of created EC2 instance")
+	}
+	return strings.Trim(string(bytes), "\n"), nil
 }
 
 // Init completes the cp context from the options, env vars, and if possible from the user

@@ -27,6 +27,7 @@ import (
 	"gopkg.in/AlecAivazis/survey.v1"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/login"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 )
 
@@ -120,10 +121,34 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 		return emperror.Wrap(err, "controlplane creation failed")
 	}
 
-	fmt.Fprintln(os.Stderr, "\nPipeline is ready, now you can login with: \x1b[1mbanzai login\x1b[0m")
-	// TODO add --endpoint to example command
-	return nil
+	url, err := options.readAddress()
+	if err != nil {
+		return emperror.Wrap(err, "can't read host name of EC2 instance created")
+	}
+	url += "pipeline"
 
+	log.Infof("Pipeline is ready at %s.", url)
+
+	var loginNow bool
+	if banzaiCli.Interactive() {
+		if err := survey.AskOne(
+			&survey.Confirm{
+				Message: "Do you want to login now?",
+				Default: true,
+			},
+			&loginNow,
+			nil,
+		); err != nil {
+			loginNow = false
+		}
+	}
+
+	if loginNow {
+		return login.Login(banzaiCli, url, "", true, false)
+	} else {
+		log.Infof("Pipeline is ready, now you can login with: \x1b[1mbanzai login --endpoint=%q\x1b[0m", url)
+	}
+	return nil
 }
 
 func runInternal(command string, options cpContext, env map[string]string) error {
@@ -134,6 +159,7 @@ func runInternal(command string, options cpContext, env map[string]string) error
 
 	cmd := []string{"/terraform/entrypoint.sh",
 		command,
+		"-var", "workdir=/root",
 		"-parallelism=1"} // workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/271
 	return runInstaller(cmd, options, cmdEnv)
 }
@@ -159,7 +185,6 @@ func runInstaller(command []string, options cpContext, env map[string]string) er
 		"run", "-it", "--rm",
 		"-v", fmt.Sprintf("%s:/root", options.workspace),
 		"-e", fmt.Sprintf("IS_DOCKER_FOR_MAC=%s", isDockerForMac),
-		"-e", fmt.Sprintf("VALUES_FILE=%s", "/root/"+valuesFilename),
 	}
 
 	envs := os.Environ()

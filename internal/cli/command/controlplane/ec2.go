@@ -15,11 +15,8 @@
 package controlplane
 
 import (
-	"io/ioutil"
 	"os"
 	"os/exec"
-	"path/filepath"
-	"strings"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/goph/emperror"
@@ -35,25 +32,20 @@ func ensureEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string) err
 	}
 
 	log.Info("Creating Kubernetes cluster on AWS...")
-	const ec2Host = "ec2-host"
-	const idRsa = "id_rsa"
 	argv := []string{"terraform", "apply",
 		"-target", "module.aws_provider",
-		"-var", "values_file=/root/" + valuesFilename,
-		"-var", "instance_host_file=/root/" + ec2Host,
-		"-var", "id_rsa_file=/root/" + idRsa}
+	}
 	if err := runInstaller(argv, options, creds); err != nil {
 		return emperror.Wrap(err, "failed to create AWS infrastructure")
 	}
 
-	hostBytes, err := ioutil.ReadFile(filepath.Join(options.workspace, ec2Host))
+	host, err := options.readEc2Host()
 	if err != nil {
-		return emperror.Wrap(err, "can't read host name of EC2 instance created")
+		return err
 	}
-	host := strings.Trim(string(hostBytes), "\n")
 
 	log.Infof("retrieve kubernetes config from cluster %q", host)
-	cmd := exec.Command("ssh", "-oStrictHostKeyChecking=no", "-l", "centos", "-i", filepath.Join(options.workspace, idRsa), host, "sudo", "cat", "/etc/kubernetes/admin.conf")
+	cmd := exec.Command("ssh", "-oStrictHostKeyChecking=no", "-l", "centos", "-i", options.sshkeyPath(), host, "sudo", "cat", "/etc/kubernetes/admin.conf")
 	cmd.Stderr = os.Stderr
 	config, err := cmd.Output()
 	if err != nil {
