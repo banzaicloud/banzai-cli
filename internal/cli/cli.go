@@ -187,38 +187,46 @@ func makeFingerprintVerifier(expected []byte) func(certificates [][]byte, verifi
 			return err
 		}
 		if bytes.Compare(actual, expected) != 0 {
-			return errors.Errorf("server certificate fingerprint %x does not match %x", actual, expected)
+			return errors.Errorf("server certificate fingerprint %x does not match pinned value %x", actual, expected)
 		}
 
 		return nil
 	}
 }
 
-func isUnknownAuthorityError(err error) bool {
+// x509Error extracts the certificate validation errors from an url.Error or returns nil
+func x509Error(err error) error {
 	if err == nil {
-		return false
+		return nil
 	}
 	if err, ok := err.(*url.Error); ok {
-		if _, ok := err.Err.(x509.UnknownAuthorityError); ok {
-			return true
+		switch err.Err.(type) {
+		case x509.UnknownAuthorityError, x509.CertificateInvalidError, x509.HostnameError:
+			return err.Err
 		}
 	}
-	return false
+	return nil
 }
 
-func CheckPipelineEndpoint(endpoint string) (string, error) {
+// CheckPipelineEndpoint checks if the endpoint is a valid Pipeline endpoint.
+// It returns the server cert's sha256 fingerprint if the endpoint is valid.
+// If the endpoint is valid, but the TLS validatation failed, it returns the
+// fingerprint of the server certificate, the original x509 error, and a
+// nil-error.
+func CheckPipelineEndpoint(endpoint string) (string, error, error) {
 	parsed, err := url.Parse(endpoint)
 	if err != nil {
-		return "", emperror.Wrap(err, "failed to parse endpoint URL")
+		return "", nil, emperror.Wrap(err, "failed to parse endpoint URL")
 	}
 	parsed.Path = path.Join(parsed.Path, "version")
 	endpoint = parsed.String()
 
-	fingerprint := ""
+	var x509Err error
 	response, err := http.Get(endpoint)
 	if err != nil {
-		if !isUnknownAuthorityError(err) {
-			return "", emperror.Wrap(err, "failed to connect to Pipeline")
+		x509Err = x509Error(err)
+		if x509Err == nil {
+			return "", nil, emperror.Wrap(err, "failed to connect to Pipeline")
 		}
 
 		insecure := &http.Client{
@@ -234,30 +242,30 @@ func CheckPipelineEndpoint(endpoint string) (string, error) {
 		}
 		response, err = insecure.Get(endpoint)
 		if err != nil {
-			return "", emperror.Wrap(err, "failed to connect to Pipeline")
+			return "", nil, emperror.Wrap(err, "failed to connect to Pipeline")
 		}
 
-		if len(response.TLS.PeerCertificates) < 1 {
-			return "", errors.New("server certificate is missing")
-		}
-		hash, err := getFingerprint(response.TLS.PeerCertificates[0])
-		if err != nil {
-			return "", err
-		}
-		fingerprint = hex.EncodeToString(hash)
 	}
 
 	defer response.Body.Close()
 	if response.StatusCode != 200 {
-		return "", errors.Errorf("failed to check Pipeline version: %s", response.Status)
+		return "", nil, errors.Errorf("failed to check Pipeline version: %s", response.Status)
 	}
 
 	version, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return "", emperror.Wrap(err, "failed to check Pipeline version")
+		return "", nil, emperror.Wrap(err, "failed to check Pipeline version")
 	}
 	log.Debugf("Pipeline version: %q", string(version))
-	return fingerprint, nil
+
+	if len(response.TLS.PeerCertificates) < 1 {
+		return "", nil, errors.New("server certificate is missing")
+	}
+	hash, err := getFingerprint(response.TLS.PeerCertificates[0])
+	if err != nil {
+		return "", nil, err
+	}
+	return hex.EncodeToString(hash), x509Err, nil
 }
 
 func getFingerprint(cert *x509.Certificate) ([]byte, error) {
@@ -267,11 +275,7 @@ func getFingerprint(cert *x509.Certificate) ([]byte, error) {
 		return nil, errors.Errorf("server's certificate contains an unsupported type of public key: %T", cert.PublicKey)
 	}
 
-	der, err := x509.MarshalPKIXPublicKey(cert.PublicKey)
-	if err != nil {
-		return nil, emperror.Wrapf(err, "failed to parse server certificate")
-	}
-	hash := sha256.Sum256(der)
+	hash := sha256.Sum256(cert.Raw)
 	log.Debugf("server certificate Subject: %q, SHA256 hash: %x", cert.Subject, hash)
 	return hash[0:], nil
 }

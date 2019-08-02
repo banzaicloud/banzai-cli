@@ -91,25 +91,27 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 	}
 
 	log.Debugf("checking if endpoint is available: %q", endpoint)
-	fingerprint, err := cli.CheckPipelineEndpoint(endpoint)
+	fingerprint, x509Err, err := cli.CheckPipelineEndpoint(endpoint)
 	if err != nil {
 		return err
 	}
 
-	if fingerprint != "" {
+	if x509Err != nil {
 		if !options.skipVerify && banzaiCli.Interactive() {
 			_ = survey.AskOne(
 				&survey.Confirm{
-					Message: "Failed to verify server certificate. Do you want to connect anyway?",
+					Message: fmt.Sprintf("Failed to verify server certificate: %v. Do you want to connect anyway?", x509Err),
 					Help:    fmt.Sprintf("The following certificate fingerprint will be pinned: %v", fingerprint),
 				},
 				&options.skipVerify, nil)
 		}
 		if options.skipVerify {
-			log.Warnf("Could not verify server certificate. Pinning fingerprint %s.", fingerprint)
+			log.Warnf("Could not verify server certificate: %v. Pinning certificate fingerprint %s.", x509Err, fingerprint)
 		} else {
-			return errors.New("Could not verify server certificate")
+			return emperror.Wrap(x509Err, "could not verify server certificate")
 		}
+	} else {
+		fingerprint = "" // don't pin valid certificates. TODO: make this an option
 	}
 
 	token := options.token
