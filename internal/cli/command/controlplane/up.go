@@ -159,7 +159,6 @@ func runInternal(command string, options cpContext, env map[string]string) error
 
 	cmd := []string{"/terraform/entrypoint.sh",
 		command,
-		"-var", "workdir=/root",
 		"-parallelism=1"} // workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/271
 	return runInstaller(cmd, options, cmdEnv)
 }
@@ -196,7 +195,12 @@ func runInstaller(command []string, options cpContext, env map[string]string) er
 	args = append(append(append(args,
 		fmt.Sprintf("banzaicloud/cp-installer:%s", options.installerTag)),
 		command...),
+		"-var", "workdir=/root",
 		"-state=/root/terraform.tfstate")
+
+	if env[input.AwsRegionKey] != "" {
+		args = append(args, "-var", "aws_region="+env[input.AwsRegionKey])
+	}
 
 	log.Info("docker ", strings.Join(args, " "))
 
