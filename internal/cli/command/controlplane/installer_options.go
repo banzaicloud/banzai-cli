@@ -130,6 +130,10 @@ func (c *cpContext) writeKubeconfig(outBytes []byte) error {
 	return emperror.Wrap(ioutil.WriteFile(path, outBytes, 0600), "failed to write kubeconfig file")
 }
 
+func (c *cpContext) deleteKubeconfig() error {
+	return os.Remove(c.kubeconfigPath())
+}
+
 func (c *cpContext) sshkeyPath() string {
 	return filepath.Join(c.workspace, sshkeyFilename)
 }

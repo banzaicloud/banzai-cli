@@ -103,10 +103,17 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 			return emperror.Wrap(err, "EC2 cluster destroy failed")
 		}
 
+		if err := options.deleteKubeconfig(); err != nil {
+			return emperror.Wrap(err, "failed to remove Kubeconfig")
+		}
+
 	case providerKind:
-		err := deleteKINDCluster(banzaiCli)
-		if err != nil {
+		if err := deleteKINDCluster(banzaiCli); err != nil {
 			return emperror.Wrap(err, "KIND cluster destroy failed")
+		}
+
+		if err := options.deleteKubeconfig(); err != nil {
+			return emperror.Wrap(err, "failed to remove Kubeconfig")
 		}
 	default:
 		err := runInternal("destroy", *options.cpContext, env)
