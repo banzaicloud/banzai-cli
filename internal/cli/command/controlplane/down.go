@@ -15,6 +15,9 @@
 package controlplane
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/goph/emperror"
@@ -75,6 +78,7 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 
 	// TODO: check if there are any clusters are created with the pipeline instance
 
+	log.Info("controlplane is being destroyed")
 	var env map[string]string
 	switch values["provider"] {
 	case providerEc2:
@@ -93,20 +97,32 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 			}
 		}
 		env = creds
-	}
 
-	log.Info("controlplane is being destroyed")
-	err := runInternal("destroy", *options.cpContext, env)
-	if err != nil {
-		return emperror.Wrap(err, "control plane destroy failed")
-	}
+		err = deleteEC2Cluster(banzaiCli, *options.cpContext, env)
 
-	switch values["provider"] {
+		if err != nil {
+			return emperror.Wrap(err, "EC2 cluster destroy failed")
+		}
+
+		return nil
+
 	case providerKind:
-		err = deleteKINDCluster(banzaiCli)
+		err := deleteKINDCluster(banzaiCli)
 		if err != nil {
 			return emperror.Wrap(err, "KIND cluster destroy failed")
 		}
+	default:
+		err := runInternal("destroy", *options.cpContext, env)
+		if err != nil {
+			return emperror.Wrap(err, "control plane destroy failed")
+		}
+		return nil
+	}
+
+	err := os.Remove(fmt.Sprintf("%s/terraform.tfstate", options.workspace))
+
+	if err != nil {
+		return emperror.Wrap(err, "remove state file failed")
 	}
 
 	return nil

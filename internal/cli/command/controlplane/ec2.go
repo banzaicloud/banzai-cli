@@ -54,3 +54,18 @@ func ensureEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string) err
 
 	return options.writeKubeconfig(config)
 }
+
+func deleteEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string) error {
+
+	log.Info("Deleting Kubernetes cluster on AWS...")
+	argv := []string{"terraform", "destroy",
+		"-target", "module.aws_provider",
+	}
+
+	if err := runInstaller(argv, options, creds); err != nil {
+		return emperror.Wrap(err, "failed to delete AWS infrastructure")
+	}
+
+	return nil
+}
+
