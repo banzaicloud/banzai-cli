@@ -33,6 +33,11 @@ func AskOrganization(banzaiCli cli.Cli) int32 {
 		log.Fatalf("could not list organizations: %v", err)
 	}
 
+	if len(orgs) == 1 {
+		log.Printf("selecting organization %q", orgs[0].Name)
+		return orgs[0].Id
+	}
+
 	orgSelection := make([]string, len(orgs))
 	orgResultMap := make(map[string]int32, len(orgs))
 	for i, org := range orgs {
@@ -43,7 +48,7 @@ func AskOrganization(banzaiCli cli.Cli) int32 {
 	var name string
 	err = survey.AskOne(&survey.Select{Message: "Organization:", Options: orgSelection}, &name, survey.Required)
 	if err != nil {
-		log.Fatalf("could choose an organization organizations: %v", err)
+		log.Printf("could not choose an organization: %v", err)
 	}
 
 	return orgResultMap[name]

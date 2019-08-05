@@ -15,21 +15,17 @@
 package controlplane
 
 import (
-	"errors"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
+	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/goph/emperror"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 type destroyOptions struct {
-	controlPlaneInstallerOptions
+	*cpContext
 }
 
 // NewDownCommand creates a new cobra.Command for `banzai controlplane down`.
@@ -42,20 +38,29 @@ func NewDownCommand(banzaiCli cli.Cli) *cobra.Command {
 		Long:  "Destroy a controlplane based on json stdin or interactive session",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceErrors = true
+			cmd.SilenceUsage = true
+
 			return runDestroy(options, banzaiCli)
 		},
 	}
 
-	flags := cmd.Flags()
-
-	bindInstallerFlags(flags, &options.controlPlaneInstallerOptions)
+	options.cpContext = NewContext(cmd, banzaiCli)
 
 	return cmd
 }
 
 func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
+	if err := options.Init(); err != nil {
+		return err
+	}
 
-	if isInteractive() {
+	var values map[string]interface{}
+	if err := options.readValues(&values); err != nil {
+		return err
+	}
+
+	if banzaiCli.Interactive() {
 		var destroy bool
 		_ = survey.AskOne(
 			&survey.Confirm{
@@ -71,55 +76,54 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
-	// create temp dir for the files to attach
-	dir, err := ioutil.TempDir(".", "tmp")
-	if err != nil {
-		return emperror.Wrapf(err, "failed to create temporary directory")
-	}
-	defer os.RemoveAll(dir)
-
-	kubeconfigName, err := filepath.Abs(filepath.Join(dir, "kubeconfig"))
-	if err != nil {
-		return emperror.Wrap(err, "failed to construct kubeconfig file name")
-	}
-
-	valuesName, err := filepath.Abs(valuesDefault)
-	if err != nil {
-		return emperror.Wrap(err, "failed to construct values file name")
-	}
-
-	var values map[string]interface{}
-	rawValues, err := ioutil.ReadFile(valuesName)
-	if err != nil {
-		return emperror.Wrap(err, "failed to read control plane descriptor")
-	}
-
-	if err := utils.Unmarshal(rawValues, &values); err != nil {
-		return emperror.Wrap(err, "failed to parse control plane descriptor")
-	}
-
-	kindCluster := isKINDClusterRequested(values)
-
-	if err := copyKubeconfig(banzaiCli, kubeconfigName, kindCluster); err != nil {
-		return emperror.Wrap(err, "failed to copy Kubeconfig")
-	}
-
-	tfdir, err := filepath.Abs("./.tfstate")
-	if err != nil {
-		return emperror.Wrap(err, "failed to construct tfstate directory path")
-	}
+	// TODO: check if there are any clusters are created with the pipeline instance
 
 	log.Info("controlplane is being destroyed")
-	err = runInternal("destroy", valuesName, kubeconfigName, tfdir, options.controlPlaneInstallerOptions)
-	if err != nil {
-		return emperror.Wrap(err, "control plane destroy failed")
-	}
-
-	if kindCluster {
-		err = deleteKINDCluster(banzaiCli)
+	var env map[string]string
+	switch values["provider"] {
+	case providerEc2:
+		id, creds, err := input.GetAmazonCredentials()
 		if err != nil {
+			return emperror.Wrap(err, "failed to get AWS credentials")
+		}
+
+		if valuesConfig, ok := values["providerConfig"]; ok {
+			if valuesConfig, ok := valuesConfig.(map[string]interface{}); ok {
+				if ak := valuesConfig["accessKey"]; ak != "" {
+					if ak != id {
+						return errors.Errorf("Current AWS access key %q differs from the one used earlier: %q", ak, id)
+					}
+				}
+			}
+		}
+		env = creds
+
+		err = deleteEC2Cluster(banzaiCli, *options.cpContext, env)
+		if err != nil {
+			return emperror.Wrap(err, "EC2 cluster destroy failed")
+		}
+
+		if err := options.deleteKubeconfig(); err != nil {
+			return emperror.Wrap(err, "failed to remove Kubeconfig")
+		}
+
+	case providerKind:
+		if err := deleteKINDCluster(banzaiCli); err != nil {
 			return emperror.Wrap(err, "KIND cluster destroy failed")
 		}
+
+		if err := options.deleteKubeconfig(); err != nil {
+			return emperror.Wrap(err, "failed to remove Kubeconfig")
+		}
+	default:
+		err := runInternal("destroy", *options.cpContext, env)
+		if err != nil {
+			return emperror.Wrap(err, "control plane destroy failed")
+		}
+	}
+
+	if err := options.deleteTfstate(); err != nil {
+		return emperror.Wrap(err, "failed to remove state file")
 	}
 
 	return nil

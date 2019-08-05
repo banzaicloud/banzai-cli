@@ -16,10 +16,18 @@ package input
 
 import (
 	"context"
+	"os/exec"
+	"path/filepath"
 
 	"github.com/antihax/optional"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/goph/emperror"
+	"github.com/pkg/errors"
 	"gopkg.in/AlecAivazis/survey.v1"
+	// "gopkg.in/yaml.v2" -- could not be used for kubernetes types
+	"github.com/ghodss/yaml"
+	v1 "k8s.io/client-go/tools/clientcmd/api/v1"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -48,4 +56,82 @@ func AskSecret(banzaiCli cli.Cli, orgID int32, cloud string) (string, error) {
 	}
 
 	return secretIds[secretName], nil
+}
+
+const AwsRegionKey = "AWS_DEFAULT_REGION"
+
+// GetAmazonCredentials extracts the local credentials from env vars and user profile while ensuring a region
+func GetAmazonCredentialsRegion(defaultRegion string) (string, string, map[string]string, error) {
+	id, out, err := GetAmazonCredentials()
+	if err != nil {
+		return id, "", out, err
+	}
+
+	if out[AwsRegionKey] == "" {
+		if defaultRegion == "" {
+			return "", "", nil, errors.New("no default AWS region is set")
+		}
+		out[AwsRegionKey] = defaultRegion
+	}
+	return id, out[AwsRegionKey], out, err
+}
+
+// GetAmazonCredentials extracts the local credentials from env vars and user profile
+func GetAmazonCredentials() (string, map[string]string, error) {
+	/* create a new session, which is basically the same as the following, but may also contain a region
+	creds := credentials.NewChainCredentials(
+		[]credentials.Provider{
+			&credentials.EnvProvider{},
+			&credentials.SharedCredentialsProvider{},
+		}) */
+	session, err := session.NewSession(&aws.Config{})
+	if err != nil {
+		return "", nil, err
+
+	}
+
+	value, err := session.Config.Credentials.Get()
+	if err != nil {
+		return "", nil, err
+	}
+
+	if value.SessionToken != "" {
+		return "", nil, errors.New("AWS session tokens are not supported by Banzai Cloud Pipeline")
+	}
+
+	out := map[string]string{
+		"AWS_ACCESS_KEY_ID":     value.AccessKeyID,
+		"AWS_SECRET_ACCESS_KEY": value.SecretAccessKey,
+	}
+	if session.Config.Region != nil {
+		out[AwsRegionKey] = *session.Config.Region
+	}
+
+	return value.AccessKeyID, out, nil
+}
+
+// GetCurrentKubecontext extracts the Kubernetes context selected locally
+func GetCurrentKubecontext() (string, string, error) {
+	c := exec.Command("kubectl", "config", "view", "--minify", "--raw")
+	out, err := c.Output()
+	if err != nil {
+		return "", "", emperror.Wrap(err, "failed to query current context from kubectl")
+	}
+
+	var parsed v1.Config
+	if err := yaml.Unmarshal(out, &parsed); err != nil {
+		return "", "", emperror.Wrap(err, "failed to parse local configuration")
+	}
+
+	if len(parsed.AuthInfos) != 1 {
+		return "", "", errors.New("kubernetes config doesn't contain a single user definition")
+	}
+	authConf := parsed.AuthInfos[0].AuthInfo.AuthProvider
+
+	if authConf != nil && authConf.Config["cmd-path"] != "" {
+		// TODO add support
+		return "", "", errors.Errorf("kubernetes authorization helpers (%s) are not supported", filepath.Base(authConf.Config["cmd-path"]))
+	}
+
+	return parsed.CurrentContext, string(out), nil
 }

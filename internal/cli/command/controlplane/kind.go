@@ -23,11 +23,11 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strings"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/ghodss/yaml"
 	"github.com/goph/emperror"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kind "sigs.k8s.io/kind/pkg/cluster/config/v1alpha3"
@@ -36,16 +36,7 @@ import (
 
 const version = "v0.4.0"
 const clusterName = "banzai"
-
-func isKINDClusterRequested(values map[string]interface{}) bool {
-	if provider, ok := values["provider"]; ok {
-		if providerMap, ok := provider.(map[string]interface{}); ok {
-			_, ok := providerMap["kind"]
-			return ok
-		}
-	}
-	return false
-}
+const kindCmd = "kind"
 
 func isKINDInstalled(banzaiCli cli.Cli) bool {
 	path, err := findKINDPath(banzaiCli)
@@ -53,14 +44,14 @@ func isKINDInstalled(banzaiCli cli.Cli) bool {
 }
 
 func findKINDPath(banzaiCli cli.Cli) (string, error) {
-	path, err := exec.LookPath("kind")
+	path, err := exec.LookPath(kindCmd)
 	if err == nil {
 		return path, nil
 	} else if execErr := err.(*exec.Error); execErr.Err != exec.ErrNotFound {
 		return "", err
 	}
 
-	path = filepath.Join(banzaiCli.Home(), "bin", "kind")
+	path = filepath.Join(banzaiCli.Home(), "bin", kindCmd)
 	if _, err = os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
 			return "", nil
@@ -75,7 +66,7 @@ func downloadKIND(banzaiCli cli.Cli) error {
 
 	src := fmt.Sprintf("https://github.com/kubernetes-sigs/kind/releases/download/%s/kind-%s-amd64", version, runtime.GOOS)
 
-	kindPath := filepath.Join(banzaiCli.Home(), "bin", "kind")
+	kindPath := filepath.Join(banzaiCli.Home(), "bin", kindCmd)
 
 	resp, err := http.Get(src) // #nosec
 	if err != nil {
@@ -99,23 +90,10 @@ func downloadKIND(banzaiCli cli.Cli) error {
 	return emperror.Wrap(os.Rename(tempName, kindPath), "failed to move kind binary to its final place")
 }
 
-func getKINDKubeconfig(banzaiCli cli.Cli) (string, error) {
-	kindPath, err := findKINDPath(banzaiCli)
-	if err != nil {
-		return "", err
+func ensureKINDCluster(banzaiCli cli.Cli, options cpContext) error {
+	if options.kubeconfigExists() {
+		return nil
 	}
-
-	cmd := exec.Command(kindPath, "get", "kubeconfig-path", "--name", clusterName)
-
-	kubeconfig, err := cmd.Output()
-	if err != nil {
-		return "", err
-	}
-
-	return strings.Trim(string(kubeconfig), "\n"), nil
-}
-
-func ensureKINDCluster(banzaiCli cli.Cli) error {
 
 	if !isKINDInstalled(banzaiCli) {
 		log.Info("KIND binary (kind) is not available in $PATH, downloading it...")
@@ -133,8 +111,7 @@ func ensureKINDCluster(banzaiCli cli.Cli) error {
 
 	cmd := exec.Command(kindPath, "get", "nodes", "--name", clusterName)
 	if err := cmd.Run(); err == nil {
-		log.Info("found existing KIND cluster")
-		return nil
+		return errors.Errorf("a KIND cluster named %q already exists", clusterName)
 	}
 
 	cluster := kind.Cluster{
@@ -166,8 +143,7 @@ func ensureKINDCluster(banzaiCli cli.Cli) error {
 		return emperror.Wrap(err, "failed to prepare KIND cluster config")
 	}
 
-	kindConfigFile := filepath.Join(banzaiCli.Home(), "kind-config.yaml")
-
+	kindConfigFile := filepath.Join(options.workspace, "kind-config.yaml")
 	err = ioutil.WriteFile(kindConfigFile, buff, 0600)
 	if err != nil {
 		return emperror.Wrap(err, "failed to write KIND cluster config")
@@ -183,7 +159,13 @@ func ensureKINDCluster(banzaiCli cli.Cli) error {
 		return emperror.Wrap(err, "failed to create KIND cluster")
 	}
 
-	return nil
+	cmd = exec.Command(kindPath, "get", "kubeconfig", "--name", clusterName)
+	kubeconfig, err := cmd.Output()
+	if err != nil {
+		return emperror.Wrap(err, "failed to get KIND kubeconfig")
+	}
+
+	return options.writeKubeconfig(kubeconfig)
 }
 
 func deleteKINDCluster(banzaiCli cli.Cli) error {

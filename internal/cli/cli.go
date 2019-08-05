@@ -15,15 +15,25 @@
 package cli
 
 import (
+	"bytes"
+	"crypto/ecdsa"
+	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/hex"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"sync"
+	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/banzaicloud/banzai-cli/.gen/cloudinfo"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
@@ -47,13 +57,14 @@ type Cli interface {
 	CloudinfoClient() *cloudinfo.APIClient
 	Context() Context
 	OutputFormat() string
-	Home() string
+	Home() string // Home is the path to the .banzai directory of the user
 }
 
 type Context interface {
 	OrganizationID() int32
 	SetOrganizationID(id int32)
 	SetToken(token string)
+	SetFingerprint(fingerprint string)
 }
 
 type banzaiCli struct {
@@ -124,6 +135,13 @@ func (c *banzaiCli) Client() *pipeline.APIClient {
 
 func (c *banzaiCli) HTTPTransport() *http.Transport {
 	skip := viper.GetBool("pipeline.tls-skip-verify")
+	fingerprint := viper.GetString("pipeline.tls-fingerprint")
+	fingerprintBytes, err := hex.DecodeString(fingerprint)
+	if err != nil {
+		log.Error(emperror.Wrapf(err, "invalid tls-fingerprint configuration %q", fingerprint))
+		skip = false
+	}
+
 	pemCerts := []byte(viper.GetString("pipeline.tls-ca-cert"))
 	if caFile := viper.GetString("pipeline.tls-ca-file"); len(pemCerts) == 0 && caFile != "" {
 		dat, err := ioutil.ReadFile(caFile)
@@ -135,7 +153,7 @@ func (c *banzaiCli) HTTPTransport() *http.Transport {
 	}
 
 	/* #nosec G402 */
-	if skip || len(pemCerts) > 0 {
+	if skip || len(pemCerts) > 0 || fingerprint != "" {
 		tls := &tls.Config{
 			InsecureSkipVerify: skip,
 		}
@@ -150,12 +168,129 @@ func (c *banzaiCli) HTTPTransport() *http.Transport {
 			}
 		}
 
+		if len(fingerprintBytes) != 0 {
+			tls.VerifyPeerCertificate = makeFingerprintVerifier(fingerprintBytes)
+		}
+
 		return &http.Transport{
 			TLSClientConfig: tls,
 		}
 	}
 
 	return http.DefaultTransport.(*http.Transport)
+}
+
+func makeFingerprintVerifier(expected []byte) func(certificates [][]byte, verifiedChains [][]*x509.Certificate) error {
+	return func(certificates [][]byte, verifiedChains [][]*x509.Certificate) error {
+		actual, err := getServerCertFingerprint(certificates)
+		if err != nil {
+			return err
+		}
+		if bytes.Compare(actual, expected) != 0 {
+			return errors.Errorf("server certificate fingerprint %x does not match pinned value %x", actual, expected)
+		}
+
+		return nil
+	}
+}
+
+// x509Error extracts the certificate validation errors from an url.Error or returns nil
+func x509Error(err error) error {
+	if err == nil {
+		return nil
+	}
+	if err, ok := err.(*url.Error); ok {
+		switch err.Err.(type) {
+		case x509.UnknownAuthorityError, x509.CertificateInvalidError, x509.HostnameError:
+			return err.Err
+		}
+	}
+	return nil
+}
+
+// CheckPipelineEndpoint checks if the endpoint is a valid Pipeline endpoint.
+// It returns the server cert's sha256 fingerprint if the endpoint is valid.
+// If the endpoint is valid, but the TLS validatation failed, it returns the
+// fingerprint of the server certificate, the original x509 error, and a
+// nil-error.
+func CheckPipelineEndpoint(endpoint string) (string, error, error) {
+	parsed, err := url.Parse(endpoint)
+	if err != nil {
+		return "", nil, emperror.Wrap(err, "failed to parse endpoint URL")
+	}
+	parsed.Path = path.Join(parsed.Path, "version")
+	endpoint = parsed.String()
+
+	var x509Err error
+	response, err := http.Get(endpoint) // #nosec G107
+	/* #nosec G402 */
+	if err != nil {
+		x509Err = x509Error(err)
+		if x509Err == nil {
+			return "", nil, emperror.Wrap(err, "failed to connect to Pipeline")
+		}
+
+		insecure := &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+				Proxy:           http.ProxyFromEnvironment,
+				DialContext: (&net.Dialer{
+					Timeout:   30 * time.Second,
+					KeepAlive: 30 * time.Second,
+					DualStack: true,
+				}).DialContext,
+			},
+		}
+		response, err = insecure.Get(endpoint)
+		if err != nil {
+			return "", nil, emperror.Wrap(err, "failed to connect to Pipeline")
+		}
+
+	}
+
+	defer response.Body.Close()
+	if response.StatusCode != 200 {
+		return "", nil, errors.Errorf("failed to check Pipeline version: %s", response.Status)
+	}
+
+	version, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return "", nil, emperror.Wrap(err, "failed to check Pipeline version")
+	}
+	log.Debugf("Pipeline version: %q", string(version))
+
+	if len(response.TLS.PeerCertificates) < 1 {
+		return "", nil, errors.New("server certificate is missing")
+	}
+	hash, err := getFingerprint(response.TLS.PeerCertificates[0])
+	if err != nil {
+		return "", nil, err
+	}
+	return hex.EncodeToString(hash), x509Err, nil
+}
+
+func getFingerprint(cert *x509.Certificate) ([]byte, error) {
+	switch cert.PublicKey.(type) {
+	case *rsa.PublicKey, *ecdsa.PublicKey:
+	default:
+		return nil, errors.Errorf("server's certificate contains an unsupported type of public key: %T", cert.PublicKey)
+	}
+
+	hash := sha256.Sum256(cert.Raw)
+	log.Debugf("server certificate Subject: %q, SHA256 hash: %x", cert.Subject, hash)
+	return hash[0:], nil
+}
+
+func getServerCertFingerprint(certificates [][]byte) ([]byte, error) {
+	if len(certificates) < 1 {
+		return nil, errors.New("server certificate is missing")
+	}
+	cert, err := x509.ParseCertificate(certificates[0])
+	if err != nil {
+		return nil, emperror.Wrap(err, "failed to parse certificate from server")
+	}
+
+	return getFingerprint(cert)
 }
 
 func (c *banzaiCli) CloudinfoClient() *cloudinfo.APIClient {
@@ -186,6 +321,14 @@ func (c *banzaiCli) SetOrganizationID(id int32) {
 
 func (c *banzaiCli) SetToken(token string) {
 	viper.Set("pipeline.token", token)
+
+	c.save()
+	c.clientOnce = sync.Once{}
+}
+
+func (c *banzaiCli) SetFingerprint(fingerprint string) {
+	viper.Set("pipeline.tls-fingerprint", fingerprint)
+	viper.Set("pipeline.tls-skip-verify", fingerprint != "")
 
 	c.save()
 	c.clientOnce = sync.Once{}

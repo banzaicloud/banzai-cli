@@ -25,6 +25,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gopkg.in/AlecAivazis/survey.v1"
@@ -33,10 +34,11 @@ import (
 const defaultLoginFlow = "login with browser"
 
 type loginOptions struct {
-	token     string
-	endpoint  string
-	orgName   string
-	permanent bool
+	token      string
+	endpoint   string
+	orgName    string
+	permanent  bool
+	skipVerify bool
 }
 
 // NewLoginCommand returns a cobra command for logging in.
@@ -60,8 +62,13 @@ func NewLoginCommand(banzaiCli cli.Cli) *cobra.Command {
 	flags.StringVarP(&options.endpoint, "endpoint", "e", "", "Pipeline API endpoint to save")
 	flags.StringVarP(&options.orgName, "organization", "", "", "Name of the organization to select as default")
 	flags.BoolVarP(&options.permanent, "permanent", "", false, "Create permanent token (interactive login flow only)")
+	flags.BoolVar(&options.skipVerify, "skip-verify", false, "Skip certificate verification and pin fingerprint")
 
 	return cmd
+}
+
+func Login(banzaiCli cli.Cli, endpoint, orgName string, permanent bool, skipVerify bool) error {
+	return runLogin(banzaiCli, loginOptions{endpoint: endpoint, orgName: orgName, permanent: permanent, skipVerify: skipVerify})
 }
 
 func runLogin(banzaiCli cli.Cli, options loginOptions) error {
@@ -70,34 +77,65 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 	if options.endpoint != "" {
 		endpoint = options.endpoint
 	} else if banzaiCli.Interactive() {
-		_ = survey.AskOne(
+		err := survey.AskOne(
 			&survey.Input{
 				Message: "Pipeline endpoint:",
 				Help:    "The API endpoint to use for accessing Pipeline",
 				Default: endpoint,
 			},
 			&endpoint, survey.Required)
+		if err != nil {
+			return emperror.Wrap(err, "no endpoint selected")
+		}
 	}
 
 	if endpoint == "" {
 		return errors.New("Please set Pipeline endpoint with --endpoint, or run the command interactively.")
 	}
 
+	log.Debugf("checking if endpoint is available: %q", endpoint)
+	fingerprint, x509Err, err := cli.CheckPipelineEndpoint(endpoint)
+	if err != nil {
+		return err
+	}
+
+	if x509Err != nil {
+		if !options.skipVerify && banzaiCli.Interactive() {
+			_ = survey.AskOne(
+				&survey.Confirm{
+					Message: fmt.Sprintf("Failed to verify server certificate: %v. Do you want to connect anyway?", x509Err),
+					Help:    fmt.Sprintf("The following certificate fingerprint will be pinned: %v", fingerprint),
+				},
+				&options.skipVerify, nil)
+		}
+		if options.skipVerify {
+			log.Warnf("Could not verify server certificate: %v. Pinning certificate fingerprint %s.", x509Err, fingerprint)
+		} else {
+			return emperror.Wrap(x509Err, "could not verify server certificate")
+		}
+	} else {
+		fingerprint = "" // don't pin valid certificates. TODO: make this an option
+	}
+
 	token := options.token
 	if token == "" {
 		if banzaiCli.Interactive() {
-			_ = survey.AskOne(
+			err := survey.AskOne(
 				&survey.Input{
 					Message: "Pipeline token:",
 					Default: defaultLoginFlow,
 					Help:    fmt.Sprintf("Login through a browser flow or copy your Pipeline access token from the token field of %s/api/v1/token", endpoint),
 				},
 				&token, nil)
+			if err != nil {
+				return emperror.Wrap(err, "no token selected")
+			}
 		} else {
 			return errors.New("Please set Pipeline token with --token, or run the command interactively.")
 		}
 	}
 
+	banzaiCli.Context().SetFingerprint(fingerprint)
 	sessionToken := false
 	if token == "" || token == defaultLoginFlow {
 		var err error
