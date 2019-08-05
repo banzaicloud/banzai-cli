@@ -55,7 +55,6 @@ func ensureEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string) err
 }
 
 func deleteEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string) error {
-
 	log.Info("Deleting Kubernetes cluster on AWS...")
 	argv := []string{"terraform", "destroy",
 		"-target", "module.aws_provider",
