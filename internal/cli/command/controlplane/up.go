@@ -174,6 +174,12 @@ func runInstaller(command []string, options cpContext, env map[string]string) er
 
 	isDockerForMac := strings.Trim(string(infoOuput), "\n")
 
+	isLocalhost := "false"
+
+	if isDockerForMac == "true" {
+		isLocalhost = "true"
+	}
+
 	if options.pullInstaller {
 		if err := options.pullDockerImage(); err != nil {
 			return emperror.Wrap(err, "failed to pull cp-installer")
@@ -184,6 +190,7 @@ func runInstaller(command []string, options cpContext, env map[string]string) er
 		"run", "-it", "--rm",
 		"-v", fmt.Sprintf("%s:/root", options.workspace),
 		"-e", fmt.Sprintf("IS_DOCKER_FOR_MAC=%s", isDockerForMac),
+		"-e", fmt.Sprintf("IS_LOCALHOST=%s", isLocalhost),
 	}
 
 	envs := os.Environ()
