@@ -26,7 +26,6 @@ import (
 const defaultAwsRegion = "us-west-1"
 
 func ensureEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string) error {
-
 	if options.kubeconfigExists() {
 		return nil
 	}
