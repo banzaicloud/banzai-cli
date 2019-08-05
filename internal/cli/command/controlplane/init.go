@@ -73,6 +73,9 @@ func NewInitCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	options := newInitOptions(cmd, banzaiCli)
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
+		cmd.SilenceErrors = true
+		cmd.SilenceUsage = true
+
 		return runInit(*options, banzaiCli)
 	}
 

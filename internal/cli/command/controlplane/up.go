@@ -47,6 +47,9 @@ func NewUpCommand(banzaiCli cli.Cli) *cobra.Command {
 		Long:    `Deploy or upgrade an instance of Banzai Cloud Pipeline based on a values file in the workspace, or initialize the workspace from an input file or an interactive session.` + initLongDescription,
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceErrors = true
+			cmd.SilenceUsage = true
+
 			return runUp(options, banzaiCli)
 		},
 	}

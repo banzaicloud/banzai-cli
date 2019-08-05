@@ -38,6 +38,9 @@ func NewDownCommand(banzaiCli cli.Cli) *cobra.Command {
 		Long:  "Destroy a controlplane based on json stdin or interactive session",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceErrors = true
+			cmd.SilenceUsage = true
+
 			return runDestroy(options, banzaiCli)
 		},
 	}
