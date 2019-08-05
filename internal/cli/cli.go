@@ -222,7 +222,8 @@ func CheckPipelineEndpoint(endpoint string) (string, error, error) {
 	endpoint = parsed.String()
 
 	var x509Err error
-	response, err := http.Get(endpoint)
+	response, err := http.Get(endpoint) // #nosec G107
+	/* #nosec G402 */
 	if err != nil {
 		x509Err = x509Error(err)
 		if x509Err == nil {
