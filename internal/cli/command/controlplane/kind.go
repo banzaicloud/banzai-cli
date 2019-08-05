@@ -27,6 +27,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/ghodss/yaml"
 	"github.com/goph/emperror"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kind "sigs.k8s.io/kind/pkg/cluster/config/v1alpha3"
@@ -110,8 +111,7 @@ func ensureKINDCluster(banzaiCli cli.Cli, options cpContext) error {
 
 	cmd := exec.Command(kindPath, "get", "nodes", "--name", clusterName)
 	if err := cmd.Run(); err == nil {
-		log.Info("found existing KIND cluster")
-		return nil
+		return errors.Errorf("a KIND cluster named %q already exists", clusterName)
 	}
 
 	cluster := kind.Cluster{
