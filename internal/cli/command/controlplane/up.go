@@ -191,6 +191,7 @@ func runInstaller(command []string, options cpContext, env map[string]string) er
 		"-v", fmt.Sprintf("%s:/root", options.workspace),
 		"-e", fmt.Sprintf("IS_DOCKER_FOR_MAC=%s", isDockerForMac),
 		"-e", fmt.Sprintf("IS_LOCALHOST=%s", isLocalhost),
+		"-e", fmt.Sprintf("KUBECONFIG=/root/%s", kubeconfigFilename),
 	}
 
 	envs := os.Environ()
@@ -203,7 +204,7 @@ func runInstaller(command []string, options cpContext, env map[string]string) er
 		fmt.Sprintf("banzaicloud/cp-installer:%s", options.installerTag)),
 		command...),
 		"-var", "workdir=/root",
-		"-state=/root/terraform.tfstate")
+		"-state=/root/"+tfstateFilename)
 
 	log.Info("docker ", strings.Join(args, " "))
 

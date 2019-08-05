@@ -37,6 +37,7 @@ const (
 	ec2HostFilename    = "ec2-host"
 	sshkeyFilename     = "id_rsa"
 	addressFilename    = "cp-address"
+	tfstateFilename    = "terraform.tfstate"
 )
 
 type cpContext struct {
@@ -113,6 +114,14 @@ func (c *cpContext) kubeconfigPath() string {
 func (c *cpContext) kubeconfigExists() bool {
 	_, err := os.Stat(c.kubeconfigPath())
 	return err == nil
+}
+
+func (c *cpContext) tfstatePath() string {
+	return filepath.Join(c.workspace, tfstateFilename)
+}
+
+func (c *cpContext) deleteTfstate() error {
+	return os.Remove(c.tfstatePath())
 }
 
 func (c *cpContext) writeKubeconfig(outBytes []byte) error {
