@@ -89,11 +89,18 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 		}
 	} else {
 		log.Debugf("using existing workspace %q", options.workspace)
+		if options.initOptions.file != "" {
+			return errors.New("workspace is already initialized but --file is specified")
+		}
 	}
 
 	var values map[string]interface{}
 	if err := options.readValues(&values); err != nil {
 		return err
+	}
+
+	if options.provider != "" && options.provider != values["provider"] {
+		return errors.New("workspace is already initialized but a different --provider is specified")
 	}
 
 	var env map[string]string

@@ -88,6 +88,7 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	}
 
 	if options.valuesExists() {
+		log.Info("You can create another workspace with --workspace, or run `banzai pipeline up` to deploy the current one.")
 		return errors.Errorf("workspace is already initialized in %q", options.workspace)
 	}
 
