@@ -20,6 +20,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -97,6 +98,13 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 	var values map[string]interface{}
 	if err := options.readValues(&values); err != nil {
 		return err
+	}
+
+	if uuidValue, ok := values["uuid"]; !ok {
+		if uuidString, ok := uuidValue.(string); !ok || uuidString == "" {
+			log.Infof("An uuid field that identifies the Banzai Cloud Pipeline instance to deploy is missing from the values file. You can add one with `echo 'uuid: %s' >>%q`", uuid.New().String(), options.valuesPath())
+			return errors.New("uuid field is missing from the values file")
+		}
 	}
 
 	if options.provider != "" && options.provider != values["provider"] {
