@@ -120,15 +120,30 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 	token := options.token
 	if token == "" {
 		if banzaiCli.Interactive() {
+			var browserLogin bool
 			err := survey.AskOne(
-				&survey.Input{
-					Message: "Pipeline token:",
-					Default: defaultLoginFlow,
-					Help:    fmt.Sprintf("Login through a browser flow or copy your Pipeline access token from the token field of %s/api/v1/token", endpoint),
+				&survey.Confirm{
+					Message: "Login using web browser?",
+					Help:    "The easiest login flow will open a browser window where you can log in using your credentials. Alternatively you can log in by a token.",
+					Default: true,
 				},
-				&token, nil)
+				&browserLogin, nil)
+
 			if err != nil {
-				return emperror.Wrap(err, "no token selected")
+				return err
+			}
+
+			if !browserLogin {
+				err := survey.AskOne(
+					&survey.Input{
+						Message: "Pipeline token:",
+						Default: defaultLoginFlow,
+						Help:    fmt.Sprintf("Copy your Pipeline access token from the token field of %s/api/v1/token", endpoint),
+					},
+					&token, nil)
+				if err != nil {
+					return emperror.Wrap(err, "no token selected")
+				}
 			}
 		} else {
 			return errors.New("Please set Pipeline token with --token, or run the command interactively.")

@@ -143,7 +143,7 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 	if banzaiCli.Interactive() {
 		if err := survey.AskOne(
 			&survey.Confirm{
-				Message: "Do you want to login now?",
+				Message: "Do you want to login this CLI tool now?",
 				Default: true,
 			},
 			&loginNow,
@@ -152,6 +152,8 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 			loginNow = false
 		}
 	}
+
+	log.Infof("The certificate of this environment is signed by an unknown authority by default. You can safely accept this.")
 
 	if loginNow {
 		return login.Login(banzaiCli, url, "", true, false)
