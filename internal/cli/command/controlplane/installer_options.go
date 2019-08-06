@@ -33,7 +33,7 @@ import (
 const (
 	workspaceKey       = "installer.workspace"
 	valuesFilename     = "values.yaml"
-	kubeconfigFilename = "Kubeconfig"
+	kubeconfigFilename = "kubeconfig"
 	ec2HostFilename    = "ec2-host"
 	sshkeyFilename     = "id_rsa"
 	addressFilename    = "cp-address"
