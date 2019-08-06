@@ -20,6 +20,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
+	"github.com/google/uuid"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -184,5 +185,12 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	}
 
 	out["providerConfig"] = providerConfig
+
+	if uuidValue, ok := out["uuid"]; !ok {
+		if uuidString, ok := uuidValue.(string); !ok || uuidString == "" {
+			out["uuid"] = uuid.New().String()
+		}
+	}
+
 	return options.writeValues(out)
 }
