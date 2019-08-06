@@ -66,7 +66,11 @@ func downloadKIND(banzaiCli cli.Cli) error {
 
 	src := fmt.Sprintf("https://github.com/kubernetes-sigs/kind/releases/download/%s/kind-%s-amd64", version, runtime.GOOS)
 
-	kindPath := filepath.Join(banzaiCli.Home(), "bin", kindCmd)
+	binDir := filepath.Join(banzaiCli.Home(), "bin")
+	if err := os.MkdirAll(binDir, 0755); err != nil {
+		return emperror.Wrapf(err, "failed to create %q directory", binDir)
+	}
+	kindPath := filepath.Join(binDir, kindCmd)
 
 	resp, err := http.Get(src) // #nosec
 	if err != nil {
@@ -91,10 +95,6 @@ func downloadKIND(banzaiCli cli.Cli) error {
 }
 
 func ensureKINDCluster(banzaiCli cli.Cli, options cpContext) error {
-	if options.kubeconfigExists() {
-		return nil
-	}
-
 	if !isKINDInstalled(banzaiCli) {
 		log.Info("KIND binary (kind) is not available in $PATH, downloading it...")
 		err := downloadKIND(banzaiCli)
@@ -111,6 +111,10 @@ func ensureKINDCluster(banzaiCli cli.Cli, options cpContext) error {
 
 	cmd := exec.Command(kindPath, "get", "nodes", "--name", clusterName)
 	if err := cmd.Run(); err == nil {
+		if options.kubeconfigExists() {
+			return nil
+		}
+
 		return errors.Errorf("a KIND cluster named %q already exists", clusterName)
 	}
 
