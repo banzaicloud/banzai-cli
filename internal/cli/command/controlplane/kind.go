@@ -44,15 +44,8 @@ func isKINDInstalled(banzaiCli cli.Cli) bool {
 }
 
 func findKINDPath(banzaiCli cli.Cli) (string, error) {
-	path, err := exec.LookPath(kindCmd)
-	if err == nil {
-		return path, nil
-	} else if execErr := err.(*exec.Error); execErr.Err != exec.ErrNotFound {
-		return "", err
-	}
-
-	path = filepath.Join(banzaiCli.Home(), "bin", kindCmd)
-	if _, err = os.Stat(path); err != nil {
+	path := filepath.Join(banzaiCli.Home(), "bin", kindCmd)
+	if _, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
 			return "", nil
 		}
