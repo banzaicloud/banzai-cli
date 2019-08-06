@@ -122,6 +122,12 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		log.Debugf("won't use local kubernetes context: %v", err)
 	}
 
+	if provider, ok := out["provider"]; ok {
+		if providerStr, ok := provider.(string); ok {
+			options.provider = providerStr
+		}
+	}
+
 	if options.provider == "" {
 		if !banzaiCli.Interactive() {
 			return errors.New("please select provider (--provider or provider field of values file)")
