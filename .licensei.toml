@@ -23,4 +23,15 @@ ignored = [
     "google.golang.org/api",
     "sigs.k8s.io/yaml",
     "go.opencensus.io",
+
+    # Backyards deps
+    "gomodules.xyz/jsonpatch/v2", # Apache 2.0
+    "gopkg.in/fsnotify.v1", # BSD 3-Clause
+    "istio.io/operator", # Apache 2
+    "istio.io/pkg", # Apache 2
+    "go.uber.org/atomic", # MIT
+    "go.uber.org/multierr", # MIT
+    "go.uber.org/zap", # MIT
+    "emperror.dev/handler/logrus", # MIT
+    "emperror.dev/errors", # MIT
 ]
