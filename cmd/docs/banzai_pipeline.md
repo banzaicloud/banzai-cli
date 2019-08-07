@@ -1,15 +1,15 @@
-## banzai cluster
+## banzai pipeline
 
-Manage clusters
+Manage deployment of Banzai Cloud Pipeline instances
 
 ### Synopsis
 
-Manage clusters
+Manage deployment of Banzai Cloud Pipeline instances
 
 ### Options
 
 ```
-  -h, --help   help for cluster
+  -h, --help   help for pipeline
 ```
 
 ### Options inherited from parent commands
@@ -28,11 +28,7 @@ Manage clusters
 ### SEE ALSO
 
 * [banzai](banzai.md)	 - A command line client for the Banzai Cloud Pipeline platform.
-* [banzai cluster create](banzai_cluster_create.md)	 - Create a cluster
-* [banzai cluster delete](banzai_cluster_delete.md)	 - Delete a cluster
-* [banzai cluster feature](banzai_cluster_feature.md)	 - Manage cluster features
-* [banzai cluster get](banzai_cluster_get.md)	 - Get cluster details
-* [banzai cluster import](banzai_cluster_import.md)	 - Import an existing cluster (EXPERIMENTAL)
-* [banzai cluster list](banzai_cluster_list.md)	 - List clusters
-* [banzai cluster shell](banzai_cluster_shell.md)	 - Start a shell or run a command with the cluster configured as kubectl context
+* [banzai pipeline down](banzai_pipeline_down.md)	 - Destroy the controlplane
+* [banzai pipeline init](banzai_pipeline_init.md)	 - Initialize configuration for Banzai Cloud Pipeline
+* [banzai pipeline up](banzai_pipeline_up.md)	 - Deploy Banzai Cloud Pipeline
 

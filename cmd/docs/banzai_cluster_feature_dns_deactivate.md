@@ -1,21 +1,21 @@
-## banzai controlplane down
+## banzai cluster feature dns deactivate
 
-Destroy the controlplane
+Deactivate the DNS feature of a cluster
 
 ### Synopsis
 
-Destroy a controlplane based on json stdin or interactive session
+Deactivate the DNS feature of a cluster
 
 ```
-banzai controlplane down [flags]
+banzai cluster feature dns deactivate [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help               help for down
-      --image-pull         Pull cp-installer image even if it's present locally (default true)
-      --image-tag string   Tag of banzaicloud/cp-installer Docker image to use (default "latest")
+      --cluster int32         ID of cluster to deactivate DNS cluster feature of
+      --cluster-name string   Name of cluster to deactivate DNS cluster feature of
+  -h, --help                  help for deactivate
 ```
 
 ### Options inherited from parent commands
@@ -33,5 +33,5 @@ banzai controlplane down [flags]
 
 ### SEE ALSO
 
-* [banzai controlplane](banzai_controlplane.md)	 - Manage controlplane
+* [banzai cluster feature dns](banzai_cluster_feature_dns.md)	 - Manage cluster DNS feature
 

@@ -23,7 +23,7 @@ import (
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster"
+	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
@@ -36,7 +36,7 @@ type installSecretOptions struct {
 	file       string
 	secretName string
 	merge      bool
-	cluster.Context
+	clustercontext.Context
 }
 
 func NewInstallCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -74,7 +74,7 @@ func NewInstallCommand(banzaiCli cli.Cli) *cobra.Command {
 	flags.StringVarP(&options.file, "file", "f", "", "Template descriptor file")
 	flags.StringVarP(&options.secretName, "name", "n", "", "Name of the Pipeline secret to use")
 	flags.BoolVarP(&options.merge, "merge", "m", false, "Merge fields to an existing Kubernetes secret")
-	options.Context = cluster.NewClusterContext(cmd, banzaiCli, "install secret on")
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "install secret on")
 
 	return cmd
 }

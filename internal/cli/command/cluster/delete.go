@@ -20,6 +20,7 @@ import (
 	"github.com/antihax/optional"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/format"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
@@ -30,7 +31,7 @@ import (
 
 type deleteOptions struct {
 	force bool
-	Context
+	clustercontext.Context
 }
 
 func NewDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -49,7 +50,7 @@ func NewDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&options.force, "force", "f", false, "Allow non-graceful cluster deletion")
-	options.Context = NewClusterContext(cmd, banzaiCli, "delete")
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "delete")
 
 	return cmd
 }

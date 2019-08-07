@@ -1,29 +1,21 @@
-## banzai cluster import
+## banzai cluster feature
 
-Import an existing cluster (EXPERIMENTAL)
+Manage cluster features
 
 ### Synopsis
 
-This is an experimental feature. You can import an existing Kubernetes cluster into Pipeline. Some Pipeline features may not work as expected.
+Manage cluster features
 
 ```
-banzai cluster import [flags]
-```
-
-### Examples
-
-```
-banzai cluster import --name myimportedcluster --kubeconfig=kube.conf
-kubectl config view --minify --raw | banzai cluster import -n myimportedcluster
+banzai cluster feature [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help                help for import
-      --kubeconfig string   Kubeconfig file (with embed client cert/key for the user entry)
-      --magic               Import current local kubernetes context
-  -n, --name string         Name of the cluster
+      --cluster int32         ID of cluster to list features
+      --cluster-name string   Name of cluster to list features
+  -h, --help                  help for feature
 ```
 
 ### Options inherited from parent commands
@@ -42,4 +34,6 @@ kubectl config view --minify --raw | banzai cluster import -n myimportedcluster
 ### SEE ALSO
 
 * [banzai cluster](banzai_cluster.md)	 - Manage clusters
+* [banzai cluster feature dns](banzai_cluster_feature_dns.md)	 - Manage cluster DNS feature
+* [banzai cluster feature list](banzai_cluster_feature_list.md)	 - List active (and pending) features of a cluster
 

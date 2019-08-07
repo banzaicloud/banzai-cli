@@ -27,6 +27,7 @@ import (
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/goph/emperror"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -34,7 +35,7 @@ import (
 )
 
 type shellOptions struct {
-	Context
+	clustercontext.Context
 	wrapHelm bool
 }
 
@@ -69,7 +70,7 @@ func NewShellCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	cmd.Flags().BoolVar(&options.wrapHelm, "wrap-helm", true, "Wrap the helm command with a version that downloads the matching version and creates a custom helm home")
 
-	options.Context = NewClusterContext(cmd, banzaiCli, "run a shell for")
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "run a shell for")
 
 	return cmd
 }

@@ -12,31 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cluster
+package feature
 
 import (
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature"
+	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features/dns"
 	"github.com/spf13/cobra"
 )
 
-// NewClusterCommand returns a cobra command for `cluster` subcommands.
-func NewClusterCommand(banzaiCli cli.Cli) *cobra.Command {
+func NewFeatureCommand(banzaiCli cli.Cli) *cobra.Command {
+	options := listOptions{}
+
 	cmd := &cobra.Command{
-		Use:     "cluster",
-		Aliases: []string{"clusters", "c", "cl"},
-		Short:   "Manage clusters",
+		Use:     "feature",
+		Aliases: []string{"features", "feat", "ft"},
+		Short:   "Manage cluster features",
+		Args:    cobra.MaximumNArgs(1),
+		RunE: func(_ *cobra.Command, args []string) error {
+			return runList(banzaiCli, options, args)
+		},
 	}
 
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "list features")
+
 	cmd.AddCommand(
-		NewCreateCommand(banzaiCli),
-		NewDeleteCommand(banzaiCli),
-		NewGetCommand(banzaiCli),
-		NewHelmCommand(banzaiCli),
-		NewImportCommand(banzaiCli),
 		NewListCommand(banzaiCli),
-		NewShellCommand(banzaiCli),
-		feature.NewFeatureCommand(banzaiCli),
+		// NOTE: add feature commands here
+		dns.NewDNSCommand(banzaiCli),
 	)
 
 	return cmd

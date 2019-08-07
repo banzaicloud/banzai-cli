@@ -12,59 +12,71 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cluster
+package feature
 
 import (
 	"context"
 
-	pkgPipeline "github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/format"
+	"github.com/goph/emperror"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-type getOptions struct {
+type listOptions struct {
 	clustercontext.Context
 }
 
-func NewGetCommand(banzaiCli cli.Cli) *cobra.Command {
-	options := getOptions{}
+func NewListCommand(banzaiCli cli.Cli) *cobra.Command {
+	options := listOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "get [--cluster=ID | [--cluster-name=]NAME]",
-		Aliases: []string{"g", "show"},
-		Short:   "Get cluster details",
+		Use:     "list",
+		Aliases: []string{"ls"},
+		Short:   "List active (and pending) features of a cluster",
 		Args:    cobra.MaximumNArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return runGet(banzaiCli, options, args)
+		RunE: func(_ *cobra.Command, args []string) error {
+			return runList(banzaiCli, options, args)
 		},
 	}
-	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "get")
+
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "list features")
 
 	return cmd
 }
 
-func runGet(banzaiCli cli.Cli, options getOptions, args []string) error {
+func runList(banzaiCli cli.Cli, options listOptions, args []string) error {
 	pipeline := banzaiCli.Client()
 	orgId := banzaiCli.Context().OrganizationID()
 
 	if err := options.Init(args...); err != nil {
-		return err
+		return emperror.Wrap(err, "failed to initialize options")
 	}
 
-	id := options.ClusterID()
-	cluster, _, err := pipeline.ClustersApi.GetCluster(context.Background(), orgId, id)
+	clusterId := options.ClusterID()
+
+	list, resp, err := pipeline.ClusterFeaturesApi.ListClusterFeatures(context.Background(), orgId, clusterId)
 	if err != nil {
-		cli.LogAPIError("get clusters", err, orgId)
-		log.Fatalf("could not get clusters: %v", err)
+		cli.LogAPIError("list cluster features", err, resp.Request)
+		log.Fatalf("could not list cluster features: %v", err)
 	}
 
-	type details struct {
-		pkgPipeline.GetClusterStatusResponse
+	type row struct {
+		Name   string
+		Status string
 	}
-	detailed := details{GetClusterStatusResponse: cluster}
-	format.ClusterWrite(banzaiCli, detailed)
+
+	table := make([]row, 0, len(list))
+	for name, details := range list {
+		table = append(table, row{
+			Name:   name,
+			Status: details.Status,
+		})
+	}
+
+	format.ClustersFeatureWrite(banzaiCli, table)
+
 	return nil
 }
