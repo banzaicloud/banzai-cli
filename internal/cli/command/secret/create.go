@@ -22,6 +22,7 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/antihax/optional"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -31,7 +32,6 @@ import (
 	"github.com/goph/emperror"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 const (
@@ -57,10 +57,10 @@ type createSecretOptions struct {
 
 // secretFieldQuestion contains all necessary field for a secret question (any type except generic)
 type secretFieldQuestion struct {
-	input     *survey.Password
-	name      string
-	output    string
-	validator survey.Validator
+	input    *survey.Password
+	name     string
+	output   string
+	required bool
 }
 
 // NewCreateCommand returns a cobra command for `banzai create create` command
@@ -259,7 +259,7 @@ func buildInteractiveCreateSecretRequest(banzaiCli cli.Cli, options *createSecre
 	out.Type = options.secretType
 	out.Tags = options.tags
 
-	if len(options.validate) == 0 {
+	if options.validate == "" {
 		if options.secretType == TypeAmazon ||
 			options.secretType == TypeAzure ||
 			options.secretType == TypeAlibaba ||
@@ -273,7 +273,7 @@ func buildInteractiveCreateSecretRequest(banzaiCli cli.Cli, options *createSecre
 				Help:    "Pipeline can optionally try to connect to the cloud provider, and execute some basic tests.",
 				Default: true,
 			}
-			_ = survey.AskOne(prompt, &v, nil)
+			_ = survey.AskOne(prompt, &v)
 			if !v {
 				options.validate = "false"
 			}
@@ -296,7 +296,7 @@ func surveyGenericSecretType(out *pipeline.CreateSecretRequest) {
 				Message: "Key of field:",
 			},
 			&key,
-			survey.Required,
+			survey.WithValidator(survey.Required),
 		)
 
 		// ask for value
@@ -306,7 +306,7 @@ func surveyGenericSecretType(out *pipeline.CreateSecretRequest) {
 				Message: "Value of field:",
 			},
 			&value,
-			survey.Required,
+			survey.WithValidator(survey.Required),
 		)
 
 		// add to values field
@@ -317,7 +317,7 @@ func surveyGenericSecretType(out *pipeline.CreateSecretRequest) {
 		prompt := &survey.Confirm{
 			Message: "Do you want to add another key/value pair?",
 		}
-		_ = survey.AskOne(prompt, &isContinue, nil)
+		_ = survey.AskOne(prompt, &isContinue)
 		if !isContinue {
 			return
 		}
@@ -338,7 +338,10 @@ func readCreateSecretRequestFromFile(fileName string, out *pipeline.CreateSecret
 // surveySecretName starts to get secret name from the user
 func surveySecretName(options *createSecretOptions) {
 	if len(options.secretName) == 0 {
-		_ = survey.AskOne(&survey.Input{Message: "Secret name"}, &options.secretName, survey.Required)
+		_ = survey.AskOne(&survey.Input{Message: "Secret name"},
+			&options.secretName,
+			survey.WithValidator(survey.Required),
+		)
 	}
 }
 
@@ -355,7 +358,7 @@ func surveySecretType(options *createSecretOptions, allowedTypes map[string]pipe
 			Options:  typeOptions,
 			PageSize: 13,
 		}
-		_ = survey.AskOne(selectTypePrompt, &options.secretType, survey.Required)
+		_ = survey.AskOne(selectTypePrompt, &options.secretType, survey.WithValidator(survey.Required))
 	}
 }
 
@@ -369,26 +372,24 @@ func surveySecretFields(options *createSecretOptions, allowedTypes map[string]pi
 		fields := allowedSecret.Fields
 		questions := make([]secretFieldQuestion, len(fields))
 		for index, f := range fields {
-
-			// check value mandatory
-			v := survey.Required
-			if !f.Required {
-				v = nil
-			}
-
-			// create question input
 			questions[index] = secretFieldQuestion{
 				name: f.Name,
 				input: &survey.Password{
 					Message: f.Name,
 					Help:    f.Description,
 				},
-				validator: v,
+				required: f.Required,
 			}
 		}
 
 		for i, q := range questions {
-			_ = survey.AskOne(q.input, &questions[i].output, q.validator)
+			opts := []survey.AskOpt{}
+			if q.required {
+				opts = append(opts, survey.WithValidator(survey.Required))
+			}
+			if err := survey.AskOne(q.input, &questions[i].output, opts...); err != nil {
+				return emperror.Wrap(err, "failed to ask for value")
+			}
 		}
 
 		// set create secret request fields
@@ -414,7 +415,7 @@ func surveyTags(options *createSecretOptions) {
 		prompt := &survey.Confirm{
 			Message: "Do you want to add tag(s) to this secret?",
 		}
-		_ = survey.AskOne(prompt, &isTagAdd, nil)
+		_ = survey.AskOne(prompt, &isTagAdd)
 
 		if isTagAdd {
 			for {
@@ -426,7 +427,7 @@ func surveyTags(options *createSecretOptions) {
 						Help:    "Leave empty to cancel.",
 					},
 					&tag,
-					survey.Required,
+					survey.WithValidator(survey.Required),
 				)
 
 				if tag == "skip" {
@@ -480,7 +481,7 @@ func importLocalCredential(banzaiCli cli.Cli, options *createSecretOptions) (map
 			Message: fmt.Sprintf("Do you want to create the secret from your local credential (%s)?", id),
 			Help:    fmt.Sprintf("We can extract your local AWS credentials if you want."),
 		}
-		_ = survey.AskOne(prompt, &options.magic, nil)
+		_ = survey.AskOne(prompt, &options.magic)
 	}
 
 	if options.magic {

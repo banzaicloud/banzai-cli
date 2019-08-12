@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
@@ -29,7 +30,6 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 type installSecretOptions struct {
@@ -158,7 +158,6 @@ func buildInteractiveInstallSecretRequest(options installSecretOptions, out *pip
 					Help:    "Give either a relative or an absolute path to a file containing a JSON or YAML secret installation request. Leave empty to cancel.",
 				},
 				&fileName,
-				nil,
 			)
 			if fileName == "skip" || fileName == "" {
 				break

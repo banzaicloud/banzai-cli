@@ -17,12 +17,12 @@ package bucket
 import (
 	"context"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/antihax/optional"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gopkg.in/AlecAivazis/survey.v1"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -119,7 +119,7 @@ func runDelete(banzaiCli cli.Cli, o deleteBucketsOptions) error {
 		format.DetailedBucketWrite(banzaiCli, bucket, bucket.Cloud)
 
 		confirmed := false
-		survey.AskOne(&survey.Confirm{Message: "Do you want to DELETE the bucket?"}, &confirmed, nil)
+		survey.AskOne(&survey.Confirm{Message: "Do you want to DELETE the bucket?"}, &confirmed)
 		if !confirmed {
 			return errors.New("deletion cancelled")
 		}

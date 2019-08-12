@@ -20,12 +20,12 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/google/uuid"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gopkg.in/AlecAivazis/survey.v1"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/login"
@@ -76,7 +76,6 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 					Default: true,
 				},
 				&options.init,
-				nil,
 			); err != nil {
 				options.init = false
 			}
@@ -155,7 +154,6 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 				Default: true,
 			},
 			&loginNow,
-			nil,
 		); err != nil {
 			loginNow = false
 		}

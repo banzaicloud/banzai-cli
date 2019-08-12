@@ -15,9 +15,9 @@
 package input
 
 import (
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
-	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 const (
@@ -38,7 +38,7 @@ func AskCloud() (string, error) {
 		CloudProviderAzure,
 		CloudProviderGoogle,
 		CloudProviderOracle,
-	}}, &cloud, survey.Required)
+	}}, &cloud, survey.WithValidator(survey.Required))
 	if err != nil {
 		return cloud, emperror.Wrap(err, "failed to select cloud")
 	}

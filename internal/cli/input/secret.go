@@ -19,12 +19,12 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/antihax/optional"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
-	"gopkg.in/AlecAivazis/survey.v1"
 	// "gopkg.in/yaml.v2" -- could not be used for kubernetes types
 	"github.com/ghodss/yaml"
 	v1 "k8s.io/client-go/tools/clientcmd/api/v1"
@@ -50,7 +50,7 @@ func AskSecret(banzaiCli cli.Cli, orgID int32, cloud string) (string, error) {
 		secretOptions[i] = s.Name
 		secretIds[s.Name] = s.Id
 	}
-	err = survey.AskOne(&survey.Select{Message: "Secret:", Options: secretOptions}, &secretName, survey.Required)
+	err = survey.AskOne(&survey.Select{Message: "Secret:", Options: secretOptions}, &secretName, survey.WithValidator(survey.Required))
 	if err != nil {
 		return "", emperror.Wrap(err, "failed to select secret")
 	}
