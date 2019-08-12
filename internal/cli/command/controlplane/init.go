@@ -17,13 +17,12 @@ package controlplane
 import (
 	"fmt"
 
+	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	"github.com/google/uuid"
-	"github.com/goph/emperror"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -123,12 +122,12 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	if !banzaiCli.Interactive() || options.file != "" {
 		filename, raw, err := utils.ReadFileOrStdin(options.file)
 		if err != nil {
-			return emperror.Wrapf(err, "failed to read file %q", filename)
+			return errors.WrapIff(err, "failed to read file %q", filename)
 		}
 
 		err = utils.Unmarshal(raw, &out)
 		if err != nil {
-			return emperror.Wrap(err, "failed to parse descriptor")
+			return errors.WrapIf(err, "failed to parse descriptor")
 		}
 
 		if provider, ok := out["provider"].(string); ok && provider != "" {
@@ -180,7 +179,7 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 			id, region, _, err = input.GetAmazonCredentialsRegion(defaultAwsRegion)
 			if err != nil {
 				log.Info("Please set your AWS credentials using aws-cli. See https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#cli-quick-configuration")
-				return emperror.Wrap(err, "failed to use local AWS credentials")
+				return errors.WrapIf(err, "failed to use local AWS credentials")
 			} else {
 				log.Infof("Using AWS region: %q", region)
 			}

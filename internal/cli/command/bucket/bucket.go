@@ -18,9 +18,8 @@ import (
 	"context"
 	"fmt"
 
+	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/goph/emperror"
-	"github.com/pkg/errors"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -62,7 +61,7 @@ func GetManagedBuckets(banzaiCli cli.Cli, orgID int32, cloud, location string) (
 	managedBuckets, _, err := banzaiCli.Client().StorageApi.ListObjectStoreBuckets(context.Background(), orgID, &pipeline.ListObjectStoreBucketsOpts{})
 	if err != nil {
 		err = utils.ConvertError(errors.WithStack(err))
-		return nil, emperror.Wrap(err, "could not get buckets")
+		return nil, errors.WrapIf(err, "could not get buckets")
 	}
 
 	buckets := make([]Bucket, 0)
@@ -104,7 +103,7 @@ func GetManagedBucket(banzaiCli cli.Cli, orgID int32, name, cloud, location, sto
 		var selectedName string
 		err = survey.AskOne(&survey.Select{Message: getTitlesForBucketSelection(), Options: bucketSlice}, &selectedName, survey.WithValidator(survey.Required))
 		if err != nil {
-			return false, selectedBucket, emperror.Wrap(err, "failed to select bucket")
+			return false, selectedBucket, errors.WrapIf(err, "failed to select bucket")
 		}
 		selectedBucket = bucketNames[selectedName]
 	} else {

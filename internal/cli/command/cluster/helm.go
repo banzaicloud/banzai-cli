@@ -30,9 +30,8 @@ import (
 	"syscall"
 	"time"
 
+	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/goph/emperror"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	yaml "gopkg.in/yaml.v2"
@@ -60,13 +59,13 @@ func writeHelm(url, name string) error {
 
 	tgz, err := http.Get(url) // #nosec
 	if err != nil {
-		return emperror.Wrapf(err, "failed to download helm from %q", url)
+		return errors.WrapIff(err, "failed to download helm from %q", url)
 	}
 	defer tgz.Body.Close()
 
 	zr, err := gzip.NewReader(tgz.Body)
 	if err != nil {
-		return emperror.Wrap(err, "failed to uncompress helm archive")
+		return errors.WrapIf(err, "failed to uncompress helm archive")
 	}
 	defer zr.Close()
 
@@ -74,23 +73,23 @@ func writeHelm(url, name string) error {
 	for {
 		hdr, err := tr.Next()
 		if err != nil {
-			return emperror.Wrap(err, "failed to extract helm from archive")
+			return errors.WrapIf(err, "failed to extract helm from archive")
 		}
 		if filepath.Base(hdr.Name) == "helm" {
 			tempName := name + "~"
 			f, err := os.OpenFile(tempName, (os.O_WRONLY | os.O_CREATE | os.O_EXCL), 0755)
 			if err != nil {
-				return emperror.Wrap(err, "failed to create temporary file for helm binary")
+				return errors.WrapIf(err, "failed to create temporary file for helm binary")
 			}
 
 			_, err = io.Copy(f, tr)
 			f.Close()
 
 			if err != nil {
-				return emperror.Wrap(err, "failed to write helm binary")
+				return errors.WrapIf(err, "failed to write helm binary")
 			}
 
-			return emperror.Wrap(os.Rename(tempName, name), "failed to move helm binary to its final place")
+			return errors.WrapIf(os.Rename(tempName, name), "failed to move helm binary to its final place")
 		}
 	}
 }
@@ -103,7 +102,7 @@ func runHelm(banzaiCli cli.Cli, options helmOptions, args []string) error {
 
 	bindir := filepath.Join(banzaiCli.Home(), "bin")
 	if err := os.MkdirAll(bindir, 0755); err != nil {
-		return emperror.Wrapf(err, "failed to create %q directory", bindir)
+		return errors.WrapIff(err, "failed to create %q directory", bindir)
 	}
 
 	url := fmt.Sprintf("https://get.helm.sh/helm-%s-%s-amd64.tar.gz", version, runtime.GOOS)
@@ -115,7 +114,7 @@ func runHelm(banzaiCli cli.Cli, options helmOptions, args []string) error {
 			return errors.Errorf("unsupported architecture: %v", runtime.GOARCH)
 		}
 		if err := writeHelm(url, name); err != nil {
-			return emperror.Wrap(err, "failed to download helm client")
+			return errors.WrapIf(err, "failed to download helm client")
 		}
 		log.Infof("Helm %s downloaded successfully", version)
 	}
@@ -124,11 +123,11 @@ func runHelm(banzaiCli cli.Cli, options helmOptions, args []string) error {
 	helmHome := filepath.Join(banzaiCli.Home(), fmt.Sprintf("helm/org-%d", org))
 	helmRepos := filepath.Join(helmHome, "repository")
 	if err := os.MkdirAll(helmRepos, 0755); err != nil {
-		return emperror.Wrapf(err, "failed to create %q directory", bindir)
+		return errors.WrapIff(err, "failed to create %q directory", bindir)
 	}
 
 	if err := dumpRepositories(banzaiCli, helmRepos); err != nil {
-		return emperror.Wrap(err, "failed to sync Helm repositories")
+		return errors.WrapIf(err, "failed to sync Helm repositories")
 	}
 
 	env := os.Environ()
@@ -149,7 +148,7 @@ func runHelm(banzaiCli cli.Cli, options helmOptions, args []string) error {
 	}
 
 	log.Debugf("Environment: %v", envs)
-	return emperror.Wrap(syscall.Exec(name, append([]string{"helm"}, args...), env), "failed to exec helm")
+	return errors.WrapIf(syscall.Exec(name, append([]string{"helm"}, args...), env), "failed to exec helm")
 }
 
 // helmRepo is an item of the repositories config of Helm
@@ -177,12 +176,12 @@ func dumpRepositories(banzaiCli cli.Cli, reposdir string) error {
 	pipeline := banzaiCli.Client()
 	repos, _, err := pipeline.HelmApi.HelmListRepos(context.Background(), org)
 	if err != nil {
-		return emperror.Wrap(err, "failed to get list of Helm repositories")
+		return errors.WrapIf(err, "failed to get list of Helm repositories")
 	}
 
 	cachedir := filepath.Join(reposdir, "cache")
 	if err := os.MkdirAll(cachedir, 0755); err != nil {
-		return emperror.Wrap(err, "failed to create helm cache directory")
+		return errors.WrapIf(err, "failed to create helm cache directory")
 	}
 
 	config := helmRepos{ApiVersion: "v1", Repositories: make([]helmRepo, len(repos)), Generated: time.Now()}
@@ -196,7 +195,7 @@ func dumpRepositories(banzaiCli cli.Cli, reposdir string) error {
 		if _, err := os.Stat(cache); err != nil {
 			err := ioutil.WriteFile(cache, empty, 0644)
 			if err != nil {
-				return emperror.Wrap(err, "failed to write initial repository config")
+				return errors.WrapIf(err, "failed to write initial repository config")
 			}
 		}
 		config.Repositories[i] = helmRepo{Name: repo.Name, URL: repo.Url, Cache: cache}
@@ -204,17 +203,17 @@ func dumpRepositories(banzaiCli cli.Cli, reposdir string) error {
 
 	content, err := yaml.Marshal(config)
 	if err != nil {
-		return emperror.Wrap(err, "failed to marshal Helm repositories list")
+		return errors.WrapIf(err, "failed to marshal Helm repositories list")
 	}
 
-	return emperror.Wrap(ioutil.WriteFile(filename, content, 0644), "failed to write repository list")
+	return errors.WrapIf(ioutil.WriteFile(filename, content, 0644), "failed to write repository list")
 }
 
 func tillerVersion() (string, error) {
 	c := exec.Command("kubectl", "get", "deployment", "-n", "kube-system", "-o", "jsonpath={.items[0].spec.template.spec.containers[0].image}", "-l", "app=helm")
 	out, err := c.Output()
 	if err != nil {
-		return "", emperror.Wrap(err, "failed to determine version of Tiller on the cluster")
+		return "", errors.WrapIf(err, "failed to determine version of Tiller on the cluster")
 	}
 	parts := strings.Split(string(out), ":")
 	if len(parts) != 2 {

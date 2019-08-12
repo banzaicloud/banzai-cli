@@ -18,9 +18,8 @@ import (
 	"context"
 	"sort"
 
+	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/goph/emperror"
-	"github.com/pkg/errors"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
@@ -44,7 +43,7 @@ func AskLocation(banzaiCli cli.Cli, cloud string) (string, error) {
 	sort.Strings(locationOptions)
 	err = survey.AskOne(&survey.Select{Message: "Location:", Options: locationOptions}, &locationName, survey.WithValidator(survey.Required))
 	if err != nil {
-		return "", emperror.Wrap(err, "failed to select location")
+		return "", errors.WrapIf(err, "failed to select location")
 	}
 
 	return locationIDs[locationName], nil

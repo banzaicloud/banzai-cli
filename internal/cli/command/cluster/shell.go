@@ -25,10 +25,10 @@ import (
 	"strings"
 	"time"
 
+	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
-	"github.com/goph/emperror"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/ttacon/chalk"
@@ -79,17 +79,17 @@ func writeConfig(ctx context.Context, client *pipeline.APIClient, orgId, id int3
 	config, response, clusterErr := client.ClustersApi.GetClusterConfig(ctx, orgId, id)
 	if clusterErr != nil {
 		retry = response.StatusCode == 400
-		err = emperror.Wrap(clusterErr, "could not get cluster config")
+		err = errors.WrapIf(clusterErr, "could not get cluster config")
 		return
 	}
 
 	if _, err = tmpfile.Write([]byte(config.Data)); err != nil {
-		err = emperror.Wrap(err, "could not write temporary file")
+		err = errors.WrapIf(err, "could not write temporary file")
 		return
 	}
 
 	if err = tmpfile.Close(); err != nil {
-		err = emperror.Wrap(err, "could not close temporary file")
+		err = errors.WrapIf(err, "could not close temporary file")
 	}
 	return
 }
@@ -107,7 +107,7 @@ func runShell(banzaiCli cli.Cli, options shellOptions, args []string) error {
 
 	tmpfile, err := ioutil.TempFile("", "kubeconfig") // mode is 0600 by default
 	if err != nil {
-		return emperror.Wrap(err, "could not write temporary file")
+		return errors.WrapIf(err, "could not write temporary file")
 	}
 	defer os.Remove(tmpfile.Name())
 
@@ -141,7 +141,7 @@ func runShell(banzaiCli cli.Cli, options shellOptions, args []string) error {
 	retry, err := writeConfig(ctx, pipeline, orgId, id, tmpfile)
 	if err != nil {
 		if !interactive || !retry {
-			return emperror.Wrap(err, "writing kubeconfig")
+			return errors.WrapIf(err, "writing kubeconfig")
 		}
 
 		go func() {
@@ -168,7 +168,7 @@ func runShell(banzaiCli cli.Cli, options shellOptions, args []string) error {
 
 	org, _, err := pipeline.OrganizationsApi.GetOrg(ctx, orgId)
 	if err != nil {
-		return emperror.Wrap(err, "could not get organization")
+		return errors.WrapIf(err, "could not get organization")
 	}
 
 	log.Printf("Running %v %v", shell, strings.Join(args, " "))
@@ -201,7 +201,7 @@ func runShell(banzaiCli cli.Cli, options shellOptions, args []string) error {
 	if options.wrapHelm {
 		bindir := filepath.Join(banzaiCli.Home(), "bin")
 		if err := os.MkdirAll(bindir, 0755); err != nil {
-			return emperror.Wrapf(err, "failed to create %q directory", bindir)
+			return errors.WrapIff(err, "failed to create %q directory", bindir)
 		}
 
 		if _, ok := envs["PATH"]; !ok {
@@ -216,7 +216,7 @@ func runShell(banzaiCli cli.Cli, options shellOptions, args []string) error {
 		if strings.Contains(cmd, "/") {
 			cmd, err = filepath.Abs(cmd)
 			if err != nil {
-				return emperror.Wrap(err, "failed to construct command for banzai cli")
+				return errors.WrapIf(err, "failed to construct command for banzai cli")
 			}
 		}
 
@@ -225,7 +225,7 @@ exec %s cluster _helm -- "$@"
 `, cmd)
 
 		if err := ioutil.WriteFile(filepath.Join(bindir, "helm"), []byte(script), 0755); err != nil {
-			return emperror.Wrap(err, "failed to write helm wrapper script")
+			return errors.WrapIf(err, "failed to write helm wrapper script")
 		}
 	}
 
@@ -236,7 +236,7 @@ exec %s cluster _helm -- "$@"
 	}
 
 	if err := c.Run(); err != nil {
-		wrapped := emperror.Wrap(err, "failed to run command")
+		wrapped := errors.WrapIf(err, "failed to run command")
 
 		if err, ok := err.(interface{ ExitCode() int }); ok {
 			log.Error(wrapped)

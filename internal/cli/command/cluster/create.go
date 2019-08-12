@@ -23,10 +23,9 @@ import (
 	"strings"
 	"time"
 
+	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/antihax/optional"
-	"github.com/goph/emperror"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -81,17 +80,17 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 	} else { // non-interactive
 		filename, raw, err := utils.ReadFileOrStdin(options.file)
 		if err != nil {
-			return emperror.WrapWith(err, "failed to read", "filename", filename)
+			return errors.WrapIfWithDetails(err, "failed to read", "filename", filename)
 		}
 
 		log.Debugf("%d bytes read", len(raw))
 
 		if err := validateClusterCreateRequest(raw); err != nil {
-			return emperror.Wrap(err, "failed to parse create cluster request")
+			return errors.WrapIf(err, "failed to parse create cluster request")
 		}
 
 		if err := utils.Unmarshal(raw, &out); err != nil {
-			return emperror.Wrap(err, "failed to unmarshal create cluster request")
+			return errors.WrapIf(err, "failed to unmarshal create cluster request")
 		}
 	}
 
@@ -99,7 +98,7 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 	cluster, _, err := banzaiCli.Client().ClustersApi.CreateCluster(context.Background(), orgID, out)
 	if err != nil {
 		cli.LogAPIError("create cluster", err, out)
-		return emperror.Wrap(err, "failed to create cluster")
+		return errors.WrapIf(err, "failed to create cluster")
 	}
 
 	log.Info("cluster is being created")
@@ -139,7 +138,7 @@ func validateClusterCreateRequest(val interface{}) error {
 	var typer struct{ Type string }
 	err := decoder.Decode(&typer)
 	if err != nil {
-		return emperror.Wrap(err, "invalid JSON request")
+		return errors.WrapIf(err, "invalid JSON request")
 	}
 
 	decoder = json.NewDecoder(strings.NewReader(str))
@@ -150,7 +149,7 @@ func validateClusterCreateRequest(val interface{}) error {
 	} else {
 		err = decoder.Decode(&pipeline.CreateClusterRequestV2{})
 	}
-	return emperror.Wrap(err, "invalid request")
+	return errors.WrapIf(err, "invalid request")
 }
 
 func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, orgID int32, out map[string]interface{}) error {
@@ -180,7 +179,7 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 			continue
 		} else {
 			if err := utils.Unmarshal(raw, &out); err != nil {
-				return emperror.Wrap(err, "failed to parse CreateClusterRequest")
+				return errors.WrapIf(err, "failed to parse CreateClusterRequest")
 			}
 
 			break
@@ -219,7 +218,7 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 	if out["type"] == "pke-on-azure" && out["resourceGroup"] == "" {
 		rgs, _, err := banzaiCli.Client().InfoApi.GetResourceGroups(context.Background(), orgID, secretID)
 		if err != nil {
-			return emperror.Wrap(err, "can't list resource groups")
+			return errors.WrapIf(err, "can't list resource groups")
 		}
 
 		var rg string
@@ -373,7 +372,7 @@ func buildDefaultRequest(out map[string]interface{}) error {
 	if provider, ok := providers[providerName]; ok {
 		marshalled, err := json.Marshal(provider)
 		if err != nil {
-			return emperror.Wrap(err, "failed to marshal request template")
+			return errors.WrapIf(err, "failed to marshal request template")
 		}
 
 		utils.Unmarshal(marshalled, &out)
@@ -389,7 +388,7 @@ func buildSecretChoice(banzaiCli cli.Cli, orgID int32, cloud string, out map[str
 
 	secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{Type_: optional.NewString(cloud)})
 	if err != nil {
-		return "", emperror.Wrap(err, "could not list secrets")
+		return "", errors.WrapIf(err, "could not list secrets")
 	}
 
 	// get ID from Name + validate
@@ -415,7 +414,7 @@ func buildSecretChoice(banzaiCli cli.Cli, orgID int32, cloud string, out map[str
 
 	var name string
 	if err = survey.AskOne(&survey.Select{Message: "Secret:", Help: "Select the secret to use for creating cloud resources", Options: secretNames}, &name, nil); err != nil {
-		return "", emperror.Wrap(err, "no secret set")
+		return "", errors.WrapIf(err, "no secret set")
 	}
 	out["secretName"] = name
 	return secretIDs[name], nil

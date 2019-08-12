@@ -18,9 +18,9 @@ import (
 	"fmt"
 	"os"
 
+	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	"github.com/ghodss/yaml"
-	"github.com/goph/emperror"
 )
 
 // ConfigFile Parsed form config file
@@ -112,12 +112,12 @@ func (f Field) validate() error {
 func readConfig(filename string) (file ConfigFile, err error) {
 	filename, raw, err := utils.ReadFileOrStdin(filename)
 	if err != nil {
-		return file, emperror.WrapWith(err, "failed to read", "filename", filename)
+		return file, errors.WrapIfWithDetails(err, "failed to read", "filename", filename)
 	}
 
 	err = yaml.Unmarshal(raw, &file)
 	if err != nil {
-		return file, emperror.Wrap(err, "invalid format")
+		return file, errors.WrapIf(err, "invalid format")
 	}
 
 	err = file.validate()

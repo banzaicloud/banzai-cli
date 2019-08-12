@@ -16,14 +16,14 @@ package secret
 
 import (
 	"context"
-	"errors"
 	"fmt"
+
+	"emperror.dev/errors"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/format"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
-	"github.com/goph/emperror"
 	"github.com/spf13/cobra"
 )
 
@@ -70,7 +70,7 @@ func runGet(banzaiCli cli.Cli, options getOptions) error {
 	if id == "" {
 		secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{})
 		if err != nil {
-			return emperror.Wrap(err, "could not list secrets")
+			return errors.WrapIf(err, "could not list secrets")
 		}
 		for _, secret := range secrets {
 			if secret.Name == options.name {
@@ -85,7 +85,7 @@ func runGet(banzaiCli cli.Cli, options getOptions) error {
 
 	secret, _, err := banzaiCli.Client().SecretsApi.GetSecret(context.Background(), orgID, id)
 	if err != nil {
-		return emperror.Wrap(err, "could not get secret")
+		return errors.WrapIf(err, "could not get secret")
 	}
 
 	if options.hide {

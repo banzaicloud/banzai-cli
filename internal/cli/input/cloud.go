@@ -15,9 +15,8 @@
 package input
 
 import (
+	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/goph/emperror"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -40,7 +39,7 @@ func AskCloud() (string, error) {
 		CloudProviderOracle,
 	}}, &cloud, survey.WithValidator(survey.Required))
 	if err != nil {
-		return cloud, emperror.Wrap(err, "failed to select cloud")
+		return cloud, errors.WrapIf(err, "failed to select cloud")
 	}
 
 	return cloud, nil

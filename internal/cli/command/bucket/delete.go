@@ -17,10 +17,9 @@ package bucket
 import (
 	"context"
 
+	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/antihax/optional"
-	"github.com/goph/emperror"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -132,7 +131,7 @@ func runDelete(banzaiCli cli.Cli, o deleteBucketsOptions) error {
 
 	_, err = banzaiCli.Client().StorageApi.DeleteObjectStoreBucket(context.Background(), orgID, bucket.Name, bucket.secretID, bucket.Cloud, &deleteOptions)
 	if err != nil {
-		return emperror.Wrap(utils.ConvertError(err), "could not delete bucket")
+		return errors.WrapIf(utils.ConvertError(err), "could not delete bucket")
 	}
 
 	log.Infof("bucket '%s' successfully deleted", bucket.Name)

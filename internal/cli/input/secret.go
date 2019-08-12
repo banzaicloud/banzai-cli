@@ -19,12 +19,12 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/antihax/optional"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/goph/emperror"
-	"github.com/pkg/errors"
+
 	// "gopkg.in/yaml.v2" -- could not be used for kubernetes types
 	"github.com/ghodss/yaml"
 	v1 "k8s.io/client-go/tools/clientcmd/api/v1"
@@ -41,7 +41,7 @@ func AskSecret(banzaiCli cli.Cli, orgID int32, cloud string) (string, error) {
 		Type_: optional.NewString(cloud),
 	})
 	if err != nil {
-		return "", emperror.Wrap(utils.ConvertError(err), "could not get secret")
+		return "", errors.WrapIf(utils.ConvertError(err), "could not get secret")
 	}
 
 	secretOptions := make([]string, len(secrets))
@@ -52,7 +52,7 @@ func AskSecret(banzaiCli cli.Cli, orgID int32, cloud string) (string, error) {
 	}
 	err = survey.AskOne(&survey.Select{Message: "Secret:", Options: secretOptions}, &secretName, survey.WithValidator(survey.Required))
 	if err != nil {
-		return "", emperror.Wrap(err, "failed to select secret")
+		return "", errors.WrapIf(err, "failed to select secret")
 	}
 
 	return secretIds[secretName], nil
@@ -115,12 +115,12 @@ func GetCurrentKubecontext() (string, string, error) {
 	c := exec.Command("kubectl", "config", "view", "--minify", "--raw")
 	out, err := c.Output()
 	if err != nil {
-		return "", "", emperror.Wrap(err, "failed to query current context from kubectl")
+		return "", "", errors.WrapIf(err, "failed to query current context from kubectl")
 	}
 
 	var parsed v1.Config
 	if err := yaml.Unmarshal(out, &parsed); err != nil {
-		return "", "", emperror.Wrap(err, "failed to parse local configuration")
+		return "", "", errors.WrapIf(err, "failed to parse local configuration")
 	}
 
 	if len(parsed.AuthInfos) != 1 {

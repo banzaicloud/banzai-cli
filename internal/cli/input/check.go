@@ -18,14 +18,14 @@ import (
 	"context"
 	"net/http"
 
+	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/goph/emperror"
 )
 
 func checkPipeline(banzaiCli cli.Cli) error {
 	_, response, err := banzaiCli.Client().UsersApi.GetCurrentUser(context.Background())
 	if err != nil && response != nil && response.StatusCode == http.StatusNotFound {
-		return emperror.Wrap(err, "given URL is not a Pipeline endpoint")
+		return errors.WrapIf(err, "given URL is not a Pipeline endpoint")
 	}
 
 	return err

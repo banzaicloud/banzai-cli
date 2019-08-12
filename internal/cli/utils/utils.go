@@ -20,9 +20,8 @@ import (
 	"io/ioutil"
 	"os"
 
+	"emperror.dev/errors"
 	"github.com/ghodss/yaml"
-	"github.com/goph/emperror"
-	"github.com/pkg/errors"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 )
@@ -38,13 +37,13 @@ func Unmarshal(raw []byte, data interface{}) error {
 	// use this method to prevent unmarshalling directly with yaml, for example to map[interface{}]interface{}
 	converted, err := yaml.YAMLToJSON(raw)
 	if err != nil {
-		return emperror.Wrap(err, "unmarshal")
+		return errors.WrapIf(err, "unmarshal")
 	}
 
 	decoder = json.NewDecoder(bytes.NewReader(converted))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(data); err != nil {
-		return emperror.Wrap(err, "unmarshal")
+		return errors.WrapIf(err, "unmarshal")
 	}
 
 	return nil

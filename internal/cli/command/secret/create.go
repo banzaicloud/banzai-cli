@@ -17,10 +17,11 @@ package secret
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"strings"
+
+	"emperror.dev/errors"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/antihax/optional"
@@ -29,7 +30,6 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli/format"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
-	"github.com/goph/emperror"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -146,7 +146,7 @@ func runCreateSecret(banzaiCli cli.Cli, options *createSecretOptions) error {
 	)
 	if err != nil {
 		cli.LogAPIError("create secret", err, out)
-		return emperror.Wrap(err, "failed to create secret")
+		return errors.WrapIf(err, "failed to create secret")
 	}
 
 	format.SecretWrite(banzaiCli.Out(), options.format, banzaiCli.Color(), response)
@@ -184,15 +184,15 @@ func getCreateSecretRequest(banzaiCli cli.Cli, options *createSecretOptions, out
 func readFileAndValidate(filename string, out *pipeline.CreateSecretRequest) error {
 	filename, raw, err := utils.ReadFileOrStdin(filename)
 	if err != nil {
-		return emperror.WrapWith(err, "failed to read", "filename", filename)
+		return errors.WrapIfWithDetails(err, "failed to read", "filename", filename)
 	}
 
 	if err := validateCreateSecretRequest(raw); err != nil {
-		return emperror.Wrap(err, "failed to parse create cluster request")
+		return errors.WrapIf(err, "failed to parse create cluster request")
 	}
 
 	if err := utils.Unmarshal(raw, &out); err != nil {
-		return emperror.Wrap(err, "failed to unmarshal create cluster request")
+		return errors.WrapIf(err, "failed to unmarshal create cluster request")
 	}
 
 	return nil
@@ -213,13 +213,13 @@ func validateCreateSecretRequest(val interface{}) error {
 	var typer struct{ Type string }
 	err := decoder.Decode(&typer)
 	if err != nil {
-		return emperror.Wrap(err, "invalid JSON request")
+		return errors.WrapIf(err, "invalid JSON request")
 	}
 
 	decoder = json.NewDecoder(strings.NewReader(str))
 	decoder.DisallowUnknownFields()
 
-	return emperror.Wrap(decoder.Decode(&pipeline.CreateSecretRequest{}), "invalid request")
+	return errors.WrapIf(decoder.Decode(&pipeline.CreateSecretRequest{}), "invalid request")
 }
 
 func buildInteractiveCreateSecretRequest(banzaiCli cli.Cli, options *createSecretOptions, out *pipeline.CreateSecretRequest) error {
@@ -328,9 +328,9 @@ func surveyGenericSecretType(out *pipeline.CreateSecretRequest) {
 // readCreateSecretRequestFromFile reads file from the getting filename into CreateSecretRequest
 func readCreateSecretRequestFromFile(fileName string, out *pipeline.CreateSecretRequest) error {
 	if raw, err := ioutil.ReadFile(fileName); err != nil {
-		return emperror.Wrapf(err, "failed to read file: %s", fileName)
+		return errors.WrapIff(err, "failed to read file: %s", fileName)
 	} else if err := utils.Unmarshal(raw, &out); err != nil {
-		return emperror.Wrap(err, "failed to parse CreateSecretRequest")
+		return errors.WrapIf(err, "failed to parse CreateSecretRequest")
 	}
 	return nil
 }
@@ -388,7 +388,7 @@ func surveySecretFields(options *createSecretOptions, allowedTypes map[string]pi
 				opts = append(opts, survey.WithValidator(survey.Required))
 			}
 			if err := survey.AskOne(q.input, &questions[i].output, opts...); err != nil {
-				return emperror.Wrap(err, "failed to ask for value")
+				return errors.WrapIf(err, "failed to ask for value")
 			}
 		}
 

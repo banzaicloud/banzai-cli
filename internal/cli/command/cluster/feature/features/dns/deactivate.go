@@ -17,9 +17,9 @@ package dns
 import (
 	"context"
 
+	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
-	"github.com/goph/emperror"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -48,7 +48,7 @@ type deactivateOptions struct {
 
 func runDeactivate(banzaiCli cli.Cli, options deactivateOptions, args []string) error {
 	if err := options.Init(args...); err != nil {
-		return emperror.Wrap(err, "failed to initialize options")
+		return errors.WrapIf(err, "failed to initialize options")
 	}
 
 	pipeline := banzaiCli.Client()

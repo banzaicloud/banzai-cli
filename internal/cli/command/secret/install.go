@@ -21,13 +21,12 @@ import (
 	"net/http"
 	"strings"
 
+	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
-	"github.com/goph/emperror"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -86,7 +85,7 @@ func runInstallSecret(banzaiCli cli.Cli, options installSecretOptions) error {
 	}
 
 	if err := options.Init(); err != nil {
-		return emperror.Wrap(err, "failed to select cluster")
+		return errors.WrapIf(err, "failed to select cluster")
 	}
 
 	out := &pipeline.InstallSecretRequest{
@@ -103,17 +102,17 @@ func runInstallSecret(banzaiCli cli.Cli, options installSecretOptions) error {
 		// non-interactive
 		filename, raw, err := utils.ReadFileOrStdin(options.file)
 		if err != nil {
-			return emperror.WrapWith(err, "failed to read", "filename", filename)
+			return errors.WrapIfWithDetails(err, "failed to read", "filename", filename)
 		}
 
 		log.Debugf("%d bytes read", len(raw))
 
 		if err := validateInstallSecretRequest(raw); err != nil {
-			return emperror.Wrap(err, "failed to parse create cluster request")
+			return errors.WrapIf(err, "failed to parse create cluster request")
 		}
 
 		if err := utils.Unmarshal(raw, &out); err != nil {
-			return emperror.Wrap(err, "failed to unmarshal create cluster request")
+			return errors.WrapIf(err, "failed to unmarshal create cluster request")
 		}
 
 	}
@@ -129,7 +128,7 @@ func runInstallSecret(banzaiCli cli.Cli, options installSecretOptions) error {
 		if options.merge {
 			if _, _, err = banzaiCli.Client().ClustersApi.MergeSecret(context.Background(), orgID, clusterID, options.secretName, *out); err != nil {
 				cli.LogAPIError("merge secret", err, out)
-				return emperror.Wrap(err, "failed to merge secret")
+				return errors.WrapIf(err, "failed to merge secret")
 			}
 		} else {
 			return errors.New("set --merge flag to merge existing secret")
@@ -138,7 +137,7 @@ func runInstallSecret(banzaiCli cli.Cli, options installSecretOptions) error {
 
 	if err != nil {
 		cli.LogAPIError("install secret", err, out)
-		return emperror.Wrap(err, "failed to install secret")
+		return errors.WrapIf(err, "failed to install secret")
 	}
 
 	log.Info("secret installed to cluster")
@@ -172,7 +171,7 @@ func buildInteractiveInstallSecretRequest(options installSecretOptions, out *pip
 			continue
 		} else {
 			if err := utils.Unmarshal(raw, out); err != nil {
-				return emperror.Wrap(err, "failed to parse InstallSecretRequest")
+				return errors.WrapIf(err, "failed to parse InstallSecretRequest")
 			}
 
 			break
@@ -197,11 +196,11 @@ func validateInstallSecretRequest(val interface{}) error {
 	var typer struct{ Type string }
 	err := decoder.Decode(&typer)
 	if err != nil {
-		return emperror.Wrap(err, "invalid JSON request")
+		return errors.WrapIf(err, "invalid JSON request")
 	}
 
 	decoder = json.NewDecoder(strings.NewReader(str))
 	decoder.DisallowUnknownFields()
 
-	return emperror.Wrap(decoder.Decode(&pipeline.InstallSecretRequest{}), "invalid request")
+	return errors.WrapIf(decoder.Decode(&pipeline.InstallSecretRequest{}), "invalid request")
 }

@@ -18,8 +18,8 @@ import (
 	"os"
 	"os/exec"
 
+	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/goph/emperror"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -35,7 +35,7 @@ func ensureEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string) err
 		"-target", "module.aws_provider",
 	}
 	if err := runInstaller(argv, options, creds); err != nil {
-		return emperror.Wrap(err, "failed to create AWS infrastructure")
+		return errors.WrapIf(err, "failed to create AWS infrastructure")
 	}
 
 	host, err := options.readEc2Host()
@@ -48,7 +48,7 @@ func ensureEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string) err
 	cmd.Stderr = os.Stderr
 	config, err := cmd.Output()
 	if err != nil {
-		return emperror.Wrap(err, "failed to retrieve kubernetes config from cluster")
+		return errors.WrapIf(err, "failed to retrieve kubernetes config from cluster")
 	}
 
 	return options.writeKubeconfig(config)
@@ -61,7 +61,7 @@ func deleteEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string) err
 	}
 
 	if err := runInstaller(argv, options, creds); err != nil {
-		return emperror.Wrap(err, "failed to delete AWS infrastructure")
+		return errors.WrapIf(err, "failed to delete AWS infrastructure")
 	}
 
 	return nil

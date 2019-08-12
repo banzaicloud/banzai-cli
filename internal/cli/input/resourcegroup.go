@@ -17,9 +17,8 @@ package input
 import (
 	"context"
 
+	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/goph/emperror"
-	"github.com/pkg/errors"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
@@ -31,12 +30,12 @@ func AskResourceGroup(banzaiCli cli.Cli, orgID int32, secretID, defaultResourceG
 
 	rgs, _, err := banzaiCli.Client().InfoApi.GetResourceGroups(context.Background(), orgID, secretID)
 	if err != nil {
-		return "", emperror.Wrap(utils.ConvertError(err), "can't list resource groups")
+		return "", errors.WrapIf(utils.ConvertError(err), "can't list resource groups")
 	}
 
 	err = survey.AskOne(&survey.Select{Message: "Resource group:", Options: rgs, Default: defaultResourceGroup}, &resourceGroup)
 	if err != nil {
-		return "", emperror.Wrap(err, "no resource group selected")
+		return "", errors.WrapIf(err, "no resource group selected")
 	}
 
 	return resourceGroup, nil
@@ -46,7 +45,7 @@ func AskResourceGroup(banzaiCli cli.Cli, orgID int32, secretID, defaultResourceG
 func IsResourceGroupValid(banzaiCli cli.Cli, orgID int32, secretID string, resourceGroup string) error {
 	rgs, _, err := banzaiCli.Client().InfoApi.GetResourceGroups(context.Background(), orgID, secretID)
 	if err != nil {
-		return emperror.Wrap(utils.ConvertError(err), "could not list resource groups")
+		return errors.WrapIf(utils.ConvertError(err), "could not list resource groups")
 	}
 
 	for _, rg := range rgs {

@@ -17,10 +17,10 @@ package feature
 import (
 	"context"
 
+	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/format"
-	"github.com/goph/emperror"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -52,7 +52,7 @@ func runList(banzaiCli cli.Cli, options listOptions, args []string) error {
 	orgId := banzaiCli.Context().OrganizationID()
 
 	if err := options.Init(args...); err != nil {
-		return emperror.Wrap(err, "failed to initialize options")
+		return errors.WrapIf(err, "failed to initialize options")
 	}
 
 	clusterId := options.ClusterID()
