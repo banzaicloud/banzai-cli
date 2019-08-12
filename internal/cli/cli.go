@@ -210,9 +210,9 @@ func x509Error(err error) error {
 
 // CheckPipelineEndpoint checks if the endpoint is a valid Pipeline endpoint.
 // It returns the server cert's sha256 fingerprint if the endpoint is valid.
-// If the endpoint is valid, but the TLS validatation failed, it returns the
+// If the endpoint is valid, but the TLS validation failed, it returns the
 // fingerprint of the server certificate, the original x509 error, and a
-// nil-error.
+// nil-error. Returns empty hash and TLS error if endpoint is not TLS.
 func CheckPipelineEndpoint(endpoint string) (string, error, error) {
 	parsed, err := url.Parse(endpoint)
 	if err != nil {
@@ -258,6 +258,10 @@ func CheckPipelineEndpoint(endpoint string) (string, error, error) {
 		return "", nil, emperror.Wrap(err, "failed to check Pipeline version")
 	}
 	log.Debugf("Pipeline version: %q", string(version))
+
+	if response.TLS == nil {
+		return "", errors.New("Pipeline endpoint is unencrypted"), nil
+	}
 
 	if len(response.TLS.PeerCertificates) < 1 {
 		return "", nil, errors.New("server certificate is missing")
