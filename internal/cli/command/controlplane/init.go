@@ -83,6 +83,31 @@ func NewInitCommand(banzaiCli cli.Cli) *cobra.Command {
 	return cmd
 }
 
+func askProvider(k8sContext string) (string, error) {
+	choices := []string{"Create single-node cluster in Amazon EC2", "Create KIND (Kubernetes in Docker) cluster locally"}
+	if k8sContext != "" {
+		choices = append(choices, fmt.Sprintf("Use %q Kubernetes context", k8sContext))
+	}
+
+	var provider string
+	if err := survey.AskOne(&survey.Select{Message: "Select provider:", Options: choices}, &provider, nil); err != nil {
+		return "", err
+	}
+
+	switch {
+	case provider == choices[0]:
+		return providerEc2, nil
+
+	case provider == choices[1]:
+		return providerKind, nil
+
+	case k8sContext != "" && provider == choices[2]:
+		return providerK8s, nil
+	}
+
+	return "", errors.New("failed to select provider")
+}
+
 func runInit(options initOptions, banzaiCli cli.Cli) error {
 	if err := options.Init(); err != nil {
 		return err
@@ -132,28 +157,12 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		if !banzaiCli.Interactive() {
 			return errors.New("please select provider (--provider or provider field of values file)")
 		}
-
-		choices := []string{"Create single-node cluster in Amazon EC2", "Create KIND (Kubernetes in Docker) cluster locally"}
-		if k8sContext != "" {
-			choices = append(choices, fmt.Sprintf("Use %q Kubernetes context", k8sContext))
-		}
-
-		var provider string
-		if err := survey.AskOne(&survey.Select{Message: "Select provider:", Options: choices}, &provider, nil); err != nil {
+		provider, err := askProvider(k8sContext)
+		if err != nil {
 			return err
 		}
 
-		switch {
-		case provider == choices[0]:
-			options.provider = providerEc2
-
-		case provider == choices[1]:
-			options.provider = providerKind
-
-		case provider == choices[2]:
-			options.provider = providerK8s
-
-		}
+		options.provider = provider
 	}
 
 	out["provider"] = options.provider
