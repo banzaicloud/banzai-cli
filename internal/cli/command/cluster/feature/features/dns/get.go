@@ -18,11 +18,11 @@ import (
 	"context"
 	"strings"
 
+	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/output"
-	"github.com/goph/emperror"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -53,7 +53,7 @@ const featureName = "dns"
 
 func runGet(banzaiCli cli.Cli, options getOptions, args []string) error {
 	if err := options.Init(args...); err != nil {
-		return emperror.Wrap(err, "failed to initialize options")
+		return errors.WrapIf(err, "failed to initialize options")
 	}
 
 	pipeline := banzaiCli.Client()

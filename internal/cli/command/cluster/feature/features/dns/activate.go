@@ -18,12 +18,12 @@ import (
 	"context"
 	"encoding/json"
 
+	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
-	"github.com/goph/emperror"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -58,11 +58,11 @@ func runActivate(banzaiCli cli.Cli, options activateOptions, _ []string) error {
 	var req pipeline.ActivateClusterFeatureRequest
 	if options.filePath == "" && banzaiCli.Interactive() {
 		if err := buildActivateReqInteractively(banzaiCli, options, &req); err != nil {
-			return emperror.Wrap(err, "failed to build activate request interactively")
+			return errors.WrapIf(err, "failed to build activate request interactively")
 		}
 	} else {
 		if err := readActivateReqFromFileOrStdin(options.filePath, &req); err != nil {
-			return emperror.Wrap(err, "failed to read DNS cluster feature specification")
+			return errors.WrapIf(err, "failed to read DNS cluster feature specification")
 		}
 	}
 
@@ -80,11 +80,11 @@ func runActivate(banzaiCli cli.Cli, options activateOptions, _ []string) error {
 func readActivateReqFromFileOrStdin(filePath string, req *pipeline.ActivateClusterFeatureRequest) error {
 	filename, raw, err := utils.ReadFileOrStdin(filePath)
 	if err != nil {
-		return emperror.WrapWith(err, "failed to read", "filename", filename)
+		return errors.WrapIfWithDetails(err, "failed to read", "filename", filename)
 	}
 
 	if err := json.Unmarshal(raw, &req); err != nil {
-		return emperror.Wrap(err, "failed to unmarshal input")
+		return errors.WrapIf(err, "failed to unmarshal input")
 	}
 
 	return nil
@@ -94,7 +94,7 @@ func buildActivateReqInteractively(_ cli.Cli, _ activateOptions, req *pipeline.A
 
 	var edit bool
 	if err := survey.AskOne(&survey.Confirm{Message: "Do you want to edit the cluster feature activation request in your text editor?"}, &edit); err != nil {
-		return emperror.Wrap(err, "failure during survey")
+		return errors.WrapIf(err, "failure during survey")
 	}
 	if !edit {
 		return nil
@@ -102,16 +102,16 @@ func buildActivateReqInteractively(_ cli.Cli, _ activateOptions, req *pipeline.A
 
 	content, err := json.MarshalIndent(*req, "", "  ")
 	if err != nil {
-		return emperror.Wrap(err, "failed to marshal request to JSON")
+		return errors.WrapIf(err, "failed to marshal request to JSON")
 	}
 	if err := survey.AskOne(
 		&survey.Editor{Default: string(content), HideDefault: true, AppendDefault: true},
 		&content,
 		survey.WithValidator(validateActivateClusterFeatureRequest)); err != nil {
-		return emperror.Wrap(err, "failure during survey")
+		return errors.WrapIf(err, "failure during survey")
 	}
 	if err := json.Unmarshal(content, req); err != nil {
-		return emperror.Wrap(err, "failed to unmarshal JSON as request")
+		return errors.WrapIf(err, "failed to unmarshal JSON as request")
 	}
 
 	return nil
@@ -120,7 +120,7 @@ func buildActivateReqInteractively(_ cli.Cli, _ activateOptions, req *pipeline.A
 func validateActivateClusterFeatureRequest(req interface{}) error {
 	var request pipeline.ActivateClusterFeatureRequest
 	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
-		return emperror.Wrap(err, "request is not valid JSON")
+		return errors.WrapIf(err, "request is not valid JSON")
 	}
 
 	return validateSpec(request.Spec)

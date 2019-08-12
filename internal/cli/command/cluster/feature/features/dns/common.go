@@ -15,9 +15,8 @@
 package dns
 
 import (
-	"github.com/goph/emperror"
+	"emperror.dev/errors"
 	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
 )
 
 func validateSpec(specObj map[string]interface{}) error {
@@ -42,7 +41,7 @@ func validateSpec(specObj map[string]interface{}) error {
 	}
 
 	if err := mapstructure.Decode(specObj, &spec); err != nil {
-		return emperror.Wrap(err, "feature specification does not conform to schema")
+		return errors.WrapIf(err, "feature specification does not conform to schema")
 	}
 	if spec.AutoDNS != nil && spec.AutoDNS.Enabled && spec.CustomDNS != nil && spec.CustomDNS.Enabled {
 		return errors.New("Cannot enable 'autoDns' and 'customDns' at the same time")

@@ -21,10 +21,9 @@ import (
 	"strconv"
 	"time"
 
+	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/antihax/optional"
-	"github.com/goph/emperror"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -137,12 +136,12 @@ func runCreate(banzaiCli cli.Cli, o createBucketsOptions) error {
 		// Ask for bucket name
 		err = survey.AskOne(&survey.Input{Message: "Bucket name:", Default: defaultBucketName}, &o.name, survey.WithValidator(input.BucketNameValidator(o.cloud)))
 		if err != nil {
-			return emperror.Wrap(err, "failed to select name")
+			return errors.WrapIf(err, "failed to select name")
 		}
 	} else {
 		err = input.ValidateBucketName(o.cloud, o.name)
 		if err != nil {
-			return emperror.Wrap(err, "failed to validate bucket name")
+			return errors.WrapIf(err, "failed to validate bucket name")
 		}
 	}
 
@@ -169,7 +168,7 @@ func runCreate(banzaiCli cli.Cli, o createBucketsOptions) error {
 
 	secret, _, err := banzaiCli.Client().SecretsApi.GetSecret(context.Background(), orgID, o.secretID)
 	if err != nil {
-		return emperror.Wrap(utils.ConvertError(errors.WithStack(err)), "could not get secret")
+		return errors.WrapIf(utils.ConvertError(errors.WithStack(err)), "could not get secret")
 	}
 
 	if secret.Type != o.cloud {
@@ -181,13 +180,13 @@ func runCreate(banzaiCli cli.Cli, o createBucketsOptions) error {
 			// Ask for storage account
 			err = survey.AskOne(&survey.Input{Message: "Storage account:", Default: o.storageAccount}, &o.storageAccount)
 			if err != nil {
-				return emperror.Wrap(err, "failed to get storage account")
+				return errors.WrapIf(err, "failed to get storage account")
 			}
 
 			// Ask for resource group
 			o.resourceGroup, err = input.AskResourceGroup(banzaiCli, orgID, o.secretID, o.resourceGroup)
 			if err != nil {
-				return emperror.Wrap(err, "failed to select resource group")
+				return errors.WrapIf(err, "failed to select resource group")
 			}
 		} else {
 			err = input.IsResourceGroupValid(banzaiCli, orgID, o.secretID, o.resourceGroup)
@@ -200,7 +199,7 @@ func runCreate(banzaiCli cli.Cli, o createBucketsOptions) error {
 	request := getCreateBucketRequest(o)
 	response, _, err := banzaiCli.Client().StorageApi.CreateObjectStoreBucket(context.Background(), orgID, request)
 	if err != nil {
-		return emperror.Wrap(utils.ConvertError(errors.WithStack(err)), "could not create bucket")
+		return errors.WrapIf(utils.ConvertError(errors.WithStack(err)), "could not create bucket")
 	}
 
 	log.Infof("bucket create request accepted for %s on %s", response.Name, response.Cloud)
@@ -218,7 +217,7 @@ func runCreate(banzaiCli cli.Cli, o createBucketsOptions) error {
 		time.Sleep(time.Duration(3) * time.Second)
 		bucket, _, err := banzaiCli.Client().StorageApi.GetBucket(context.Background(), orgID, o.name, o.cloud, &getBucketOpts)
 		if err != nil {
-			return emperror.Wrap(utils.ConvertError(errors.WithStack(err)), "could not get bucket")
+			return errors.WrapIf(utils.ConvertError(errors.WithStack(err)), "could not get bucket")
 		}
 		if bucket.Status != "CREATING" {
 			format.DetailedBucketWrite(banzaiCli, ConvertBucketInfoToBucket(bucket), bucket.Cloud)

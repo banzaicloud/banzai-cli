@@ -20,10 +20,9 @@ import (
 	"os/exec"
 	"strings"
 
+	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/google/uuid"
-	"github.com/goph/emperror"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -115,16 +114,16 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 	case providerKind:
 		err := ensureKINDCluster(banzaiCli, *options.cpContext)
 		if err != nil {
-			return emperror.Wrap(err, "failed to create KIND cluster")
+			return errors.WrapIf(err, "failed to create KIND cluster")
 		}
 
 	case providerEc2:
 		_, creds, err := input.GetAmazonCredentials()
 		if err != nil {
-			return emperror.Wrap(err, "failed to get AWS credentials")
+			return errors.WrapIf(err, "failed to get AWS credentials")
 		}
 		if err := ensureEC2Cluster(banzaiCli, *options.cpContext, creds); err != nil {
-			return emperror.Wrap(err, "failed to create EC2 cluster")
+			return errors.WrapIf(err, "failed to create EC2 cluster")
 		}
 		env = creds
 	default:
@@ -135,12 +134,12 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 
 	log.Info("Deploying Banzai Cloud Pipeline to Kubernetes cluster...")
 	if err := runInternal("apply", *options.cpContext, env); err != nil {
-		return emperror.Wrap(err, "controlplane creation failed")
+		return errors.WrapIf(err, "controlplane creation failed")
 	}
 
 	url, err := options.readAddress()
 	if err != nil {
-		return emperror.Wrap(err, "can't read host name of EC2 instance created")
+		return errors.WrapIf(err, "can't read host name of EC2 instance created")
 	}
 	url += "pipeline"
 
@@ -200,7 +199,7 @@ func runInstaller(command []string, options cpContext, env map[string]string) er
 
 	if options.pullInstaller {
 		if err := options.pullDockerImage(); err != nil {
-			return emperror.Wrap(err, "failed to pull cp-installer")
+			return errors.WrapIf(err, "failed to pull cp-installer")
 		}
 	}
 

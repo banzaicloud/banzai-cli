@@ -18,10 +18,9 @@ import (
 	"context"
 	"fmt"
 
+	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/goph/emperror"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -82,7 +81,7 @@ func (c *clusterContext) Init(args ...string) error {
 	if c.id != 0 {
 		cluster, _, err := pipeline.ClustersApi.GetCluster(context.Background(), orgId, c.id)
 		if err != nil {
-			return emperror.Wrapf(err, "failed to retrieve cluster %d", c.id)
+			return errors.WrapIff(err, "failed to retrieve cluster %d", c.id)
 		}
 
 		c.name = cluster.Name
@@ -91,11 +90,11 @@ func (c *clusterContext) Init(args ...string) error {
 
 	clusters, _, err := pipeline.ClustersApi.ListClusters(context.Background(), orgId)
 	if err != nil {
-		return emperror.Wrap(err, "could not list clusters")
+		return errors.WrapIf(err, "could not list clusters")
 	}
 
 	if len(clusters) == 0 {
-		return emperror.Wrap(err, "there are no clusters in the organization")
+		return errors.WrapIf(err, "there are no clusters in the organization")
 	}
 
 	if c.name == "" {
@@ -110,7 +109,7 @@ func (c *clusterContext) Init(args ...string) error {
 
 		err := survey.AskOne(&survey.Select{Message: "Cluster:", Options: clusterSlice}, &c.name, survey.WithValidator(survey.Required))
 		if err != nil {
-			return emperror.Wrap(err, "failed to select a cluster")
+			return errors.WrapIf(err, "failed to select a cluster")
 		}
 	}
 

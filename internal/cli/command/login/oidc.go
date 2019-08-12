@@ -30,12 +30,11 @@ import (
 	"syscall"
 	"time"
 
+	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/coreos/go-oidc"
 	"github.com/google/uuid"
-	"github.com/goph/emperror"
 	"github.com/pkg/browser"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )
@@ -287,7 +286,7 @@ func (a *app) handleCallback(w http.ResponseWriter, r *http.Request) {
 func (a *app) requestTokenFromPipeline(rawIDToken string) (string, error) {
 	pipelineURL, err := url.Parse(a.pipelineBasePath)
 	if err != nil {
-		return "", emperror.Wrap(err, "failed to parse Pipeline endpoint")
+		return "", errors.WrapIf(err, "failed to parse Pipeline endpoint")
 	}
 
 	pipelineURL.Path = "/auth/dex/callback"

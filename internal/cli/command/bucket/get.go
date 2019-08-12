@@ -15,7 +15,7 @@
 package bucket
 
 import (
-	"github.com/pkg/errors"
+	"emperror.dev/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 

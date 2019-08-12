@@ -22,8 +22,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/goph/emperror"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -89,22 +89,22 @@ func (c *cpContext) valuesExists() bool {
 func (c *cpContext) writeValues(out interface{}) error {
 	outBytes, err := yaml.Marshal(out)
 	if err != nil {
-		return emperror.Wrap(err, "failed to marshal values file")
+		return errors.WrapIf(err, "failed to marshal values file")
 	}
 
 	path := c.valuesPath()
 	log.Debugf("writing values file to %q", path)
-	return emperror.Wrap(ioutil.WriteFile(path, outBytes, 0600), "failed to write values file")
+	return errors.WrapIf(ioutil.WriteFile(path, outBytes, 0600), "failed to write values file")
 }
 
 func (c *cpContext) readValues(out interface{}) error {
 	path := c.valuesPath()
 	raw, err := ioutil.ReadFile(path)
 	if err != nil {
-		return emperror.Wrap(err, "failed to read values file")
+		return errors.WrapIf(err, "failed to read values file")
 	}
 
-	return emperror.Wrap(yaml.Unmarshal(raw, out), "failed to parse values file")
+	return errors.WrapIf(yaml.Unmarshal(raw, out), "failed to parse values file")
 }
 
 func (c *cpContext) kubeconfigPath() string {
@@ -127,7 +127,7 @@ func (c *cpContext) deleteTfstate() error {
 func (c *cpContext) writeKubeconfig(outBytes []byte) error {
 	path := c.kubeconfigPath()
 	log.Debugf("writing kubeconfig file to %q", path)
-	return emperror.Wrap(ioutil.WriteFile(path, outBytes, 0600), "failed to write kubeconfig file")
+	return errors.WrapIf(ioutil.WriteFile(path, outBytes, 0600), "failed to write kubeconfig file")
 }
 
 func (c *cpContext) deleteKubeconfig() error {
@@ -146,7 +146,7 @@ func (c *cpContext) readAddress() (string, error) {
 	path := c.addressPath()
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
-		return "", emperror.Wrap(err, "can't read endpoint URL")
+		return "", errors.WrapIf(err, "can't read endpoint URL")
 	}
 	return strings.Trim(string(bytes), "\n"), nil
 }
@@ -159,7 +159,7 @@ func (c *cpContext) readEc2Host() (string, error) {
 	path := c.ec2HostPath()
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
-		return "", emperror.Wrap(err, "can't read address of created EC2 instance")
+		return "", errors.WrapIf(err, "can't read address of created EC2 instance")
 	}
 	return strings.Trim(string(bytes), "\n"), nil
 }
@@ -181,9 +181,9 @@ func (c *cpContext) Init() error {
 	var err error
 	c.workspace, err = filepath.Abs(c.workspace)
 	if err != nil {
-		return emperror.Wrapf(err, "failed to calculate absolute path to %q", c.workspace)
+		return errors.WrapIff(err, "failed to calculate absolute path to %q", c.workspace)
 	}
 
 	err = os.MkdirAll(c.workspace, 0700)
-	return emperror.Wrapf(err, "failed to use %q as workspace path", c.workspace)
+	return errors.WrapIff(err, "failed to use %q as workspace path", c.workspace)
 }

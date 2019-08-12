@@ -18,9 +18,9 @@ import (
 	"context"
 	"log"
 
+	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/goph/emperror"
 )
 
 // AskOrganization asks for an organization.
@@ -70,7 +70,7 @@ func GetOrganization(banzaiCli cli.Cli) int32 {
 func GetOrganizations(banzaiCli cli.Cli) (map[string]int32, error) {
 	orgs, _, err := banzaiCli.Client().OrganizationsApi.ListOrgs(context.Background())
 	if err != nil {
-		return nil, emperror.Wrap(err, "could not list organizations")
+		return nil, errors.WrapIf(err, "could not list organizations")
 	}
 
 	orgMap := make(map[string]int32, len(orgs))

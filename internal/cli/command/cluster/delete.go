@@ -17,14 +17,13 @@ package cluster
 import (
 	"context"
 
+	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/antihax/optional"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/format"
-	"github.com/goph/emperror"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -65,7 +64,7 @@ func runDelete(banzaiCli cli.Cli, options deleteOptions, args []string) error {
 
 	if banzaiCli.Interactive() {
 		if cluster, _, err := client.ClustersApi.GetCluster(context.Background(), orgId, id); err != nil {
-			return emperror.Wrap(err, "failed to get cluster details")
+			return errors.WrapIf(err, "failed to get cluster details")
 		} else {
 			format.ClusterWrite(banzaiCli, cluster)
 		}
@@ -77,7 +76,7 @@ func runDelete(banzaiCli cli.Cli, options deleteOptions, args []string) error {
 	}
 	if cluster, _, err := client.ClustersApi.DeleteCluster(context.Background(), orgId, id, &pipeline.DeleteClusterOpts{Force: optional.NewBool(options.force)}); err != nil {
 		cli.LogAPIError("delete cluster", err, id)
-		return emperror.Wrap(err, "failed to delete cluster")
+		return errors.WrapIf(err, "failed to delete cluster")
 	} else {
 		log.Printf("Deleting cluster %v", cluster)
 	}

@@ -19,13 +19,12 @@ import (
 	"fmt"
 	"os"
 
+	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/goph/emperror"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -85,7 +84,7 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 			},
 			&endpoint, survey.WithValidator(survey.Required))
 		if err != nil {
-			return emperror.Wrap(err, "no endpoint selected")
+			return errors.WrapIf(err, "no endpoint selected")
 		}
 	}
 
@@ -111,7 +110,7 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 		if options.skipVerify {
 			log.Warnf("Could not verify server certificate: %v. Pinning certificate fingerprint %s.", x509Err, fingerprint)
 		} else {
-			return emperror.Wrap(x509Err, "could not verify server certificate")
+			return errors.WrapIf(x509Err, "could not verify server certificate")
 		}
 	} else {
 		fingerprint = "" // don't pin valid certificates. TODO: make this an option
@@ -142,7 +141,7 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 					},
 					&token)
 				if err != nil {
-					return emperror.Wrap(err, "no token selected")
+					return errors.WrapIf(err, "no token selected")
 				}
 			}
 		} else {
@@ -177,12 +176,12 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 	if options.permanent {
 		err := createPermanentToken(banzaiCli)
 		if err != nil {
-			return emperror.Wrap(err, "failed to create permanent token")
+			return errors.WrapIf(err, "failed to create permanent token")
 		}
 
 		if sessionToken {
 			if err := deleteToken(banzaiCli, token); err != nil {
-				return emperror.Wrap(err, "failed to delete session token")
+				return errors.WrapIf(err, "failed to delete session token")
 			}
 		}
 	}
@@ -191,7 +190,7 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 	if options.orgName != "" {
 		orgs, err := input.GetOrganizations(banzaiCli)
 		if err != nil {
-			return emperror.Wrap(err, "could not get organizations")
+			return errors.WrapIf(err, "could not get organizations")
 		}
 
 		var orgFound bool

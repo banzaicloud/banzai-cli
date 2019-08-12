@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/pkg/errors"
+	"emperror.dev/errors"
 	yaml "gopkg.in/yaml.v2"
 
 	"github.com/banzaicloud/banzai-cli/pkg/formatting"

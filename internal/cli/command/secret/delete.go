@@ -16,13 +16,13 @@ package secret
 
 import (
 	"context"
-	"errors"
 	"fmt"
+
+	"emperror.dev/errors"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
-	"github.com/goph/emperror"
 	"github.com/spf13/cobra"
 )
 
@@ -68,7 +68,7 @@ func runDelete(banzaiCli cli.Cli, options deleteOptions) error {
 	if options.name {
 		secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{})
 		if err != nil {
-			return emperror.Wrap(err, "could not list secrets")
+			return errors.WrapIf(err, "could not list secrets")
 		}
 
 		idMap := make(map[string]string)

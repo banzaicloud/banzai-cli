@@ -22,13 +22,12 @@ import (
 	"net/http"
 	"os"
 
+	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
-	"github.com/goph/emperror"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -80,7 +79,7 @@ func importCluster(banzaiCli cli.Cli, options importOptions) error {
 	} else {
 		filename, raw, err := utils.ReadFileOrStdin(options.file)
 		if err != nil {
-			return emperror.WrapWith(err, "failed to read", "filename", filename)
+			return errors.WrapIfWithDetails(err, "failed to read", "filename", filename)
 		}
 		options.kubeconfig = base64.StdEncoding.EncodeToString(raw)
 	}
@@ -95,7 +94,7 @@ func importCluster(banzaiCli cli.Cli, options importOptions) error {
 
 	// Validate secret create request
 	if err := validateSecretCreateRequest(req); err != nil {
-		return emperror.Wrap(err, "failed to create cluster request")
+		return errors.WrapIf(err, "failed to create cluster request")
 	}
 
 	req.Name += "-kubeconfig"
@@ -111,14 +110,14 @@ func importCluster(banzaiCli cli.Cli, options importOptions) error {
 	if err != nil {
 		// Secret already exists
 		if resp != nil && resp.StatusCode == http.StatusConflict {
-			return emperror.WrapWith(err, "secret with this name is already created", "secret", req.Name)
+			return errors.WrapIfWithDetails(err, "secret with this name is already created", "secret", req.Name)
 		}
 		// Generic error
 		if oerr, ok := err.(pipeline.GenericOpenAPIError); ok {
 			log.Errorf("secret creation error: %s", oerr.Body())
 		}
 
-		return emperror.Wrap(err, "failed to create Kubernetes secret")
+		return errors.WrapIf(err, "failed to create Kubernetes secret")
 	}
 
 	log.Debugf("Kubernetes config secret created with id: %s\n", secret.Id)
@@ -147,7 +146,7 @@ func importCluster(banzaiCli cli.Cli, options importOptions) error {
 			log.Errorf("secret creation error: %s", oerr.Body())
 		}
 
-		return emperror.Wrap(err, "failed to import Kubernetes cluster")
+		return errors.WrapIf(err, "failed to import Kubernetes cluster")
 	}
 
 	log.Debugf("Kubernetes config secret created with id: %d\n", cluster.Id)
@@ -164,7 +163,7 @@ func buildInteractiveImportRequest(_ cli.Cli, options importOptions, _ int32) (k
 	} else if options.file != "" {
 		filename, raw, err := utils.ReadFileOrStdin(options.file)
 		if err != nil {
-			return "", "", emperror.WrapWith(err, "failed to read", "filename", filename)
+			return "", "", errors.WrapIfWithDetails(err, "failed to read", "filename", filename)
 		}
 		kubeconfig = string(raw)
 	}

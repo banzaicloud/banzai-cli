@@ -24,10 +24,9 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/ghodss/yaml"
-	"github.com/goph/emperror"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kind "sigs.k8s.io/kind/pkg/cluster/config/v1alpha3"
@@ -61,13 +60,13 @@ func downloadKIND(banzaiCli cli.Cli) error {
 
 	binDir := filepath.Join(banzaiCli.Home(), "bin")
 	if err := os.MkdirAll(binDir, 0755); err != nil {
-		return emperror.Wrapf(err, "failed to create %q directory", binDir)
+		return errors.WrapIff(err, "failed to create %q directory", binDir)
 	}
 	kindPath := filepath.Join(binDir, kindCmd)
 
 	resp, err := http.Get(src) // #nosec
 	if err != nil {
-		return emperror.Wrap(err, "failed to HTTP GET kind binary")
+		return errors.WrapIf(err, "failed to HTTP GET kind binary")
 	}
 
 	defer resp.Body.Close()
@@ -75,16 +74,16 @@ func downloadKIND(banzaiCli cli.Cli) error {
 	tempName := kindPath + "~"
 	f, err := os.OpenFile(tempName, (os.O_WRONLY | os.O_CREATE | os.O_EXCL), 0700)
 	if err != nil {
-		return emperror.Wrap(err, "failed to create temporary file for kind binary")
+		return errors.WrapIf(err, "failed to create temporary file for kind binary")
 	}
 
 	_, err = io.Copy(f, resp.Body)
 	f.Close()
 	if err != nil {
-		return emperror.Wrap(err, "failed to write kind binary")
+		return errors.WrapIf(err, "failed to write kind binary")
 	}
 
-	return emperror.Wrap(os.Rename(tempName, kindPath), "failed to move kind binary to its final place")
+	return errors.WrapIf(os.Rename(tempName, kindPath), "failed to move kind binary to its final place")
 }
 
 func ensureKINDCluster(banzaiCli cli.Cli, options cpContext) error {
@@ -92,7 +91,7 @@ func ensureKINDCluster(banzaiCli cli.Cli, options cpContext) error {
 		log.Info("KIND binary (kind) is not available in $PATH, downloading it...")
 		err := downloadKIND(banzaiCli)
 		if err != nil {
-			return emperror.Wrap(err, "failed to download kind binary")
+			return errors.WrapIf(err, "failed to download kind binary")
 		}
 		log.Info("KIND installed")
 	}
@@ -137,13 +136,13 @@ func ensureKINDCluster(banzaiCli cli.Cli, options cpContext) error {
 
 	buff, err := yaml.Marshal(&cluster)
 	if err != nil {
-		return emperror.Wrap(err, "failed to prepare KIND cluster config")
+		return errors.WrapIf(err, "failed to prepare KIND cluster config")
 	}
 
 	kindConfigFile := filepath.Join(options.workspace, "kind-config.yaml")
 	err = ioutil.WriteFile(kindConfigFile, buff, 0600)
 	if err != nil {
-		return emperror.Wrap(err, "failed to write KIND cluster config")
+		return errors.WrapIf(err, "failed to write KIND cluster config")
 	}
 
 	cmd = exec.Command(kindPath, "create", "cluster", "--config", kindConfigFile, "--name", clusterName)
@@ -153,13 +152,13 @@ func ensureKINDCluster(banzaiCli cli.Cli, options cpContext) error {
 
 	err = cmd.Run()
 	if err != nil {
-		return emperror.Wrap(err, "failed to create KIND cluster")
+		return errors.WrapIf(err, "failed to create KIND cluster")
 	}
 
 	cmd = exec.Command(kindPath, "get", "kubeconfig", "--name", clusterName)
 	kubeconfig, err := cmd.Output()
 	if err != nil {
-		return emperror.Wrap(err, "failed to get KIND kubeconfig")
+		return errors.WrapIf(err, "failed to get KIND kubeconfig")
 	}
 
 	return options.writeKubeconfig(kubeconfig)
@@ -175,7 +174,7 @@ func deleteKINDCluster(banzaiCli cli.Cli) error {
 
 	_, err = cmd.Output()
 	if err != nil {
-		return emperror.Wrap(err, "failed to delete KIND cluster")
+		return errors.WrapIf(err, "failed to delete KIND cluster")
 	}
 
 	return nil

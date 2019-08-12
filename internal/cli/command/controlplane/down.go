@@ -15,11 +15,10 @@
 package controlplane
 
 import (
+	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
-	"github.com/goph/emperror"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -83,7 +82,7 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 	case providerEc2:
 		id, creds, err := input.GetAmazonCredentials()
 		if err != nil {
-			return emperror.Wrap(err, "failed to get AWS credentials")
+			return errors.WrapIf(err, "failed to get AWS credentials")
 		}
 
 		if valuesConfig, ok := values["providerConfig"]; ok {
@@ -99,30 +98,30 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 
 		err = deleteEC2Cluster(banzaiCli, *options.cpContext, env)
 		if err != nil {
-			return emperror.Wrap(err, "EC2 cluster destroy failed")
+			return errors.WrapIf(err, "EC2 cluster destroy failed")
 		}
 
 		if err := options.deleteKubeconfig(); err != nil {
-			return emperror.Wrap(err, "failed to remove Kubeconfig")
+			return errors.WrapIf(err, "failed to remove Kubeconfig")
 		}
 
 	case providerKind:
 		if err := deleteKINDCluster(banzaiCli); err != nil {
-			return emperror.Wrap(err, "KIND cluster destroy failed")
+			return errors.WrapIf(err, "KIND cluster destroy failed")
 		}
 
 		if err := options.deleteKubeconfig(); err != nil {
-			return emperror.Wrap(err, "failed to remove Kubeconfig")
+			return errors.WrapIf(err, "failed to remove Kubeconfig")
 		}
 	default:
 		err := runInternal("destroy", *options.cpContext, env)
 		if err != nil {
-			return emperror.Wrap(err, "control plane destroy failed")
+			return errors.WrapIf(err, "control plane destroy failed")
 		}
 	}
 
 	if err := options.deleteTfstate(); err != nil {
-		return emperror.Wrap(err, "failed to remove state file")
+		return errors.WrapIf(err, "failed to remove state file")
 	}
 
 	return nil

@@ -33,12 +33,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pkg/errors"
+	"emperror.dev/errors"
 
 	"github.com/banzaicloud/banzai-cli/.gen/cloudinfo"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 
-	"github.com/goph/emperror"
 	"github.com/mattn/go-isatty"
 	"github.com/mitchellh/go-homedir"
 	log "github.com/sirupsen/logrus"
@@ -138,7 +137,7 @@ func (c *banzaiCli) HTTPTransport() *http.Transport {
 	fingerprint := viper.GetString("pipeline.tls-fingerprint")
 	fingerprintBytes, err := hex.DecodeString(fingerprint)
 	if err != nil {
-		log.Error(emperror.Wrapf(err, "invalid tls-fingerprint configuration %q", fingerprint))
+		log.Error(errors.WrapIff(err, "invalid tls-fingerprint configuration %q", fingerprint))
 		skip = false
 	}
 
@@ -216,7 +215,7 @@ func x509Error(err error) error {
 func CheckPipelineEndpoint(endpoint string) (string, error, error) {
 	parsed, err := url.Parse(endpoint)
 	if err != nil {
-		return "", nil, emperror.Wrap(err, "failed to parse endpoint URL")
+		return "", nil, errors.WrapIf(err, "failed to parse endpoint URL")
 	}
 	parsed.Path = path.Join(parsed.Path, "version")
 	endpoint = parsed.String()
@@ -227,7 +226,7 @@ func CheckPipelineEndpoint(endpoint string) (string, error, error) {
 	if err != nil {
 		x509Err = x509Error(err)
 		if x509Err == nil {
-			return "", nil, emperror.Wrap(err, "failed to connect to Pipeline")
+			return "", nil, errors.WrapIf(err, "failed to connect to Pipeline")
 		}
 
 		insecure := &http.Client{
@@ -243,7 +242,7 @@ func CheckPipelineEndpoint(endpoint string) (string, error, error) {
 		}
 		response, err = insecure.Get(endpoint)
 		if err != nil {
-			return "", nil, emperror.Wrap(err, "failed to connect to Pipeline")
+			return "", nil, errors.WrapIf(err, "failed to connect to Pipeline")
 		}
 
 	}
@@ -255,7 +254,7 @@ func CheckPipelineEndpoint(endpoint string) (string, error, error) {
 
 	version, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return "", nil, emperror.Wrap(err, "failed to check Pipeline version")
+		return "", nil, errors.WrapIf(err, "failed to check Pipeline version")
 	}
 	log.Debugf("Pipeline version: %q", string(version))
 
@@ -291,7 +290,7 @@ func getServerCertFingerprint(certificates [][]byte) ([]byte, error) {
 	}
 	cert, err := x509.ParseCertificate(certificates[0])
 	if err != nil {
-		return nil, emperror.Wrap(err, "failed to parse certificate from server")
+		return nil, errors.WrapIf(err, "failed to parse certificate from server")
 	}
 
 	return getFingerprint(cert)
@@ -348,13 +347,13 @@ func (c *banzaiCli) save() {
 		configPath := path.Join(home, ".banzai")
 		err := os.MkdirAll(configPath, os.ModePerm)
 		if err != nil {
-			log.Fatal(emperror.Wrap(err, "failed to create config dir"))
+			log.Fatal(errors.WrapIf(err, "failed to create config dir"))
 		}
 
 		configPath = filepath.Join(configPath, "config.yaml")
 		err = viper.WriteConfigAs(configPath)
 		if err != nil {
-			log.Fatal(emperror.Wrap(err, "failed to write config"))
+			log.Fatal(errors.WrapIf(err, "failed to write config"))
 		}
 
 		log.Infof("config created at %v", configPath)
@@ -367,7 +366,7 @@ func (c *banzaiCli) save() {
 		configPath := filepath.Dir(viper.ConfigFileUsed())
 		err := os.MkdirAll(configPath, 0700)
 		if err != nil {
-			log.Fatal(emperror.Wrap(err, "failed to create config dir"))
+			log.Fatal(errors.WrapIf(err, "failed to create config dir"))
 		}
 	}
 
