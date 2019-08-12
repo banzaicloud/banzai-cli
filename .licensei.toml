@@ -17,10 +17,13 @@ ignored = [
     "github.com/gogo/protobuf", # BSD
 
     # Vanity URLS :\
-    "google.golang.org/grpc",
-    "google.golang.org/genproto",
     "cloud.google.com/go",
-    "google.golang.org/api",
-    "sigs.k8s.io/yaml",
+    "emperror.dev/errors",
     "go.opencensus.io",
+    "go.uber.org/atomic",
+    "go.uber.org/multierr",
+    "google.golang.org/api",
+    "google.golang.org/genproto",
+    "google.golang.org/grpc",
+    "sigs.k8s.io/yaml",
 ]
