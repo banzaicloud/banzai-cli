@@ -298,7 +298,7 @@ func (a *app) requestTokenFromPipeline(rawIDToken string) (string, error) {
 	writer.Close()
 
 	a.client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
+		return http.ErrUseLastResponse
 	}
 
 	resp, err := a.client.Post(pipelineURL.String(), writer.FormDataContentType(), reqBody)

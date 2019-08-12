@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
@@ -28,7 +29,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 const defaultLoginFlow = "login with browser"
@@ -83,7 +83,7 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 				Help:    "The API endpoint to use for accessing Pipeline",
 				Default: endpoint,
 			},
-			&endpoint, survey.Required)
+			&endpoint, survey.WithValidator(survey.Required))
 		if err != nil {
 			return emperror.Wrap(err, "no endpoint selected")
 		}
@@ -106,7 +106,7 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 					Message: fmt.Sprintf("Failed to verify server certificate: %v. Do you want to connect anyway?", x509Err),
 					Help:    fmt.Sprintf("The following certificate fingerprint will be pinned: %v", fingerprint),
 				},
-				&options.skipVerify, nil)
+				&options.skipVerify)
 		}
 		if options.skipVerify {
 			log.Warnf("Could not verify server certificate: %v. Pinning certificate fingerprint %s.", x509Err, fingerprint)
@@ -127,7 +127,7 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 					Help:    "The easiest login flow will open a browser window where you can log in using your credentials. Alternatively you can log in by a token.",
 					Default: true,
 				},
-				&browserLogin, nil)
+				&browserLogin)
 
 			if err != nil {
 				return err
@@ -140,7 +140,7 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 						Default: defaultLoginFlow,
 						Help:    fmt.Sprintf("Copy your Pipeline access token from the token field of %s/api/v1/token", endpoint),
 					},
-					&token, nil)
+					&token)
 				if err != nil {
 					return emperror.Wrap(err, "no token selected")
 				}
@@ -171,7 +171,7 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 				Message: "Create permanent token?",
 				Help:    "Create a permanent token instead of saving the temporary one generated automatically.",
 			},
-			&options.permanent, nil)
+			&options.permanent)
 	}
 
 	if options.permanent {

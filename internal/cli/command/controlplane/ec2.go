@@ -66,4 +66,3 @@ func deleteEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string) err
 
 	return nil
 }
-

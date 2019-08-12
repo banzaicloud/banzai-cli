@@ -18,9 +18,9 @@ import (
 	"context"
 	"sort"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
-	"gopkg.in/AlecAivazis/survey.v1"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
@@ -42,7 +42,7 @@ func AskLocation(banzaiCli cli.Cli, cloud string) (string, error) {
 		locationIDs[region.Name] = region.Id
 	}
 	sort.Strings(locationOptions)
-	err = survey.AskOne(&survey.Select{Message: "Location:", Options: locationOptions}, &locationName, survey.Required)
+	err = survey.AskOne(&survey.Select{Message: "Location:", Options: locationOptions}, &locationName, survey.WithValidator(survey.Required))
 	if err != nil {
 		return "", emperror.Wrap(err, "failed to select location")
 	}

@@ -15,13 +15,13 @@
 package controlplane
 
 import (
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 type destroyOptions struct {
@@ -68,7 +68,6 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 				Default: true,
 			},
 			&destroy,
-			nil,
 		)
 
 		if !destroy {

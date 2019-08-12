@@ -20,11 +20,11 @@ import (
 	"path"
 	"text/template"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/Masterminds/sprig"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 type templateOptions struct {
@@ -100,7 +100,7 @@ func runExecuteTemplate(_ cli.Cli, options templateOptions) {
 			if _, err := os.Stat(filePath); !os.IsNotExist(err) {
 				overwrite := false
 				prompt := &survey.Confirm{Message: fmt.Sprintf("%s already exists. Do you want to overwrite it?", filePath)}
-				survey.AskOne(prompt, &overwrite, nil)
+				survey.AskOne(prompt, &overwrite)
 
 				if !overwrite {
 					continue

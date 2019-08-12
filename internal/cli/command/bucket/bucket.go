@@ -18,9 +18,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
-	"gopkg.in/AlecAivazis/survey.v1"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -102,7 +102,7 @@ func GetManagedBucket(banzaiCli cli.Cli, orgID int32, name, cloud, location, sto
 		}
 
 		var selectedName string
-		err = survey.AskOne(&survey.Select{Message: getTitlesForBucketSelection(), Options: bucketSlice}, &selectedName, survey.Required)
+		err = survey.AskOne(&survey.Select{Message: getTitlesForBucketSelection(), Options: bucketSlice}, &selectedName, survey.WithValidator(survey.Required))
 		if err != nil {
 			return false, selectedBucket, emperror.Wrap(err, "failed to select bucket")
 		}

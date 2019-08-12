@@ -18,8 +18,8 @@ import (
 	"reflect"
 	"regexp"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/pkg/errors"
-	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 const (

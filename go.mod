@@ -1,6 +1,7 @@
 module github.com/banzaicloud/banzai-cli
 
 require (
+	github.com/AlecAivazis/survey/v2 v2.0.2
 	github.com/Masterminds/goutils v1.1.0 // indirect
 	github.com/Masterminds/sprig v2.18.0+incompatible
 	github.com/antihax/optional v0.0.0-20180407024304-ca021399b1a6
@@ -16,8 +17,7 @@ require (
 	github.com/goph/emperror v0.16.0
 	github.com/huandu/xstrings v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.7 // indirect
-	github.com/mattn/go-colorable v0.1.0 // indirect
-	github.com/mattn/go-isatty v0.0.4
+	github.com/mattn/go-isatty v0.0.8
 	github.com/microcosm-cc/bluemonday v1.0.2 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.1.2
@@ -32,7 +32,6 @@ require (
 	github.com/spf13/viper v1.3.1
 	github.com/ttacon/chalk v0.0.0-20140724125006-76b3c8b611de
 	golang.org/x/oauth2 v0.0.0-20190212230446-3e8b2be13635
-	gopkg.in/AlecAivazis/survey.v1 v1.8.2
 	gopkg.in/square/go-jose.v2 v2.3.1 // indirect
 	gopkg.in/yaml.v2 v2.2.2
 	k8s.io/apimachinery v0.0.0-20190404173353-6a84e37a896d

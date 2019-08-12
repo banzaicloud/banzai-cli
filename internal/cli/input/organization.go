@@ -18,9 +18,9 @@ import (
 	"context"
 	"log"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/goph/emperror"
-	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 // AskOrganization asks for an organization.
@@ -46,7 +46,7 @@ func AskOrganization(banzaiCli cli.Cli) int32 {
 	}
 
 	var name string
-	err = survey.AskOne(&survey.Select{Message: "Organization:", Options: orgSelection}, &name, survey.Required)
+	err = survey.AskOne(&survey.Select{Message: "Organization:", Options: orgSelection}, &name, survey.WithValidator(survey.Required))
 	if err != nil {
 		log.Printf("could not choose an organization: %v", err)
 	}

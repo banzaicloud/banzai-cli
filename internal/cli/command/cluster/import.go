@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
@@ -30,7 +31,6 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 type importOptions struct {
@@ -170,7 +170,7 @@ func buildInteractiveImportRequest(_ cli.Cli, options importOptions, _ int32) (k
 	}
 
 	if kubeconfig == "" {
-		_ = survey.AskOne(&survey.Editor{Message: "kubeconfig:", Default: ""}, &kubeconfig, nil)
+		_ = survey.AskOne(&survey.Editor{Message: "kubeconfig:", Default: ""}, &kubeconfig)
 	}
 
 	if options.name != "" {
@@ -179,7 +179,7 @@ func buildInteractiveImportRequest(_ cli.Cli, options importOptions, _ int32) (k
 		clusterName = fmt.Sprintf("%s%d", os.Getenv("USER"), os.Getpid())
 	}
 
-	err = survey.AskOne(&survey.Input{Message: "Cluster name:", Default: clusterName}, &clusterName, nil)
+	err = survey.AskOne(&survey.Input{Message: "Cluster name:", Default: clusterName}, &clusterName)
 	return
 }
 

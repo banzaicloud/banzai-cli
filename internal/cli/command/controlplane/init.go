@@ -17,6 +17,7 @@ package controlplane
 import (
 	"fmt"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
@@ -25,7 +26,6 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 const (
@@ -89,19 +89,19 @@ func askProvider(k8sContext string) (string, error) {
 		choices = append(choices, fmt.Sprintf("Use %q Kubernetes context", k8sContext))
 	}
 
-	var provider string
-	if err := survey.AskOne(&survey.Select{Message: "Select provider:", Options: choices}, &provider, nil); err != nil {
+	var provider int
+	if err := survey.AskOne(&survey.Select{Message: "Select provider:", Options: choices}, &provider); err != nil {
 		return "", err
 	}
 
-	switch {
-	case provider == choices[0]:
+	switch provider {
+	case 0:
 		return providerEc2, nil
 
-	case provider == choices[1]:
+	case 1:
 		return providerKind, nil
 
-	case k8sContext != "" && provider == choices[2]:
+	case 2:
 		return providerK8s, nil
 	}
 
@@ -189,7 +189,7 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		providerConfig["accessKey"] = id
 
 		var confirmed bool
-		_ = survey.AskOne(&survey.Confirm{Message: fmt.Sprintf("Do you want to use the following AWS access key: %s?", id)}, &confirmed, nil)
+		_ = survey.AskOne(&survey.Confirm{Message: fmt.Sprintf("Do you want to use the following AWS access key: %s?", id)}, &confirmed)
 		if !confirmed {
 			return errors.New("cancelled")
 		}

@@ -21,12 +21,12 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/antihax/optional"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gopkg.in/AlecAivazis/survey.v1"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -135,7 +135,7 @@ func runCreate(banzaiCli cli.Cli, o createBucketsOptions) error {
 
 	if o.name == "" {
 		// Ask for bucket name
-		err = survey.AskOne(&survey.Input{Message: "Bucket name:", Default: defaultBucketName}, &o.name, input.BucketNameValidator(o.cloud))
+		err = survey.AskOne(&survey.Input{Message: "Bucket name:", Default: defaultBucketName}, &o.name, survey.WithValidator(input.BucketNameValidator(o.cloud)))
 		if err != nil {
 			return emperror.Wrap(err, "failed to select name")
 		}
@@ -179,7 +179,7 @@ func runCreate(banzaiCli cli.Cli, o createBucketsOptions) error {
 	if o.cloud == input.CloudProviderAzure {
 		if banzaiCli.Interactive() {
 			// Ask for storage account
-			err = survey.AskOne(&survey.Input{Message: "Storage account:", Default: o.storageAccount}, &o.storageAccount, nil)
+			err = survey.AskOne(&survey.Input{Message: "Storage account:", Default: o.storageAccount}, &o.storageAccount)
 			if err != nil {
 				return emperror.Wrap(err, "failed to get storage account")
 			}

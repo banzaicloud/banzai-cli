@@ -17,9 +17,9 @@ package input
 import (
 	"context"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
-	"gopkg.in/AlecAivazis/survey.v1"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
@@ -34,7 +34,7 @@ func AskResourceGroup(banzaiCli cli.Cli, orgID int32, secretID, defaultResourceG
 		return "", emperror.Wrap(utils.ConvertError(err), "can't list resource groups")
 	}
 
-	err = survey.AskOne(&survey.Select{Message: "Resource group:", Options: rgs, Default: defaultResourceGroup}, &resourceGroup, nil)
+	err = survey.AskOne(&survey.Select{Message: "Resource group:", Options: rgs, Default: defaultResourceGroup}, &resourceGroup)
 	if err != nil {
 		return "", emperror.Wrap(err, "no resource group selected")
 	}

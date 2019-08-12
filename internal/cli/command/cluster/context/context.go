@@ -18,12 +18,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 type Context interface {
@@ -108,7 +108,7 @@ func (c *clusterContext) Init(args ...string) error {
 			clusterSlice[i] = cluster.Name
 		}
 
-		err := survey.AskOne(&survey.Select{Message: "Cluster:", Options: clusterSlice}, &c.name, survey.Required)
+		err := survey.AskOne(&survey.Select{Message: "Cluster:", Options: clusterSlice}, &c.name, survey.WithValidator(survey.Required))
 		if err != nil {
 			return emperror.Wrap(err, "failed to select a cluster")
 		}

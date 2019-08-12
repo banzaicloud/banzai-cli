@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
@@ -25,7 +26,6 @@ import (
 	"github.com/goph/emperror"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 func NewActivateCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -93,7 +93,7 @@ func readActivateReqFromFileOrStdin(filePath string, req *pipeline.ActivateClust
 func buildActivateReqInteractively(_ cli.Cli, _ activateOptions, req *pipeline.ActivateClusterFeatureRequest) error {
 
 	var edit bool
-	if err := survey.AskOne(&survey.Confirm{Message: "Do you want to edit the cluster feature activation request in your text editor?"}, &edit, nil); err != nil {
+	if err := survey.AskOne(&survey.Confirm{Message: "Do you want to edit the cluster feature activation request in your text editor?"}, &edit); err != nil {
 		return emperror.Wrap(err, "failure during survey")
 	}
 	if !edit {
@@ -104,7 +104,10 @@ func buildActivateReqInteractively(_ cli.Cli, _ activateOptions, req *pipeline.A
 	if err != nil {
 		return emperror.Wrap(err, "failed to marshal request to JSON")
 	}
-	if err := survey.AskOne(&survey.Editor{Default: string(content), HideDefault: true, AppendDefault: true}, &content, validateActivateClusterFeatureRequest); err != nil {
+	if err := survey.AskOne(
+		&survey.Editor{Default: string(content), HideDefault: true, AppendDefault: true},
+		&content,
+		survey.WithValidator(validateActivateClusterFeatureRequest)); err != nil {
 		return emperror.Wrap(err, "failure during survey")
 	}
 	if err := json.Unmarshal(content, req); err != nil {

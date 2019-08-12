@@ -17,6 +17,7 @@ package cluster
 import (
 	"context"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/antihax/optional"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -26,7 +27,6 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 type deleteOptions struct {
@@ -70,7 +70,7 @@ func runDelete(banzaiCli cli.Cli, options deleteOptions, args []string) error {
 			format.ClusterWrite(banzaiCli, cluster)
 		}
 		confirmed := false
-		survey.AskOne(&survey.Confirm{Message: "Do you want to DELETE the cluster?"}, &confirmed, nil)
+		survey.AskOne(&survey.Confirm{Message: "Do you want to DELETE the cluster?"}, &confirmed)
 		if !confirmed {
 			return errors.New("deletion cancelled")
 		}

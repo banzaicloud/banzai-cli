@@ -23,12 +23,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/antihax/optional"
 	"github.com/goph/emperror"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gopkg.in/AlecAivazis/survey.v1"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -166,7 +166,6 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 					Help:    "Give either a relative or an absolute path to a file containing a JSON or YAML Cluster creation request. Leave empty to cancel.",
 				},
 				&fileName,
-				nil,
 			)
 			if fileName == "skip" || fileName == "" {
 				break
@@ -213,7 +212,7 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 
 	if out["name"] == nil || out["name"] == "" {
 		name := fmt.Sprintf("%s%d", os.Getenv("USER"), os.Getpid())
-		_ = survey.AskOne(&survey.Input{Message: "Cluster name:", Default: name}, &name, nil)
+		_ = survey.AskOne(&survey.Input{Message: "Cluster name:", Default: name}, &name)
 		out["name"] = name
 	}
 
@@ -224,7 +223,7 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 		}
 
 		var rg string
-		if err = survey.AskOne(&survey.Select{Message: "Resource group:", Options: rgs}, &rg, nil); err == nil {
+		if err = survey.AskOne(&survey.Select{Message: "Resource group:", Options: rgs}, &rg); err == nil {
 			out["resourceGroup"] = rg
 		} else {
 			log.Error("no resource group selected")
@@ -241,12 +240,12 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 		}
 
 		var open bool
-		_ = survey.AskOne(&survey.Confirm{Message: "Do you want to edit the cluster request in your text editor?"}, &open, nil)
+		_ = survey.AskOne(&survey.Confirm{Message: "Do you want to edit the cluster request in your text editor?"}, &open)
 		if !open {
 			break
 		}
 
-		_ = survey.AskOne(&survey.Editor{Message: "Create cluster request:", Default: content, HideDefault: true, AppendDefault: true}, &content, validateClusterCreateRequest)
+		_ = survey.AskOne(&survey.Editor{Message: "Create cluster request:", Default: content, HideDefault: true, AppendDefault: true}, &content, survey.WithValidator(validateClusterCreateRequest))
 		if err := json.Unmarshal([]byte(content), &out); err != nil {
 			log.Errorf("can't parse request: %v", err)
 		}
