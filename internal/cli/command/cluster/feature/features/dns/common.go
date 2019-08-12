@@ -19,6 +19,8 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+type obj = map[string]interface{}
+
 func validateSpec(specObj map[string]interface{}) error {
 	providers := map[string]bool{
 		"route53": true,
@@ -69,4 +71,30 @@ func validateSpec(specObj map[string]interface{}) error {
 		}
 	}
 	return nil
+}
+
+var providers = map[string]struct {
+	Name       string
+	SecretType string
+}{
+	"route53": {
+		Name:       "Amazon Route 53",
+		SecretType: "amazon",
+	},
+	"azure": {
+		Name:       "Azure DNS",
+		SecretType: "azure",
+	},
+	"cloudflare": {
+		Name:       "Cloudflare DNS",
+		SecretType: "cloudflare",
+	},
+	"digitalocean": {
+		Name:       "DigitalOcean DNS",
+		SecretType: "digitalocean",
+	},
+	"google": {
+		Name:       "Google Cloud DNS",
+		SecretType: "google",
+	},
 }
