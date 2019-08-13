@@ -256,7 +256,6 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 			Message: fmt.Sprintf("Do you want to CREATE the cluster %q now?", out["name"]),
 		},
 		&create,
-		nil,
 	)
 
 	if !create {
@@ -367,7 +366,7 @@ func buildDefaultRequest(out map[string]interface{}) error {
 
 	var providerName string
 
-	_ = survey.AskOne(&survey.Select{Message: "Provider:", Help: "Select the provider to use", Options: providerNames}, &providerName, nil)
+	_ = survey.AskOne(&survey.Select{Message: "Provider:", Help: "Select the provider to use", Options: providerNames}, &providerName)
 
 	if provider, ok := providers[providerName]; ok {
 		marshalled, err := json.Marshal(provider)
@@ -389,6 +388,11 @@ func buildSecretChoice(banzaiCli cli.Cli, orgID int32, cloud string, out map[str
 	secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{Type_: optional.NewString(cloud)})
 	if err != nil {
 		return "", errors.WrapIf(err, "could not list secrets")
+	}
+
+	if len(secrets) == 0 {
+		log.Infof("you can create a secret with `banzai secret create --type=%q`", cloud)
+		return "", errors.Errorf("there is no secret for %s", cloud)
 	}
 
 	// get ID from Name + validate
@@ -413,7 +417,7 @@ func buildSecretChoice(banzaiCli cli.Cli, orgID int32, cloud string, out map[str
 	}
 
 	var name string
-	if err = survey.AskOne(&survey.Select{Message: "Secret:", Help: "Select the secret to use for creating cloud resources", Options: secretNames}, &name, nil); err != nil {
+	if err = survey.AskOne(&survey.Select{Message: "Secret:", Help: "Select the secret to use for creating cloud resources", Options: secretNames}, &name); err != nil {
 		return "", errors.WrapIf(err, "no secret set")
 	}
 	out["secretName"] = name
