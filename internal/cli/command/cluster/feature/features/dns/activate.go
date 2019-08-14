@@ -35,11 +35,13 @@ func NewActivateCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := activateOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "activate",
-		Aliases: []string{"add", "enable", "install", "on"},
-		Short:   "Activate the DNS feature of a cluster",
-		Args:    cobra.NoArgs,
-		RunE: func(_ *cobra.Command, args []string) error {
+		Use:           "activate",
+		Aliases:       []string{"add", "enable", "install", "on"},
+		Short:         "Activate the DNS feature of a cluster",
+		Args:          cobra.NoArgs,
+		SilenceErrors: true,
+		SilenceUsage:  true,
+		RunE: func(cmd *cobra.Command, args []string) error {
 			return runActivate(banzaiCli, options, args)
 		},
 	}
@@ -279,7 +281,7 @@ func askSecret(banzaiCli cli.Cli, provider string) (string, error) {
 func askDnsProviderSpecificOptions(banzaiCli cli.Cli, provider string, secretID string, req *pipeline.ActivateClusterFeatureRequest) (interface{}, error) {
 	orgID := banzaiCli.Context().OrganizationID()
 
-	r := activateRequest{
+	r := activateCustomRequest{
 		Name:     provider,
 		SecretID: secretID,
 	}
@@ -353,7 +355,7 @@ func buildAutoDNSFeatureRequest(req *pipeline.ActivateClusterFeatureRequest) {
 	}
 }
 
-type activateRequest struct {
+type activateCustomRequest struct {
 	Name     string          `json:"name"`
 	SecretID string          `json:"secretId"`
 	Options  providerOptions `json:"options,omitempty"`
