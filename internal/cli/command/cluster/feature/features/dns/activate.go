@@ -249,11 +249,13 @@ func askSecret(banzaiCli cli.Cli, provider string) (string, error) {
 		return "", errors.Wrap(err, "failed to retrieve secrets")
 	}
 
-	// TODO: (colin) check secrets length
+	// TODO (colin): add create secret option
+	if len(secrets) == 0 {
+		return "", errors.New(fmt.Sprintf("there's no secrets with '%s' type", secretType))
+	}
 
 	// TODO: share secret selection/creation flow
 	var secretID string
-	// TODO (colin): add create secret option
 	options := make([]string, len(secrets))
 	for i, s := range secrets {
 		options[i] = s.Name
