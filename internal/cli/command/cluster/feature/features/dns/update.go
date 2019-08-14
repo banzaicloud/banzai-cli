@@ -74,6 +74,8 @@ func runUpdate(banzaiCli cli.Cli, options updateOptions, _ []string) error {
 		log.Fatalf("could not activate DNS cluster feature: %v", err)
 	}
 
+	log.Infof("feature '%s' started to update", featureName)
+
 	return nil
 }
 
