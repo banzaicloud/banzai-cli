@@ -15,6 +15,9 @@
 package dns
 
 const (
+	dnsAuto   = "Auto DNS"
+	dnsCustom = "Custom DNS"
+
 	// supported DNS provider names
 	dnsRoute53 = "route53"
 	dnsAzure   = "azure"

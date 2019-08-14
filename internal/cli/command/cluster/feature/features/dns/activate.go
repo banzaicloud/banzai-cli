@@ -71,18 +71,13 @@ func runActivate(banzaiCli cli.Cli, options activateOptions, _ []string) error {
 		}
 	}
 
-	resp, _ := json.Marshal(req)
-
-	fmt.Println("request", string(resp))
-
-	// todo (colin): put back the request
-	//orgId := banzaiCli.Context().OrganizationID()
-	//clusterId := options.ClusterID()
-	//resp, err := banzaiCli.Client().ClusterFeaturesApi.ActivateClusterFeature(context.Background(), orgId, clusterId, featureName, req)
-	//if err != nil {
-	//	cli.LogAPIError("activate DNS cluster feature", err, resp.Request)
-	//	log.Fatalf("could not activate DNS cluster feature: %v", err)
-	//}
+	orgId := banzaiCli.Context().OrganizationID()
+	clusterId := options.ClusterID()
+	_, err := banzaiCli.Client().ClusterFeaturesApi.ActivateClusterFeature(context.Background(), orgId, clusterId, featureName, req)
+	if err != nil {
+		cli.LogAPIError("activate DNS cluster feature", err, req)
+		log.Fatalf("could not activate DNS cluster feature: %v", err)
+	}
 
 	return nil
 }
@@ -101,23 +96,28 @@ func readActivateReqFromFileOrStdin(filePath string, req *pipeline.ActivateClust
 }
 
 func buildActivateReqInteractively(banzaiCli cli.Cli, _ activateOptions, req *pipeline.ActivateClusterFeatureRequest) error {
-
-	var comp string
-	if err := survey.AskOne(&survey.Select{Message: "Please select a DNS component to activate:", Options: []string{"Auto DNS", "Custom DNS"}, Default: "Auto DNS"}, &comp, nil); err != nil {
-		return errors.Wrap(err, "failure during survey")
+	comp, err := askDnsComponent()
+	if err != nil {
+		return errors.WrapIf(err, "error during choosing DNS component")
 	}
 
 	switch comp {
-	case "Auto DNS":
+	case dnsAuto:
 		buildAutoDNSFeatureRequest(req)
-	case "Custom DNS":
+	case dnsCustom:
 		if err := buildCustomDNSFeatureRequest(banzaiCli, req); err != nil {
 			return err
 		}
 	}
 
 	var edit bool
-	if err := survey.AskOne(&survey.Confirm{Message: "Do you want to edit the cluster feature activation request in your text editor?"}, &edit); err != nil {
+	if err := survey.AskOne(
+		&survey.Confirm{
+			Message: "Do you want to edit the cluster feature activation request in your text editor?",
+		},
+		&edit,
+		nil,
+	); err != nil {
 		return errors.WrapIf(err, "failure during survey")
 	}
 	if !edit {
@@ -129,9 +129,14 @@ func buildActivateReqInteractively(banzaiCli cli.Cli, _ activateOptions, req *pi
 		return errors.WrapIf(err, "failed to marshal request to JSON")
 	}
 	if err := survey.AskOne(
-		&survey.Editor{Default: string(content), HideDefault: true, AppendDefault: true},
+		&survey.Editor{
+			Default:       string(content),
+			HideDefault:   true,
+			AppendDefault: true,
+		},
 		&content,
-		survey.WithValidator(validateActivateClusterFeatureRequest)); err != nil {
+		survey.WithValidator(validateActivateClusterFeatureRequest),
+	); err != nil {
 		return errors.WrapIf(err, "failure during survey")
 	}
 	if err := json.Unmarshal(content, req); err != nil {
@@ -172,8 +177,7 @@ func buildCustomDNSFeatureRequest(banzaiCli cli.Cli, req *pipeline.ActivateClust
 		return err
 	}
 
-	// TODO: provider specific options
-	providerSpec, err := askDnsProviderSpecificOptions(banzaiCli, provider, secretID, req)
+	providerSpec, err := askDnsProviderSpecificOptions(banzaiCli, provider, secretID)
 	if err != nil {
 		return err
 	}
@@ -194,14 +198,27 @@ func askDomainFilter() ([]string, error) {
 	var domainFilters []string
 	for {
 		var domainFilter string
-		if err := survey.AskOne(&survey.Input{Message: "Please provide a domain filter to match domains against", Default: "*"}, &domainFilter, nil); err != nil {
-			return nil, errors.Wrap(err, "failure during survey")
+		if err := survey.AskOne(
+			&survey.Input{
+				Message: "Please provide a domain filter to match domains against",
+				Default: "*",
+			},
+			&domainFilter,
+			nil,
+		); err != nil {
+			return nil, errors.WrapIf(err, "failure during survey")
 		}
 		domainFilters = append(domainFilters, domainFilter)
 
 		var another bool
-		if err := survey.AskOne(&survey.Confirm{Message: "Would you like to add another domain filter?"}, &another, nil); err != nil {
-			return nil, errors.Wrap(err, "failure during survey")
+		if err := survey.AskOne(
+			&survey.Confirm{
+				Message: "Would you like to add another domain filter?",
+			},
+			&another,
+			nil,
+		); err != nil {
+			return nil, errors.WrapIf(err, "failure during survey")
 		}
 		if !another {
 			break
@@ -213,8 +230,14 @@ func askDomainFilter() ([]string, error) {
 
 func askDomain() (string, error) {
 	var clusterDomain string
-	if err := survey.AskOne(&survey.Input{Message: "Please specify the cluster's domain:"}, &clusterDomain, nil); err != nil {
-		return "", errors.Wrap(err, "failure during survey")
+	if err := survey.AskOne(
+		&survey.Input{
+			Message: "Please specify the cluster's domain:",
+		},
+		&clusterDomain,
+		nil,
+	); err != nil {
+		return "", errors.WrapIf(err, "failure during survey")
 	}
 
 	return clusterDomain, nil
@@ -227,8 +250,15 @@ func askDnsProvider() (string, error) {
 		for _, p := range providers {
 			options = append(options, p.Name)
 		}
-		if err := survey.AskOne(&survey.Select{Message: "Please select a DNS provider:", Options: options}, &provider, nil); err != nil {
-			return "", errors.Wrap(err, "failure during survey")
+		if err := survey.AskOne(
+			&survey.Select{
+				Message: "Please select a DNS provider:",
+				Options: options,
+			},
+			&provider,
+			nil,
+		); err != nil {
+			return "", errors.WrapIf(err, "failure during survey")
 		}
 		for id, p := range providers {
 			if p.Name == provider {
@@ -256,7 +286,6 @@ func askSecret(banzaiCli cli.Cli, provider string) (string, error) {
 		return "", errors.New(fmt.Sprintf("there's no secrets with '%s' type", secretType))
 	}
 
-	// TODO: share secret selection/creation flow
 	var secretID string
 	options := make([]string, len(secrets))
 	for i, s := range secrets {
@@ -264,8 +293,15 @@ func askSecret(banzaiCli cli.Cli, provider string) (string, error) {
 	}
 
 	var secretName string
-	if err := survey.AskOne(&survey.Select{Message: "Please select a secret for accessing the provider:", Options: options}, &secretName, nil); err != nil {
-		return "", errors.Wrap(err, "failed to retrieve secrets")
+	if err := survey.AskOne(
+		&survey.Select{
+			Message: "Please select a secret for accessing the provider:",
+			Options: options,
+		},
+		&secretName,
+		nil,
+	); err != nil {
+		return "", errors.WrapIf(err, "failed to retrieve secrets")
 	}
 
 	for _, s := range secrets {
@@ -278,7 +314,7 @@ func askSecret(banzaiCli cli.Cli, provider string) (string, error) {
 	return secretID, nil
 }
 
-func askDnsProviderSpecificOptions(banzaiCli cli.Cli, provider string, secretID string, req *pipeline.ActivateClusterFeatureRequest) (interface{}, error) {
+func askDnsProviderSpecificOptions(banzaiCli cli.Cli, provider string, secretID string) (interface{}, error) {
 	orgID := banzaiCli.Context().OrganizationID()
 
 	r := activateCustomRequest{
@@ -287,6 +323,7 @@ func askDnsProviderSpecificOptions(banzaiCli cli.Cli, provider string, secretID 
 	}
 
 	switch provider {
+	case dnsRoute53:
 	case dnsGoogle:
 		project, err := askGoogleProject(banzaiCli, secretID, orgID)
 		if err != nil {
@@ -332,8 +369,15 @@ func askGoogleProject(banzaiCli cli.Cli, secretID string, orgID int32) (string, 
 	}
 
 	var projectName string
-	if err := survey.AskOne(&survey.Select{Message: "Please select a project:", Options: options}, &projectName, nil); err != nil {
-		return "", errors.Wrap(err, "failed to retrieve projects")
+	if err := survey.AskOne(
+		&survey.Select{
+			Message: "Please select a project:",
+			Options: options,
+		},
+		&projectName,
+		nil,
+	); err != nil {
+		return "", errors.WrapIf(err, "failed to retrieve projects")
 	}
 
 	var projectID string
@@ -353,6 +397,22 @@ func buildAutoDNSFeatureRequest(req *pipeline.ActivateClusterFeatureRequest) {
 			"enabled": true,
 		},
 	}
+}
+
+func askDnsComponent() (string, error) {
+	var comp string
+	if err := survey.AskOne(
+		&survey.Select{
+			Message: "Please select a DNS component to activate:",
+			Options: []string{dnsAuto, dnsCustom},
+			Default: dnsAuto,
+		},
+		&comp,
+		nil,
+	); err != nil {
+		return "", errors.WrapIf(err, "failure during survey")
+	}
+	return comp, nil
 }
 
 type activateCustomRequest struct {
