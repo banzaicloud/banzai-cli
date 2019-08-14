@@ -17,6 +17,7 @@ package dns
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
@@ -24,6 +25,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
+	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -67,13 +69,18 @@ func runActivate(banzaiCli cli.Cli, options activateOptions, _ []string) error {
 		}
 	}
 
-	orgId := banzaiCli.Context().OrganizationID()
-	clusterId := options.ClusterID()
-	resp, err := banzaiCli.Client().ClusterFeaturesApi.ActivateClusterFeature(context.Background(), orgId, clusterId, featureName, req)
-	if err != nil {
-		cli.LogAPIError("activate DNS cluster feature", err, resp.Request)
-		log.Fatalf("could not activate DNS cluster feature: %v", err)
-	}
+	resp, _ := json.Marshal(req)
+
+	fmt.Println("request", string(resp))
+
+	// todo (colin): put back the request
+	//orgId := banzaiCli.Context().OrganizationID()
+	//clusterId := options.ClusterID()
+	//resp, err := banzaiCli.Client().ClusterFeaturesApi.ActivateClusterFeature(context.Background(), orgId, clusterId, featureName, req)
+	//if err != nil {
+	//	cli.LogAPIError("activate DNS cluster feature", err, resp.Request)
+	//	log.Fatalf("could not activate DNS cluster feature: %v", err)
+	//}
 
 	return nil
 }
@@ -100,93 +107,10 @@ func buildActivateReqInteractively(banzaiCli cli.Cli, _ activateOptions, req *pi
 
 	switch comp {
 	case "Auto DNS":
-		req.Spec = obj{
-			"autoDns": obj{
-				"enabled": true,
-			},
-		}
+		buildAutoDNSFeatureRequest(req)
 	case "Custom DNS":
-		var domainFilters []string
-		for {
-			var domainFilter string
-			if err := survey.AskOne(&survey.Input{Message: "Please provide a domain filter to match domains against", Default: "*"}, &domainFilter, nil); err != nil {
-				return errors.Wrap(err, "failure during survey")
-			}
-			domainFilters = append(domainFilters, domainFilter)
-
-			var another bool
-			if err := survey.AskOne(&survey.Confirm{Message: "Would you like to add another domain filter?"}, &another, nil); err != nil {
-				return errors.Wrap(err, "failure during survey")
-			}
-			if !another {
-				break
-			}
-		}
-
-		var clusterDomain string
-		if err := survey.AskOne(&survey.Input{Message: "Please specify the cluster's domain:"}, &clusterDomain, nil); err != nil {
-			return errors.Wrap(err, "failure during survey")
-		}
-
-		var provider string
-		{
-			options := make([]string, 0, len(providers))
-			for _, p := range providers {
-				options = append(options, p.Name)
-			}
-			if err := survey.AskOne(&survey.Select{Message: "Please select a DNS provider:", Options: options}, &provider, nil); err != nil {
-				return errors.Wrap(err, "failure during survey")
-			}
-			for id, p := range providers {
-				if p.Name == provider {
-					provider = id
-					break
-				}
-			}
-		}
-
-		// TODO: provider specific options
-
-		orgID := banzaiCli.Context().OrganizationID()
-		secretType := providers[provider].SecretType
-		secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{Type_: optional.NewString(secretType)})
-		if err != nil {
-			return errors.Wrap(err, "failed to retrieve secrets")
-		}
-
-		// TODO: share secret selection/creation flow
-		var secretID string
-		{
-			options := make([]string, 1+len(secrets))
-			options[0] = "Create new secret"
-			for i, s := range secrets {
-				options[1+i] = s.Name
-			}
-			var secretName string
-			if err := survey.AskOne(&survey.Select{Message: "Please select a secret for accessing the provider:", Options: options}, &secretName, nil); err != nil {
-				return errors.Wrap(err, "failed to retrieve secrets")
-			}
-			if secretName == options[0] {
-				// TODO: create new secret
-			} else {
-				for _, s := range secrets {
-					if s.Name == secretName {
-						secretID = s.Id
-						break
-					}
-				}
-			}
-		}
-
-		req.Spec = obj{
-			"customDns": obj{
-				"domainFilters": domainFilters,
-				"clusterDomain": clusterDomain,
-				"provider": obj{
-					"name":     provider,
-					"secretId": secretID,
-				},
-			},
+		if err := buildCustomDNSFeatureRequest(banzaiCli, req); err != nil {
+			return err
 		}
 	}
 
@@ -222,4 +146,218 @@ func validateActivateClusterFeatureRequest(req interface{}) error {
 	}
 
 	return validateSpec(request.Spec)
+}
+
+// todo activate??
+func buildCustomDNSFeatureRequest(banzaiCli cli.Cli, req *pipeline.ActivateClusterFeatureRequest) error {
+	domainFilters, err := askDomainFilter()
+	if err != nil {
+		return err
+	}
+
+	clusterDomain, err := askDomain()
+	if err != nil {
+		return err
+	}
+
+	provider, err := askDnsProvider()
+	if err != nil {
+		return err
+	}
+
+	secretID, err := askSecret(banzaiCli, provider)
+	if err != nil {
+		return err
+	}
+
+	// TODO: provider specific options
+	providerSpec, err := askDnsProviderSpecificOptions(banzaiCli, provider, secretID, req)
+	if err != nil {
+		return err
+	}
+
+	req.Spec = obj{
+		"customDns": obj{
+			"enabled":       true,
+			"domainFilters": domainFilters,
+			"clusterDomain": clusterDomain,
+			"provider":      providerSpec,
+		},
+	}
+
+	return nil
+}
+
+func askDomainFilter() ([]string, error) {
+	var domainFilters []string
+	for {
+		var domainFilter string
+		if err := survey.AskOne(&survey.Input{Message: "Please provide a domain filter to match domains against", Default: "*"}, &domainFilter, nil); err != nil {
+			return nil, errors.Wrap(err, "failure during survey")
+		}
+		domainFilters = append(domainFilters, domainFilter)
+
+		var another bool
+		if err := survey.AskOne(&survey.Confirm{Message: "Would you like to add another domain filter?"}, &another, nil); err != nil {
+			return nil, errors.Wrap(err, "failure during survey")
+		}
+		if !another {
+			break
+		}
+	}
+
+	return domainFilters, nil
+}
+
+func askDomain() (string, error) {
+	var clusterDomain string
+	if err := survey.AskOne(&survey.Input{Message: "Please specify the cluster's domain:"}, &clusterDomain, nil); err != nil {
+		return "", errors.Wrap(err, "failure during survey")
+	}
+
+	return clusterDomain, nil
+}
+
+func askDnsProvider() (string, error) {
+	var provider string
+	{
+		options := make([]string, 0, len(providers))
+		for _, p := range providers {
+			options = append(options, p.Name)
+		}
+		if err := survey.AskOne(&survey.Select{Message: "Please select a DNS provider:", Options: options}, &provider, nil); err != nil {
+			return "", errors.Wrap(err, "failure during survey")
+		}
+		for id, p := range providers {
+			if p.Name == provider {
+				provider = id
+				break
+			}
+		}
+	}
+	return provider, nil
+}
+
+func askSecret(banzaiCli cli.Cli, provider string) (string, error) {
+
+	log.Debugf("load %s secrets", provider)
+
+	orgID := banzaiCli.Context().OrganizationID()
+	secretType := providers[provider].SecretType
+	secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{Type_: optional.NewString(secretType)})
+	if err != nil {
+		return "", errors.Wrap(err, "failed to retrieve secrets")
+	}
+
+	// TODO: (colin) check secrets length
+
+	// TODO: share secret selection/creation flow
+	var secretID string
+	// TODO (colin): add create secret option
+	options := make([]string, len(secrets))
+	for i, s := range secrets {
+		options[i] = s.Name
+	}
+
+	var secretName string
+	if err := survey.AskOne(&survey.Select{Message: "Please select a secret for accessing the provider:", Options: options}, &secretName, nil); err != nil {
+		return "", errors.Wrap(err, "failed to retrieve secrets")
+	}
+
+	for _, s := range secrets {
+		if s.Name == secretName {
+			secretID = s.Id
+			break
+		}
+	}
+
+	return secretID, nil
+}
+
+func askDnsProviderSpecificOptions(banzaiCli cli.Cli, provider string, secretID string, req *pipeline.ActivateClusterFeatureRequest) (interface{}, error) {
+	orgID := banzaiCli.Context().OrganizationID()
+
+	r := activateRequest{
+		Name:     provider,
+		SecretID: secretID,
+	}
+
+	switch provider {
+	case dnsGoogle:
+		project, err := askGoogleProject(banzaiCli, secretID, orgID)
+		if err != nil {
+			return nil, err
+		}
+		r.Options = providerOptions{
+			Project: project,
+		}
+	case dnsAzure:
+		resourceGroup, err := input.AskResourceGroup(banzaiCli, orgID, secretID, "")
+		if err != nil {
+			return nil, err
+		}
+		r.Options = providerOptions{
+			ResourceGroup: resourceGroup,
+		}
+	default:
+		return nil, &NotSupportedProviderError{
+			provider: provider,
+		}
+	}
+
+	return r, nil
+}
+
+type NotSupportedProviderError struct {
+	provider string
+}
+
+func (e *NotSupportedProviderError) Error() string {
+	return fmt.Sprintf("not supported provider: %s", e.provider)
+}
+
+func askGoogleProject(banzaiCli cli.Cli, secretID string, orgID int32) (string, error) {
+	projects, _, err := banzaiCli.Client().ProjectsApi.GetProjects(context.Background(), orgID, secretID)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to retrieve google projects")
+	}
+
+	options := make([]string, len(projects.Projects))
+	for i, p := range projects.Projects {
+		options[i] = p.Name
+	}
+
+	var projectName string
+	if err := survey.AskOne(&survey.Select{Message: "Please select a project:", Options: options}, &projectName, nil); err != nil {
+		return "", errors.Wrap(err, "failed to retrieve projects")
+	}
+
+	var projectID string
+	for _, p := range projects.Projects {
+		if p.Name == projectName {
+			projectID = p.ProjectId
+			break
+		}
+	}
+
+	return projectID, nil
+}
+
+func buildAutoDNSFeatureRequest(req *pipeline.ActivateClusterFeatureRequest) {
+	req.Spec = obj{
+		"autoDns": obj{
+			"enabled": true,
+		},
+	}
+}
+
+type activateRequest struct {
+	Name     string          `json:"name"`
+	SecretID string          `json:"secretId"`
+	Options  providerOptions `json:"options,omitempty"`
+}
+
+type providerOptions struct {
+	Project       string `json:"project,omitempty"`
+	ResourceGroup string `json:"resourceGroup,omitempty"`
 }
