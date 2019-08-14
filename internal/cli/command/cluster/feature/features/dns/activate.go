@@ -59,10 +59,10 @@ type activateOptions struct {
 	filePath string
 }
 
-func runActivate(banzaiCli cli.Cli, options activateOptions, _ []string) error {
+func runActivate(banzaiCli cli.Cli, options activateOptions, args []string) error {
 	var req pipeline.ActivateClusterFeatureRequest
 	if options.filePath == "" && banzaiCli.Interactive() {
-		if err := buildActivateReqInteractively(banzaiCli, options, &req); err != nil {
+		if err := buildActivateReqInteractively(banzaiCli, options, &req, args); err != nil {
 			return errors.WrapIf(err, "failed to build activate request interactively")
 		}
 	} else {
@@ -95,7 +95,16 @@ func readActivateReqFromFileOrStdin(filePath string, req *pipeline.ActivateClust
 	return nil
 }
 
-func buildActivateReqInteractively(banzaiCli cli.Cli, _ activateOptions, req *pipeline.ActivateClusterFeatureRequest) error {
+func buildActivateReqInteractively(
+	banzaiCli cli.Cli,
+	ao activateOptions,
+	req *pipeline.ActivateClusterFeatureRequest,
+	args []string,
+) error {
+	if err := ao.Init(args...); err != nil {
+		return errors.Wrap(err, "failed to initialize options")
+	}
+
 	comp, err := askDnsComponent()
 	if err != nil {
 		return errors.WrapIf(err, "error during choosing DNS component")
@@ -155,7 +164,6 @@ func validateActivateClusterFeatureRequest(req interface{}) error {
 	return validateSpec(request.Spec)
 }
 
-// todo activate??
 func buildCustomDNSFeatureRequest(banzaiCli cli.Cli, req *pipeline.ActivateClusterFeatureRequest) error {
 	domainFilters, err := askDomainFilter()
 	if err != nil {
