@@ -61,5 +61,7 @@ func runDeactivate(banzaiCli cli.Cli, options deactivateOptions, args []string) 
 		log.Fatalf("could not deactivate DNS cluster feature: %v", err)
 	}
 
+	log.Infof("feature '%s' started to deactivate", featureName)
+
 	return nil
 }
