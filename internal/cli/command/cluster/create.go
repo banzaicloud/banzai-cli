@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -363,6 +364,7 @@ func buildDefaultRequest(out map[string]interface{}) error {
 	for provider := range providers {
 		providerNames = append(providerNames, provider)
 	}
+	sort.Strings(providerNames)
 
 	var providerName string
 
