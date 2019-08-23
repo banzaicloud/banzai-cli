@@ -7,7 +7,7 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: Pipeline API
-  version: 0.26.0
+  version: 0.29.0-dev.1
 servers:
 - url: http://localhost:9090
 tags:
@@ -50,6 +50,18 @@ tags:
 - description: 'ARK: restores related functions'
   name: ark-restores
 paths:
+  /api/version:
+    get:
+      description: Return Pipeline build and deployment info
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionResponse'
+          description: Version info
+      tags:
+      - common
   /api/v1/orgs/{orgId}/domain:
     get:
       description: Return the base domain
@@ -8004,6 +8016,35 @@ components:
       description: Feature properties
       required: true
   schemas:
+    VersionResponse:
+      description: Pipeline build and deployment info
+      example:
+        build_date: build_date
+        os: os
+        arch: arch
+        go_version: go_version
+        compiler: compiler
+        instance_uuid: instance_uuid
+        version: version
+        commit_hash: commit_hash
+      properties:
+        version:
+          type: string
+        commit_hash:
+          type: string
+        build_date:
+          type: string
+        go_version:
+          type: string
+        os:
+          type: string
+        arch:
+          type: string
+        compiler:
+          type: string
+        instance_uuid:
+          type: string
+      type: object
     UpdateUserRequest:
       example:
         gitHubToken: b8d9cfb5df15fd513bf3351719876ffff4b310d2
@@ -8087,6 +8128,16 @@ components:
           cloud: google
           profileName: profileName
           secretName: my-aws-secret
+          scaleOptions:
+            desiredMem: 1.602745618307040320615897144307382404804229736328125
+            onDemandPct: 59
+            excludes:
+            - excludes
+            - excludes
+            desiredCpu: 1.080082819046101150206595775671303272247314453125
+            keepDesiredCapacity: true
+            desiredGpu: 0
+            enabled: true
           secretIds:
           - 62bc3c75-91fb-4670-bad4-24b401a9deac
           - 4378ae32-2355-12ed-b984-1234567804ed
@@ -8102,7 +8153,7 @@ components:
           properties:
             gke:
               master:
-                version: 0.26.0
+                version: 0.29.0-dev.1
               nodePools:
                 pool1:
                   count: 1
@@ -8286,6 +8337,16 @@ components:
         cloud: google
         profileName: profileName
         secretName: my-aws-secret
+        scaleOptions:
+          desiredMem: 1.602745618307040320615897144307382404804229736328125
+          onDemandPct: 59
+          excludes:
+          - excludes
+          - excludes
+          desiredCpu: 1.080082819046101150206595775671303272247314453125
+          keepDesiredCapacity: true
+          desiredGpu: 0
+          enabled: true
         secretIds:
         - 62bc3c75-91fb-4670-bad4-24b401a9deac
         - 4378ae32-2355-12ed-b984-1234567804ed
@@ -8301,7 +8362,7 @@ components:
         properties:
           gke:
             master:
-              version: 0.26.0
+              version: 0.29.0-dev.1
             nodePools:
               pool1:
                 count: 1
@@ -8345,11 +8406,13 @@ components:
           type: object
         profileName:
           type: string
+        scaleOptions:
+          $ref: '#/components/schemas/ScaleOptions'
         properties:
           example:
             gke:
               master:
-                version: 0.26.0
+                version: 0.29.0-dev.1
               nodePools:
                 pool1:
                   count: 1
@@ -8402,6 +8465,16 @@ components:
       - kind
       type: object
     ScaleOptions:
+      example:
+        desiredMem: 1.602745618307040320615897144307382404804229736328125
+        onDemandPct: 59
+        excludes:
+        - excludes
+        - excludes
+        desiredCpu: 1.080082819046101150206595775671303272247314453125
+        keepDesiredCapacity: true
+        desiredGpu: 0
+        enabled: true
       properties:
         enabled:
           type: boolean
@@ -9034,7 +9107,7 @@ components:
           example:
             google:
               master:
-                version: 0.26.0
+                version: 0.29.0-dev.1
               nodePools:
                 pool1:
                   count: 2
@@ -9766,6 +9839,8 @@ components:
           type: string
         upgrade:
           type: boolean
+        force_upgrade:
+          type: boolean
         service_account:
           type: string
         canary_image:
@@ -10103,7 +10178,7 @@ components:
         properties:
           gke:
             master:
-              version: 0.26.0
+              version: 0.29.0-dev.1
             nodeVersion: "1.10"
             nodePools:
               pool1:
@@ -10129,7 +10204,7 @@ components:
           example:
             gke:
               master:
-                version: 0.26.0
+                version: 0.29.0-dev.1
               nodeVersion: "1.10"
               nodePools:
                 pool1:
@@ -10161,7 +10236,7 @@ components:
         properties:
           gke:
             master:
-              version: 0.26.0
+              version: 0.29.0-dev.1
             nodeVersion: 1.8.7-gke.1
             nodePools:
               pool1:
@@ -10187,7 +10262,7 @@ components:
           example:
             gke:
               master:
-                version: 0.26.0
+                version: 0.29.0-dev.1
               nodeVersion: 1.8.7-gke.1
               nodePools:
                 pool1:

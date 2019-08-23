@@ -3,7 +3,7 @@
  *
  * Pipeline v0.3.0 swagger
  *
- * API version: 0.26.0
+ * API version: 0.29.0-dev.1
  * Contact: info@banzaicloud.com
  */
 
@@ -22,5 +22,6 @@ type CreateClusterRequest struct {
 	SecretName string `json:"secretName,omitempty"`
 	PostHooks map[string]interface{} `json:"postHooks,omitempty"`
 	ProfileName string `json:"profileName,omitempty"`
+	ScaleOptions ScaleOptions `json:"scaleOptions,omitempty"`
 	Properties map[string]interface{} `json:"properties"`
 }
