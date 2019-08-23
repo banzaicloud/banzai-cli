@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
@@ -205,37 +206,20 @@ func buildCustomDNSFeatureRequest(banzaiCli cli.Cli, req *pipeline.ActivateClust
 }
 
 func askDomainFilter() ([]string, error) {
-	var domainFilters []string
-	for {
-		var domainFilter string
-		if err := survey.AskOne(
-			&survey.Input{
-				Message: "Please provide a domain filter to match domains against",
-				Default: "*",
-			},
-			&domainFilter,
-			nil,
-		); err != nil {
-			return nil, errors.WrapIf(err, "failure during survey")
-		}
-		domainFilters = append(domainFilters, domainFilter)
-
-		var another bool
-		if err := survey.AskOne(
-			&survey.Confirm{
-				Message: "Would you like to add another domain filter?",
-			},
-			&another,
-			nil,
-		); err != nil {
-			return nil, errors.WrapIf(err, "failure during survey")
-		}
-		if !another {
-			break
-		}
+	var domainFilter string
+	if err := survey.AskOne(
+		&survey.Input{
+			Message: "Please provide a domain filter to match domains against",
+			Default: "*",
+			Help:    "To add multiple domains separate with commna (,) character. Like: *foo.com, *bar.com",
+		},
+		&domainFilter,
+		nil,
+	); err != nil {
+		return nil, errors.WrapIf(err, "failure during survey")
 	}
 
-	return domainFilters, nil
+	return strings.Split(domainFilter, ","), nil
 }
 
 func askDomain() (string, error) {
