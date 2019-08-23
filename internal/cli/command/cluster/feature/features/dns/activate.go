@@ -40,8 +40,8 @@ func NewActivateCommand(banzaiCli cli.Cli) *cobra.Command {
 		Short:         "Activate the DNS feature of a cluster",
 		Args:          cobra.NoArgs,
 		SilenceErrors: true,
-		SilenceUsage:  true,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
 			return runActivate(banzaiCli, options, args)
 		},
 	}
