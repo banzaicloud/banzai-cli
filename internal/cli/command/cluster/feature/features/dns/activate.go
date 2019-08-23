@@ -128,7 +128,6 @@ func buildActivateReqInteractively(
 			Message: "Do you want to edit the cluster feature activation request in your text editor?",
 		},
 		&edit,
-		nil,
 	); err != nil {
 		return errors.WrapIf(err, "failure during survey")
 	}
@@ -214,7 +213,6 @@ func askDomainFilter() ([]string, error) {
 			Help:    "To add multiple domains separate with commna (,) character. Like: *foo.com, *bar.com",
 		},
 		&domainFilter,
-		nil,
 	); err != nil {
 		return nil, errors.WrapIf(err, "failure during survey")
 	}
@@ -229,7 +227,6 @@ func askDomain() (string, error) {
 			Message: "Please specify the cluster's domain:",
 		},
 		&clusterDomain,
-		nil,
 	); err != nil {
 		return "", errors.WrapIf(err, "failure during survey")
 	}
@@ -250,7 +247,6 @@ func askDnsProvider() (string, error) {
 				Options: options,
 			},
 			&provider,
-			nil,
 		); err != nil {
 			return "", errors.WrapIf(err, "failure during survey")
 		}
@@ -293,7 +289,6 @@ func askSecret(banzaiCli cli.Cli, provider string) (string, error) {
 			Options: options,
 		},
 		&secretName,
-		nil,
 	); err != nil {
 		return "", errors.WrapIf(err, "failed to retrieve secrets")
 	}
@@ -369,7 +364,6 @@ func askGoogleProject(banzaiCli cli.Cli, secretID string, orgID int32) (string, 
 			Options: options,
 		},
 		&projectName,
-		nil,
 	); err != nil {
 		return "", errors.WrapIf(err, "failed to retrieve projects")
 	}
@@ -402,7 +396,6 @@ func askDnsComponent() (string, error) {
 			Default: dnsAuto,
 		},
 		&comp,
-		nil,
 	); err != nil {
 		return "", errors.WrapIf(err, "failure during survey")
 	}
