@@ -182,12 +182,7 @@ func buildCustomDNSFeatureRequest(banzaiCli cli.Cli, req *pipeline.ActivateClust
 		return err
 	}
 
-	secretID, err := askSecret(banzaiCli, provider)
-	if err != nil {
-		return err
-	}
-
-	providerSpec, err := askDnsProviderSpecificOptions(banzaiCli, provider, secretID)
+	providerSpec, err := askDnsProviderSpecificOptions(banzaiCli, provider)
 	if err != nil {
 		return err
 	}
@@ -304,8 +299,13 @@ func askSecret(banzaiCli cli.Cli, provider string) (string, error) {
 	return "", errors.Errorf("no secret with name %q", secretName)
 }
 
-func askDnsProviderSpecificOptions(banzaiCli cli.Cli, provider string, secretID string) (interface{}, error) {
+func askDnsProviderSpecificOptions(banzaiCli cli.Cli, provider string) (interface{}, error) {
 	orgID := banzaiCli.Context().OrganizationID()
+
+	secretID, err := askSecret(banzaiCli, provider)
+	if err != nil {
+		return nil, errors.WrapIf(err, fmt.Sprintf("failed to get secret for %q provider", provider))
+	}
 
 	r := activateCustomRequest{
 		Name:     provider,
