@@ -61,9 +61,14 @@ type activateOptions struct {
 }
 
 func runActivate(banzaiCli cli.Cli, options activateOptions, args []string) error {
+
+	if err := options.Init(args...); err != nil {
+		return errors.Wrap(err, "failed to initialize options")
+	}
+
 	var req pipeline.ActivateClusterFeatureRequest
 	if options.filePath == "" && banzaiCli.Interactive() {
-		if err := buildActivateReqInteractively(banzaiCli, options, &req, args); err != nil {
+		if err := buildActivateReqInteractively(banzaiCli, &req); err != nil {
 			return errors.WrapIf(err, "failed to build activate request interactively")
 		}
 	} else {
@@ -100,14 +105,8 @@ func readActivateReqFromFileOrStdin(filePath string, req *pipeline.ActivateClust
 
 func buildActivateReqInteractively(
 	banzaiCli cli.Cli,
-	ao activateOptions,
 	req *pipeline.ActivateClusterFeatureRequest,
-	args []string,
 ) error {
-	if err := ao.Init(args...); err != nil {
-		return errors.Wrap(err, "failed to initialize options")
-	}
-
 	comp, err := askDnsComponent()
 	if err != nil {
 		return errors.WrapIf(err, "error during choosing DNS component")
