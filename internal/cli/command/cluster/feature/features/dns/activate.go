@@ -212,8 +212,9 @@ func askDomainFilter() ([]string, error) {
 		return nil, errors.WrapIf(err, "failure during survey")
 	}
 
-	var filters []string
-	for _, s := range strings.Split(domainFilter, ",") {
+	filterItems := strings.Split(domainFilter, ",")
+	filters := make([]string, len(filterItems))
+	for _, s := range filterItems {
 		filters = append(filters, strings.TrimSpace(s))
 	}
 
