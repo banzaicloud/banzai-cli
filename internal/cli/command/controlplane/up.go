@@ -182,21 +182,6 @@ func runInternal(command string, options cpContext, env map[string]string) error
 
 func runInstaller(command []string, options cpContext, env map[string]string) error {
 
-	infoCmd := exec.Command("docker", "info", "-f", "{{or (eq .OperatingSystem \"Docker Desktop\") (eq .OperatingSystem \"Docker for Mac\")}}")
-
-	infoOuput, err := infoCmd.Output()
-	if err != nil {
-		return err
-	}
-
-	isDockerForMac := strings.Trim(string(infoOuput), "\n")
-
-	isLocalhost := "false"
-
-	if isDockerForMac == "true" {
-		isLocalhost = "true"
-	}
-
 	if options.pullInstaller {
 		if err := options.pullDockerImage(); err != nil {
 			return errors.WrapIf(err, "failed to pull cp-installer")
@@ -204,10 +189,8 @@ func runInstaller(command []string, options cpContext, env map[string]string) er
 	}
 
 	args := []string{
-		"run", "-it", "--rm",
+		"run", "-it", "--rm", "--net=host",
 		"-v", fmt.Sprintf("%s:/root", options.workspace),
-		"-e", fmt.Sprintf("IS_DOCKER_FOR_MAC=%s", isDockerForMac),
-		"-e", fmt.Sprintf("IS_LOCALHOST=%s", isLocalhost),
 		"-e", fmt.Sprintf("KUBECONFIG=/root/%s", kubeconfigFilename),
 	}
 
@@ -232,6 +215,6 @@ func runInstaller(command []string, options cpContext, env map[string]string) er
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	err = cmd.Run()
+	err := cmd.Run()
 	return err
 }

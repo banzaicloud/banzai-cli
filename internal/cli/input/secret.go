@@ -16,6 +16,7 @@ package input
 
 import (
 	"context"
+	"net/url"
 	"os/exec"
 	"path/filepath"
 
@@ -111,27 +112,59 @@ func GetAmazonCredentials() (string, map[string]string, error) {
 }
 
 // GetCurrentKubecontext extracts the Kubernetes context selected locally
-func GetCurrentKubecontext() (string, string, error) {
+func GetCurrentKubecontext() (string, []byte, error) {
 	c := exec.Command("kubectl", "config", "view", "--minify", "--raw")
 	out, err := c.Output()
 	if err != nil {
-		return "", "", errors.WrapIf(err, "failed to query current context from kubectl")
+		return "", nil, errors.WrapIf(err, "failed to query current context from kubectl")
 	}
 
 	var parsed v1.Config
 	if err := yaml.Unmarshal(out, &parsed); err != nil {
-		return "", "", errors.WrapIf(err, "failed to parse local configuration")
+		return "", nil, errors.WrapIf(err, "failed to parse local configuration")
 	}
 
 	if len(parsed.AuthInfos) != 1 {
-		return "", "", errors.New("kubernetes config doesn't contain a single user definition")
+		return "", nil, errors.New("kubernetes config doesn't contain a single user definition")
 	}
 	authConf := parsed.AuthInfos[0].AuthInfo.AuthProvider
 
 	if authConf != nil && authConf.Config["cmd-path"] != "" {
 		// TODO add support
-		return "", "", errors.Errorf("kubernetes authorization helpers (%s) are not supported", filepath.Base(authConf.Config["cmd-path"]))
+		return "", nil, errors.Errorf("kubernetes authorization helpers (%s) are not supported", filepath.Base(authConf.Config["cmd-path"]))
 	}
 
-	return parsed.CurrentContext, string(out), nil
+	return parsed.CurrentContext, out, nil
+}
+
+// RewriteLocalhostToHostDockerInternal rewrites a minified kubeconfig to use `host.docker.internal` in place of localhost
+func RewriteLocalhostToHostDockerInternal(in []byte) ([]byte, error) {
+	var parsed v1.Config
+	if err := yaml.Unmarshal(in, &parsed); err != nil {
+		return nil, errors.WrapIf(err, "failed to parse local configuration")
+	}
+	if len(parsed.Clusters) != 1 {
+		return nil, errors.New("kubernetes config doesn't contain a single cluster definition")
+	}
+	serverURL, err := url.Parse(parsed.Clusters[0].Cluster.Server)
+	if err != nil {
+		return nil, errors.WrapIf(err, "failed to parse server URL")
+	}
+
+	if host := serverURL.Hostname(); host == "localhost" || host == "127.0.0.1" {
+		port := serverURL.Port()
+		serverURL.Host = "host.docker.internal"
+		if port != "" {
+			serverURL.Host += ":" + port
+		}
+		parsed.Clusters[0].Cluster.Server = serverURL.String()
+		if len(parsed.Clusters[0].Cluster.CertificateAuthorityData) > 0 {
+			// kubernetes has no way to disable cert common name check only
+			parsed.Clusters[0].Cluster.CertificateAuthorityData = []byte{}
+			parsed.Clusters[0].Cluster.InsecureSkipTLSVerify = true
+		}
+	}
+
+	out, err := yaml.Marshal(parsed)
+	return out, errors.WrapIf(err, "failed to parse local configuration")
 }

@@ -26,6 +26,7 @@ import (
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/ghodss/yaml"
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -159,6 +160,15 @@ func ensureKINDCluster(banzaiCli cli.Cli, options cpContext) error {
 	kubeconfig, err := cmd.Output()
 	if err != nil {
 		return errors.WrapIf(err, "failed to get KIND kubeconfig")
+	}
+
+	if runtime.GOOS != "linux" {
+		// non-native docker daemons can't access the host machine directly even if running in host networking mode
+		// we have to rewrite configs referring to localhost to use the special name `host.docker.internal` instead
+		kubeconfig, err = input.RewriteLocalhostToHostDockerInternal(kubeconfig)
+		if err != nil {
+			return errors.WrapIf(err, "failed to rewrite Kubernetes config")
+		}
 	}
 
 	return options.writeKubeconfig(kubeconfig)

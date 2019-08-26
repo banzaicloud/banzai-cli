@@ -16,6 +16,7 @@ package controlplane
 
 import (
 	"fmt"
+	"runtime"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
@@ -83,6 +84,7 @@ func NewInitCommand(banzaiCli cli.Cli) *cobra.Command {
 }
 
 func askProvider(k8sContext string) (string, error) {
+	lookup := []string{providerEc2, providerKind, providerK8s}
 	choices := []string{"Create single-node cluster in Amazon EC2", "Create KIND (Kubernetes in Docker) cluster locally"}
 	if k8sContext != "" {
 		choices = append(choices, fmt.Sprintf("Use %q Kubernetes context", k8sContext))
@@ -93,18 +95,7 @@ func askProvider(k8sContext string) (string, error) {
 		return "", err
 	}
 
-	switch provider {
-	case 0:
-		return providerEc2, nil
-
-	case 1:
-		return providerKind, nil
-
-	case 2:
-		return providerK8s, nil
-	}
-
-	return "", errors.New("failed to select provider")
+	return lookup[provider], nil
 }
 
 func runInit(options initOptions, banzaiCli cli.Cli) error {
@@ -142,8 +133,18 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 
 	k8sContext, k8sConfig, err := input.GetCurrentKubecontext()
 	if err != nil {
+		if options.provider == providerK8s {
+			return errors.WrapIf(err, "failed to use current Kubernetes context")
+		}
 		k8sContext = ""
 		log.Debugf("won't use local kubernetes context: %v", err)
+	} else if runtime.GOOS != "linux" {
+		// non-native docker daemons can't access the host machine directly even if running in host networking mode
+		// we have to rewrite configs referring to localhost to use the special name `host.docker.internal` instead
+		k8sConfig, err = input.RewriteLocalhostToHostDockerInternal(k8sConfig)
+		if err != nil {
+			return errors.WrapIf(err, "failed to rewrite Kubernetes config")
+		}
 	}
 
 	if provider, ok := out["provider"]; ok {
@@ -172,6 +173,8 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
+	out["ingressHostPort"] = options.provider != providerK8s
+
 	switch options.provider {
 	case providerEc2:
 		id, region, _, err := input.GetAmazonCredentialsRegion("")
@@ -193,7 +196,7 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 			return errors.New("cancelled")
 		}
 	case providerK8s:
-		if err := options.writeKubeconfig([]byte(k8sConfig)); err != nil {
+		if err := options.writeKubeconfig(k8sConfig); err != nil {
 			return err
 		}
 	}
