@@ -35,6 +35,8 @@ type obj = map[string]interface{}
 func validateSpec(specObj map[string]interface{}) error {
 	providers := map[string]bool{
 		dnsRoute53: true,
+		dnsAzure: true,
+		dnsGoogle: true,
 	}
 
 	var spec struct {
