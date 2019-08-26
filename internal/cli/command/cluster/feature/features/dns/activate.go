@@ -212,7 +212,7 @@ func askDomainFilter() ([]string, error) {
 	}
 
 	filterItems := strings.Split(domainFilter, ",")
-	filters := make([]string, len(filterItems))
+	filters := make([]string, 0, len(filterItems))
 	for _, s := range filterItems {
 		filters = append(filters, strings.TrimSpace(s))
 	}
