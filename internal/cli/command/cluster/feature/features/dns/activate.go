@@ -80,7 +80,7 @@ func runActivate(banzaiCli cli.Cli, options activateOptions, args []string) erro
 		log.Fatalf("could not activate DNS cluster feature: %v", err)
 	}
 
-	log.Infof("feature '%s' started to activate", featureName)
+	log.Infof("feature %q started to activate", featureName)
 
 	return nil
 }
@@ -118,7 +118,7 @@ func buildActivateReqInteractively(
 		buildAutoDNSFeatureRequest(req)
 	case dnsCustom:
 		if err := buildCustomDNSFeatureRequest(banzaiCli, req); err != nil {
-			return err
+			return errors.Wrap(err, "failed to build custom DNS feature request")
 		}
 	}
 
@@ -209,8 +209,8 @@ func askDomainFilter() ([]string, error) {
 	if err := survey.AskOne(
 		&survey.Input{
 			Message: "Please provide a domain filter to match domains against",
-			Default: "*",
-			Help:    "To add multiple domains separate with commna (,) character. Like: *foo.com, *bar.com",
+			Default: "",
+			Help:    "To add multiple domains separate with commna (,) character. Like: foo.com, bar.com",
 		},
 		&domainFilter,
 	); err != nil {
@@ -235,29 +235,27 @@ func askDomain() (string, error) {
 }
 
 func askDnsProvider() (string, error) {
+	options := make([]string, 0, len(providers))
+	for _, p := range providers {
+		options = append(options, p.Name)
+	}
+
 	var provider string
-	{
-		options := make([]string, 0, len(providers))
-		for _, p := range providers {
-			options = append(options, p.Name)
-		}
-		if err := survey.AskOne(
-			&survey.Select{
-				Message: "Please select a DNS provider:",
-				Options: options,
-			},
-			&provider,
-		); err != nil {
-			return "", errors.WrapIf(err, "failure during survey")
-		}
-		for id, p := range providers {
-			if p.Name == provider {
-				provider = id
-				break
-			}
+	if err := survey.AskOne(
+		&survey.Select{
+			Message: "Please select a DNS provider:",
+			Options: options,
+		},
+		&provider,
+	); err != nil {
+		return "", errors.WrapIf(err, "failure during survey")
+	}
+	for id, p := range providers {
+		if p.Name == provider {
+			return id, nil
 		}
 	}
-	return provider, nil
+	return "", errors.Errorf("unsupported provider %q", provider)
 }
 
 func askSecret(banzaiCli cli.Cli, provider string) (string, error) {
@@ -273,10 +271,9 @@ func askSecret(banzaiCli cli.Cli, provider string) (string, error) {
 
 	// TODO (colin): add create secret option
 	if len(secrets) == 0 {
-		return "", errors.New(fmt.Sprintf("there's no secrets with '%s' type", secretType))
+		return "", errors.New(fmt.Sprintf("there are no secrets with type %q", secretType))
 	}
 
-	var secretID string
 	options := make([]string, len(secrets))
 	for i, s := range secrets {
 		options[i] = s.Name
@@ -295,12 +292,11 @@ func askSecret(banzaiCli cli.Cli, provider string) (string, error) {
 
 	for _, s := range secrets {
 		if s.Name == secretName {
-			secretID = s.Id
-			break
+			return s.Id, nil
 		}
 	}
 
-	return secretID, nil
+	return "", errors.Errorf("no secret with name %q", secretName)
 }
 
 func askDnsProviderSpecificOptions(banzaiCli cli.Cli, provider string, secretID string) (interface{}, error) {
@@ -368,15 +364,13 @@ func askGoogleProject(banzaiCli cli.Cli, secretID string, orgID int32) (string, 
 		return "", errors.WrapIf(err, "failed to retrieve projects")
 	}
 
-	var projectID string
 	for _, p := range projects.Projects {
 		if p.Name == projectName {
-			projectID = p.ProjectId
-			break
+			return p.ProjectId, nil
 		}
 	}
 
-	return projectID, nil
+	return "", errors.Errorf("unknown project name %q", projectName)
 }
 
 func buildAutoDNSFeatureRequest(req *pipeline.ActivateClusterFeatureRequest) {
