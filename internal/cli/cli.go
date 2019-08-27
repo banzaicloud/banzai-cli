@@ -34,6 +34,7 @@ import (
 	"time"
 
 	"emperror.dev/errors"
+	"github.com/banzaicloud/banzai-cli/.gen/telescopes"
 
 	"github.com/banzaicloud/banzai-cli/.gen/cloudinfo"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
@@ -46,6 +47,7 @@ import (
 )
 
 const orgIdKey = "organization.id"
+const banzaiUserAgent = "banzai-cli/1.0.0/go"
 
 type Cli interface {
 	Out() io.Writer
@@ -54,6 +56,7 @@ type Cli interface {
 	Client() *pipeline.APIClient
 	HTTPTransport() *http.Transport
 	CloudinfoClient() *cloudinfo.APIClient
+	TelescopesClient() *telescopes.APIClient
 	Context() Context
 	OutputFormat() string
 	Home() string // Home is the path to the .banzai directory of the user
@@ -72,6 +75,8 @@ type banzaiCli struct {
 	clientOnce          sync.Once
 	cloudinfoClient     *cloudinfo.APIClient
 	cloudinfoClientOnce sync.Once
+	telescopesClient     *telescopes.APIClient
+	telescopesClientOnce sync.Once
 }
 
 func NewCli(out io.Writer) Cli {
@@ -119,7 +124,7 @@ func (c *banzaiCli) Client() *pipeline.APIClient {
 	c.clientOnce.Do(func() {
 		config := pipeline.NewConfiguration()
 		config.BasePath = viper.GetString("pipeline.basepath")
-		config.UserAgent = "banzai-cli/1.0.0/go"
+		config.UserAgent = banzaiUserAgent
 		config.HTTPClient = oauth2.NewClient(nil, oauth2.StaticTokenSource(
 			&oauth2.Token{AccessToken: viper.GetString("pipeline.token")},
 		))
@@ -300,12 +305,24 @@ func (c *banzaiCli) CloudinfoClient() *cloudinfo.APIClient {
 	c.cloudinfoClientOnce.Do(func() {
 		config := cloudinfo.NewConfiguration()
 		config.BasePath = viper.GetString("cloudinfo.basepath")
-		config.UserAgent = "banzai-cli/1.0.0/go"
+		config.UserAgent = banzaiUserAgent
 
 		c.cloudinfoClient = cloudinfo.NewAPIClient(config)
 	})
 
 	return c.cloudinfoClient
+}
+
+func (c *banzaiCli) TelescopesClient() *telescopes.APIClient {
+	c.telescopesClientOnce.Do(func() {
+		config := telescopes.NewConfiguration()
+		config.BasePath = viper.GetString("telescopes.basepath")
+		config.UserAgent = banzaiUserAgent
+
+		c.telescopesClient = telescopes.NewAPIClient(config)
+	})
+
+	return c.telescopesClient
 }
 
 func (c *banzaiCli) Context() Context {

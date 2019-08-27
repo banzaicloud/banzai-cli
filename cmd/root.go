@@ -101,8 +101,9 @@ func init() {
 	_ = viper.BindPFlag("output.verbose", flags.Lookup("verbose"))
 
 	viper.SetDefault("pipeline.basepath", "https://beta.banzaicloud.io/pipeline")
-	viper.SetDefault("cloudinfo.basepath", "https://banzaicloud.com/cloudinfo/api/v1")
+	viper.SetDefault("cloudinfo.basepath", "https://beta.banzaicloud.io/cloudinfo/api/v1")
 	viper.BindEnv("cloudinfo.basepath", "BANZAI_CLOUDINFO_BASEPATH")
+	viper.SetDefault("telescopes.basepath", "https://beta.banzaicloud.io/recommender/api/v1")
 
 	cli := cli.NewCli(os.Stdout)
 

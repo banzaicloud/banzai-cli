@@ -23,6 +23,7 @@ endif
 
 PIPELINE_VERSION = 0.29.0-dev.1
 CLOUDINFO_VERSION = 0.7.1
+TELESCOPES_VERSION = 0.5.1
 
 # Dependency versions
 GOTESTSUM_VERSION = 0.3.3
@@ -153,6 +154,17 @@ generate-cloudinfo-client: ## Generate client from Cloudinfo OpenAPI spec
 	-i /local/cloudinfo-openapi.yaml \
 	-g go \
 	-o /local/.gen/cloudinfo
+
+.PHONY: generate-telescopes-client
+generate-telescopes-client: ## Generate client from Telescopes OpenAPI spec
+	curl https://raw.githubusercontent.com/banzaicloud/telescopes/master/api/openapi-spec/recommender.yaml | sed "s/version: .*/version: ${TELESCOPES_VERSION}/" > telescopes-openapi.yaml
+	rm -rf .gen/telescopes
+	docker run --rm -v ${PWD}:/local banzaicloud/openapi-generator-cli:${OPENAPI_GENERATOR_VERSION} generate \
+	--additional-properties packageName=telescopes \
+	--additional-properties withGoCodegenComment=true \
+	-i /local/telescopes-openapi.yaml \
+	-g go \
+	-o /local/.gen/telescopes
 
 bin/goreleaser: bin/goreleaser-${GORELEASER_VERSION}
 	@ln -sf goreleaser-${GORELEASER_VERSION} bin/goreleaser

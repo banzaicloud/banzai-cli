@@ -21,14 +21,17 @@ import (
 	"io/ioutil"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/antihax/optional"
+	"github.com/banzaicloud/banzai-cli/.gen/telescopes"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -153,6 +156,123 @@ func validateClusterCreateRequest(val interface{}) error {
 	return errors.WrapIf(err, "invalid request")
 }
 
+func buildInteractiveEKSCreateRequest(banzaiCli cli.Cli, out map[string]interface{}) error {
+	var recommendCluster bool
+	_ = survey.AskOne(&survey.Confirm{Message: "Do you want a recommendation on your node groups?"}, &recommendCluster)
+	if !recommendCluster {
+		return nil
+	}
+
+	provider := "amazon"
+	service := "eks"
+
+	region := "us-west-2"
+	_ = survey.AskOne(&survey.Input{Message: "AWS region:", Default: region}, &region)
+
+	//TODO add float & int validators
+	sumCpuQuest := "8.0"
+	_ = survey.AskOne(&survey.Input{Message: "Sum of CPU resources:", Default: sumCpuQuest}, &sumCpuQuest)
+	sumCpu, _ := strconv.ParseFloat(sumCpuQuest, 64)
+
+	sumMemQuest := "16.0"
+	_ = survey.AskOne(&survey.Input{Message: "Sum of Memory resources:", Default: sumMemQuest}, &sumMemQuest)
+	sumMem, _ := strconv.ParseFloat(sumMemQuest, 64)
+
+	minNodesQuest := "1"
+	_ = survey.AskOne(&survey.Input{Message: "Minimum number of nodes:", Default: minNodesQuest}, &minNodesQuest)
+	minNodes, _ := strconv.Atoi(minNodesQuest)
+
+	maxNodesQuest := "3"
+	_ = survey.AskOne(&survey.Input{Message: "Maximum number of nodes:", Default: maxNodesQuest}, &maxNodesQuest)
+	maxNodes, _ := strconv.Atoi(maxNodesQuest)
+
+	onDemandPctQuest := "80"
+	_ = survey.AskOne(&survey.Input{Message: "On-demand percentage:", Default: onDemandPctQuest}, &onDemandPctQuest)
+	onDemandPct, _ := strconv.Atoi(onDemandPctQuest)
+
+	recommendationResponse, _, err := banzaiCli.TelescopesClient().RecommendApi.RecommendCluster(context.Background(),
+		provider, service, region, telescopes.RecommendClusterRequest{
+			SumCpu: sumCpu,
+			SumMem: sumMem,
+			MinNodes: int64(minNodes),
+			MaxNodes: int64(maxNodes),
+			SameSize: false,
+			OnDemandPct: int64(onDemandPct),
+		})
+
+	if err != nil {
+		return errors.Wrap(err, "failed to retrieve recommendation for EKS")
+	}
+
+	eksNodePools:= make(map[string]pipeline.NodePoolsAmazon)
+	for i, np := range recommendationResponse.NodePools {
+		poolName := np.Role
+		if poolName == "worker" {
+			poolName = fmt.Sprintf("%s-%v", np.Role, i)
+		}
+		eksNodePool := pipeline.NodePoolsAmazon{
+			InstanceType: np.Vm.Type,
+			Autoscaling:  true,
+			MinCount:     int32(np.SumNodes),
+			MaxCount:     int32(maxNodes),
+		}
+		if np.VmClass == "spot" {
+			eksNodePool.SpotPrice = fmt.Sprintf("%v", np.Vm.OnDemandPrice)
+		}
+		eksNodePools[poolName] = eksNodePool
+	}
+
+	//get k8s version from cloudinfo
+	versionsResponse, _, err := banzaiCli.CloudinfoClient().VersionsApi.GetVersions(context.Background(), provider, service, region)
+	if err != nil {
+		log.Error(errors.Wrap(err, "failed to retrieve k8s versions for EKS"))
+	}
+	k8sVersion := "1.13.7"
+	for _, v := range versionsResponse.Versions {
+		if v.Location == region {
+			k8sVersion = v.Default
+		}
+	}
+	eksProperties := pipeline.CreateEksPropertiesEks{
+		Version: k8sVersion,
+		NodePools: eksNodePools,
+	}
+
+	marshalledEksProps, err := json.Marshal(eksProperties)
+	if err != nil {
+		return errors.WrapIf(err, "failed to marshal EKS properties")
+	}
+	var eksOut interface{}
+	utils.Unmarshal(marshalledEksProps, &eksOut)
+	unstructured.SetNestedField(out,  eksOut, "properties", "eks")
+
+	// add scaleOptions
+	var addScaleOptions bool
+	_ = survey.AskOne(&survey.Confirm{Message: "Do you want enable Hollowtrees?"}, &addScaleOptions)
+	if !addScaleOptions {
+		return nil
+	}
+
+	scaleOptions := pipeline.ScaleOptions{
+		Enabled: true,
+		DesiredCpu: sumCpu,
+		DesiredMem: sumMem,
+		DesiredGpu: 0,
+		OnDemandPct: int32(onDemandPct),
+		KeepDesiredCapacity: true,
+	}
+
+	marshalledScaleOptions, err := json.Marshal(scaleOptions)
+	if err != nil {
+		return errors.WrapIf(err, "failed to marshal EKS properties")
+	}
+	var scaleOptionsOut interface{}
+	utils.Unmarshal(marshalledScaleOptions, &scaleOptionsOut)
+	out["scaleOptions"] = scaleOptionsOut
+
+	return nil
+}
+
 func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, orgID int32, out map[string]interface{}) error {
 	var content string
 	var fileName = options.file
@@ -227,6 +347,17 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 			out["resourceGroup"] = rg
 		} else {
 			log.Error("no resource group selected")
+		}
+	}
+
+	// recommend cluster layout and enable Hollowtrees in case of EKS
+	_, exists, err := unstructured.NestedMap(out, "properties", "eks")
+	if err != nil {
+		return errors.WrapIf(err, "failed to retrieve properties.eks")
+	}
+	if exists {
+		if err = buildInteractiveEKSCreateRequest(banzaiCli, out); err != nil {
+			return err
 		}
 	}
 
