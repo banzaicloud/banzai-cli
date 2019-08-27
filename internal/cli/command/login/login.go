@@ -139,7 +139,7 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 						Default: defaultLoginFlow,
 						Help:    fmt.Sprintf("Copy your Pipeline access token from the token field of %s/api/v1/token", endpoint),
 					},
-					&token)
+					&token, survey.WithValidator(survey.Required))
 				if err != nil {
 					return errors.WrapIf(err, "no token selected")
 				}
