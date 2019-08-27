@@ -43,6 +43,7 @@ const (
 type cpContext struct {
 	installerTag  string
 	pullInstaller bool
+	autoApprove   bool
 	workspace     string
 	banzaiCli     cli.Cli
 }
@@ -73,6 +74,7 @@ func NewContext(cmd *cobra.Command, banzaiCli cli.Cli) *cpContext {
 	flags := cmd.Flags()
 	flags.StringVar(&ctx.installerTag, "image-tag", "latest", "Tag of banzaicloud/cp-installer Docker image to use")
 	flags.BoolVar(&ctx.pullInstaller, "image-pull", true, "Pull cp-installer image even if it's present locally")
+	flags.BoolVar(&ctx.autoApprove, "auto-approve", true, "Automatically approve the changes to deploy")
 	flags.StringVar(&ctx.workspace, "workspace", "", "Name of directory for storing the applied configuration and deployment status")
 	return &ctx
 }

@@ -29,9 +29,10 @@ import (
 )
 
 const (
-	providerK8s  = "k8s"
-	providerEc2  = "ec2"
-	providerKind = "kind"
+	providerK8s      = "k8s"
+	providerEc2      = "ec2"
+	providerKind     = "kind"
+	defaultLocalhost = "default.localhost.banzaicloud.io"
 )
 
 type initOptions struct {
@@ -173,9 +174,13 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
+	out["defaultStorageBackend"] = "postgres"
 	out["ingressHostPort"] = options.provider != providerK8s
 
 	switch options.provider {
+	case providerKind:
+		out["externalHost"] = defaultLocalhost
+		// TODO check if it resolves to 127.0.0.1 (user's dns recursor may drop this)
 	case providerEc2:
 		id, region, _, err := input.GetAmazonCredentialsRegion("")
 		if err != nil {
@@ -195,10 +200,12 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		if !confirmed {
 			return errors.New("cancelled")
 		}
+		out["externalHost"] = "auto" // address of ec2 instance
 	case providerK8s:
 		if err := options.writeKubeconfig(k8sConfig); err != nil {
 			return err
 		}
+		out["externalHost"] = "auto" // address of lb service
 	}
 
 	out["providerConfig"] = providerConfig
