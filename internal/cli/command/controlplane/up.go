@@ -63,14 +63,7 @@ func NewUpCommand(banzaiCli cli.Cli) *cobra.Command {
 	return cmd
 }
 
-func printExternalHostRecord(host string) error {
-	c := exec.Command("kubectl", "get", "services", "-n", "banzaicloud", "traefik", "-o", "jsonpath='{.status.loadBalancer.ingress[0].*}")
-	out, err := c.Output()
-	if err != nil {
-		return errors.WrapIf(err, "failed to determine address of the load balancer")
-	}
-
-	lbAddress := strings.Trim(string(out), "'\n ") // TODO get from tf output
+func printExternalHostRecord(host, lbAddress string) error {
 	lbRecordType := "A"
 	if net.ParseIP(lbAddress) == nil {
 		lbRecordType = "CNAME"
@@ -172,7 +165,7 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 		return errors.WrapIf(err, "failed to deploy pipeline components")
 	}
 
-	url, err := options.readAddress()
+	url, err := options.readExternalAddress()
 	if err != nil {
 		return errors.WrapIf(err, "can't read final URL of Pipeline")
 	}
@@ -180,9 +173,13 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 	url += "pipeline"
 
 	if externalHost != "auto" && externalHost != defaultLocalhost {
-		err := printExternalHostRecord(externalHost)
-		if err != nil {
+		if target, err := options.readTraefikAddress(); err != nil {
 			log.Errorf("%v", err)
+		} else {
+			err := printExternalHostRecord(externalHost, target)
+			if err != nil {
+				log.Errorf("%v", err)
+			}
 		}
 	}
 
