@@ -148,7 +148,15 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 		if err != nil {
 			return errors.WrapIf(err, "failed to get AWS credentials")
 		}
-		if err := ensureEC2Cluster(banzaiCli, *options.cpContext, creds); err != nil {
+
+		useGeneratedKey := true
+		if pc, ok := values["providerConfig"]; ok {
+			if pc, ok := pc.(map[string]interface{}); ok {
+				useGeneratedKey = pc["key_name"] != nil && pc["key_name"] != ""
+			}
+		}
+
+		if err := ensureEC2Cluster(banzaiCli, *options.cpContext, creds, useGeneratedKey); err != nil {
 			return errors.WrapIf(err, "failed to create EC2 cluster")
 		}
 		env = creds
