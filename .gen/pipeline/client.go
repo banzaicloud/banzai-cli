@@ -3,7 +3,7 @@
  *
  * Pipeline v0.3.0 swagger
  *
- * API version: 0.26.0
+ * API version: 0.29.0-dev.1
  * Contact: info@banzaicloud.com
  */
 
@@ -39,7 +39,7 @@ var (
 	xmlCheck  = regexp.MustCompile("(?i:[application|text]/xml)")
 )
 
-// APIClient manages communication with the Pipeline API API v0.26.0
+// APIClient manages communication with the Pipeline API API v0.29.0-dev.1
 // In most cases there should be only one, shared, APIClient.
 type APIClient struct {
 	cfg    *Configuration

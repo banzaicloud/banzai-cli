@@ -21,7 +21,7 @@ endif
 TEST_FORMAT = short-verbose
 endif
 
-PIPELINE_VERSION = 0.26.0
+PIPELINE_VERSION = 0.29.0-dev.1
 CLOUDINFO_VERSION = 0.7.1
 
 # Dependency versions
