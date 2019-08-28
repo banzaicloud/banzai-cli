@@ -166,8 +166,10 @@ func buildInteractiveEKSCreateRequest(banzaiCli cli.Cli, out map[string]interfac
 	provider := "amazon"
 	service := "eks"
 
-	region := "us-west-2"
-	_ = survey.AskOne(&survey.Input{Message: "AWS region:", Default: region}, &region)
+	region, err := input.AskLocation(banzaiCli, "amazon")
+	if err != nil {
+		return err
+	}
 
 	//TODO add float & int validators
 	sumCpuQuest := "8.0"
@@ -204,17 +206,16 @@ func buildInteractiveEKSCreateRequest(banzaiCli cli.Cli, out map[string]interfac
 		return errors.Wrap(err, "failed to retrieve recommendation for EKS")
 	}
 
-	eksNodePools:= make(map[string]pipeline.NodePoolsAmazon)
+	eksNodePools:= make(map[string]pipeline.NodePoolsAmazon, 0)
 	for i, np := range recommendationResponse.NodePools {
-		poolName := np.Role
-		if poolName == "worker" {
-			poolName = fmt.Sprintf("%s-%v", np.Role, i)
+		if np.Role != "worker" {
+			continue
 		}
+		poolName := fmt.Sprintf("%s-%v", np.Role, i)
 		eksNodePool := pipeline.NodePoolsAmazon{
 			InstanceType: np.Vm.Type,
-			Autoscaling:  true,
-			MinCount:     int32(np.SumNodes),
-			MaxCount:     int32(maxNodes),
+			Autoscaling:  false,
+			Count:     int32(np.SumNodes),
 		}
 		if np.VmClass == "spot" {
 			eksNodePool.SpotPrice = fmt.Sprintf("%v", np.Vm.OnDemandPrice)
