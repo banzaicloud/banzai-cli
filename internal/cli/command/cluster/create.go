@@ -217,7 +217,7 @@ func buildInteractiveEKSCreateRequest(banzaiCli cli.Cli, out map[string]interfac
 			Autoscaling:  false,
 			Count:     int32(np.SumNodes),
 			MinCount:  int32(np.SumNodes),
-			MaxCount:  int32(np.SumNodes) + 1,
+			MaxCount:  int32(maxNodes),
 		}
 		if np.VmClass == "spot" {
 			eksNodePool.SpotPrice = fmt.Sprintf("%v", np.Vm.OnDemandPrice)
