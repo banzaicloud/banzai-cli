@@ -16,6 +16,8 @@ package controlplane
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"runtime"
 
 	"emperror.dev/errors"
@@ -177,6 +179,13 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
+	uuID := uuid.New().String()
+	if uuidValue, ok := out["uuid"].(string); ok && uuidValue != "" {
+		uuID = uuidValue
+	} else {
+		out["uuid"] = uuID
+	}
+
 	out["ingressHostPort"] = options.provider != providerK8s
 
 	switch options.provider {
@@ -196,6 +205,11 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		}
 		providerConfig["region"] = region
 		providerConfig["accessKey"] = id
+		hostname, _ := os.Hostname()
+		providerConfig["tags"] = map[string]string{
+			"banzaicloud-pipeline-controlplane-uuid": uuID,
+			"local-id":                               fmt.Sprintf("%s@%s/%s", os.Getenv("USER"), hostname, filepath.Base(options.workspace)),
+		}
 
 		var confirmed bool
 		_ = survey.AskOne(&survey.Confirm{Message: fmt.Sprintf("Do you want to use the following AWS access key: %s?", id)}, &confirmed)
@@ -216,12 +230,6 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	}
 
 	out["providerConfig"] = providerConfig
-
-	if uuidValue, ok := out["uuid"]; !ok {
-		if uuidString, ok := uuidValue.(string); !ok || uuidString == "" {
-			out["uuid"] = uuid.New().String()
-		}
-	}
 
 	return options.writeValues(out)
 }
