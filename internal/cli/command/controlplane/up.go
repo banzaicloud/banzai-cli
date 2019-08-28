@@ -233,7 +233,6 @@ func runInstaller(command []string, options cpContext, env map[string]string) er
 	args := []string{
 		"run", "-it", "--rm", "--net=host",
 		"-v", fmt.Sprintf("%s:/root", options.workspace),
-		"-e", fmt.Sprintf("KUBECONFIG=/root/%s", kubeconfigFilename),
 	}
 
 	envs := os.Environ()
