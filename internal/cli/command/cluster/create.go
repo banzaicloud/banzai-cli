@@ -249,6 +249,7 @@ func buildInteractiveEKSCreateRequest(banzaiCli cli.Cli, out map[string]interfac
 	utils.Unmarshal(marshalledEksProps, &eksOut)
 	delete(eksOut, "vpc")
 	unstructured.SetNestedField(out,  eksOut, "properties", "eks")
+	out["location"] = region
 
 	// add scaleOptions
 	var addScaleOptions bool
