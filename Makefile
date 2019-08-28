@@ -146,7 +146,7 @@ generate-pipeline-client: ## Generate client from Pipeline OpenAPI spec
 
 .PHONY: generate-cloudinfo-client
 generate-cloudinfo-client: ## Generate client from Cloudinfo OpenAPI spec
-	curl https://raw.githubusercontent.com/banzaicloud/cloudinfo/${CLOUDINFO_VERSION}/api/openapi-spec/cloudinfo.yaml | sed "s/version: .*/version: ${CLOUDINFO_VERSION}/" > cloudinfo-openapi.yaml
+	curl https://raw.githubusercontent.com/banzaicloud/cloudinfo/master/api/openapi-spec/cloudinfo.yaml | sed "s/version: .*/version: ${CLOUDINFO_VERSION}/" > cloudinfo-openapi.yaml
 	rm -rf .gen/cloudinfo
 	docker run --rm -v ${PWD}:/local banzaicloud/openapi-generator-cli:${OPENAPI_GENERATOR_VERSION} generate \
 	--additional-properties packageName=cloudinfo \

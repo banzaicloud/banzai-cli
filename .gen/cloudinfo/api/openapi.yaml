@@ -543,6 +543,11 @@ components:
           x-go-name: Versions
       type: object
       x-go-package: github.com/banzaicloud/cloudinfo/pkg/cloudinfo
+    LocationVersionArray:
+      items:
+        $ref: '#/components/schemas/LocationVersion'
+      type: array
+      x-go-package: github.com/banzaicloud/cloudinfo/internal/app/cloudinfo/api
     ProductDetails:
       description: ProductDetails extended view of the virtual machine details
       example:
@@ -801,24 +806,8 @@ components:
       x-go-package: github.com/banzaicloud/cloudinfo/internal/app/cloudinfo/api
     VersionsResponse:
       description: VersionsResponse holds the list of available versions
-      example:
-        versions:
-        - default: default
-          versions:
-          - versions
-          - versions
-          location: location
-        - default: default
-          versions:
-          - versions
-          - versions
-          location: location
-      properties:
-        versions:
-          items:
-            $ref: '#/components/schemas/LocationVersion'
-          type: array
-          x-go-name: Versions
+      items:
+        $ref: '#/components/schemas/LocationVersion'
       type: object
       x-go-package: github.com/banzaicloud/cloudinfo/internal/app/cloudinfo/api
     ZonePrice:

@@ -65,7 +65,6 @@ Class | Method | HTTP request | Description
  - [Service](docs/Service.md)
  - [ServiceResponse](docs/ServiceResponse.md)
  - [ServicesResponse](docs/ServicesResponse.md)
- - [VersionsResponse](docs/VersionsResponse.md)
  - [ZonePrice](docs/ZonePrice.md)
 
 
