@@ -216,7 +216,7 @@ func buildInteractiveEKSCreateRequest(banzaiCli cli.Cli, out map[string]interfac
 			InstanceType: np.Vm.Type,
 			Autoscaling:  false,
 			Count:     int32(np.SumNodes),
-			MinCount:  int32(np.SumNodes),
+			MinCount:  int32(0),
 			MaxCount:  int32(maxNodes),
 		}
 		if np.VmClass == "spot" {
