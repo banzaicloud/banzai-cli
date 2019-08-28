@@ -33,6 +33,8 @@ const (
 	providerEc2      = "ec2"
 	providerKind     = "kind"
 	defaultLocalhost = "default.localhost.banzaicloud.io"
+	autoHost         = "auto"
+	externalHost     = "externalHost"
 )
 
 type initOptions struct {
@@ -130,6 +132,7 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	// add defaults to values in case of missing values file
 	if options.file == "" {
 		out["tlsInsecure"] = true
+		out["defaultStorageBackend"] = "postgres"
 	}
 
 	k8sContext, k8sConfig, err := input.GetCurrentKubecontext()
@@ -174,7 +177,6 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
-	out["defaultStorageBackend"] = "postgres"
 	out["ingressHostPort"] = options.provider != providerK8s
 
 	switch options.provider {
@@ -200,12 +202,17 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		if !confirmed {
 			return errors.New("cancelled")
 		}
-		out["externalHost"] = "auto" // address of ec2 instance
+
+		if out[externalHost] == nil {
+			out[externalHost] = autoHost // address of ec2 instance
+		}
 	case providerK8s:
 		if err := options.writeKubeconfig(k8sConfig); err != nil {
 			return err
 		}
-		out["externalHost"] = "auto" // address of lb service
+		if out[externalHost] == nil {
+			out[externalHost] = autoHost // address of lb service
+		}
 	}
 
 	out["providerConfig"] = providerConfig

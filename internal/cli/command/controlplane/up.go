@@ -63,14 +63,13 @@ func NewUpCommand(banzaiCli cli.Cli) *cobra.Command {
 	return cmd
 }
 
-func printExternalHostRecord(host, lbAddress string) error {
+func printExternalHostRecord(host, lbAddress string) {
 	lbRecordType := "A"
 	if net.ParseIP(lbAddress) == nil {
 		lbRecordType = "CNAME"
 	}
 
 	fmt.Printf("Please create a DNS record pointing to the load balancer:\n\n%s IN %s %s\n", host, lbRecordType, lbAddress)
-	return nil
 }
 
 func runUp(options createOptions, banzaiCli cli.Cli) error {
@@ -127,7 +126,6 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
-	externalHost, _ := values["externalHost"].(string)
 	var env map[string]string
 	switch values["provider"] {
 	case providerKind:
@@ -165,6 +163,10 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 		return errors.WrapIf(err, "failed to deploy pipeline components")
 	}
 
+	return postInstall(options, banzaiCli, values)
+}
+
+func postInstall(options createOptions, banzaiCli cli.Cli, values map[string]interface{}) error {
 	url, err := options.readExternalAddress()
 	if err != nil {
 		return errors.WrapIf(err, "can't read final URL of Pipeline")
@@ -172,14 +174,13 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 	log.Infof("Pipeline is ready at %s.", url)
 	url += "pipeline"
 
+	externalHost, _ := values["externalHost"].(string)
+
 	if externalHost != "auto" && externalHost != defaultLocalhost {
 		if target, err := options.readTraefikAddress(); err != nil {
 			log.Errorf("%v", err)
 		} else {
-			err := printExternalHostRecord(externalHost, target)
-			if err != nil {
-				log.Errorf("%v", err)
-			}
+			printExternalHostRecord(externalHost, target)
 		}
 	}
 
