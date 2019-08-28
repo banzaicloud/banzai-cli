@@ -16,6 +16,7 @@ package controlplane
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"strings"
@@ -60,6 +61,15 @@ func NewUpCommand(banzaiCli cli.Cli) *cobra.Command {
 	flags.BoolVarP(&options.init, "init", "i", false, "Initialize workspace")
 
 	return cmd
+}
+
+func printExternalHostRecord(host, lbAddress string) {
+	lbRecordType := "A"
+	if net.ParseIP(lbAddress) == nil {
+		lbRecordType = "CNAME"
+	}
+
+	fmt.Printf("Please create a DNS record pointing to the load balancer:\n\n%s IN %s %s\n", host, lbRecordType, lbAddress)
 }
 
 func runUp(options createOptions, banzaiCli cli.Cli) error {
@@ -109,6 +119,13 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 		return errors.New("workspace is already initialized but a different --provider is specified")
 	}
 
+	if options.pullInstaller {
+		log.Info("Pulling Banzai Cloud Pipeline installer image...")
+		if err := options.pullDockerImage(); err != nil {
+			return errors.WrapIf(err, "failed to pull cp-installer")
+		}
+	}
+
 	var env map[string]string
 	switch values["provider"] {
 	case providerKind:
@@ -122,10 +139,19 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 		if err != nil {
 			return errors.WrapIf(err, "failed to get AWS credentials")
 		}
-		if err := ensureEC2Cluster(banzaiCli, *options.cpContext, creds); err != nil {
+
+		useGeneratedKey := true
+		if pc, ok := values["providerConfig"]; ok {
+			if pc, ok := pc.(map[string]interface{}); ok {
+				useGeneratedKey = pc["key_name"] != nil && pc["key_name"] != ""
+			}
+		}
+
+		if err := ensureEC2Cluster(banzaiCli, *options.cpContext, creds, useGeneratedKey); err != nil {
 			return errors.WrapIf(err, "failed to create EC2 cluster")
 		}
 		env = creds
+
 	default:
 		if !options.kubeconfigExists() {
 			return errors.New("could not find Kubeconfig in workspace")
@@ -134,16 +160,29 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 
 	log.Info("Deploying Banzai Cloud Pipeline to Kubernetes cluster...")
 	if err := runInternal("apply", *options.cpContext, env); err != nil {
-		return errors.WrapIf(err, "controlplane creation failed")
+		return errors.WrapIf(err, "failed to deploy pipeline components")
 	}
 
-	url, err := options.readAddress()
+	return postInstall(options, banzaiCli, values)
+}
+
+func postInstall(options createOptions, banzaiCli cli.Cli, values map[string]interface{}) error {
+	url, err := options.readExternalAddress()
 	if err != nil {
-		return errors.WrapIf(err, "can't read host name of EC2 instance created")
+		return errors.WrapIf(err, "can't read final URL of Pipeline")
 	}
+	log.Infof("Pipeline is ready at %s.", url)
 	url += "pipeline"
 
-	log.Infof("Pipeline is ready at %s.", url)
+	externalHost, _ := values["externalHost"].(string)
+
+	if externalHost != "auto" && externalHost != defaultLocalhost {
+		if target, err := options.readTraefikAddress(); err != nil {
+			log.Errorf("%v", err)
+		} else {
+			printExternalHostRecord(externalHost, target)
+		}
+	}
 
 	var loginNow bool
 	if banzaiCli.Interactive() {
@@ -168,46 +207,32 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 	return nil
 }
 
-func runInternal(command string, options cpContext, env map[string]string) error {
+func runInternal(command string, options cpContext, env map[string]string, targets ...string) error {
 	cmdEnv := map[string]string{"KUBECONFIG": "/root/" + kubeconfigFilename}
 	for k, v := range env {
 		cmdEnv[k] = v
 	}
 
-	cmd := []string{"/terraform/entrypoint.sh",
+	cmd := []string{"terraform",
 		command,
 		"-parallelism=1"} // workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/271
+
+	if options.autoApprove {
+		cmd = append(cmd, "-auto-approve")
+	}
+
+	for _, target := range targets {
+		cmd = append(cmd, "-target", target)
+	}
+
 	return runInstaller(cmd, options, cmdEnv)
 }
 
 func runInstaller(command []string, options cpContext, env map[string]string) error {
 
-	infoCmd := exec.Command("docker", "info", "-f", "{{or (eq .OperatingSystem \"Docker Desktop\") (eq .OperatingSystem \"Docker for Mac\")}}")
-
-	infoOuput, err := infoCmd.Output()
-	if err != nil {
-		return err
-	}
-
-	isDockerForMac := strings.Trim(string(infoOuput), "\n")
-
-	isLocalhost := "false"
-
-	if isDockerForMac == "true" {
-		isLocalhost = "true"
-	}
-
-	if options.pullInstaller {
-		if err := options.pullDockerImage(); err != nil {
-			return errors.WrapIf(err, "failed to pull cp-installer")
-		}
-	}
-
 	args := []string{
-		"run", "-it", "--rm",
+		"run", "-it", "--rm", "--net=host",
 		"-v", fmt.Sprintf("%s:/root", options.workspace),
-		"-e", fmt.Sprintf("IS_DOCKER_FOR_MAC=%s", isDockerForMac),
-		"-e", fmt.Sprintf("IS_LOCALHOST=%s", isLocalhost),
 		"-e", fmt.Sprintf("KUBECONFIG=/root/%s", kubeconfigFilename),
 	}
 
@@ -232,6 +257,6 @@ func runInstaller(command []string, options cpContext, env map[string]string) er
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	err = cmd.Run()
+	err := cmd.Run()
 	return err
 }

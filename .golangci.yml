@@ -15,6 +15,7 @@ linters:
         - megacheck
         - errcheck
         - goimports
+        - gocyclo
 
 linters-settings:
     golint:

@@ -70,12 +70,12 @@ func importCluster(banzaiCli cli.Cli, options importOptions) error {
 	orgId := banzaiCli.Context().OrganizationID()
 
 	if banzaiCli.Interactive() {
-		var err error
-		options.kubeconfig, options.name, err = buildInteractiveImportRequest(banzaiCli, options, orgId)
+		raw, name, err := buildInteractiveImportRequest(banzaiCli, options, orgId)
 		if err != nil {
 			return err
 		}
-		options.kubeconfig = base64.StdEncoding.EncodeToString([]byte(options.kubeconfig))
+		options.kubeconfig = base64.StdEncoding.EncodeToString(raw)
+		options.name = name
 	} else {
 		filename, raw, err := utils.ReadFileOrStdin(options.file)
 		if err != nil {
@@ -154,21 +154,21 @@ func importCluster(banzaiCli cli.Cli, options importOptions) error {
 	return nil
 }
 
-func buildInteractiveImportRequest(_ cli.Cli, options importOptions, _ int32) (kubeconfig, clusterName string, err error) {
+func buildInteractiveImportRequest(_ cli.Cli, options importOptions, _ int32) (kubeconfig []byte, clusterName string, err error) {
 	if options.magic {
 		clusterName, kubeconfig, err = input.GetCurrentKubecontext()
 		if err != nil {
 			return
 		}
 	} else if options.file != "" {
-		filename, raw, err := utils.ReadFileOrStdin(options.file)
+		filename, cfg, err := utils.ReadFileOrStdin(options.file)
 		if err != nil {
-			return "", "", errors.WrapIfWithDetails(err, "failed to read", "filename", filename)
+			return nil, "", errors.WrapIfWithDetails(err, "failed to read", "filename", filename)
 		}
-		kubeconfig = string(raw)
+		kubeconfig = cfg
 	}
 
-	if kubeconfig == "" {
+	if len(kubeconfig) == 0 {
 		_ = survey.AskOne(&survey.Editor{Message: "kubeconfig:", Default: ""}, &kubeconfig)
 	}
 

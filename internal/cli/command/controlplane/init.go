@@ -16,6 +16,9 @@ package controlplane
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
@@ -28,9 +31,12 @@ import (
 )
 
 const (
-	providerK8s  = "k8s"
-	providerEc2  = "ec2"
-	providerKind = "kind"
+	providerK8s      = "k8s"
+	providerEc2      = "ec2"
+	providerKind     = "kind"
+	defaultLocalhost = "default.localhost.banzaicloud.io"
+	autoHost         = "auto"
+	externalHost     = "externalHost"
 )
 
 type initOptions struct {
@@ -83,6 +89,7 @@ func NewInitCommand(banzaiCli cli.Cli) *cobra.Command {
 }
 
 func askProvider(k8sContext string) (string, error) {
+	lookup := []string{providerEc2, providerKind, providerK8s}
 	choices := []string{"Create single-node cluster in Amazon EC2", "Create KIND (Kubernetes in Docker) cluster locally"}
 	if k8sContext != "" {
 		choices = append(choices, fmt.Sprintf("Use %q Kubernetes context", k8sContext))
@@ -93,18 +100,7 @@ func askProvider(k8sContext string) (string, error) {
 		return "", err
 	}
 
-	switch provider {
-	case 0:
-		return providerEc2, nil
-
-	case 1:
-		return providerKind, nil
-
-	case 2:
-		return providerK8s, nil
-	}
-
-	return "", errors.New("failed to select provider")
+	return lookup[provider], nil
 }
 
 func runInit(options initOptions, banzaiCli cli.Cli) error {
@@ -138,12 +134,23 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	// add defaults to values in case of missing values file
 	if options.file == "" {
 		out["tlsInsecure"] = true
+		out["defaultStorageBackend"] = "postgres"
 	}
 
 	k8sContext, k8sConfig, err := input.GetCurrentKubecontext()
 	if err != nil {
+		if options.provider == providerK8s {
+			return errors.WrapIf(err, "failed to use current Kubernetes context")
+		}
 		k8sContext = ""
 		log.Debugf("won't use local kubernetes context: %v", err)
+	} else if runtime.GOOS != "linux" {
+		// non-native docker daemons can't access the host machine directly even if running in host networking mode
+		// we have to rewrite configs referring to localhost to use the special name `host.docker.internal` instead
+		k8sConfig, err = input.RewriteLocalhostToHostDockerInternal(k8sConfig)
+		if err != nil {
+			return errors.WrapIf(err, "failed to rewrite Kubernetes config")
+		}
 	}
 
 	if provider, ok := out["provider"]; ok {
@@ -172,7 +179,19 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
+	uuID := uuid.New().String()
+	if uuidValue, ok := out["uuid"].(string); ok && uuidValue != "" {
+		uuID = uuidValue
+	} else {
+		out["uuid"] = uuID
+	}
+
+	out["ingressHostPort"] = options.provider != providerK8s
+
 	switch options.provider {
+	case providerKind:
+		out["externalHost"] = defaultLocalhost
+		// TODO check if it resolves to 127.0.0.1 (user's dns recursor may drop this)
 	case providerEc2:
 		id, region, _, err := input.GetAmazonCredentialsRegion("")
 		if err != nil {
@@ -186,25 +205,31 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		}
 		providerConfig["region"] = region
 		providerConfig["accessKey"] = id
+		hostname, _ := os.Hostname()
+		providerConfig["tags"] = map[string]string{
+			"banzaicloud-pipeline-controlplane-uuid": uuID,
+			"local-id":                               fmt.Sprintf("%s@%s/%s", os.Getenv("USER"), hostname, filepath.Base(options.workspace)),
+		}
 
 		var confirmed bool
 		_ = survey.AskOne(&survey.Confirm{Message: fmt.Sprintf("Do you want to use the following AWS access key: %s?", id)}, &confirmed)
 		if !confirmed {
 			return errors.New("cancelled")
 		}
+
+		if out[externalHost] == nil {
+			out[externalHost] = autoHost // address of ec2 instance
+		}
 	case providerK8s:
-		if err := options.writeKubeconfig([]byte(k8sConfig)); err != nil {
+		if err := options.writeKubeconfig(k8sConfig); err != nil {
 			return err
+		}
+		if out[externalHost] == nil {
+			out[externalHost] = autoHost // address of lb service
 		}
 	}
 
 	out["providerConfig"] = providerConfig
-
-	if uuidValue, ok := out["uuid"]; !ok {
-		if uuidString, ok := uuidValue.(string); !ok || uuidString == "" {
-			out["uuid"] = uuid.New().String()
-		}
-	}
 
 	return options.writeValues(out)
 }

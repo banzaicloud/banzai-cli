@@ -31,18 +31,20 @@ import (
 )
 
 const (
-	workspaceKey       = "installer.workspace"
-	valuesFilename     = "values.yaml"
-	kubeconfigFilename = "kubeconfig"
-	ec2HostFilename    = "ec2-host"
-	sshkeyFilename     = "id_rsa"
-	addressFilename    = "cp-address"
-	tfstateFilename    = "terraform.tfstate"
+	workspaceKey            = "installer.workspace"
+	valuesFilename          = "values.yaml"
+	kubeconfigFilename      = "kubeconfig"
+	ec2HostFilename         = "ec2-host"
+	sshkeyFilename          = "id_rsa"
+	traefikAddressFilename  = "traefik-address"
+	externalAddressFilename = "external-address"
+	tfstateFilename         = "terraform.tfstate"
 )
 
 type cpContext struct {
 	installerTag  string
 	pullInstaller bool
+	autoApprove   bool
 	workspace     string
 	banzaiCli     cli.Cli
 }
@@ -73,6 +75,7 @@ func NewContext(cmd *cobra.Command, banzaiCli cli.Cli) *cpContext {
 	flags := cmd.Flags()
 	flags.StringVar(&ctx.installerTag, "image-tag", "latest", "Tag of banzaicloud/cp-installer Docker image to use")
 	flags.BoolVar(&ctx.pullInstaller, "image-pull", true, "Pull cp-installer image even if it's present locally")
+	flags.BoolVar(&ctx.autoApprove, "auto-approve", true, "Automatically approve the changes to deploy")
 	flags.StringVar(&ctx.workspace, "workspace", "", "Name of directory for storing the applied configuration and deployment status")
 	return &ctx
 }
@@ -138,12 +141,25 @@ func (c *cpContext) sshkeyPath() string {
 	return filepath.Join(c.workspace, sshkeyFilename)
 }
 
-func (c *cpContext) addressPath() string {
-	return filepath.Join(c.workspace, addressFilename)
+func (c *cpContext) traefikAddressPath() string {
+	return filepath.Join(c.workspace, traefikAddressFilename)
 }
 
-func (c *cpContext) readAddress() (string, error) {
-	path := c.addressPath()
+func (c *cpContext) readTraefikAddress() (string, error) {
+	path := c.traefikAddressPath()
+	bytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "", errors.WrapIf(err, "can't read endpoint URL")
+	}
+	return strings.Trim(string(bytes), "\n"), nil
+}
+
+func (c *cpContext) externalAddressPath() string {
+	return filepath.Join(c.workspace, externalAddressFilename)
+}
+
+func (c *cpContext) readExternalAddress() (string, error) {
+	path := c.externalAddressPath()
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return "", errors.WrapIf(err, "can't read endpoint URL")

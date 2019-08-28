@@ -463,11 +463,11 @@ func importLocalCredential(banzaiCli cli.Cli, options *createSecretOptions) (map
 	case TypeAmazon:
 		id, values, err = input.GetAmazonCredentials()
 	case TypeKubernetes:
-		var config string
+		var config []byte
 		id, config, err = input.GetCurrentKubecontext()
 
 		values = map[string]string{
-			"K8Sconfig": config,
+			"K8Sconfig": string(config),
 		}
 	default:
 		if options.magic {

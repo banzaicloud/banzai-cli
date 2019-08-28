@@ -25,16 +25,13 @@ import (
 
 const defaultAwsRegion = "us-west-1"
 
-func ensureEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string) error {
+func ensureEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string, useGeneratedKey bool) error {
 	if options.kubeconfigExists() {
 		return nil
 	}
 
 	log.Info("Creating Kubernetes cluster on AWS...")
-	argv := []string{"terraform", "apply",
-		"-target", "module.aws_provider",
-	}
-	if err := runInstaller(argv, options, creds); err != nil {
+	if err := runInternal("apply", options, creds, "module.ec2", "local_file.ec2_private_key_pem", "local_file.ec2_host"); err != nil {
 		return errors.WrapIf(err, "failed to create AWS infrastructure")
 	}
 
@@ -44,7 +41,16 @@ func ensureEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string) err
 	}
 
 	log.Infof("retrieve kubernetes config from cluster %q", host)
-	cmd := exec.Command("ssh", "-oStrictHostKeyChecking=no", "-l", "centos", "-i", options.sshkeyPath(), host, "sudo", "cat", "/etc/kubernetes/admin.conf")
+	argv := []string{"-oStrictHostKeyChecking=no", "-l", "centos"}
+	if useGeneratedKey {
+		argv = append(argv, "-i", options.sshkeyPath())
+	}
+	argv = append(argv, host, "sudo", "cat", "/etc/kubernetes/admin.conf")
+	cmd := exec.Command("ssh", argv...)
+	if !useGeneratedKey {
+		cmd.Env = []string{}
+	}
+
 	cmd.Stderr = os.Stderr
 	config, err := cmd.Output()
 	if err != nil {
