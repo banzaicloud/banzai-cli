@@ -3,7 +3,7 @@
  *
  * The product info application uses the cloud provider APIs to asynchronously fetch and parse instance type attributes and prices, while storing the results in an in memory cache and making it available as structured data through a REST API.
  *
- * API versiocreate.go 0.7.1
+ * API version: 0.7.8
  * Contact: info@banzaicloud.com
  */
 

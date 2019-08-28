@@ -1,247 +1,233 @@
 openapi: 3.0.0
 info:
-  contact:
-    email: info@banzaicloud.com
-    name: Banzai Cloud
-  description: |-
-    This project can be used to recommend instance type groups on different cloud providers consisting of regular and spot/preemptible instances.
+  description: >-
+    This project can be used to recommend instance type groups on different
+    cloud providers consisting of regular and spot/preemptible instances.
+
     The main goal is to provide and continuously manage a cost-effective but still stable cluster layout that's built up from a diverse set of regular and spot instances.
+  title: Cluster Recommender.
+  contact:
+    name: Banzai Cloud
+    email: info@banzaicloud.com
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  title: Cluster Recommender.
   version: 0.5.2
-servers:
-- url: /api/v1
 paths:
   /recommender/multicloud:
     post:
-      description: Provides a recommended set of node pools on a given provider in a specific region.
+      description: Provides a recommended set of node pools on a given provider in a
+        specific region.
+      tags:
+        - recommend
+      summary: Provides a recommended set of node pools on a given provider in a
+        specific region.
       operationId: recommendMultiCluster
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/recommendMultiClusterRequest'
+              $ref: "#/components/schemas/recommendMultiClusterRequest"
         description: request params
         required: true
       responses:
-        200:
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/recommendationResponse'
+        "200":
           description: recommendation response
-      summary: Provides a recommended set of node pools on a given provider in a specific region.
-      tags:
-      - recommend
-  /recommender/provider/{provider}/service/{service}/region/{region}/cluster:
-    post:
-      description: Provides a recommended set of node pools on a given provider in a specific region.
-      operationId: recommendCluster
-      parameters:
-      - description: provider
-        explode: false
-        in: path
-        name: provider
-        required: true
-        schema:
-          type: string
-        style: simple
-        x-go-name: Provider
-      - description: service
-        explode: false
-        in: path
-        name: service
-        required: true
-        schema:
-          type: string
-        style: simple
-        x-go-name: Service
-      - description: region
-        explode: false
-        in: path
-        name: region
-        required: true
-        schema:
-          type: string
-        style: simple
-        x-go-name: Region
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/recommendClusterRequest'
-        description: request params
-        required: true
-      responses:
-        200:
           content:
-            '*/*':
+            "*/*":
               schema:
-                $ref: '#/components/schemas/recommendationResponse'
-          description: recommendation response
-      summary: Provides a recommended set of node pools on a given provider in a specific region.
-      tags:
-      - recommend
+                $ref: "#/components/schemas/recommendationResponse"
+  "/recommender/provider/{provider}/service/{service}/region/{region}/cluster":
     put:
-      description: Provides a recommendation for a scale-out, based on a current cluster layout on a given provider in a specific region.
+      description: Provides a recommendation for a scale-out, based on a current cluster
+        layout on a given provider in a specific region.
+      tags:
+        - recommend
+      summary: Provides a recommendation for a scale-out, based on a current cluster
+        layout on a given provider in a specific region.
       operationId: recommendClusterScaleOut
       parameters:
-      - description: provider
-        explode: false
-        in: path
-        name: provider
-        required: true
-        schema:
-          type: string
-        style: simple
-        x-go-name: Provider
-      - description: service
-        explode: false
-        in: path
-        name: service
-        required: true
-        schema:
-          type: string
-        style: simple
-        x-go-name: Service
-      - description: region
-        explode: false
-        in: path
-        name: region
-        required: true
-        schema:
-          type: string
-        style: simple
-        x-go-name: Region
+        - x-go-name: Provider
+          description: provider
+          name: provider
+          in: path
+          required: true
+          schema:
+            type: string
+        - x-go-name: Service
+          description: service
+          name: service
+          in: path
+          required: true
+          schema:
+            type: string
+        - x-go-name: Region
+          description: region
+          name: region
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/recommendClusterScaleOutRequest'
+              $ref: "#/components/schemas/recommendClusterScaleOutRequest"
         description: request params
         required: true
       responses:
-        200:
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/recommendationResponse'
+        "200":
           description: recommendation response
-      summary: Provides a recommendation for a scale-out, based on a current cluster layout on a given provider in a specific region.
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/recommendationResponse"
+    post:
+      description: Provides a recommended set of node pools on a given provider in a
+        specific region.
       tags:
-      - recommend
+        - recommend
+      summary: Provides a recommended set of node pools on a given provider in a
+        specific region.
+      operationId: recommendCluster
+      parameters:
+        - x-go-name: Provider
+          description: provider
+          name: provider
+          in: path
+          required: true
+          schema:
+            type: string
+        - x-go-name: Service
+          description: service
+          name: service
+          in: path
+          required: true
+          schema:
+            type: string
+        - x-go-name: Region
+          description: region
+          name: region
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/recommendClusterRequest"
+        description: request params
+        required: true
+      responses:
+        "200":
+          description: recommendation response
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/recommendationResponse"
+servers:
+  - url: /api/v1
 components:
   schemas:
     ClusterRecommendationAccuracy:
       description: ClusterRecommendationAccuracy encapsulates recommendation accuracy
-      example:
-        masterPrice: 6.02745618307040320615897144307382404804229736328125
-        memory: 1.46581298050294517310021547018550336360931396484375
-        nodes: 5
-        spotPrice: 9.301444243932575517419536481611430644989013671875
-        workerPrice: 2.027123023002321833274663731572218239307403564453125
-        totalPrice: 3.61607674925191080461672754609026014804840087890625
-        zone: zone
-        regularPrice: 2.3021358869347654518833223846741020679473876953125
-        cpu: 0.80082819046101150206595775671303272247314453125
-        regularNodes: 5
-        spotNodes: 7
+      type: object
       properties:
         cpu:
           description: Number of recommended cpus
-          format: double
           type: number
+          format: double
           x-go-name: RecCpu
         masterPrice:
           description: Amount of master instance type prices in the recommended cluster
-          format: double
           type: number
+          format: double
           x-go-name: RecMasterPrice
         memory:
           description: The summarised amount of memory in the recommended cluster
-          format: double
           type: number
+          format: double
           x-go-name: RecMem
         nodes:
           description: Number of recommended nodes
-          format: int64
           type: integer
+          format: int64
           x-go-name: RecNodes
         regularNodes:
           description: Number of regular instance type in the recommended cluster
-          format: int64
           type: integer
+          format: int64
           x-go-name: RecRegularNodes
         regularPrice:
           description: Amount of regular instance type prices in the recommended cluster
-          format: double
           type: number
+          format: double
           x-go-name: RecRegularPrice
         spotNodes:
           description: Number of spot instance type in the recommended cluster
-          format: int64
           type: integer
+          format: int64
           x-go-name: RecSpotNodes
         spotPrice:
           description: Amount of spot instance type prices in the recommended cluster
-          format: double
           type: number
+          format: double
           x-go-name: RecSpotPrice
         totalPrice:
           description: Total price in the recommended cluster
-          format: double
           type: number
+          format: double
           x-go-name: RecTotalPrice
         workerPrice:
           description: Amount of worker instance type prices in the recommended cluster
-          format: double
           type: number
+          format: double
           x-go-name: RecWorkerPrice
         zone:
           description: Availability zone in the recommendation
           type: string
           x-go-name: RecZone
-      type: object
       x-go-package: github.com/banzaicloud/telescopes/pkg/recommender
     ClusterRecommendationReq:
       description: ClusterRecommendationReq encapsulates the recommendation input data
+      type: object
       properties:
         allowBurst:
           description: Are burst instances allowed in recommendation
           type: boolean
           x-go-name: AllowBurst
         allowOlderGen:
-          description: AllowOlderGen allow older generations of virtual machines (applies for EC2 only)
+          description: AllowOlderGen allow older generations of virtual machines (applies
+            for EC2 only)
           type: boolean
           x-go-name: AllowOlderGen
         category:
           description: Category specifies the virtual machine category
+          type: array
           items:
             type: string
-          type: array
           x-go-name: Category
         maxNodes:
           description: Maximum number of nodes in the recommended cluster
-          format: int64
           type: integer
+          format: int64
           x-go-name: MaxNodes
         minNodes:
           description: Minimum number of nodes in the recommended cluster
-          format: int64
           type: integer
+          format: int64
           x-go-name: MinNodes
         networkPerf:
           description: NetworkPerf specifies the network performance category
+          type: array
           items:
             type: string
-          type: array
           x-go-name: NetworkPerf
         onDemandPct:
           description: Percentage of regular (on-demand) nodes in the recommended cluster
-          format: int64
           type: integer
+          format: int64
           x-go-name: OnDemandPct
         sameSize:
           description: If true, recommended instance types will have a similar size
@@ -249,31 +235,31 @@ components:
           x-go-name: SameSize
         sumCpu:
           description: Total number of CPUs requested for the cluster
-          format: double
           type: number
+          format: double
           x-go-name: SumCpu
         sumGpu:
           description: Total number of GPUs requested for the cluster
-          format: int64
           type: integer
+          format: int64
           x-go-name: SumGpu
         sumMem:
           description: Total memory requested for the cluster (GB)
-          format: double
           type: number
+          format: double
           x-go-name: SumMem
-      type: object
       x-go-package: github.com/banzaicloud/telescopes/pkg/recommender
     ClusterRecommendationResp:
       description: ClusterRecommendationResp encapsulates recommendation result data
+      type: object
       properties:
         accuracy:
-          $ref: '#/components/schemas/ClusterRecommendationAccuracy'
+          $ref: "#/components/schemas/ClusterRecommendationAccuracy"
         nodePools:
           description: Recommended node pools
-          items:
-            $ref: '#/components/schemas/NodePool'
           type: array
+          items:
+            $ref: "#/components/schemas/NodePool"
           x-go-name: NodePools
         provider:
           description: The cloud provider
@@ -288,17 +274,19 @@ components:
           type: string
           x-go-name: Service
         zone:
-          description: Availability zone in the recommendation - a multi-zone recommendation means that all node pools should expand to all zones
+          description: Availability zone in the recommendation - a multi-zone
+            recommendation means that all node pools should expand to all zones
           type: string
           x-go-name: Zone
-      type: object
       x-go-package: github.com/banzaicloud/telescopes/pkg/recommender
     ClusterRecommender:
       description: ClusterRecommender is the main entry point for cluster recommendation
       type: object
       x-go-package: github.com/banzaicloud/telescopes/pkg/recommender
     GetRecommendationParams:
-      description: GetRecommendationParams is a placeholder for the recommendation route's path parameters
+      description: GetRecommendationParams is a placeholder for the recommendation route's
+        path parameters
+      type: object
       properties:
         provider:
           description: in:path
@@ -312,29 +300,10 @@ components:
           description: in:path
           type: string
           x-go-name: Service
-      type: object
       x-go-package: github.com/banzaicloud/telescopes/internal/app/telescopes/api
     NodePool:
       description: NodePool represents a set of instances with a specific vm type
-      example:
-        role: role
-        vmClass: vmClass
-        vm:
-          currentGen: true
-          memPerVm: 1.489415909854170383397331534069962799549102783203125
-          gpusPerVm: 1.024645700144157789424070870154537260532379150390625
-          networkPerf: networkPerf
-          avgPrice: 7.3862819483858839220147274318151175975799560546875
-          burst: true
-          category: category
-          networkPerfCategory: networkPerfCategory
-          type: type
-          zones:
-          - zones
-          - zones
-          onDemandPrice: 6.8468526983526398765889098285697400569915771484375
-          cpusPerVm: 1.231513536777255612975068288506008684635162353515625
-        sumNodes: 4
+      type: object
       properties:
         role:
           description: Role in the cluster, eg. master or worker
@@ -342,18 +311,19 @@ components:
           x-go-name: Role
         sumNodes:
           description: Recommended number of nodes in the node pool
-          format: int64
           type: integer
+          format: int64
           x-go-name: SumNodes
         vm:
-          $ref: '#/components/schemas/VirtualMachine'
+          $ref: "#/components/schemas/VirtualMachine"
         vmClass:
-          description: Specifies if the recommended node pool consists of regular or spot/preemptible instance types
+          description: Specifies if the recommended node pool consists of regular or
+            spot/preemptible instance types
           type: string
           x-go-name: VmClass
-      type: object
       x-go-package: github.com/banzaicloud/telescopes/pkg/recommender
     NodePoolDesc:
+      type: object
       properties:
         instanceType:
           description: Instance type of VMs in the node pool
@@ -361,52 +331,39 @@ components:
           x-go-name: InstanceType
         sumNodes:
           description: Number of VMs in the node pool
-          format: int64
           type: integer
+          format: int64
           x-go-name: SumNodes
         vmClass:
-          description: Signals that the node pool consists of regular or spot/preemptible instance types
+          description: Signals that the node pool consists of regular or spot/preemptible
+            instance types
           type: string
           x-go-name: VmClass
-      type: object
       x-go-package: github.com/banzaicloud/telescopes/pkg/recommender
     NodePoolRecommender:
       type: object
       x-go-package: github.com/banzaicloud/telescopes/pkg/recommender
     Provider:
+      type: object
       properties:
         provider:
           type: string
           x-go-name: Provider
         services:
+          type: array
           items:
             type: string
-          type: array
           x-go-name: Services
-      type: object
       x-go-package: github.com/banzaicloud/telescopes/pkg/recommender
     VirtualMachine:
       description: VirtualMachine describes an instance type
-      example:
-        currentGen: true
-        memPerVm: 1.489415909854170383397331534069962799549102783203125
-        gpusPerVm: 1.024645700144157789424070870154537260532379150390625
-        networkPerf: networkPerf
-        avgPrice: 7.3862819483858839220147274318151175975799560546875
-        burst: true
-        category: category
-        networkPerfCategory: networkPerfCategory
-        type: type
-        zones:
-        - zones
-        - zones
-        onDemandPrice: 6.8468526983526398765889098285697400569915771484375
-        cpusPerVm: 1.231513536777255612975068288506008684635162353515625
+      type: object
       properties:
         avgPrice:
-          description: Average price of the instance (differs from on demand price in case of spot or preemptible instances)
-          format: double
+          description: Average price of the instance (differs from on demand price in case
+            of spot or preemptible instances)
           type: number
+          format: double
           x-go-name: AvgPrice
         burst:
           description: Burst signals a burst type instance
@@ -418,8 +375,8 @@ components:
           x-go-name: Category
         cpusPerVm:
           description: Number of CPUs in the instance type
-          format: double
           type: number
+          format: double
           x-go-name: Cpus
         currentGen:
           description: CurrentGen the vm is of current generation
@@ -427,13 +384,13 @@ components:
           x-go-name: CurrentGen
         gpusPerVm:
           description: Number of GPUs in the instance type
-          format: double
           type: number
+          format: double
           x-go-name: Gpus
         memPerVm:
           description: Available memory in the instance type (GB)
-          format: double
           type: number
+          format: double
           x-go-name: Mem
         networkPerf:
           description: NetworkPerf holds the network performance
@@ -445,8 +402,8 @@ components:
           x-go-name: NetworkPerfCat
         onDemandPrice:
           description: Regular price of the instance type
-          format: double
           type: number
+          format: double
           x-go-name: OnDemandPrice
         type:
           description: Instance type
@@ -454,64 +411,67 @@ components:
           x-go-name: Type
         zones:
           description: Zones
+          type: array
           items:
             type: string
-          type: array
           x-go-name: Zones
-      type: object
       x-go-package: github.com/banzaicloud/telescopes/pkg/recommender
     VmRecommender:
       type: object
       x-go-package: github.com/banzaicloud/telescopes/pkg/recommender
     recommendClusterRequest:
       description: SingleClusterRecommendationReq encapsulates the recommendation input data
+      type: object
       properties:
         allowBurst:
           description: Are burst instances allowed in recommendation
           type: boolean
           x-go-name: AllowBurst
         allowOlderGen:
-          description: AllowOlderGen allow older generations of virtual machines (applies for EC2 only)
+          description: AllowOlderGen allow older generations of virtual machines (applies
+            for EC2 only)
           type: boolean
           x-go-name: AllowOlderGen
         category:
           description: Category specifies the virtual machine category
+          type: array
           items:
             type: string
-          type: array
           x-go-name: Category
         excludes:
-          description: Excludes is a blacklist - a slice with vm types to be excluded from the recommendation
+          description: Excludes is a blacklist - a slice with vm types to be excluded from
+            the recommendation
+          type: array
           items:
             type: string
-          type: array
           x-go-name: Excludes
         includes:
-          description: Includes is a whitelist - a slice with vm types to be contained in the recommendation
+          description: Includes is a whitelist - a slice with vm types to be contained in
+            the recommendation
+          type: array
           items:
             type: string
-          type: array
           x-go-name: Includes
         maxNodes:
           description: Maximum number of nodes in the recommended cluster
-          format: int64
           type: integer
+          format: int64
           x-go-name: MaxNodes
         minNodes:
           description: Minimum number of nodes in the recommended cluster
-          format: int64
           type: integer
+          format: int64
           x-go-name: MinNodes
         networkPerf:
           description: NetworkPerf specifies the network performance category
+          type: array
           items:
             type: string
-          type: array
           x-go-name: NetworkPerf
         onDemandPct:
           description: Percentage of regular (on-demand) nodes in the recommended cluster
-          format: int64
           type: integer
+          format: int64
           x-go-name: OnDemandPct
         sameSize:
           description: If true, recommended instance types will have a similar size
@@ -519,142 +479,147 @@ components:
           x-go-name: SameSize
         sumCpu:
           description: Total number of CPUs requested for the cluster
-          format: double
           type: number
+          format: double
           x-go-name: SumCpu
         sumGpu:
           description: Total number of GPUs requested for the cluster
-          format: int64
           type: integer
+          format: int64
           x-go-name: SumGpu
         sumMem:
           description: Total memory requested for the cluster (GB)
-          format: double
           type: number
+          format: double
           x-go-name: SumMem
         zone:
           description: Availability zone that the cluster should expand to
           type: string
           x-go-name: Zone
-      type: object
       x-go-name: SingleClusterRecommendationReq
       x-go-package: github.com/banzaicloud/telescopes/pkg/recommender
     recommendClusterScaleOutRequest:
-      description: ClusterScaleoutRecommendationReq encapsulates the recommendation input data
+      description: ClusterScaleoutRecommendationReq encapsulates the recommendation input
+        data
+      type: object
       properties:
         actualLayout:
           description: |-
             Description of the current cluster layout
             in:body
-          items:
-            $ref: '#/components/schemas/NodePoolDesc'
           type: array
+          items:
+            $ref: "#/components/schemas/NodePoolDesc"
           x-go-name: ActualLayout
         desiredCpu:
           description: Total desired number of CPUs in the cluster after the scale out
-          format: double
           type: number
+          format: double
           x-go-name: DesiredCpu
         desiredGpu:
           description: Total desired number of GPUs in the cluster after the scale out
-          format: int64
           type: integer
+          format: int64
           x-go-name: DesiredGpu
         desiredMem:
           description: Total desired memory (GB) in the cluster after the scale out
-          format: double
           type: number
+          format: double
           x-go-name: DesiredMem
         excludes:
-          description: Excludes is a blacklist - a slice with vm types to be excluded from the recommendation
+          description: Excludes is a blacklist - a slice with vm types to be excluded from
+            the recommendation
+          type: array
           items:
             type: string
-          type: array
           x-go-name: Excludes
         onDemandPct:
           description: Percentage of regular (on-demand) nodes among the scale out nodes
-          format: int64
           type: integer
+          format: int64
           x-go-name: OnDemandPct
         zone:
           description: Availability zone to be included in the recommendation
           type: string
           x-go-name: Zone
-      type: object
       x-go-name: ClusterScaleoutRecommendationReq
       x-go-package: github.com/banzaicloud/telescopes/pkg/recommender
     recommendMultiClusterRequest:
       description: MultiClusterRecommendationReq encapsulates the recommendation input data
+      type: object
       properties:
         allowBurst:
           description: Are burst instances allowed in recommendation
           type: boolean
           x-go-name: AllowBurst
         allowOlderGen:
-          description: AllowOlderGen allow older generations of virtual machines (applies for EC2 only)
+          description: AllowOlderGen allow older generations of virtual machines (applies
+            for EC2 only)
           type: boolean
           x-go-name: AllowOlderGen
         category:
           description: Category specifies the virtual machine category
+          type: array
           items:
             type: string
-          type: array
           x-go-name: Category
         continents:
+          type: array
           items:
             type: string
-          type: array
           x-go-name: Continents
         excludes:
+          description: Excludes is a blacklist - a slice with vm types to be excluded from
+            the recommendation
+          type: object
           additionalProperties:
+            type: object
             additionalProperties:
+              type: array
               items:
                 type: string
-              type: array
-            type: object
-          description: Excludes is a blacklist - a slice with vm types to be excluded from the recommendation
-          type: object
           x-go-name: Excludes
         includes:
+          description: Includes is a whitelist - a slice with vm types to be contained in
+            the recommendation
+          type: object
           additionalProperties:
+            type: object
             additionalProperties:
+              type: array
               items:
                 type: string
-              type: array
-            type: object
-          description: Includes is a whitelist - a slice with vm types to be contained in the recommendation
-          type: object
           x-go-name: Includes
         maxNodes:
           description: Maximum number of nodes in the recommended cluster
-          format: int64
           type: integer
+          format: int64
           x-go-name: MaxNodes
         minNodes:
           description: Minimum number of nodes in the recommended cluster
-          format: int64
           type: integer
+          format: int64
           x-go-name: MinNodes
         networkPerf:
           description: NetworkPerf specifies the network performance category
+          type: array
           items:
             type: string
-          type: array
           x-go-name: NetworkPerf
         onDemandPct:
           description: Percentage of regular (on-demand) nodes in the recommended cluster
-          format: int64
           type: integer
+          format: int64
           x-go-name: OnDemandPct
         providers:
-          items:
-            $ref: '#/components/schemas/Provider'
           type: array
+          items:
+            $ref: "#/components/schemas/Provider"
           x-go-name: Providers
         respPerService:
           description: Maximum number of response per service
-          format: int64
           type: integer
+          format: int64
           x-go-name: RespPerService
         sameSize:
           description: If true, recommended instance types will have a similar size
@@ -662,86 +627,32 @@ components:
           x-go-name: SameSize
         sumCpu:
           description: Total number of CPUs requested for the cluster
-          format: double
           type: number
+          format: double
           x-go-name: SumCpu
         sumGpu:
           description: Total number of GPUs requested for the cluster
-          format: int64
           type: integer
+          format: int64
           x-go-name: SumGpu
         sumMem:
           description: Total memory requested for the cluster (GB)
-          format: double
           type: number
+          format: double
           x-go-name: SumMem
-      type: object
       x-go-name: MultiClusterRecommendationReq
       x-go-package: github.com/banzaicloud/telescopes/pkg/recommender
     recommendationResponse:
       description: RecommendationResponse encapsulates the recommendation response
-      example:
-        provider: provider
-        zone: zone
-        service: service
-        accuracy:
-          masterPrice: 6.02745618307040320615897144307382404804229736328125
-          memory: 1.46581298050294517310021547018550336360931396484375
-          nodes: 5
-          spotPrice: 9.301444243932575517419536481611430644989013671875
-          workerPrice: 2.027123023002321833274663731572218239307403564453125
-          totalPrice: 3.61607674925191080461672754609026014804840087890625
-          zone: zone
-          regularPrice: 2.3021358869347654518833223846741020679473876953125
-          cpu: 0.80082819046101150206595775671303272247314453125
-          regularNodes: 5
-          spotNodes: 7
-        nodePools:
-        - role: role
-          vmClass: vmClass
-          vm:
-            currentGen: true
-            memPerVm: 1.489415909854170383397331534069962799549102783203125
-            gpusPerVm: 1.024645700144157789424070870154537260532379150390625
-            networkPerf: networkPerf
-            avgPrice: 7.3862819483858839220147274318151175975799560546875
-            burst: true
-            category: category
-            networkPerfCategory: networkPerfCategory
-            type: type
-            zones:
-            - zones
-            - zones
-            onDemandPrice: 6.8468526983526398765889098285697400569915771484375
-            cpusPerVm: 1.231513536777255612975068288506008684635162353515625
-          sumNodes: 4
-        - role: role
-          vmClass: vmClass
-          vm:
-            currentGen: true
-            memPerVm: 1.489415909854170383397331534069962799549102783203125
-            gpusPerVm: 1.024645700144157789424070870154537260532379150390625
-            networkPerf: networkPerf
-            avgPrice: 7.3862819483858839220147274318151175975799560546875
-            burst: true
-            category: category
-            networkPerfCategory: networkPerfCategory
-            type: type
-            zones:
-            - zones
-            - zones
-            onDemandPrice: 6.8468526983526398765889098285697400569915771484375
-            cpusPerVm: 1.231513536777255612975068288506008684635162353515625
-          sumNodes: 4
-        region: region
+      type: object
       properties:
         accuracy:
-          $ref: '#/components/schemas/ClusterRecommendationAccuracy'
+          $ref: "#/components/schemas/ClusterRecommendationAccuracy"
         nodePools:
           description: Recommended node pools
-          items:
-            $ref: '#/components/schemas/NodePool'
           type: array
+          items:
+            $ref: "#/components/schemas/NodePool"
           x-go-name: NodePools
         provider:
           description: The cloud provider
@@ -756,9 +667,10 @@ components:
           type: string
           x-go-name: Service
         zone:
-          description: Availability zone in the recommendation - a multi-zone recommendation means that all node pools should expand to all zones
+          description: Availability zone in the recommendation - a multi-zone
+            recommendation means that all node pools should expand to all zones
           type: string
           x-go-name: Zone
-      type: object
       x-go-name: RecommendationResponse
       x-go-package: github.com/banzaicloud/telescopes/internal/app/telescopes/api
+
