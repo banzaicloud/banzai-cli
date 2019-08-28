@@ -46,12 +46,12 @@ func ensureEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string, use
 	log.Infof("retrieve kubernetes config from cluster %q", host)
 	argv := []string{"-oStrictHostKeyChecking=no", "-l", "centos"}
 	if useGeneratedKey {
-		argv = append(argv, "-i", options.sshkeyPath())
+		argv = append(argv, "-i", options.sshkeyPath(), "-F", "/dev/null")
 	}
 	argv = append(argv, host, "sudo", "cat", "/etc/kubernetes/admin.conf")
 	cmd := exec.Command("ssh", argv...)
 	if !useGeneratedKey {
-		cmd.Env = []string{}
+		cmd.Env = []string{"LC_ALL=C"}
 	}
 
 	cmd.Stderr = os.Stderr
