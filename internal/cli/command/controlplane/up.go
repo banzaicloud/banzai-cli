@@ -134,7 +134,7 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
-	externalHost, _ := values["externalHostSource"].(string)
+	externalHost, _ := values["externalHost"].(string)
 	var env map[string]string
 	switch values["provider"] {
 	case providerKind:
@@ -178,10 +178,6 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 	}
 	log.Infof("Pipeline is ready at %s.", url)
 	url += "pipeline"
-
-	source, ok := values["externalHostSource"].(string)
-	if !ok || source == "" {
-	}
 
 	if externalHost != "auto" && externalHost != defaultLocalhost {
 		err := printExternalHostRecord(externalHost)
