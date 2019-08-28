@@ -31,7 +31,7 @@ func ensureEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string) err
 	}
 
 	log.Info("Creating Kubernetes cluster on AWS...")
-	if err := runInternal("apply", options, creds, "module.aws_provider"); err != nil {
+	if err := runInternal("apply", options, creds, "module.ec2"); err != nil {
 		return errors.WrapIf(err, "failed to create AWS infrastructure")
 	}
 
