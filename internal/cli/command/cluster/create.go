@@ -21,14 +21,17 @@ import (
 	"io/ioutil"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/antihax/optional"
+	"github.com/banzaicloud/banzai-cli/.gen/telescopes"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -153,6 +156,128 @@ func validateClusterCreateRequest(val interface{}) error {
 	return errors.WrapIf(err, "invalid request")
 }
 
+func buildInteractiveEKSCreateRequest(banzaiCli cli.Cli, out map[string]interface{}) error {
+	var recommendCluster bool
+	_ = survey.AskOne(&survey.Confirm{Message: "Do you want a recommendation on your node groups?"}, &recommendCluster)
+	if !recommendCluster {
+		return nil
+	}
+
+	provider := "amazon"
+	service := "eks"
+
+	region, err := input.AskLocation(banzaiCli, "amazon")
+	if err != nil {
+		return err
+	}
+
+	sumCpuQuest := "6"
+	_ = survey.AskOne(&survey.Input{Message: "Sum of CPU resources:", Default: sumCpuQuest}, &sumCpuQuest, survey.WithValidator(input.InputNumberValidator(0, 1000000)))
+	sumCpu, _ := strconv.Atoi(sumCpuQuest)
+
+	sumMemQuest := "12"
+	_ = survey.AskOne(&survey.Input{Message: "Sum of Memory resources (GB):", Default: sumMemQuest}, &sumMemQuest, survey.WithValidator(input.InputNumberValidator(0, 100000000)))
+	sumMem, _ := strconv.Atoi(sumMemQuest)
+
+	minNodesQuest := "3"
+	_ = survey.AskOne(&survey.Input{Message: "Minimum number of nodes:", Default: minNodesQuest}, &minNodesQuest, survey.WithValidator(input.InputNumberValidator(0, 10000)))
+	minNodes, _ := strconv.Atoi(minNodesQuest)
+
+	maxNodesQuest := "5"
+	_ = survey.AskOne(&survey.Input{Message: "Maximum number of nodes:", Default: maxNodesQuest}, &maxNodesQuest, survey.WithValidator(input.InputNumberValidator(0, 10000)))
+	maxNodes, _ := strconv.Atoi(maxNodesQuest)
+
+	onDemandPctQuest := "25"
+	_ = survey.AskOne(&survey.Input{Message: "On-demand percentage:", Default: onDemandPctQuest}, &onDemandPctQuest, survey.WithValidator(input.InputNumberValidator(-1, 100)))
+	onDemandPct, _ := strconv.Atoi(onDemandPctQuest)
+
+	recommendationResponse, _, err := banzaiCli.TelescopesClient().RecommendApi.RecommendCluster(context.Background(),
+		provider, service, region, telescopes.RecommendClusterRequest{
+			SumCpu: float64(sumCpu),
+			SumMem: float64(sumMem),
+			MinNodes: int64(minNodes),
+			MaxNodes: int64(maxNodes),
+			SameSize: false,
+			OnDemandPct: int64(onDemandPct),
+			Includes: getEksInstanceTypes(),
+		})
+
+	if err != nil {
+		return errors.Wrap(err, "failed to retrieve recommendation for EKS")
+	}
+
+	eksNodePools:= make(map[string]pipeline.NodePoolsAmazon, 0)
+	for i, np := range recommendationResponse.NodePools {
+		if np.Role != "worker" {
+			continue
+		}
+		poolName := fmt.Sprintf("%s-%v", np.Role, i)
+		eksNodePool := pipeline.NodePoolsAmazon{
+			InstanceType: np.Vm.Type,
+			Autoscaling:  false,
+			Count:     int32(np.SumNodes),
+			MinCount:  int32(0),
+			MaxCount:  int32(maxNodes),
+		}
+		if np.VmClass == "spot" {
+			eksNodePool.SpotPrice = fmt.Sprintf("%v", np.Vm.OnDemandPrice)
+		}
+		eksNodePools[poolName] = eksNodePool
+	}
+
+	//get k8s version from cloudinfo
+	versionsResponse, _, err := banzaiCli.CloudinfoClient().VersionsApi.GetVersions(context.Background(), provider, service, region)
+	if err != nil {
+		log.Error(errors.Wrap(err, "failed to retrieve k8s versions for EKS"))
+	}
+	k8sVersion := "1.13.7"
+	for _, v := range versionsResponse {
+		if v.Location == region {
+			k8sVersion = v.Default
+		}
+	}
+	eksProperties := pipeline.CreateEksPropertiesEks{
+		Version: k8sVersion,
+		NodePools: eksNodePools,
+	}
+
+	marshalledEksProps, err := json.Marshal(eksProperties)
+	if err != nil {
+		return errors.WrapIf(err, "failed to marshal EKS properties")
+	}
+	var eksOut map[string]interface{}
+	utils.Unmarshal(marshalledEksProps, &eksOut)
+	delete(eksOut, "vpc")
+	unstructured.SetNestedField(out,  eksOut, "properties", "eks")
+	out["location"] = region
+
+	// add scaleOptions
+	var addScaleOptions bool
+	_ = survey.AskOne(&survey.Confirm{Message: "Do you want enable Hollowtrees?"}, &addScaleOptions)
+	if !addScaleOptions {
+		return nil
+	}
+
+	scaleOptions := pipeline.ScaleOptions{
+		Enabled: true,
+		DesiredCpu: float64(sumCpu),
+		DesiredMem: float64(sumMem),
+		DesiredGpu: 0,
+		OnDemandPct: int32(onDemandPct),
+		KeepDesiredCapacity: true,
+	}
+
+	marshalledScaleOptions, err := json.Marshal(scaleOptions)
+	if err != nil {
+		return errors.WrapIf(err, "failed to marshal EKS properties")
+	}
+	var scaleOptionsOut interface{}
+	utils.Unmarshal(marshalledScaleOptions, &scaleOptionsOut)
+	out["scaleOptions"] = scaleOptionsOut
+
+	return nil
+}
+
 func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, orgID int32, out map[string]interface{}) error {
 	var content string
 	var fileName = options.file
@@ -227,6 +352,17 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 			out["resourceGroup"] = rg
 		} else {
 			log.Error("no resource group selected")
+		}
+	}
+
+	// recommend cluster layout and enable Hollowtrees in case of EKS
+	_, exists, err := unstructured.NestedMap(out, "properties", "eks")
+	if err != nil {
+		return errors.WrapIf(err, "failed to retrieve properties.eks")
+	}
+	if exists {
+		if err = buildInteractiveEKSCreateRequest(banzaiCli, out); err != nil {
+			return err
 		}
 	}
 
@@ -424,4 +560,64 @@ func buildSecretChoice(banzaiCli cli.Cli, orgID int32, cloud string, out map[str
 	}
 	out["secretName"] = name
 	return secretIDs[name], nil
+}
+
+func getEksInstanceTypes() []string {
+	return []string{
+		"t2.small",
+		"t2.medium",
+		"t2.large",
+		"t2.xlarge",
+		"t2.2xlarge",
+		"m3.medium",
+		"m3.large",
+		"m3.xlarge",
+		"m3.2xlarge",
+		"m4.large",
+		"m4.xlarge",
+		"m4.2xlarge",
+		"m4.4xlarge",
+		"m4.10xlarge",
+		"m5.large",
+		"m5.xlarge",
+		"m5.2xlarge",
+		"m5.4xlarge",
+		"m5.12xlarge",
+		"m5.24xlarge",
+		"c4.large",
+		"c4.xlarge",
+		"c4.2xlarge",
+		"c4.4xlarge",
+		"c4.8xlarge",
+		"c5.large",
+		"c5.xlarge",
+		"c5.2xlarge",
+		"c5.4xlarge",
+		"c5.9xlarge",
+		"c5.18xlarge",
+		"i3.large",
+		"i3.xlarge",
+		"i3.2xlarge",
+		"i3.4xlarge",
+		"i3.8xlarge",
+		"i3.16xlarge",
+		"r3.xlarge",
+		"r3.2xlarge",
+		"r3.4xlarge",
+		"r3.8xlarge",
+		"r4.large",
+		"r4.xlarge",
+		"r4.2xlarge",
+		"r4.4xlarge",
+		"r4.8xlarge",
+		"r4.16xlarge",
+		"x1.16xlarge",
+		"x1.32xlarge",
+		"p2.xlarge",
+		"p2.8xlarge",
+		"p2.16xlarge",
+		"p3.2xlarge",
+		"p3.8xlarge",
+		"p3.16xlarge",
+	}
 }
