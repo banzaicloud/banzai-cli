@@ -17,6 +17,7 @@ package controlplane
 import (
 	"os"
 	"os/exec"
+	"strings"
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -28,13 +29,13 @@ const (
 	ec2Module        = "module.ec2"
 )
 
-func ensureEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string, useGeneratedKey bool) error {
+func ensureEC2Cluster(banzaiCli cli.Cli, options cpContext, creds map[string]string, useGeneratedKey bool) error {
 	if options.kubeconfigExists() {
 		return nil
 	}
 
 	log.Info("Creating Kubernetes cluster on AWS...")
-	if err := runInternal("apply", options, creds, ec2Module, "local_file.ec2_private_key_pem", "local_file.ec2_host"); err != nil {
+	if err := runTerraform("apply", options, banzaiCli, creds, ec2Module, "local_file.ec2_private_key_pem", "local_file.ec2_host"); err != nil {
 		return errors.WrapIf(err, "failed to create AWS infrastructure")
 	}
 
@@ -44,14 +45,18 @@ func ensureEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string, use
 	}
 
 	log.Infof("retrieve kubernetes config from cluster %q", host)
+
 	argv := []string{"-oStrictHostKeyChecking=no", "-l", "centos"}
 	if useGeneratedKey {
 		argv = append(argv, "-i", options.sshkeyPath(), "-F", "/dev/null")
 	}
+
 	argv = append(argv, host, "sudo", "cat", "/etc/kubernetes/admin.conf")
+
+	log.Debugf("ssh %s", strings.Join(argv, " "))
 	cmd := exec.Command("ssh", argv...)
 	if !useGeneratedKey {
-		cmd.Env = []string{"LC_ALL=C"}
+		cmd.Env = []string{"LC_ALL=C"} // prevent use of agent
 	}
 
 	cmd.Stderr = os.Stderr
@@ -63,9 +68,9 @@ func ensureEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string, use
 	return options.writeKubeconfig(config)
 }
 
-func deleteEC2Cluster(_ cli.Cli, options cpContext, creds map[string]string) error {
+func deleteEC2Cluster(banzaiCli cli.Cli, options cpContext, creds map[string]string) error {
 	log.Info("Deleting Kubernetes cluster on AWS...")
-	if err := runInternal("destroy", options, creds, ec2Module); err != nil {
+	if err := runTerraform("destroy", options, banzaiCli, creds, ec2Module); err != nil {
 		return errors.WrapIf(err, "failed to delete AWS infrastructure")
 	}
 

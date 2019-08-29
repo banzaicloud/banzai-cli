@@ -17,9 +17,6 @@ package controlplane
 import (
 	"fmt"
 	"net"
-	"os"
-	"os/exec"
-	"strings"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
@@ -159,7 +156,7 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 	}
 
 	log.Info("Deploying Banzai Cloud Pipeline to Kubernetes cluster...")
-	if err := runInternal("apply", *options.cpContext, env); err != nil {
+	if err := runTerraform("apply", *options.cpContext, banzaiCli, env); err != nil {
 		return errors.WrapIf(err, "failed to deploy pipeline components")
 	}
 
@@ -205,57 +202,4 @@ func postInstall(options createOptions, banzaiCli cli.Cli, values map[string]int
 		log.Infof("Pipeline is ready, now you can login with: \x1b[1mbanzai login --endpoint=%q\x1b[0m", url)
 	}
 	return nil
-}
-
-func runInternal(command string, options cpContext, env map[string]string, targets ...string) error {
-	cmdEnv := map[string]string{"KUBECONFIG": "/root/" + kubeconfigFilename}
-	for k, v := range env {
-		cmdEnv[k] = v
-	}
-
-	cmd := []string{"terraform",
-		command,
-		"-parallelism=1"} // workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/271
-
-	if options.autoApprove {
-		cmd = append(cmd, "-auto-approve")
-	}
-
-	for _, target := range targets {
-		cmd = append(cmd, "-target", target)
-	}
-
-	return runInstaller(cmd, options, cmdEnv)
-}
-
-func runInstaller(command []string, options cpContext, env map[string]string) error {
-
-	args := []string{
-		"run", "-it", "--rm", "--net=host",
-		"-v", fmt.Sprintf("%s:/root", options.workspace),
-	}
-
-	envs := os.Environ()
-	for key, value := range env {
-		args = append(args, "-e", key)
-		envs = append(envs, fmt.Sprintf("%s=%s", key, value))
-	}
-
-	args = append(append(append(args,
-		fmt.Sprintf("banzaicloud/cp-installer:%s", options.installerTag)),
-		command...),
-		"-var", "workdir=/root",
-		"-state=/root/"+tfstateFilename)
-
-	log.Info("docker ", strings.Join(args, " "))
-
-	cmd := exec.Command("docker", args...)
-
-	cmd.Env = envs
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	err := cmd.Run()
-	return err
 }
