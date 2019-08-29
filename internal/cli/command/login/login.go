@@ -164,7 +164,12 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 	viper.Set("pipeline.basepath", endpoint)
 	banzaiCli.Context().SetToken(token)
 
-	if !options.permanent && banzaiCli.Interactive() {
+	expiringToken, err := isExpiringToken(token)
+	if err != nil {
+		return errors.WrapIf(err, "failed to create permanent token")
+	}
+
+	if !options.permanent && banzaiCli.Interactive() && expiringToken {
 		_ = survey.AskOne(
 			&survey.Confirm{
 				Message: "Create permanent token?",
@@ -173,7 +178,7 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 			&options.permanent)
 	}
 
-	if options.permanent {
+	if options.permanent && expiringToken {
 		err := createPermanentToken(banzaiCli)
 		if err != nil {
 			return errors.WrapIf(err, "failed to create permanent token")
@@ -230,17 +235,24 @@ func createPermanentToken(banzaiCli cli.Cli) error {
 }
 
 func deleteToken(banzaiCli cli.Cli, secret string) error {
-	token, _ := jwt.Parse(secret, nil)
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return errors.New("can't parse old token")
+	claims := jwt.StandardClaims{}
+	_, _ = jwt.ParseWithClaims(secret, &claims, nil)
+
+	if err := claims.Valid(); err != nil {
+		return errors.Wrap(err, "old token is invalid")
 	}
 
-	id, ok := claims["jti"].(string)
-	if !ok {
-		return errors.New("can't find token id in secret")
-	}
-
-	_, err := banzaiCli.Client().AuthApi.DeleteToken(context.Background(), id)
+	_, err := banzaiCli.Client().AuthApi.DeleteToken(context.Background(), claims.Id)
 	return err
+}
+
+func isExpiringToken(secret string) (bool, error) {
+	claims := jwt.StandardClaims{}
+	_, _ = jwt.ParseWithClaims(secret, &claims, nil)
+
+	if err := claims.Valid(); err != nil {
+		return false, errors.Wrap(err, "old token is invalid")
+	}
+
+	return claims.ExpiresAt != 0, nil
 }
