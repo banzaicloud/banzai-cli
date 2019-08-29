@@ -13,6 +13,7 @@ banzai pipeline down [flags]
 ### Options
 
 ```
+      --auto-approve       Automatically approve the changes to deploy (default true)
   -h, --help               help for down
       --image-pull         Pull cp-installer image even if it's present locally (default true)
       --image-tag string   Tag of banzaicloud/cp-installer Docker image to use (default "latest")

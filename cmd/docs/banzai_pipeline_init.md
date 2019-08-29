@@ -21,6 +21,7 @@ banzai pipeline init [flags]
 ### Options
 
 ```
+      --auto-approve       Automatically approve the changes to deploy (default true)
   -f, --file string        Input Banzai Cloud Pipeline instance descriptor file
   -h, --help               help for init
       --image-pull         Pull cp-installer image even if it's present locally (default true)
