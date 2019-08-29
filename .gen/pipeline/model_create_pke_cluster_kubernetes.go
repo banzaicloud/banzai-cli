@@ -3,7 +3,7 @@
  *
  * Pipeline v0.3.0 swagger
  *
- * API version: 0.29.0-dev.1
+ * API version: pke-oidc-refactor
  * Contact: info@banzaicloud.com
  */
 
@@ -14,6 +14,7 @@ package pipeline
 type CreatePkeClusterKubernetes struct {
 	Version string `json:"version"`
 	Rbac bool `json:"rbac,omitempty"`
+	Oidc CreatePkeClusterKubernetesOidc `json:"oidc,omitempty"`
 	Cri CreatePkeClusterKubernetesCri `json:"cri,omitempty"`
 	Network CreatePkeClusterKubernetesNetwork `json:"network,omitempty"`
 }

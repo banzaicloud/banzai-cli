@@ -3,7 +3,7 @@
  *
  * Pipeline v0.3.0 swagger
  *
- * API version: 0.29.0-dev.1
+ * API version: pke-oidc-refactor
  * Contact: info@banzaicloud.com
  */
 
@@ -39,7 +39,7 @@ var (
 	xmlCheck  = regexp.MustCompile("(?i:[application|text]/xml)")
 )
 
-// APIClient manages communication with the Pipeline API API v0.29.0-dev.1
+// APIClient manages communication with the Pipeline API API vpke-oidc-refactor
 // In most cases there should be only one, shared, APIClient.
 type APIClient struct {
 	cfg    *Configuration
@@ -90,8 +90,6 @@ type APIClient struct {
 	OrganizationsApi *OrganizationsApiService
 
 	PoliciesApi *PoliciesApiService
-
-	ProfilesApi *ProfilesApiService
 
 	ProjectsApi *ProjectsApiService
 
@@ -146,7 +144,6 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.NetworkApi = (*NetworkApiService)(&c.common)
 	c.OrganizationsApi = (*OrganizationsApiService)(&c.common)
 	c.PoliciesApi = (*PoliciesApiService)(&c.common)
-	c.ProfilesApi = (*ProfilesApiService)(&c.common)
 	c.ProjectsApi = (*ProjectsApiService)(&c.common)
 	c.ScanlogApi = (*ScanlogApiService)(&c.common)
 	c.SecretsApi = (*SecretsApiService)(&c.common)

@@ -21,7 +21,7 @@ endif
 TEST_FORMAT = short-verbose
 endif
 
-PIPELINE_VERSION = 0.29.0-dev.1
+PIPELINE_VERSION = pke-oidc-refactor
 CLOUDINFO_VERSION = 0.7.8
 TELESCOPES_VERSION = 0.5.2
 
