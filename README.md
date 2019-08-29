@@ -43,24 +43,13 @@ For interactive login, just run `banzai login`, and follow the instructions give
 
 ### Use
 
+A command line client for the Banzai Cloud Pipeline platform.
+
+### Options
+
 ```
-A command line client for the Banzai Pipeline platform.
-
-Usage:
-  banzai [command]
-
-Available Commands:
-  cluster      Manage clusters
-  controlplane Manage controlplane
-  form         Open forms from config, persist provided values and generate templates
-  help         Help about any command
-  login        Configure and log in to a Banzai Cloud context
-  organization List and select organizations
-  secret       Manage secrets
-
-Flags:
       --color                use colors on non-tty outputs
-      --config string        config file (default is $HOME/.banzai/config.yaml)
+      --config string        config file (default is $BANZAICONFIG or $HOME/.banzai/config.yaml)
   -h, --help                 help for banzai
       --interactive          ask questions interactively even if stdin or stdout is non-tty
       --no-color             never display color output
@@ -68,9 +57,17 @@ Flags:
       --organization int32   organization id
   -o, --output string        output format (default|yaml|json) (default "default")
       --verbose              more verbose output
-      --version              version for banzai
-
-Use "banzai [command] --help" for more information about a command.
 ```
+
+### SEE ALSO
+
+* [banzai bucket](cmd/docs/banzai_bucket.md)	 - Manage buckets
+* [banzai cluster](cmd/docs/banzai_cluster.md)	 - Manage clusters
+* [banzai form](cmd/docs/banzai_form.md)	 - Open forms from config, persist provided values and generate templates
+* [banzai login](cmd/docs/banzai_login.md)	 - Configure and log in to a Banzai Cloud context
+* [banzai organization](cmd/docs/banzai_organization.md)	 - List and select organizations
+* [banzai pipeline](cmd/docs/banzai_pipeline.md)	 - Manage deployment of Banzai Cloud Pipeline instances
+* [banzai secret](cmd/docs/banzai_secret.md)	 - Manage secrets
+
 
 For more details, check the [official documentation](http://banzaicloud.com/docs/cli/).
