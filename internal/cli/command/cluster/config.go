@@ -38,7 +38,7 @@ func NewConfigCommand(banzaiCli cli.Cli) *cobra.Command {
 		Use:     "config",
 		Aliases: []string{"conf"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runConfig(banzaiCli, options, args)
+			return runConfig(banzaiCli, options)
 		},
 		Short:   "Downloads a cluster's kubectl config",
 		Long:    "You can either run the command without arguments to interactively select a cluster, and get an interactive shell, select the cluster with the --cluster-name flag, or specify the command to run.",
@@ -52,7 +52,7 @@ func NewConfigCommand(banzaiCli cli.Cli) *cobra.Command {
 	return cmd
 }
 
-func runConfig(banzaiCli cli.Cli, options configOptions, args []string) error {
+func runConfig(banzaiCli cli.Cli, options configOptions) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
