@@ -17,7 +17,6 @@ package cluster
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"time"
 
@@ -64,17 +63,17 @@ func runConfig(banzaiCli cli.Cli, options configOptions, args []string) error {
 	}
 	id := options.ClusterID()
 
-	tmpfile, err := ioutil.TempFile("", "kubeconfig") // mode is 0600 by default
+	kubeconfigPath := fmt.Sprintf("%s/kubeconfig-%d-%d.yaml", banzaiCli.Home(), orgId, id)
+	kubeconfigFile, err := os.OpenFile(kubeconfigPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		return errors.WrapIf(err, "could not write temporary file")
+		return errors.Wrap(err, "failed to open kube config file for writing")
 	}
-	defer os.Remove(tmpfile.Name())
 
 	interactive := banzaiCli.Interactive()
 
 	if options.oidc {
 		if !interactive {
-			return errors.WrapIf(err, "oidc config available only in interactive mode")
+			return errors.New("oidc config available only in interactive mode")
 		}
 
 		oidcSecret, _, err := pipeline.SecretsApi.GetSecret(ctx, orgId, fmt.Sprintf("cluster-%d-dex-client", id))
@@ -86,7 +85,7 @@ func runConfig(banzaiCli cli.Cli, options configOptions, args []string) error {
 
 	} else {
 
-		retry, err := writeConfig(ctx, pipeline, orgId, id, tmpfile)
+		retry, err := writeConfig(ctx, pipeline, orgId, id, kubeconfigFile)
 		if err != nil {
 			if !interactive || !retry {
 				return errors.WrapIf(err, "writing kubeconfig")
@@ -94,7 +93,7 @@ func runConfig(banzaiCli cli.Cli, options configOptions, args []string) error {
 
 			go func() {
 				for {
-					retry, err := writeConfig(ctx, pipeline, orgId, id, tmpfile)
+					retry, err := writeConfig(ctx, pipeline, orgId, id, kubeconfigFile)
 					if err != nil {
 						if !retry {
 							log.Fatalf("%v", err)
