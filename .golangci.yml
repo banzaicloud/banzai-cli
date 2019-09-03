@@ -16,6 +16,7 @@ linters:
         - errcheck
         - goimports
         - gocyclo
+        - bodyclose
 
 linters-settings:
     golint:
