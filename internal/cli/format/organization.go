@@ -27,7 +27,7 @@ func OrganizationWrite(out io.Writer, format string, color bool, data interface{
 		Out:    out,
 		Color:  color,
 		Format: format,
-		Fields: []string{"Id", "Name"},
+		Fields: []string{"Id", "Name", "Selected"},
 	}
 
 	err := output.Output(ctx, data)

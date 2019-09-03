@@ -20,6 +20,7 @@ import (
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/format"
+	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -52,16 +53,24 @@ func runList(banzaiCli cli.Cli, options listOptions) {
 		log.Fatalf("could not list organizations: %v", err)
 	}
 
-	format.OrganizationWrite(banzaiCli.Out(), options.format, banzaiCli.Color(), orgs)
+	orgsList := []map[string]interface{}{}
+
+	err = mapstructure.Decode(orgs, &orgsList)
+	if err != nil {
+		log.Fatalf("failed to encode orgs: %v", err)
+	}
 
 	// TODO: do this better
 	if strings.ToLower(options.format) != "json" && strings.ToLower(options.format) != "yaml" {
 		id := banzaiCli.Context().OrganizationID()
-		for _, org := range orgs {
-			if org.Id == id {
-				// TODO: review log usage
-				log.Infof("Organization %q (%d) is selected.", org.Name, org.Id)
+		for _, org := range orgsList {
+			if org["Id"] == id {
+				org["Selected"] = "✔"
+			} else {
+				org["Selected"] = ""
 			}
 		}
 	}
+
+	format.OrganizationWrite(banzaiCli.Out(), options.format, banzaiCli.Color(), orgsList)
 }
