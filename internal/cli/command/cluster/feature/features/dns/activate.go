@@ -138,18 +138,19 @@ func buildActivateReqInteractively(
 	if err != nil {
 		return errors.WrapIf(err, "failed to marshal request to JSON")
 	}
+	var result string
 	if err := survey.AskOne(
 		&survey.Editor{
 			Default:       string(content),
 			HideDefault:   true,
 			AppendDefault: true,
 		},
-		&content,
+		&result,
 		survey.WithValidator(validateActivateClusterFeatureRequest),
 	); err != nil {
 		return errors.WrapIf(err, "failure during survey")
 	}
-	if err := json.Unmarshal(content, req); err != nil {
+	if err := json.Unmarshal([]byte(result), req); err != nil {
 		return errors.WrapIf(err, "failed to unmarshal JSON as request")
 	}
 
