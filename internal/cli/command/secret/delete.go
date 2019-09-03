@@ -111,7 +111,7 @@ func runDelete(banzaiCli cli.Cli, options deleteOptions) error {
 	}
 
 	if failed {
-		return errors.New("errors occured during secret deletion")
+		return errors.New("errors occurred during secret deletion")
 	}
 
 	return nil

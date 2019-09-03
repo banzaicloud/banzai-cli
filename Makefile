@@ -1,6 +1,6 @@
 # A Self-Documenting Makefile: http://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 
-OS = $(shell uname)
+OS = $(shell uname | tr A-Z a-z)
 
 # Project variables
 PACKAGE = github.com/banzaicloud/banzai-cli
@@ -21,16 +21,16 @@ endif
 TEST_FORMAT = short-verbose
 endif
 
-PIPELINE_VERSION = 0.29.0-dev.1
+PIPELINE_VERSION = 0.29.1
 CLOUDINFO_VERSION = 0.7.8
 TELESCOPES_VERSION = 0.5.2
 
 # Dependency versions
-GOTESTSUM_VERSION = 0.3.3
-GOLANGCI_VERSION = 1.16.0
+GOTESTSUM_VERSION = 0.3.5
+GOLANGCI_VERSION = 1.17.1
 LICENSEI_VERSION = 0.1.0
 GORELEASER_VERSION = 0.112.2
-PACKR_VERSION = 2.0.8
+PACKR_VERSION = 2.6.0
 OPENAPI_GENERATOR_VERSION = PR1869
 
 GOLANG_VERSION = 1.12
@@ -43,12 +43,7 @@ bin/packr2: bin/packr2-${PACKR_VERSION}
 	@ln -sf packr2-${PACKR_VERSION} bin/packr2
 bin/packr2-${PACKR_VERSION}:
 	@mkdir -p bin
-ifeq (${OS}, Darwin)
-	curl -L https://github.com/gobuffalo/packr/releases/download/v${PACKR_VERSION}/packr_${PACKR_VERSION}_darwin_amd64.tar.gz | tar -zOxf - packr2 > ./bin/packr2-${PACKR_VERSION} && chmod +x ./bin/packr2-${PACKR_VERSION}
-endif
-ifeq (${OS}, Linux)
-	curl -L https://github.com/gobuffalo/packr/releases/download/v${PACKR_VERSION}/packr_${PACKR_VERSION}_linux_amd64.tar.gz | tar -zOxf - packr2 > ./bin/packr2-${PACKR_VERSION} && chmod +x ./bin/packr2-${PACKR_VERSION}
-endif
+	curl -L https://github.com/gobuffalo/packr/releases/download/v${PACKR_VERSION}/packr_${PACKR_VERSION}_${OS}_amd64.tar.gz | tar -zOxf - packr2 > ./bin/packr2-${PACKR_VERSION} && chmod +x ./bin/packr2-${PACKR_VERSION}
 
 .PHONY: client-build
 client-build: ## Build form client
@@ -89,12 +84,7 @@ bin/gotestsum: bin/gotestsum-${GOTESTSUM_VERSION}
 	@ln -sf gotestsum-${GOTESTSUM_VERSION} bin/gotestsum
 bin/gotestsum-${GOTESTSUM_VERSION}:
 	@mkdir -p bin
-ifeq (${OS}, Darwin)
-	curl -L https://github.com/gotestyourself/gotestsum/releases/download/v${GOTESTSUM_VERSION}/gotestsum_${GOTESTSUM_VERSION}_darwin_amd64.tar.gz | tar -zOxf - gotestsum > ./bin/gotestsum-${GOTESTSUM_VERSION} && chmod +x ./bin/gotestsum-${GOTESTSUM_VERSION}
-endif
-ifeq (${OS}, Linux)
-	curl -L https://github.com/gotestyourself/gotestsum/releases/download/v${GOTESTSUM_VERSION}/gotestsum_${GOTESTSUM_VERSION}_linux_amd64.tar.gz | tar -zOxf - gotestsum > ./bin/gotestsum-${GOTESTSUM_VERSION} && chmod +x ./bin/gotestsum-${GOTESTSUM_VERSION}
-endif
+	curl -L https://github.com/gotestyourself/gotestsum/releases/download/v${GOTESTSUM_VERSION}/gotestsum_${GOTESTSUM_VERSION}_${OS}_amd64.tar.gz | tar -zOxf - gotestsum > ./bin/gotestsum-${GOTESTSUM_VERSION} && chmod +x ./bin/gotestsum-${GOTESTSUM_VERSION}
 
 TEST_PKGS ?= ./...
 TEST_REPORT_NAME ?= results.xml
