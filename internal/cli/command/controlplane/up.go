@@ -174,9 +174,23 @@ func postInstall(options createOptions, banzaiCli cli.Cli, values map[string]int
 	externalHost, _ := values["externalHost"].(string)
 
 	if externalHost != "auto" && externalHost != defaultLocalhost {
-		if target, err := options.readTraefikAddress(); err != nil {
-			log.Errorf("%v", err)
-		} else {
+		var target string
+		switch values["provider"] {
+		case providerKind:
+			target = "127.0.0.1"
+		case providerEc2:
+			target, err = options.readEc2Host()
+			if err != nil {
+				log.Errorf("%v", err)
+			}
+		case providerK8s:
+			target, err = options.readTraefikAddress()
+			if err != nil {
+				log.Errorf("%v", err)
+			}
+		}
+
+		if target != "" {
 			printExternalHostRecord(externalHost, target)
 		}
 	}
