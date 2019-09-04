@@ -3,7 +3,7 @@
  *
  * Pipeline v0.3.0 swagger
  *
- * API version: 0.29.1
+ * API version: 0.3.0
  * Contact: info@banzaicloud.com
  */
 
@@ -17,4 +17,5 @@ type NodePoolStatusGoogle struct {
 	MinCount int32 `json:"minCount,omitempty"`
 	MaxCount int32 `json:"maxCount,omitempty"`
 	InstanceType string `json:"instanceType,omitempty"`
+	ResourceSummary map[string]ResourceSummary `json:"resourceSummary,omitempty"`
 }

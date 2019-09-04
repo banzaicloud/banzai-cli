@@ -3,7 +3,7 @@
  *
  * Pipeline v0.3.0 swagger
  *
- * API version: 0.29.1
+ * API version: 0.3.0
  * Contact: info@banzaicloud.com
  */
 
@@ -17,6 +17,6 @@ type NodeItemMetadata struct {
 	Uid string `json:"uid,omitempty"`
 	ResourceVersion string `json:"resourceVersion,omitempty"`
 	CreationTimestamp string `json:"creationTimestamp,omitempty"`
-	Labels NodeItemMetadataLabels `json:"labels,omitempty"`
-	Annotations NodeItemMetadataAnnotations `json:"annotations,omitempty"`
+	Labels map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
 }

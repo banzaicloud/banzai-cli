@@ -3,7 +3,7 @@
  *
  * Pipeline v0.3.0 swagger
  *
- * API version: 0.29.1
+ * API version: 0.3.0
  * Contact: info@banzaicloud.com
  */
 
@@ -14,4 +14,5 @@ package pipeline
 type ResourceSummary struct {
 	Cpu Resource `json:"cpu,omitempty"`
 	Memory Resource `json:"memory,omitempty"`
+	Status string `json:"status,omitempty"`
 }

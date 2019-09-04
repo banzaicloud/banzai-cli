@@ -3,7 +3,7 @@
  *
  * Pipeline v0.3.0 swagger
  *
- * API version: 0.29.1
+ * API version: 0.3.0
  * Contact: info@banzaicloud.com
  */
 
@@ -33,4 +33,5 @@ type GetClusterStatusResponse struct {
 	// The lifespan of the cluster expressed in minutes after which it is automatically deleted. Zero value means the cluster is never automatically deleted.
 	TtlMinutes int32 `json:"ttlMinutes,omitempty"`
 	NodePools map[string]NodePoolStatus `json:"nodePools,omitempty"`
+	TotalSummary ResourceSummary `json:"totalSummary,omitempty"`
 }

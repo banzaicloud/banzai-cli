@@ -3,7 +3,7 @@
  *
  * Pipeline v0.3.0 swagger
  *
- * API version: 0.29.1
+ * API version: 0.3.0
  * Contact: info@banzaicloud.com
  */
 
@@ -18,4 +18,5 @@ type NodePoolStatusOracle struct {
 	InstanceType string `json:"instanceType,omitempty"`
 	Image string `json:"image,omitempty"`
 	Autoscaling bool `json:"autoscaling,omitempty"`
+	ResourceSummary map[string]ResourceSummary `json:"resourceSummary,omitempty"`
 }

@@ -3,7 +3,7 @@
  *
  * Pipeline v0.3.0 swagger
  *
- * API version: 0.29.1
+ * API version: 0.3.0
  * Contact: info@banzaicloud.com
  */
 
@@ -20,4 +20,5 @@ type NodePoolStatusAmazon struct {
 	MaxCount int32 `json:"maxCount,omitempty"`
 	Image string `json:"image,omitempty"`
 	Labels map[string]string `json:"labels,omitempty"`
+	ResourceSummary map[string]ResourceSummary `json:"resourceSummary,omitempty"`
 }
