@@ -12,35 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cluster
+package node
 
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/node"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 )
 
-// NewClusterCommand returns a cobra command for `cluster` subcommands.
-func NewClusterCommand(banzaiCli cli.Cli) *cobra.Command {
+var NodeClusterContext clustercontext.Context
+
+// NewNodeCommand returns a cobra command for `node` subcommands.
+func NewNodeCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "cluster",
-		Aliases: []string{"clusters", "c", "cl"},
-		Short:   "Manage clusters",
+		Use:     "nodes",
+		Aliases: []string{"node", "n"},
+		Short:   "Work with cluster nodes",
 	}
 
 	cmd.AddCommand(
-		NewCreateCommand(banzaiCli),
-		NewDeleteCommand(banzaiCli),
-		NewGetCommand(banzaiCli),
-		NewHelmCommand(banzaiCli),
-		NewImportCommand(banzaiCli),
-		NewListCommand(banzaiCli),
-		NewShellCommand(banzaiCli),
-		feature.NewFeatureCommand(banzaiCli),
-		node.NewNodeCommand(banzaiCli),
+		NewNodeListCommand(banzaiCli),
+		NewSSHToNodeCommand(banzaiCli),
 	)
+
+	NodeClusterContext = clustercontext.NewClusterContext(cmd, banzaiCli, "node")
 
 	return cmd
 }
