@@ -35,6 +35,7 @@ func runTerraform(command string, options cpContext, banzaiCli cli.Cli, env map[
 		command,
 		"-parallelism=1", // workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/271
 		"-var", "workdir=/root",
+		fmt.Sprintf("-refresh=%v", options.refreshState),
 		"-state=/root/" + tfstateFilename,
 	}
 
