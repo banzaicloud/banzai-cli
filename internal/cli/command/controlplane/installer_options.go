@@ -44,6 +44,7 @@ const (
 type cpContext struct {
 	installerTag  string
 	runLocally    bool
+	refreshState  bool
 	pullInstaller bool
 	autoApprove   bool
 	workspace     string
@@ -81,6 +82,8 @@ func NewContext(cmd *cobra.Command, banzaiCli cli.Cli) *cpContext {
 
 	flags.BoolVar(&ctx.runLocally, "run-locally", false, "Run the terraform command locally instead of docker (for development)")
 	flags.MarkHidden("run-locally")
+	flags.BoolVar(&ctx.refreshState, "refresh-state", true, "Refresh terraform state for each run (turn off to save time during development)")
+	flags.MarkHidden("refresh-state")
 	return &ctx
 }
 
