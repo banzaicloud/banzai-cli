@@ -1,19 +1,21 @@
-## banzai cluster list
+## banzai cluster feature vault deactivate
 
-List clusters
+Deactivate the Vault feature of a cluster
 
 ### Synopsis
 
-List clusters
+Deactivate the Vault feature of a cluster
 
 ```
-banzai cluster list [flags]
+banzai cluster feature vault deactivate [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for list
+      --cluster int32         ID of cluster to deactivate Vault cluster feature of
+      --cluster-name string   Name of cluster to deactivate Vault cluster feature of
+  -h, --help                  help for deactivate
 ```
 
 ### Options inherited from parent commands
@@ -31,8 +33,5 @@ banzai cluster list [flags]
 
 ### SEE ALSO
 
-* [banzai cluster](banzai_cluster.md)	 - Manage clusters
-* [banzai cluster feature dns](banzai_cluster_feature_dns.md)	 - Manage cluster DNS feature
-* [banzai cluster feature list](banzai_cluster_feature_list.md)	 - List active (and pending) features of a cluster
 * [banzai cluster feature vault](banzai_cluster_feature_vault.md)	 - Manage cluster Vault feature
 

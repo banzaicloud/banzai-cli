@@ -15,110 +15,68 @@
 package dns
 
 import (
-	"context"
 	"encoding/json"
 
 	"emperror.dev/errors"
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
-	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
+	"github.com/mitchellh/mapstructure"
 )
 
-func NewUpdateCommand(banzaiCli cli.Cli) *cobra.Command {
-	options := updateOptions{}
+type UpdateManager struct{}
 
-	cmd := &cobra.Command{
-		Use:     "update",
-		Aliases: []string{"change", "modify", "set"},
-		Short:   "Update the DNS feature of a cluster",
-		Args:    cobra.NoArgs,
-		RunE: func(_ *cobra.Command, args []string) error {
-			return runUpdate(banzaiCli, options, args)
-		},
+func (m *UpdateManager) GetName() string {
+	return featureName
+}
+
+func UpdateGetManager() *UpdateManager {
+	return &UpdateManager{}
+}
+
+func (m *UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.UpdateClusterFeatureRequest) error {
+
+	var spec specResponse
+	if err := mapstructure.Decode(req.Spec, &spec); err != nil {
+		return errors.WrapIf(err, "feature specification does not conform to schema")
 	}
 
-	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "update DNS cluster feature for")
+	defaultDnsType := dnsCustom
+	if spec.AutoDNS != nil && spec.AutoDNS.Enabled {
+		defaultDnsType = dnsAuto
+	}
 
-	flags := cmd.Flags()
-	flags.StringVarP(&options.filePath, "file", "f", "", "Feature specification file")
+	comp, err := askDnsComponent(defaultDnsType)
+	if err != nil {
+		return errors.WrapIf(err, "error during choosing DNS component")
+	}
 
-	return cmd
-}
-
-type updateOptions struct {
-	clustercontext.Context
-	filePath string
-}
-
-func runUpdate(banzaiCli cli.Cli, options updateOptions, _ []string) error {
-	var req pipeline.UpdateClusterFeatureRequest
-	if options.filePath == "" && banzaiCli.Interactive() {
-		if err := buildUpdateReqInteractively(banzaiCli, options, &req); err != nil {
-			return errors.WrapIf(err, "failed to build update request interactively")
+	switch comp {
+	case dnsAuto:
+		req.Spec = buildAutoDNSFeatureRequest()
+	case dnsCustom:
+		customDNS, err := buildCustomDNSFeatureRequest(banzaiCLI, defaults{
+			clusterDomain: spec.CustomDNS.ClusterDomain,
+			domainFilters: spec.CustomDNS.DomainFilters,
+			provider: struct {
+				name     string
+				options  map[string]string
+				secretId string
+			}{
+				name:     spec.CustomDNS.Provider.Name,
+				options:  spec.CustomDNS.Provider.Options,
+				secretId: spec.CustomDNS.Provider.SecretID,
+			},
+		})
+		if err != nil {
+			return errors.Wrap(err, "failed to build custom DNS feature request")
 		}
-	} else {
-		if err := readUpdateReqFromFileOrStdin(options.filePath, &req); err != nil {
-			return errors.WrapIf(err, "failed to read DNS cluster feature specification")
-		}
-	}
-
-	orgId := banzaiCli.Context().OrganizationID()
-	clusterId := options.ClusterID()
-	resp, err := banzaiCli.Client().ClusterFeaturesApi.UpdateClusterFeature(context.Background(), orgId, clusterId, featureName, req)
-	if err != nil {
-		cli.LogAPIError("activate DNS cluster feature", err, resp.Request)
-		log.Fatalf("could not activate DNS cluster feature: %v", err)
-	}
-
-	log.Infof("feature %q started to update", featureName)
-
-	return nil
-}
-
-func readUpdateReqFromFileOrStdin(filePath string, req *pipeline.UpdateClusterFeatureRequest) error {
-	filename, raw, err := utils.ReadFileOrStdin(filePath)
-	if err != nil {
-		return errors.WrapIfWithDetails(err, "failed to read", "filename", filename)
-	}
-
-	if err := json.Unmarshal(raw, &req); err != nil {
-		return errors.WrapIf(err, "failed to unmarshal input")
+		req.Spec = customDNS
 	}
 
 	return nil
 }
 
-func buildUpdateReqInteractively(_ cli.Cli, _ updateOptions, req *pipeline.UpdateClusterFeatureRequest) error {
-	var edit bool
-	if err := survey.AskOne(&survey.Confirm{Message: "Do you want to edit the cluster feature update request in your text editor?"}, &edit); err != nil {
-		return errors.WrapIf(err, "failure during survey")
-	}
-	if !edit {
-		return nil
-	}
-
-	content, err := json.MarshalIndent(*req, "", "  ")
-	if err != nil {
-		return errors.WrapIf(err, "failed to marshal request to JSON")
-	}
-	if err := survey.AskOne(
-		&survey.Editor{Default: string(content), HideDefault: true, AppendDefault: true},
-		&content,
-		survey.WithValidator(validateActivateClusterFeatureRequest)); err != nil {
-		return errors.WrapIf(err, "failure during survey")
-	}
-	if err := json.Unmarshal(content, req); err != nil {
-		return errors.WrapIf(err, "failed to unmarshal JSON as request")
-	}
-
-	return nil
-}
-
-func validateUpdateClusterFeatureRequest(req interface{}) error {
+func (m *UpdateManager) ValidateRequest(req interface{}) error {
 	var request pipeline.UpdateClusterFeatureRequest
 	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
 		return errors.WrapIf(err, "request is not valid JSON")

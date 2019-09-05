@@ -15,107 +15,34 @@
 package dns
 
 import (
-	"context"
 	"strings"
 
-	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
-	"github.com/banzaicloud/banzai-cli/internal/cli"
-	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
-	"github.com/banzaicloud/banzai-cli/internal/cli/output"
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
 )
 
-func NewGetCommand(banzaiCli cli.Cli) *cobra.Command {
-	options := getOptions{}
+type GetManager struct{}
 
-	cmd := &cobra.Command{
-		Use:     "get",
-		Aliases: []string{"details", "show", "query"},
-		Short:   "Get details of the DNS feature for a cluster",
-		Args:    cobra.NoArgs,
-		RunE: func(_ *cobra.Command, args []string) error {
-			return runGet(banzaiCli, options, args)
-		},
-	}
-
-	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "get DNS cluster feature details of")
-
-	return cmd
+func (m *GetManager) GetCommandName() string {
+	return featureName
 }
 
-type getOptions struct {
-	clustercontext.Context
-}
-
-const featureName = "dns"
-
-func runGet(banzaiCli cli.Cli, options getOptions, args []string) error {
-	if err := options.Init(args...); err != nil {
-		return errors.WrapIf(err, "failed to initialize options")
-	}
-
-	pipeline := banzaiCli.Client()
-	orgId := banzaiCli.Context().OrganizationID()
-	clusterId := options.ClusterID()
-
-	details, resp, err := pipeline.ClusterFeaturesApi.ClusterFeatureDetails(context.Background(), orgId, clusterId, featureName)
-	if err != nil {
-		cli.LogAPIError("get DNS cluster feature details", err, resp.Request)
-		log.Fatalf("could not get DNS cluster feature details: %v", err)
-		return err
-	}
-
-	writeDNSFeatureDetails(banzaiCli, details)
-	return nil
-}
-
-func writeDNSFeatureDetails(banzaiCli cli.Cli, details pipeline.ClusterFeatureDetails) error {
-	var (
-		data   interface{}
-		fields []string
-	)
-
-	if banzaiCli.OutputFormat() == output.OutputFormatDefault {
-		tableData := getTableData(details)
-
-		data = tableData
-		fields = make([]string, 0, len(tableData))
-		for k := range tableData {
-			fields = append(fields, k)
-		}
-	} else {
-		data = details
-	}
-
-	ctx := &output.Context{
-		Out:    banzaiCli.Out(),
-		Color:  banzaiCli.Color(),
-		Format: banzaiCli.OutputFormat(),
-		Fields: fields,
-	}
-
-	return output.Output(ctx, data)
-}
-
-func getTableData(details pipeline.ClusterFeatureDetails) map[string]interface{} {
+func (m *GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]interface{} {
 	tableData := map[string]interface{}{
 		"Status": details.Status,
 	}
 
-	if autodns, ok := getObj(details.Output, "autodns"); ok {
+	if autodns, ok := getObj(details.Output, "autoDns"); ok {
 		if zone, ok := getStr(autodns, "zone"); ok {
-			tableData["AutoDNS zone"] = zone
+			tableData["AutoDNS_zone"] = zone
 		}
 		if clusterDomain, ok := getStr(autodns, "clusterDomain"); ok {
-			tableData["AutoDNS cluster domain"] = clusterDomain
+			tableData["AutoDNS_cluster domain"] = clusterDomain
 		}
 	}
 
-	if customDNS, ok := getObj(details.Spec, "customdns"); ok {
+	if customDNS, ok := getObj(details.Spec, "customDns"); ok {
 		if clusterDomain, ok := getObj(customDNS, "clusterDomain"); ok {
-			tableData["CustomDNS cluster domain"] = clusterDomain
+			tableData["CustomDNS_cluster_domain"] = clusterDomain
 		}
 		if domainFilters, ok := getList(customDNS, "domainFilters"); ok {
 			filters := make([]string, 0, len(domainFilters))
@@ -124,16 +51,20 @@ func getTableData(details pipeline.ClusterFeatureDetails) map[string]interface{}
 					filters = append(filters, s)
 				}
 			}
-			tableData["CustomDNS domain filters"] = strings.Join(filters, ",")
+			tableData["CustomDNS_domain_filters"] = strings.Join(filters, ",")
 		}
 		if provider, ok := getObj(customDNS, "provider"); ok {
 			if name, ok := getStr(provider, "name"); ok {
-				tableData["CustomDNS provider"] = name
+				tableData["CustomDNS_provider"] = name
 			}
 		}
 	}
 
 	return tableData
+}
+
+func NewGetManager() *GetManager {
+	return &GetManager{}
 }
 
 func getList(target map[string]interface{}, key string) ([]interface{}, bool) {
