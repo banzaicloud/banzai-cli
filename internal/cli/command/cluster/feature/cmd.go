@@ -15,9 +15,11 @@
 package feature
 
 import (
+	"fmt"
+
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features/dns"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features"
 	"github.com/spf13/cobra"
 )
 
@@ -40,7 +42,43 @@ func NewFeatureCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd.AddCommand(
 		NewListCommand(banzaiCli),
 		// NOTE: add feature commands here
-		dns.NewDNSCommand(banzaiCli),
+		featureCommandFactory(banzaiCli, "dns", features.NewDNSSubCommandManager()),
+		featureCommandFactory(banzaiCli, "vault", features.NewVaultSubCommandManager()),
+	)
+
+	return cmd
+}
+
+type getOptions struct {
+	clustercontext.Context
+}
+
+type SubCommandManager interface {
+	GetName() string
+	ActivateManager() features.ActivateManager
+	DeactivateManager() features.DeactivateManager
+	GetManager() features.GetManager
+	UpdateManager() features.UpdateManager
+}
+
+func featureCommandFactory(banzaiCLI cli.Cli, use string, scm SubCommandManager) *cobra.Command {
+	options := getOptions{}
+	getCommand := features.GetCommandFactory(banzaiCLI, scm.GetManager(), scm.GetName())
+
+	cmd := &cobra.Command{
+		Use:   use,
+		Short: fmt.Sprintf("Manage cluster %s feature", scm.GetName()),
+		Args:  cobra.NoArgs,
+		RunE:  getCommand.RunE,
+	}
+
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCLI, fmt.Sprintf("manage %s cluster feature of", scm.GetName()))
+
+	cmd.AddCommand(
+		features.ActivateCommandFactory(banzaiCLI, scm.ActivateManager(), scm.GetName()),
+		features.DeactivateCommandFactory(banzaiCLI, scm.DeactivateManager(), scm.GetName()),
+		getCommand,
+		features.UpdateCommandFactory(banzaiCLI, scm.UpdateManager(), scm.GetName()),
 	)
 
 	return cmd

@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dns
+package features
 
 import (
 	"context"
+	"fmt"
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -24,44 +25,53 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewDeactivateCommand(banzaiCli cli.Cli) *cobra.Command {
+type deactivateOptions struct {
+	clustercontext.Context
+}
+
+type DeactivateManager interface {
+	GetName() string
+}
+
+func DeactivateCommandFactory(banzaiCli cli.Cli, manager DeactivateManager, name string) *cobra.Command {
 	options := deactivateOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "deactivate",
 		Aliases: []string{"disable", "off", "remove", "rm", "uninstall"},
-		Short:   "Deactivate the DNS feature of a cluster",
+		Short:   fmt.Sprintf("Deactivate the %s feature of a cluster", name),
 		Args:    cobra.NoArgs,
 		RunE: func(_ *cobra.Command, args []string) error {
-			return runDeactivate(banzaiCli, options, args)
+			return runDeactivate(banzaiCli, manager, options, args)
 		},
 	}
 
-	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "deactivate DNS cluster feature of")
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, fmt.Sprintf("deactivate %s cluster feature of", name))
 
 	return cmd
 }
 
-type deactivateOptions struct {
-	clustercontext.Context
-}
-
-func runDeactivate(banzaiCli cli.Cli, options deactivateOptions, args []string) error {
+func runDeactivate(
+	banzaiCLI cli.Cli,
+	m DeactivateManager,
+	options deactivateOptions,
+	args []string,
+) error {
 	if err := options.Init(args...); err != nil {
 		return errors.WrapIf(err, "failed to initialize options")
 	}
 
-	pipeline := banzaiCli.Client()
-	orgId := banzaiCli.Context().OrganizationID()
+	pipeline := banzaiCLI.Client()
+	orgId := banzaiCLI.Context().OrganizationID()
 	clusterId := options.ClusterID()
 
-	resp, err := pipeline.ClusterFeaturesApi.DeactivateClusterFeature(context.Background(), orgId, clusterId, featureName)
+	resp, err := pipeline.ClusterFeaturesApi.DeactivateClusterFeature(context.Background(), orgId, clusterId, m.GetName())
 	if err != nil {
 		cli.LogAPIError("deactivate DNS cluster feature", err, resp.Request)
 		log.Fatalf("could not deactivate DNS cluster feature: %v", err)
 	}
 
-	log.Infof("feature %q started to deactivate", featureName)
+	log.Infof("feature %q started to deactivate", m.GetName())
 
 	return nil
 }

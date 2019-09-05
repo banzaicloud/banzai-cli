@@ -20,6 +20,8 @@ import (
 )
 
 const (
+	featureName = "dns"
+
 	dnsAuto   = "Auto DNS"
 	dnsCustom = "Custom DNS"
 
@@ -32,11 +34,15 @@ const (
 
 type obj = map[string]interface{}
 
+func NewDeactivateManager() *ActivateManager {
+	return &ActivateManager{}
+}
+
 func validateSpec(specObj map[string]interface{}) error {
 	providers := map[string]bool{
 		dnsRoute53: true,
-		dnsAzure: true,
-		dnsGoogle: true,
+		dnsAzure:   true,
+		dnsGoogle:  true,
 	}
 
 	var spec struct {
@@ -110,4 +116,30 @@ var providers = map[string]struct {
 		Name:       "Google Cloud DNS",
 		SecretType: "google",
 	},
+}
+
+type specResponse struct {
+	CustomDNS *struct {
+		Enabled       bool     `mapstructure:"enabled"`
+		DomainFilters []string `mapstructure:"domainFilters"`
+		ClusterDomain string   `mapstructure:"clusterDomain"`
+		Provider      struct {
+			Name     string            `mapstructure:"name"`
+			SecretID string            `mapstructure:"secretId"`
+			Options  map[string]string `mapstructure:"options"`
+		} `mapstructure:"provider"`
+	} `mapstructure:"customDns"`
+	AutoDNS *struct {
+		Enabled bool `mapstructure:"enabled"`
+	} `mapstructure:"autoDns"`
+}
+
+type defaults struct {
+	clusterDomain string
+	domainFilters []string
+	provider      struct {
+		name     string
+		options  map[string]string
+		secretId string
+	}
 }
