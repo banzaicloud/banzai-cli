@@ -26,7 +26,7 @@ import (
 )
 
 func runTerraform(command string, options cpContext, banzaiCli cli.Cli, env map[string]string, targets ...string) error {
-	cmdEnv := map[string]string{"KUBECONFIG": "/root/" + kubeconfigFilename}
+	cmdEnv := map[string]string{"KUBECONFIG": "/workspace/" + kubeconfigFilename}
 	for k, v := range env {
 		cmdEnv[k] = v
 	}
@@ -34,9 +34,9 @@ func runTerraform(command string, options cpContext, banzaiCli cli.Cli, env map[
 	cmd := []string{"terraform",
 		command,
 		"-parallelism=1", // workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/271
-		"-var", "workdir=/root",
+		"-var", "workdir=/workspace",
 		fmt.Sprintf("-refresh=%v", options.refreshState),
-		"-state=/root/" + tfstateFilename,
+		"-state=/workspace/" + tfstateFilename,
 	}
 
 	if options.autoApprove {
@@ -76,7 +76,7 @@ func runInstaller(command []string, options cpContext, banzaiCli cli.Cli, env ma
 
 	args := []string{
 		"run", "--rm", "--net=host",
-		"-v", fmt.Sprintf("%s:/root", options.workspace),
+		"-v", fmt.Sprintf("%s:/workspace", options.workspace),
 	}
 
 	if banzaiCli.Interactive() {
