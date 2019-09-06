@@ -76,6 +76,7 @@ func runInstaller(command []string, options cpContext, banzaiCli cli.Cli, env ma
 
 	args := []string{
 		"run", "--rm", "--net=host",
+		fmt.Sprintf("--user=%d", os.Getuid()),
 		"-v", fmt.Sprintf("%s:/workspace", options.workspace),
 	}
 
