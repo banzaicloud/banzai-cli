@@ -87,7 +87,7 @@ func runActivate(
 
 	} else {
 		if err := readActivateReqFromFileOrStdin(options.filePath, request); err != nil {
-			return errors.WrapIf(err, "failed to read Vault cluster feature specification")
+			return errors.WrapIf(err, fmt.Sprintf("failed to read %s cluster feature specification", m.GetName()))
 		}
 	}
 
@@ -95,8 +95,8 @@ func runActivate(
 	clusterId := options.ClusterID()
 	_, err = banzaiCLI.Client().ClusterFeaturesApi.ActivateClusterFeature(context.Background(), orgId, clusterId, m.GetName(), *request)
 	if err != nil {
-		cli.LogAPIError("activate Vault cluster feature", err, request)
-		log.Fatalf("could not activate Vault cluster feature: %v", err)
+		cli.LogAPIError(fmt.Sprintf("activate %s cluster feature", m.GetName()), err, request)
+		log.Fatalf("could not activate %s cluster feature: %v", m.GetName(), err)
 	}
 
 	log.Infof("feature %q started to activate", m.GetName())

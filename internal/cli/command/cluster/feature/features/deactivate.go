@@ -67,8 +67,8 @@ func runDeactivate(
 
 	resp, err := pipeline.ClusterFeaturesApi.DeactivateClusterFeature(context.Background(), orgId, clusterId, m.GetName())
 	if err != nil {
-		cli.LogAPIError("deactivate DNS cluster feature", err, resp.Request)
-		log.Fatalf("could not deactivate DNS cluster feature: %v", err)
+		cli.LogAPIError(fmt.Sprintf("deactivate %s cluster feature", m.GetName()), err, resp.Request)
+		log.Fatalf("could not deactivate %s cluster feature: %v", m.GetName(), err)
 	}
 
 	log.Infof("feature %q started to deactivate", m.GetName())
