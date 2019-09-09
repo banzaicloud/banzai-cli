@@ -187,7 +187,7 @@ func (a *app) handleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	authCodeURL := ""
-	scopes = append(scopes, "openid", "profile", "email", "groups", "federated:id")
+	scopes = append(scopes, oidc.ScopeOpenID, "profile", "email", "groups", "federated:id", oidc.ScopeOfflineAccess)
 	if r.FormValue("offline_access") != "yes" {
 		authCodeURL = a.oauth2Config(scopes).AuthCodeURL(a.oauthState)
 	} else if a.offlineAsScope {
@@ -272,7 +272,7 @@ func (a *app) handleCallback(w http.ResponseWriter, r *http.Request) {
 	buff := new(bytes.Buffer)
 	json.Indent(buff, []byte(claims), "", "  ")
 
-	pipelineToken, err = a.requestTokenFromPipeline(rawIDToken)
+	pipelineToken, err = a.requestTokenFromPipeline(rawIDToken, token.RefreshToken)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to request Pipeline token: %v", err), http.StatusInternalServerError)
 		return
@@ -283,7 +283,7 @@ func (a *app) handleCallback(w http.ResponseWriter, r *http.Request) {
 	log.Info("successfully logged in")
 }
 
-func (a *app) requestTokenFromPipeline(rawIDToken string) (string, error) {
+func (a *app) requestTokenFromPipeline(rawIDToken string, refreshToken string) (string, error) {
 	pipelineURL, err := url.Parse(a.pipelineBasePath)
 	if err != nil {
 		return "", errors.WrapIf(err, "failed to parse Pipeline endpoint")
@@ -294,6 +294,7 @@ func (a *app) requestTokenFromPipeline(rawIDToken string) (string, error) {
 	reqBody := bytes.NewBuffer(nil)
 	writer := multipart.NewWriter(reqBody)
 	writer.WriteField("id_token", rawIDToken)
+	writer.WriteField("refresh_token", refreshToken)
 	writer.Close()
 
 	a.client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
