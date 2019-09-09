@@ -99,14 +99,14 @@ func runUpdate(
 
 	} else {
 		if err := readUpdateReqFromFileOrStdin(options.filePath, request); err != nil {
-			return errors.WrapIf(err, "failed to read DNS cluster feature specification")
+			return errors.WrapIf(err, fmt.Sprintf("failed to read %s cluster feature specification", m.GetName()))
 		}
 	}
 
 	resp, err := banzaiCLI.Client().ClusterFeaturesApi.UpdateClusterFeature(context.Background(), orgID, clusterID, m.GetName(), *request)
 	if err != nil {
-		cli.LogAPIError("activate DNS cluster feature", err, resp.Request)
-		log.Fatalf("could not activate DNS cluster feature: %v", err)
+		cli.LogAPIError(fmt.Sprintf("update %s cluster feature", m.GetName()), err, resp.Request)
+		log.Fatalf("could not update %s cluster feature: %v", m.GetName(), err)
 	}
 
 	log.Infof("feature %q started to update", m.GetName())

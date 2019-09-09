@@ -70,8 +70,8 @@ func runGet(
 
 	details, resp, err := pipelineClient.ClusterFeaturesApi.ClusterFeatureDetails(context.Background(), orgId, clusterId, m.GetCommandName())
 	if err != nil {
-		cli.LogAPIError("get DNS cluster feature details", err, resp.Request)
-		log.Fatalf("could not get DNS cluster feature details: %v", err)
+		cli.LogAPIError(fmt.Sprintf("get %s cluster feature details", m.GetCommandName()), err, resp.Request)
+		log.Fatalf("could not get %s cluster feature details: %v", m.GetCommandName(), err)
 		return err
 	}
 
