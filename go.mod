@@ -36,3 +36,5 @@ require (
 	k8s.io/client-go v11.0.0+incompatible
 	sigs.k8s.io/kind v0.4.0
 )
+
+go 1.13
