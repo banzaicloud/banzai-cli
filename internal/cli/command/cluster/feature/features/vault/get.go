@@ -28,11 +28,13 @@ func (m *GetManager) GetCommandName() string {
 
 type outputResponse struct {
 	Vault struct {
-		Version string `mapstructure:"version"`
+		Version        string `mapstructure:"version"`
+		AuthMethodPath string `mapstructure:"authMethodPath"`
+		RolePath       string `mapstructure:"rolePath"`
 	} `mapstructure:"vault"`
 	Wehhook struct {
 		Version string `mapstructure:"version"`
-	} `mapstructure:"wehhook"`
+	} `mapstructure:"webhook"`
 }
 
 type specResponse struct {
@@ -65,6 +67,8 @@ func (m *GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) m
 	}
 
 	tableData["Vault_version"] = output.Vault.Version
+	tableData["Auth_method_path"] = output.Vault.AuthMethodPath
+	tableData["Role_path"] = output.Vault.RolePath
 	tableData["Webhook_version"] = output.Wehhook.Version
 	tableData["Namespaces"] = spec.Settings.Namespaces
 	tableData["Service_accounts"] = spec.Settings.ServiceAccounts
