@@ -73,7 +73,7 @@ func NewInitCommand(banzaiCli cli.Cli) *cobra.Command {
 		Long:  `Prepare a workspace for the deployment of an instance of Banzai Cloud Pipeline based on a values file or an interactive session.` + initLongDescription,
 		Args:  cobra.NoArgs,
 		PostRun: func(*cobra.Command, []string) {
-			log.Info("Successfully initialized workspace. You can run now `banzai up` to deploy Pipeline.")
+			log.Info("Successfully initialized workspace. You can run now `banzai pipeline up` to deploy Pipeline.")
 		},
 	}
 
