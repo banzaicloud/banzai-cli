@@ -15,6 +15,9 @@
 package vault
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
@@ -31,6 +34,7 @@ type outputResponse struct {
 		Version        string `mapstructure:"version"`
 		AuthMethodPath string `mapstructure:"authMethodPath"`
 		RolePath       string `mapstructure:"rolePath"`
+		Policy         string `mapstructure:"policy"`
 	} `mapstructure:"vault"`
 	Wehhook struct {
 		Version string `mapstructure:"version"`
@@ -42,6 +46,7 @@ type specResponse struct {
 		Enabled bool   `json:"enabled"`
 		Address string `json:"address"`
 		Token   string `json:"token"`
+		Policy  string `json:"policy"`
 	} `json:"custom_vault"`
 	Settings struct {
 		Namespaces      []string `json:"namespaces"`
@@ -73,10 +78,17 @@ func (m *GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) m
 	tableData["Namespaces"] = spec.Settings.Namespaces
 	tableData["Service_accounts"] = spec.Settings.ServiceAccounts
 
+	var policy string
 	if spec.CustomVault.Enabled {
 		tableData["Vault_address"] = spec.CustomVault.Address
 		tableData["Vault_token"] = spec.CustomVault.Token
+
+		policy = spec.CustomVault.Policy
+	} else {
+		policy = output.Vault.Policy
 	}
+
+	tableData["Policy"] = fmt.Sprintf("%q", strings.TrimSpace(strings.ReplaceAll(strings.ReplaceAll(policy, "\t", " "), "\n", "")))
 
 	return tableData
 }

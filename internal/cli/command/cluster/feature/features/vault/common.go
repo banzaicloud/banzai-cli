@@ -33,6 +33,7 @@ type obj = map[string]interface{}
 type defaults struct {
 	address         string
 	token           string
+	policy          string
 	namespaces      []string
 	serviceAccounts []string
 }

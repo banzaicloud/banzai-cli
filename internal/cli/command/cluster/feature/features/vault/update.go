@@ -61,6 +61,7 @@ func (m *UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeli
 		customSpec, err := buildCustomVaultFeatureRequest(defaults{
 			address: spec.CustomVault.Address,
 			token:   spec.CustomVault.Token,
+			policy:  spec.CustomVault.Policy,
 		})
 		if err != nil {
 			return errors.Wrap(err, "failed to build custom Vault feature request")
