@@ -197,8 +197,13 @@ func (c *cpContext) Init() error {
 		c.workspace = "default"
 	}
 
-	if !strings.Contains(c.workspace, string(os.PathSeparator)) {
+	if !strings.Contains(c.workspace, string(os.PathSeparator)) && c.workspace != "." && c.workspace != ".." {
+		original := c.workspace
 		c.workspace = filepath.Join(c.banzaiCli.Home(), "pipeline", c.workspace)
+		if _, err := os.Stat(original); err == nil {
+			original = "./" + original
+			log.Warningf("Using workspace %q instead of %q. Pass --workspace=%q for relative path.", c.workspace, original, original)
+		}
 	}
 
 	var err error
@@ -206,6 +211,8 @@ func (c *cpContext) Init() error {
 	if err != nil {
 		return errors.WrapIff(err, "failed to calculate absolute path to %q", c.workspace)
 	}
+
+	log.Debugf("Using workspace %q.", c.workspace)
 
 	err = os.MkdirAll(c.workspace, 0700)
 	return errors.WrapIff(err, "failed to use %q as workspace path", c.workspace)
