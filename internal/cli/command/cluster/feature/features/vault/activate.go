@@ -93,11 +93,17 @@ func buildCustomVaultFeatureRequest(defaults defaults) (map[string]interface{}, 
 		return nil, err
 	}
 
+	policy, err := askPolicy(defaults.policy)
+	if err != nil {
+		return nil, err
+	}
+
 	return obj{
 		"customVault": obj{
 			"enabled": true,
 			"address": address,
 			"token":   token,
+			"policy":  policy,
 		},
 	}, nil
 }
@@ -207,4 +213,18 @@ func askVaultToken(defaultValue string) (string, error) {
 		return "", errors.WrapIf(err, "failure during survey")
 	}
 	return token, nil
+}
+
+func askPolicy(defaultValue string) (string, error) {
+	var policy string
+	if err := survey.AskOne(
+		&survey.Input{
+			Message: "Please provide policy: ",
+			Default: defaultValue,
+		},
+		&policy,
+	); err != nil {
+		return "", errors.WrapIf(err, "failure during survey")
+	}
+	return policy, nil
 }
