@@ -26,8 +26,8 @@ var NodeClusterContext clustercontext.Context
 // NewNodeCommand returns a cobra command for `node` subcommands.
 func NewNodeCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "nodes",
-		Aliases: []string{"node", "n"},
+		Use:     "node",
+		Aliases: []string{"nodes", "n"},
 		Short:   "Work with cluster nodes",
 	}
 
