@@ -30,7 +30,6 @@ Manage clusters
 * [banzai](banzai.md)	 - A command line client for the Banzai Cloud Pipeline platform.
 * [banzai cluster create](banzai_cluster_create.md)	 - Create a cluster
 * [banzai cluster delete](banzai_cluster_delete.md)	 - Delete a cluster
-* [banzai cluster feature](banzai_cluster_feature.md)	 - Manage cluster features
 * [banzai cluster get](banzai_cluster_get.md)	 - Get cluster details
 * [banzai cluster import](banzai_cluster_import.md)	 - Import an existing cluster (EXPERIMENTAL)
 * [banzai cluster list](banzai_cluster_list.md)	 - List clusters
