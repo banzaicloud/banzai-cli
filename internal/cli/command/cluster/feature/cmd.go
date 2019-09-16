@@ -29,6 +29,7 @@ func NewFeatureCommand(banzaiCli cli.Cli) *cobra.Command {
 		Aliases: []string{"features", "feat", "ft"},
 		Short:   "Manage cluster features",
 		Args:    cobra.MaximumNArgs(1),
+		Hidden:  true,
 		RunE: func(_ *cobra.Command, args []string) error {
 			return runList(banzaiCli, options, args)
 		},
