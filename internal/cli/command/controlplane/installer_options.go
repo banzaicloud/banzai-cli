@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -42,31 +41,13 @@ const (
 )
 
 type cpContext struct {
-	installerTag  string
-	runLocally    bool
-	refreshState  bool
-	pullInstaller bool
-	autoApprove   bool
-	workspace     string
-	banzaiCli     cli.Cli
-}
-
-func (c *cpContext) pullDockerImage() error {
-
-	args := []string{
-		"pull",
-		fmt.Sprintf("banzaicloud/cp-installer:%s", c.installerTag),
-	}
-
-	log.Info("docker ", strings.Join(args, " "))
-
-	cmd := exec.Command("docker", args...)
-
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	return cmd.Run()
+	installerTag       string
+	installerImageRepo string
+	refreshState       bool
+	pullInstaller      bool
+	autoApprove        bool
+	workspace          string
+	banzaiCli          cli.Cli
 }
 
 func NewContext(cmd *cobra.Command, banzaiCli cli.Cli) *cpContext {
@@ -75,8 +56,9 @@ func NewContext(cmd *cobra.Command, banzaiCli cli.Cli) *cpContext {
 	}
 
 	flags := cmd.Flags()
-	flags.StringVar(&ctx.installerTag, "image-tag", "latest", "Tag of banzaicloud/cp-installer Docker image to use")
-	flags.BoolVar(&ctx.pullInstaller, "image-pull", true, "Pull cp-installer image even if it's present locally")
+	flags.StringVar(&ctx.installerTag, "image-tag", "latest", "Tag of installer Docker image to use")
+	flags.StringVar(&ctx.installerImageRepo, "image", "docker.io/banzaicloud/cp-installer", "Name of Docker image repository to use")
+	flags.BoolVar(&ctx.pullInstaller, "image-pull", true, "Pull installer image even if it's present locally")
 	flags.BoolVar(&ctx.autoApprove, "auto-approve", true, "Automatically approve the changes to deploy")
 	flags.StringVar(&ctx.workspace, "workspace", "", "Name of directory for storing the applied configuration and deployment status")
 
@@ -85,6 +67,10 @@ func NewContext(cmd *cobra.Command, banzaiCli cli.Cli) *cpContext {
 	flags.BoolVar(&ctx.refreshState, "refresh-state", true, "Refresh terraform state for each run (turn off to save time during development)")
 	flags.MarkHidden("refresh-state")
 	return &ctx
+}
+
+func (c *cpContext) installerImage() string {
+	return fmt.Sprintf("%s:%s", c.installerImageRepo, c.installerTag)
 }
 
 func (c *cpContext) valuesPath() string {
