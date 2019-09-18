@@ -90,9 +90,7 @@ func runInstaller(command []string, options cpContext, banzaiCli cli.Cli, env ma
 		envs = append(envs, fmt.Sprintf("%s=%s", key, value))
 	}
 
-	args = append(append(args,
-		fmt.Sprintf("banzaicloud/cp-installer:%s", options.installerTag)),
-		command...)
+	args = append(append(args, options.installerImage()), command...)
 
 	log.Info("docker ", strings.Join(args, " "))
 
@@ -104,4 +102,39 @@ func runInstaller(command []string, options cpContext, banzaiCli cli.Cli, env ma
 	cmd.Stderr = os.Stderr
 
 	return errors.WithStack(cmd.Run())
+}
+
+func pullImage(options *cpContext, banzaiCli cli.Cli) error {
+	if !options.pullInstaller {
+		return nil
+	}
+
+	var args []string
+
+	tool := options.containerRuntime
+	switch options.containerRuntime {
+	case "docker":
+		args = []string{"pull"}
+	case "containerd":
+		tool = "ctr"
+		args = []string{"image", "pull"}
+
+	case "exec":
+		return nil
+	default:
+		return errors.Errorf("unknown container runtime: %q", options.containerRuntime)
+	}
+
+	args = append(args, options.installerImage())
+	log.Info("Pulling Banzai Cloud Pipeline installer image...")
+
+	log.Info(tool, " ", strings.Join(args, " "))
+
+	cmd := exec.Command(tool, args...)
+
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	return cmd.Run()
 }
