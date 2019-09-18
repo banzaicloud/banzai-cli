@@ -43,6 +43,7 @@ const (
 type cpContext struct {
 	installerTag       string
 	installerImageRepo string
+	containerRuntime   string
 	refreshState       bool
 	pullInstaller      bool
 	autoApprove        bool
@@ -61,9 +62,7 @@ func NewContext(cmd *cobra.Command, banzaiCli cli.Cli) *cpContext {
 	flags.BoolVar(&ctx.pullInstaller, "image-pull", true, "Pull installer image even if it's present locally")
 	flags.BoolVar(&ctx.autoApprove, "auto-approve", true, "Automatically approve the changes to deploy")
 	flags.StringVar(&ctx.workspace, "workspace", "", "Name of directory for storing the applied configuration and deployment status")
-
-	flags.BoolVar(&ctx.runLocally, "run-locally", false, "Run the terraform command locally instead of docker (for development)")
-	flags.MarkHidden("run-locally")
+	flags.StringVar(&ctx.containerRuntime, "container-runtime", "docker", `Run the terraform command with "docker", "containerd" (crictl) or "exec" (execute locally)`)
 	flags.BoolVar(&ctx.refreshState, "refresh-state", true, "Refresh terraform state for each run (turn off to save time during development)")
 	flags.MarkHidden("refresh-state")
 	return &ctx

@@ -47,14 +47,19 @@ func runTerraform(command string, options cpContext, banzaiCli cli.Cli, env map[
 		cmd = append(cmd, "-target", target)
 	}
 
-	if options.runLocally {
+	switch options.containerRuntime {
+	case "exec":
 		return runLocally(cmd, cmdEnv)
+	case "docker":
+		return runDocker(cmd, options, banzaiCli, cmdEnv)
+	case "containerd":
+		return runContainer(cmd, options, banzaiCli, cmdEnv)
+	default:
+		return errors.Errorf("unknown container runtime: %q", options.containerRuntime)
 	}
-
-	return runInstaller(cmd, options, banzaiCli, cmdEnv)
 }
 
-// runInstaller runs the given command locally (for development)
+// runLocally runs the given command locally (for development)
 func runLocally(command []string, env map[string]string) error {
 	log.Info(strings.Join(command, " "))
 
@@ -71,8 +76,40 @@ func runLocally(command []string, env map[string]string) error {
 	return errors.WithStack(cmd.Run())
 }
 
-// runInstaller runs the given installer command in the installer docker container
-func runInstaller(command []string, options cpContext, banzaiCli cli.Cli, env map[string]string) error {
+// runContainer runs the given installer command in the installer container with containerd (crictl)
+func runContainer(command []string, options cpContext, banzaiCli cli.Cli, env map[string]string) error {
+
+	args := []string{
+		"run", "--rm", "--net-host",
+		// fmt.Sprintf("--user=%d", os.Getuid()), // TODO
+		"--mount", fmt.Sprintf("type=bind,src=%s,dst=/workspace,options=rbind:rw", options.workspace),
+	}
+
+	if banzaiCli.Interactive() {
+		args = append(args, "-t")
+	}
+
+	envs := os.Environ()
+	for key, value := range env {
+		args = append(args, "--env", fmt.Sprintf("%s=%s", key, value)) // env propagation does not work with cri
+	}
+
+	args = append(append(args, options.installerImage(), "banzai-cp-installer"), command...)
+
+	log.Info("ctr ", strings.Join(args, " "))
+
+	cmd := exec.Command("ctr", args...)
+
+	cmd.Env = envs
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	return errors.WithStack(cmd.Run())
+}
+
+// runDocker runs the given installer command in the installer docker container
+func runDocker(command []string, options cpContext, banzaiCli cli.Cli, env map[string]string) error {
 
 	args := []string{
 		"run", "--rm", "--net=host",
