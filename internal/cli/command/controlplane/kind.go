@@ -87,7 +87,7 @@ func downloadKIND(banzaiCli cli.Cli) error {
 	return errors.WrapIf(os.Rename(tempName, kindPath), "failed to move kind binary to its final place")
 }
 
-func ensureKINDCluster(banzaiCli cli.Cli, options cpContext) error {
+func ensureKINDCluster(banzaiCli cli.Cli, options *cpContext) error {
 	if !isKINDInstalled(banzaiCli) {
 		log.Info("KIND binary (kind) is not available in $PATH, downloading it...")
 		err := downloadKIND(banzaiCli)

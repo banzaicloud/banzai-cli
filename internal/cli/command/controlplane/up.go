@@ -48,7 +48,7 @@ func NewUpCommand(banzaiCli cli.Cli) *cobra.Command {
 			cmd.SilenceErrors = true
 			cmd.SilenceUsage = true
 
-			return runUp(options, banzaiCli)
+			return runUp(&options, banzaiCli)
 		},
 	}
 
@@ -69,7 +69,7 @@ func printExternalHostRecord(host, lbAddress string) {
 	fmt.Printf("Please create a DNS record pointing to the load balancer:\n\n%s IN %s %s\n", host, lbRecordType, lbAddress)
 }
 
-func runUp(options createOptions, banzaiCli cli.Cli) error {
+func runUp(options *createOptions, banzaiCli cli.Cli) error {
 	if err := options.Init(); err != nil {
 		return err
 	}
@@ -123,7 +123,7 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 	var env map[string]string
 	switch values["provider"] {
 	case providerKind:
-		err := ensureKINDCluster(banzaiCli, *options.cpContext)
+		err := ensureKINDCluster(banzaiCli, options.cpContext)
 		if err != nil {
 			return errors.WrapIf(err, "failed to create KIND cluster")
 		}
@@ -141,7 +141,7 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 			}
 		}
 
-		if err := ensureEC2Cluster(banzaiCli, *options.cpContext, creds, useGeneratedKey); err != nil {
+		if err := ensureEC2Cluster(banzaiCli, options.cpContext, creds, useGeneratedKey); err != nil {
 			return errors.WrapIf(err, "failed to create EC2 cluster")
 		}
 		env = creds
@@ -153,14 +153,14 @@ func runUp(options createOptions, banzaiCli cli.Cli) error {
 	}
 
 	log.Info("Deploying Banzai Cloud Pipeline to Kubernetes cluster...")
-	if err := runTerraform("apply", *options.cpContext, banzaiCli, env); err != nil {
+	if err := runTerraform("apply", options.cpContext, banzaiCli, env); err != nil {
 		return errors.WrapIf(err, "failed to deploy pipeline components")
 	}
 
 	return postInstall(options, banzaiCli, values)
 }
 
-func postInstall(options createOptions, banzaiCli cli.Cli, values map[string]interface{}) error {
+func postInstall(options *createOptions, banzaiCli cli.Cli, values map[string]interface{}) error {
 	url, err := options.readExternalAddress()
 	if err != nil {
 		return errors.WrapIf(err, "can't read final URL of Pipeline")

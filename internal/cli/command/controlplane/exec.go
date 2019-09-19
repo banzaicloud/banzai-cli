@@ -25,7 +25,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func runTerraform(command string, options cpContext, banzaiCli cli.Cli, env map[string]string, targets ...string) error {
+func runTerraform(command string, options *cpContext, banzaiCli cli.Cli, env map[string]string, targets ...string) error {
 	cmdEnv := map[string]string{"KUBECONFIG": "/workspace/" + kubeconfigFilename}
 	for k, v := range env {
 		cmdEnv[k] = v
@@ -77,7 +77,7 @@ func runLocally(command []string, env map[string]string) error {
 }
 
 // runContainer runs the given installer command in the installer container with containerd (crictl)
-func runContainer(command []string, options cpContext, banzaiCli cli.Cli, env map[string]string) error {
+func runContainer(command []string, options *cpContext, banzaiCli cli.Cli, env map[string]string) error {
 
 	args := []string{
 		"run", "--rm", "--net-host",
@@ -109,7 +109,7 @@ func runContainer(command []string, options cpContext, banzaiCli cli.Cli, env ma
 }
 
 // runDocker runs the given installer command in the installer docker container
-func runDocker(command []string, options cpContext, banzaiCli cli.Cli, env map[string]string) error {
+func runDocker(command []string, options *cpContext, banzaiCli cli.Cli, env map[string]string) error {
 
 	args := []string{
 		"run", "--rm", "--net=host",
