@@ -65,7 +65,7 @@ func NewContext(cmd *cobra.Command, banzaiCli cli.Cli) *cpContext {
 	flags.BoolVar(&ctx.pullInstaller, "image-pull", true, "Pull installer image even if it's present locally")
 	flags.BoolVar(&ctx.autoApprove, "auto-approve", true, "Automatically approve the changes to deploy")
 	flags.StringVar(&ctx.workspace, "workspace", "", "Name of directory for storing the applied configuration and deployment status")
-	flags.StringVar(&ctx.containerRuntime, "container-runtime", "docker", `Run the terraform command with "docker", "containerd" (crictl) or "exec" (execute locally)`)
+	flags.StringVar(&ctx.containerRuntime, "container-runtime", "auto", `Run the terraform command with "docker", "containerd" (crictl) or "exec" (execute locally)`)
 	flags.BoolVar(&ctx.refreshState, "refresh-state", true, "Refresh terraform state for each run (turn off to save time during development)")
 	flags.MarkHidden("refresh-state")
 	return &ctx
@@ -201,6 +201,28 @@ func (c *cpContext) Init() error {
 	}
 
 	log.Debugf("Using workspace %q.", c.workspace)
+
+	switch c.containerRuntime {
+	case "auto":
+		if hasTool("docker") == nil {
+			c.containerRuntime = "docker"
+		} else if hasTool("ctr") == nil || checkPKESupported() == nil {
+			c.containerRuntime = "containerd"
+		} else {
+			return errors.Errorf("neither docker, nor containerd is installed and working correctly on this machine")
+		}
+	case "docker":
+		if err := hasTool("docker"); err != nil {
+			return err
+		}
+	case "containerd":
+		if err := hasTool("ctr"); err != nil {
+			return err
+		}
+	case "exec":
+	default:
+		return errors.Errorf("unknown container runtime: %q", c.containerRuntime)
+	}
 
 	err = os.MkdirAll(c.workspace, 0700)
 	return errors.WrapIff(err, "failed to use %q as workspace path", c.workspace)

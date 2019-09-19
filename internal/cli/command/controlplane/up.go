@@ -118,6 +118,12 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 
 	var env map[string]string
 	switch values["provider"] {
+	case providerPke:
+		err := ensurePKECluster(banzaiCli, options.cpContext)
+		if err != nil {
+			return errors.WrapIf(err, "failed to deploy PKE cluster")
+		}
+
 	case providerKind:
 		err := ensureKINDCluster(banzaiCli, options.cpContext)
 		if err != nil {
