@@ -116,10 +116,6 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		return errors.New("workspace is already initialized but a different --provider is specified")
 	}
 
-	if err := pullImage(options.cpContext, banzaiCli); err != nil {
-		return errors.WrapIf(err, "failed to pull cp-installer")
-	}
-
 	var env map[string]string
 	switch values["provider"] {
 	case providerKind:

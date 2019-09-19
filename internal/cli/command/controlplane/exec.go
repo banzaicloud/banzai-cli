@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"emperror.dev/errors"
@@ -26,6 +27,12 @@ import (
 )
 
 func runTerraform(command string, options *cpContext, banzaiCli cli.Cli, env map[string]string, targets ...string) error {
+	var err error
+	options.installerPulled.Do(func() { err = pullImage(options, banzaiCli) })
+	if err != nil {
+		return errors.WrapIf(err, "failed to pull cp-installer")
+	}
+
 	cmdEnv := map[string]string{"KUBECONFIG": "/workspace/" + kubeconfigFilename}
 	for k, v := range env {
 		cmdEnv[k] = v
@@ -91,14 +98,19 @@ func runContainer(command []string, options *cpContext, banzaiCli cli.Cli, env m
 
 	envs := os.Environ()
 	for key, value := range env {
-		args = append(args, "--env", fmt.Sprintf("%s=%s", key, value)) // env propagation does not work with cri
+		args = append(args, "--env", fmt.Sprintf("%s=%s", key, value)) // env propagation does not work with ctr
 	}
 
 	args = append(append(args, options.installerImage(), "banzai-cp-installer"), command...)
 
+	ctrCmd, err := lookupTool("ctr")
+	if err != nil {
+		return err
+	}
+
 	log.Info("ctr ", strings.Join(args, " "))
 
-	cmd := exec.Command("ctr", args...)
+	cmd := exec.Command(ctrCmd, args...)
 
 	cmd.Env = envs
 	cmd.Stdin = os.Stdin
@@ -162,6 +174,11 @@ func pullImage(options *cpContext, banzaiCli cli.Cli) error {
 		return errors.Errorf("unknown container runtime: %q", options.containerRuntime)
 	}
 
+	tool, err := lookupTool(tool)
+	if err != nil {
+		return err
+	}
+
 	args = append(args, options.installerImage())
 	log.Info("Pulling Banzai Cloud Pipeline installer image...")
 
@@ -174,4 +191,42 @@ func pullImage(options *cpContext, banzaiCli cli.Cli) error {
 	cmd.Stderr = os.Stderr
 
 	return cmd.Run()
+}
+
+func lookupTool(tool string) (string, error) {
+	cmd, err := exec.LookPath(tool)
+
+	if err != nil {
+		cmd, err := exec.LookPath(filepath.Join("/usr/local/bin", tool))
+		if err == nil {
+			return cmd, nil
+		}
+	}
+
+	return cmd, errors.Wrapf(err, "can't find %s in PATH", tool)
+}
+
+func hasTool(tool string) error {
+	tool, err := lookupTool(tool)
+	if err != nil {
+		return err
+	}
+
+	cmd := exec.Command(tool, "version")
+	err = cmd.Run()
+
+	// grab the last non-empty error line
+	if err, ok := err.(*exec.ExitError); ok {
+		var out string
+		for _, line := range strings.Split(string(err.Stderr), "\n") {
+			if line != "" {
+				out = line
+			}
+		}
+		if out != "" {
+			return errors.Errorf("`%s version` failed: %s", out)
+		}
+	}
+
+	return errors.Wrapf(err, "%s check failed")
 }

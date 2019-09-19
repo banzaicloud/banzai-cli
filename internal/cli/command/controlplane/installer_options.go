@@ -20,6 +20,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -49,11 +50,13 @@ type cpContext struct {
 	autoApprove        bool
 	workspace          string
 	banzaiCli          cli.Cli
+	installerPulled    *sync.Once
 }
 
 func NewContext(cmd *cobra.Command, banzaiCli cli.Cli) *cpContext {
 	ctx := cpContext{
-		banzaiCli: banzaiCli,
+		banzaiCli:       banzaiCli,
+		installerPulled: new(sync.Once),
 	}
 
 	flags := cmd.Flags()
