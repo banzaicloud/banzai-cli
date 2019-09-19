@@ -1,9 +1,9 @@
 /*
  * Pipeline API
  *
- * Pipeline v0.3.0 swagger
+ * Pipeline is a feature rich application platform, built for containers on top of Kubernetes to automate the DevOps experience, continuous application development and the lifecycle of deployments. 
  *
- * API version: 0.29.1
+ * API version: latest
  * Contact: info@banzaicloud.com
  */
 
@@ -17,6 +17,6 @@ type NodeItemMetadata struct {
 	Uid string `json:"uid,omitempty"`
 	ResourceVersion string `json:"resourceVersion,omitempty"`
 	CreationTimestamp string `json:"creationTimestamp,omitempty"`
-	Labels NodeItemMetadataLabels `json:"labels,omitempty"`
-	Annotations NodeItemMetadataAnnotations `json:"annotations,omitempty"`
+	Labels map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
 }

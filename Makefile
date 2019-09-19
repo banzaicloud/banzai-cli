@@ -21,7 +21,7 @@ endif
 TEST_FORMAT = short-verbose
 endif
 
-PIPELINE_VERSION = 0.29.1
+PIPELINE_VERSION = 18142989e88a64eb4df0167b68a039e7375751ec
 CLOUDINFO_VERSION = 0.7.8
 TELESCOPES_VERSION = 0.5.2
 
@@ -125,7 +125,7 @@ license-cache: bin/licensei ## Generate license cache
 
 .PHONY: generate-pipeline-client
 generate-pipeline-client: ## Generate client from Pipeline OpenAPI spec
-	curl https://raw.githubusercontent.com/banzaicloud/pipeline/${PIPELINE_VERSION}/docs/openapi/pipeline.yaml | sed "s/version: .*/version: ${PIPELINE_VERSION}/" > pipeline-openapi.yaml
+	curl https://raw.githubusercontent.com/banzaicloud/pipeline/${PIPELINE_VERSION}/docs/openapi/pipeline.yaml > pipeline-openapi.yaml
 	rm -rf .gen/pipeline
 	docker run --rm -v ${PWD}:/local banzaicloud/openapi-generator-cli:${OPENAPI_GENERATOR_VERSION} generate \
 	--additional-properties packageName=pipeline \
@@ -133,6 +133,7 @@ generate-pipeline-client: ## Generate client from Pipeline OpenAPI spec
 	-i /local/pipeline-openapi.yaml \
 	-g go \
 	-o /local/.gen/pipeline
+	echo "package pipeline\n\nconst PipelineVersion = \"${PIPELINE_VERSION}\"" > .gen/pipeline/version.go
 
 .PHONY: generate-cloudinfo-client
 generate-cloudinfo-client: ## Generate client from Cloudinfo OpenAPI spec

@@ -1,9 +1,9 @@
 /*
  * Pipeline API
  *
- * Pipeline v0.3.0 swagger
+ * Pipeline is a feature rich application platform, built for containers on top of Kubernetes to automate the DevOps experience, continuous application development and the lifecycle of deployments. 
  *
- * API version: 0.29.1
+ * API version: latest
  * Contact: info@banzaicloud.com
  */
 
@@ -33,4 +33,5 @@ type GetClusterStatusResponse struct {
 	// The lifespan of the cluster expressed in minutes after which it is automatically deleted. Zero value means the cluster is never automatically deleted.
 	TtlMinutes int32 `json:"ttlMinutes,omitempty"`
 	NodePools map[string]NodePoolStatus `json:"nodePools,omitempty"`
+	TotalSummary ResourceSummary `json:"totalSummary,omitempty"`
 }

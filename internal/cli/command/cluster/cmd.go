@@ -15,9 +15,11 @@
 package cluster
 
 import (
-	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature"
 	"github.com/spf13/cobra"
+
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/node"
+	"github.com/banzaicloud/banzai-cli/internal/cli"
 )
 
 // NewClusterCommand returns a cobra command for `cluster` subcommands.
@@ -37,6 +39,7 @@ func NewClusterCommand(banzaiCli cli.Cli) *cobra.Command {
 		NewListCommand(banzaiCli),
 		NewShellCommand(banzaiCli),
 		feature.NewFeatureCommand(banzaiCli),
+		node.NewNodeCommand(banzaiCli),
 	)
 
 	return cmd

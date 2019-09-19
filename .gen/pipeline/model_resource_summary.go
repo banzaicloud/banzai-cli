@@ -1,9 +1,9 @@
 /*
  * Pipeline API
  *
- * Pipeline v0.3.0 swagger
+ * Pipeline is a feature rich application platform, built for containers on top of Kubernetes to automate the DevOps experience, continuous application development and the lifecycle of deployments. 
  *
- * API version: 0.29.1
+ * API version: latest
  * Contact: info@banzaicloud.com
  */
 
@@ -14,4 +14,5 @@ package pipeline
 type ResourceSummary struct {
 	Cpu Resource `json:"cpu,omitempty"`
 	Memory Resource `json:"memory,omitempty"`
+	Status string `json:"status,omitempty"`
 }
