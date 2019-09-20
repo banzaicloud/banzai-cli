@@ -19,6 +19,8 @@ import (
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features/dns"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features/securityscan"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features"
 	"github.com/spf13/cobra"
 )
