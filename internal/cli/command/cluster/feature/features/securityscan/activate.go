@@ -317,7 +317,6 @@ func (ac *activateCommander) buildCustomAnchoreFeatureRequest(activateRequest *p
 }
 
 func (ac *activateCommander) askForPolicy() (*policySpec, error) {
-
 	type policy struct {
 		name string
 		id   string
@@ -359,7 +358,6 @@ func (ac *activateCommander) askForWhiteLists() ([]releaseSpec, error) {
 	releaseWhiteList := make([]releaseSpec, 0)
 
 	for addMore {
-
 		if err := survey.AskOne(
 			&survey.Confirm{
 				Message: "Would you like to add a release whitelist item to the security scan? ",
@@ -378,7 +376,6 @@ func (ac *activateCommander) askForWhiteLists() ([]releaseSpec, error) {
 			return nil, errors.WrapIf(err, "failed to read release whitelist item")
 		}
 		releaseWhiteList = append(releaseWhiteList, *item)
-
 	}
 
 	return releaseWhiteList, nil
