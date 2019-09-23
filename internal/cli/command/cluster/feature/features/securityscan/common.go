@@ -15,7 +15,16 @@
 package securityscan
 
 import (
+	"context"
+	"fmt"
+	"strings"
+
 	"emperror.dev/errors"
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/antihax/optional"
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
+	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/mitchellh/mapstructure"
 )
 
 const (
@@ -29,7 +38,6 @@ type SecurityScanFeatureSpec struct {
 	ReleaseWhiteList []releaseSpec     `json:"releaseWhiteList,omitempty" mapstructure:"releaseWhiteList"`
 	WebhookConfig    webHookConfigSpec `json:"webhookConfig" mapstructure:"webhookConfig"`
 }
-
 
 // Validate validates the input security scan specification.
 func (s SecurityScanFeatureSpec) Validate() error {
@@ -108,4 +116,217 @@ func (w webHookConfigSpec) Validate() error {
 	}
 
 	return nil
+}
+
+// specAssembler component for common spec assembling operations
+// designed mainly to handle activation and update spec assembly
+type specAssembler struct {
+	banzaiCLI cli.Cli
+}
+
+func (sa *specAssembler) askForAnchoreConfig(currentSpec *anchoreSpec) (*anchoreSpec, error) {
+
+	if currentSpec == nil {
+		currentSpec = new(anchoreSpec)
+	}
+
+	var customAnchore bool
+	if err := survey.AskOne(
+		&survey.Confirm{
+			Message: "Configure a custom anchore instance? ",
+		},
+		&customAnchore,
+	); err != nil {
+		return nil, errors.WrapIf(err, "failure during survey")
+	}
+
+	if !customAnchore {
+		return &anchoreSpec{
+			Enabled: false,
+		}, nil
+	}
+
+	// custom anchore config
+	var anchoreURL string
+	if err := survey.AskOne(
+		&survey.Input{
+			Message: "Please enter the custom anchore URL:",
+			Default: currentSpec.Url,
+		},
+		&anchoreURL,
+	); err != nil {
+		return nil, errors.WrapIf(err, "failed to read custom Anchore URL")
+	}
+
+	secretID, err := sa.askForSecret(currentSpec.SecretID)
+	if err != nil {
+		return nil, errors.WrapIf(err, "failed to read secret for accessing custom Anchore ")
+	}
+
+	return &anchoreSpec{
+		Enabled:  true,
+		Url:      anchoreURL,
+		SecretID: secretID,
+	}, nil
+}
+
+func (sa *specAssembler) askForSecret(secretID string) (string, error) {
+	const (
+		PasswordSecretType = "password"
+	)
+
+	orgID := sa.banzaiCLI.Context().OrganizationID()
+
+	secrets, _, err := sa.banzaiCLI.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{Type_: optional.NewString(PasswordSecretType)})
+	if err != nil {
+		return "", errors.Wrap(err, "failed to retrieve secrets")
+	}
+
+	// TODO add create secret option
+	if len(secrets) == 0 {
+		return "", errors.New(fmt.Sprintf("there are no secrets with type %q", PasswordSecretType))
+	}
+
+	options := make([]string, len(secrets))
+	currentSecretName := ""
+	for i, s := range secrets {
+		options[i] = s.Name
+		if s.Id == secretID {
+			currentSecretName = s.Name
+		}
+	}
+
+	var secretName string
+	if err := survey.AskOne(
+		&survey.Select{
+			Message: "Please select a secret to access the custom Anchore instance:",
+			Options: options,
+			Default: currentSecretName,
+		},
+		&secretName,
+	); err != nil {
+		return "", errors.WrapIf(err, "failed to retrieve secrets")
+	}
+
+	for _, s := range secrets {
+		if s.Name == secretName {
+			return s.Id, nil
+		}
+	}
+
+	return "", errors.Errorf("no secret with name %q", secretName)
+}
+
+func (sa *specAssembler) askForPolicy(currentPolicy *policySpec) (*policySpec, error) {
+	if currentPolicy == nil {
+		currentPolicy = new(policySpec)
+	}
+
+	type policy struct {
+		name string
+		id   string
+	}
+	// todo add all supported policies here
+	policies := []policy{{"Default bundle", "1"}}
+
+	options := make([]string, len(policies))
+	currentPolicyName := ""
+	for i, s := range policies {
+		options[i] = s.name
+		if s.id == currentPolicy.PolicyID {
+			currentPolicyName = s.name
+		}
+	}
+
+	var policyName string
+	if err := survey.AskOne(
+		&survey.Select{
+			Message: "Please select a policy for the Anchor Engine:",
+			Options: options,
+			Default: currentPolicyName,
+		},
+		&policyName,
+	); err != nil {
+		return nil, errors.WrapIf(err, "failed to select policy")
+	}
+
+	var selected policy
+	for _, s := range policies {
+		if s.name == policyName {
+			selected = s
+		}
+	}
+
+	return &policySpec{
+		PolicyID: selected.id,
+	}, nil
+}
+
+func (sa *specAssembler) askForWebHookConfig(currentWH *webHookConfigSpec) (*webHookConfigSpec, error) {
+	if currentWH == nil {
+		currentWH = new(webHookConfigSpec)
+	}
+	var enable bool
+	if err := survey.AskOne(
+		&survey.Confirm{
+			Message: "Configure the security scan webhook?",
+		},
+		&enable,
+	); err != nil {
+		return nil, errors.WrapIf(err, "failure during survey")
+	}
+
+	if !enable {
+		return &webHookConfigSpec{
+			Enabled: false,
+		}, nil
+	}
+
+	var selector string
+	if err := survey.AskOne(
+		&survey.Select{
+			Message: "Please choose the selector for the webhook configuration:",
+			Options: []string{"Exclude", "Include"},
+			Default: currentWH.Selector,
+		},
+		&selector,
+	); err != nil {
+		return nil, errors.WrapIf(err, "failed to select policy")
+	}
+
+	var namespaces string
+	if err := survey.AskOne(
+		&survey.Input{
+			Message: "Please enter the comma separated list of namespaces:",
+			Default: strings.Join(currentWH.Namespaces, ","),
+		},
+		&namespaces,
+	); err != nil {
+		return nil, errors.WrapIf(err, "failed to read namespaces")
+	}
+
+	return &webHookConfigSpec{
+		Enabled:    true,
+		Selector:   selector,
+		Namespaces: strings.Split(namespaces, ","),
+	}, nil
+}
+
+func (sa *specAssembler) securityScanSpecAsMap(spec *SecurityScanFeatureSpec) (map[string]interface{}, error) {
+	// fill the structure of the config - make filling up the values easier
+	if spec == nil {
+		spec = &SecurityScanFeatureSpec{
+			CustomAnchore:    anchoreSpec{},
+			Policy:           policySpec{},
+			ReleaseWhiteList: nil,
+			WebhookConfig:    webHookConfigSpec{},
+		}
+	}
+
+	var specMap map[string]interface{}
+	if err := mapstructure.Decode(spec, &specMap); err != nil {
+		return nil, err
+	}
+
+	return specMap, nil
 }

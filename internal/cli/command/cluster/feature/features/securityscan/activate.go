@@ -18,11 +18,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/antihax/optional"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
@@ -34,6 +32,7 @@ import (
 
 func NewActivateCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := activateOptions{}
+	ac := MakeActivateCommander(banzaiCli)
 
 	cmd := &cobra.Command{
 		Use:           "activate",
@@ -43,7 +42,7 @@ func NewActivateCommand(banzaiCli cli.Cli) *cobra.Command {
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
-			return runActivate(banzaiCli, options, args)
+			return ac.runActivate(options, args)
 		},
 	}
 
@@ -60,15 +59,15 @@ type activateOptions struct {
 	filePath string
 }
 
-func runActivate(banzaiCli cli.Cli, options activateOptions, args []string) error {
+func (ac *activateCommander) runActivate(options activateOptions, args []string) error {
 
 	if err := options.Init(args...); err != nil {
 		return errors.Wrap(err, "failed to initialize options")
 	}
 
 	var req pipeline.ActivateClusterFeatureRequest
-	if options.filePath == "" && banzaiCli.Interactive() {
-		if err := buildActivateReqInteractively(banzaiCli, &req); err != nil {
+	if options.filePath == "" && ac.banzaiCLI.Interactive() {
+		if err := ac.buildActivateReqInteractively(&req); err != nil {
 			return errors.WrapIf(err, "failed to build activate request interactively")
 		}
 	} else {
@@ -77,9 +76,9 @@ func runActivate(banzaiCli cli.Cli, options activateOptions, args []string) erro
 		}
 	}
 
-	orgId := banzaiCli.Context().OrganizationID()
+	orgId := ac.banzaiCLI.Context().OrganizationID()
 	clusterId := options.ClusterID()
-	_, err := banzaiCli.Client().ClusterFeaturesApi.ActivateClusterFeature(context.Background(), orgId, clusterId, featureName, req)
+	_, err := ac.banzaiCLI.Client().ClusterFeaturesApi.ActivateClusterFeature(context.Background(), orgId, clusterId, featureName, req)
 	if err != nil {
 		cli.LogAPIError(fmt.Sprintf("activate %s cluster feature", featureName), err, req)
 		log.Fatalf("could not activate %s cluster feature: %v", featureName, err)
@@ -103,12 +102,7 @@ func readActivateReqFromFileOrStdin(filePath string, req *pipeline.ActivateClust
 	return nil
 }
 
-func buildActivateReqInteractively(
-	banzaiCli cli.Cli,
-	req *pipeline.ActivateClusterFeatureRequest,
-) error {
-
-	aCommander := MakeActivateCommander(banzaiCli)
+func (ac *activateCommander) buildActivateReqInteractively(req *pipeline.ActivateClusterFeatureRequest) error {
 
 	var edit bool
 	if err := survey.AskOne(
@@ -119,11 +113,12 @@ func buildActivateReqInteractively(
 	); err != nil {
 		return errors.WrapIf(err, "failure during survey")
 	}
+
 	if !edit {
-		return aCommander.buildCustomAnchoreFeatureRequest(req)
+		return ac.buildCustomAnchoreFeatureRequest(req)
 	}
 
-	spec, err := aCommander.securityScanSpecAsMap(nil)
+	spec, err := ac.securityScanSpecAsMap(nil)
 	if err != nil {
 		return errors.WrapIf(err, "failed to decode spec into map")
 	}
@@ -146,6 +141,7 @@ func buildActivateReqInteractively(
 	); err != nil {
 		return errors.WrapIf(err, "failure during survey")
 	}
+
 	if err := json.Unmarshal([]byte(result), req); err != nil {
 		return errors.WrapIf(err, "failed to unmarshal JSON as request")
 	}
@@ -162,14 +158,9 @@ func validateActivateClusterFeatureRequest(req interface{}) error {
 	return nil
 }
 
-func buildScurityscanFeatureRequest(banzaiCli cli.Cli, req *pipeline.ActivateClusterFeatureRequest) error {
-
-	return nil
-}
-
 // activateCommander helper struct for gathering activate command realated operations
 type activateCommander struct {
-	banzaiCLI cli.Cli
+	specAssembler
 }
 
 // MakeActivateCommander returns a reference to an activateCommander instance
@@ -198,97 +189,14 @@ func (ac *activateCommander) securityScanSpecAsMap(spec *SecurityScanFeatureSpec
 	return specMap, nil
 }
 
-func (ac *activateCommander) askForAnchoreConfig() (*anchoreSpec, error) {
-
-	var customAnchore bool
-	if err := survey.AskOne(
-		&survey.Confirm{
-			Message: "Configure a custom anchore instance? ",
-		},
-		&customAnchore,
-	); err != nil {
-		return nil, errors.WrapIf(err, "failure during survey")
-	}
-
-	if !customAnchore {
-		return &anchoreSpec{
-			Enabled: false,
-		}, nil
-	}
-
-	// custom anchore config
-	var anchoreURL string
-	if err := survey.AskOne(
-		&survey.Input{
-			Message: "Please enter the custom anchore URL:",
-		},
-		&anchoreURL,
-	); err != nil {
-		return nil, errors.WrapIf(err, "failed to read custom Anchore URL")
-	}
-
-	secretID, err := ac.askForSecret()
-	if err != nil {
-		return nil, errors.WrapIf(err, "failed to read secret for accessing custom Anchore ")
-	}
-
-	return &anchoreSpec{
-		Enabled:  true,
-		Url:      anchoreURL,
-		SecretID: secretID,
-	}, nil
-}
-
-func (ac *activateCommander) askForSecret() (string, error) {
-	const (
-		PasswordSecretType = "password"
-	)
-
-	orgID := ac.banzaiCLI.Context().OrganizationID()
-
-	secrets, _, err := ac.banzaiCLI.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{Type_: optional.NewString(PasswordSecretType)})
-	if err != nil {
-		return "", errors.Wrap(err, "failed to retrieve secrets")
-	}
-
-	// TODO add create secret option
-	if len(secrets) == 0 {
-		return "", errors.New(fmt.Sprintf("there are no secrets with type %q", PasswordSecretType))
-	}
-
-	options := make([]string, len(secrets))
-	for i, s := range secrets {
-		options[i] = s.Name
-	}
-
-	var secretName string
-	if err := survey.AskOne(
-		&survey.Select{
-			Message: "Please select a secret to access the custom Anchore instance:",
-			Options: options,
-		},
-		&secretName,
-	); err != nil {
-		return "", errors.WrapIf(err, "failed to retrieve secrets")
-	}
-
-	for _, s := range secrets {
-		if s.Name == secretName {
-			return s.Id, nil
-		}
-	}
-
-	return "", errors.Errorf("no secret with name %q", secretName)
-}
-
 func (ac *activateCommander) buildCustomAnchoreFeatureRequest(activateRequest *pipeline.ActivateClusterFeatureRequest) error {
 
-	anchoreConfig, err := ac.askForAnchoreConfig()
+	anchoreConfig, err := ac.askForAnchoreConfig(nil)
 	if err != nil {
 		return errors.WrapIf(err, "failed to read Anchore configuration details")
 	}
 
-	policy, err := ac.askForPolicy()
+	policy, err := ac.askForPolicy(nil)
 	if err != nil {
 		return errors.WrapIf(err, "failed to read Anchore Policy configuration details")
 	}
@@ -298,7 +206,7 @@ func (ac *activateCommander) buildCustomAnchoreFeatureRequest(activateRequest *p
 		return errors.WrapIf(err, "failed to read whitelists")
 	}
 
-	webhookConfig, err := ac.askForWebHookConfig()
+	webhookConfig, err := ac.askForWebHookConfig(nil)
 	if err != nil {
 		return errors.WrapIf(err, "failed to read webhook configuration")
 	}
@@ -314,42 +222,6 @@ func (ac *activateCommander) buildCustomAnchoreFeatureRequest(activateRequest *p
 	activateRequest.Spec = ssfMap
 
 	return nil
-}
-
-func (ac *activateCommander) askForPolicy() (*policySpec, error) {
-	type policy struct {
-		name string
-		id   string
-	}
-	// todo add all supported policies here
-	policies := []policy{{"Default bundle", "1"}}
-
-	options := make([]string, len(policies))
-	for i, s := range policies {
-		options[i] = s.name
-	}
-
-	var policyName string
-	if err := survey.AskOne(
-		&survey.Select{
-			Message: "Please select a policy for the Anchor Engine:",
-			Options: options,
-		},
-		&policyName,
-	); err != nil {
-		return nil, errors.WrapIf(err, "failed to select policy")
-	}
-
-	var selected policy
-	for _, s := range policies {
-		if s.name == policyName {
-			selected = s
-		}
-	}
-
-	return &policySpec{
-		PolicyID: selected.id,
-	}, nil
 }
 
 func (ac *activateCommander) askForWhiteLists() ([]releaseSpec, error) {
@@ -379,51 +251,6 @@ func (ac *activateCommander) askForWhiteLists() ([]releaseSpec, error) {
 	}
 
 	return releaseWhiteList, nil
-}
-
-func (ac *activateCommander) askForWebHookConfig() (*webHookConfigSpec, error) {
-	var enable bool
-	if err := survey.AskOne(
-		&survey.Confirm{
-			Message: "Configure the security scan webhook?",
-		},
-		&enable,
-	); err != nil {
-		return nil, errors.WrapIf(err, "failure during survey")
-	}
-
-	if !enable {
-		return &webHookConfigSpec{
-			Enabled: false,
-		}, nil
-	}
-
-	var selector string
-	if err := survey.AskOne(
-		&survey.Select{
-			Message: "Please choose the selector for the webhook configuration:",
-			Options: []string{"Exclude", "Include"},
-		},
-		&selector,
-	); err != nil {
-		return nil, errors.WrapIf(err, "failed to select policy")
-	}
-
-	var namespaces string
-	if err := survey.AskOne(
-		&survey.Input{
-			Message: "Please enter the comma separated list of namespaces",
-		},
-		&namespaces,
-	); err != nil {
-		return nil, errors.WrapIf(err, "failed to read namespaces")
-	}
-
-	return &webHookConfigSpec{
-		Enabled:    true,
-		Selector:   selector,
-		Namespaces: strings.Split(namespaces, ","),
-	}, nil
 }
 
 func (ac *activateCommander) askForWhiteListItem() (*releaseSpec, error) {
