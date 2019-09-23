@@ -1,22 +1,25 @@
 linters:
     enable-all: true
     disable:
+        - funlen
         - maligned
 
         # TODO: fix these
-        - dupl
-        - gochecknoglobals
-        - lll
-        - deadcode
-        - golint
-        - gochecknoinits
-        - gofmt
-        - gocritic
-        - megacheck
-        - errcheck
-        - goimports
-        - gocyclo
         - bodyclose
+        - deadcode
+        - dupl
+        - errcheck
+        - gas
+        - gochecknoglobals
+        - gochecknoinits
+        - gocritic
+        - gocyclo
+        - gofmt
+        - goimports
+        - golint
+        - lll
+        - megacheck
+        - varcheck
 
 linters-settings:
     golint:
