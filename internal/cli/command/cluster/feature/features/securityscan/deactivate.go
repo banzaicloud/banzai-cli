@@ -25,6 +25,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type deactivateOptions struct {
+	clustercontext.Context
+}
+
 func NewDeactivateCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := deactivateOptions{}
 
@@ -41,10 +45,6 @@ func NewDeactivateCommand(banzaiCli cli.Cli) *cobra.Command {
 	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, fmt.Sprintf("deactivate %s cluster feature of", featureName))
 
 	return cmd
-}
-
-type deactivateOptions struct {
-	clustercontext.Context
 }
 
 func runDeactivate(banzaiCli cli.Cli, options deactivateOptions, args []string) error {
