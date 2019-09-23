@@ -113,7 +113,7 @@ func buildActivateReqInteractively(
 	var edit bool
 	if err := survey.AskOne(
 		&survey.Confirm{
-			Message: "Do you want to edit the cluster feature activation request in your text editor?",
+			Message: "Edit the cluster feature activation request in your text editor?",
 		},
 		&edit,
 	); err != nil {
@@ -203,7 +203,7 @@ func (ac *activateCommander) askForAnchoreConfig() (*anchoreSpec, error) {
 	var customAnchore bool
 	if err := survey.AskOne(
 		&survey.Confirm{
-			Message: "Would you like to configure a custom anchore instance? ",
+			Message: "Configure a custom anchore instance? ",
 		},
 		&customAnchore,
 	); err != nil {
@@ -360,7 +360,7 @@ func (ac *activateCommander) askForWhiteLists() ([]releaseSpec, error) {
 	for addMore {
 		if err := survey.AskOne(
 			&survey.Confirm{
-				Message: "Would you like to add a release whitelist item to the security scan? ",
+				Message: "Add a release whitelist item to the security scan? ",
 			},
 			&addMore,
 		); err != nil {
@@ -385,7 +385,7 @@ func (ac *activateCommander) askForWebHookConfig() (*webHookConfigSpec, error) {
 	var enable bool
 	if err := survey.AskOne(
 		&survey.Confirm{
-			Message: "Would you like to configure the security scan webhook?",
+			Message: "Configure the security scan webhook?",
 		},
 		&enable,
 	); err != nil {
