@@ -38,7 +38,7 @@ func NewSecurityScanCommand(banzaiCli cli.Cli) *cobra.Command {
 		NewActivateCommand(banzaiCli),
 		NewDeactivateCommand(banzaiCli),
 		NewGetCommand(banzaiCli),
-		//NewUpdateCommand(banzaiCli),
+		NewUpdateCommand(banzaiCli),
 	)
 
 	return cmd
