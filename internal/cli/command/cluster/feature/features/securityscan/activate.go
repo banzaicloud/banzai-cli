@@ -30,6 +30,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type activateOptions struct {
+	clustercontext.Context
+	filePath string
+}
+
 func NewActivateCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := activateOptions{}
 	ac := MakeFeatureActivator(banzaiCli)
@@ -54,31 +59,26 @@ func NewActivateCommand(banzaiCli cli.Cli) *cobra.Command {
 	return cmd
 }
 
-type activateOptions struct {
-	clustercontext.Context
-	filePath string
-}
-
-func (ac *featureActivator) runActivate(options activateOptions, args []string) error {
+func (fa *featureActivator) runActivate(options activateOptions, args []string) error {
 
 	if err := options.Init(args...); err != nil {
 		return errors.Wrap(err, "failed to initialize options")
 	}
 
 	var req pipeline.ActivateClusterFeatureRequest
-	if options.filePath == "" && ac.banzaiCLI.Interactive() {
-		if err := ac.buildActivateReqInteractively(&req); err != nil {
+	if options.filePath == "" && fa.banzaiCLI.Interactive() {
+		if err := fa.buildActivateReqInteractively(&req); err != nil {
 			return errors.WrapIf(err, "failed to build activate request interactively")
-		}
-	} else {
-		if err := readActivateReqFromFileOrStdin(options.filePath, &req); err != nil {
-			return errors.WrapIff(err, "failed to read %s cluster feature specification", featureName)
 		}
 	}
 
-	orgId := ac.banzaiCLI.Context().OrganizationID()
+	if err := fa.readActivateReqFromFileOrStdin(options.filePath, &req); err != nil {
+		return errors.WrapIff(err, "failed to read %s cluster feature specification", featureName)
+	}
+
+	orgId := fa.banzaiCLI.Context().OrganizationID()
 	clusterId := options.ClusterID()
-	_, err := ac.banzaiCLI.Client().ClusterFeaturesApi.ActivateClusterFeature(context.Background(), orgId, clusterId, featureName, req)
+	_, err := fa.banzaiCLI.Client().ClusterFeaturesApi.ActivateClusterFeature(context.Background(), orgId, clusterId, featureName, req)
 	if err != nil {
 		cli.LogAPIError(fmt.Sprintf("activate %s cluster feature", featureName), err, req)
 		log.Fatalf("could not activate %s cluster feature: %v", featureName, err)
@@ -89,7 +89,7 @@ func (ac *featureActivator) runActivate(options activateOptions, args []string) 
 	return nil
 }
 
-func readActivateReqFromFileOrStdin(filePath string, req *pipeline.ActivateClusterFeatureRequest) error {
+func (fa *featureActivator) readActivateReqFromFileOrStdin(filePath string, req *pipeline.ActivateClusterFeatureRequest) error {
 	filename, raw, err := utils.ReadFileOrStdin(filePath)
 	if err != nil {
 		return errors.WrapIfWithDetails(err, "failed to read", "filename", filename)
@@ -102,7 +102,7 @@ func readActivateReqFromFileOrStdin(filePath string, req *pipeline.ActivateClust
 	return nil
 }
 
-func (ac *featureActivator) buildActivateReqInteractively(req *pipeline.ActivateClusterFeatureRequest) error {
+func (fa *featureActivator) buildActivateReqInteractively(req *pipeline.ActivateClusterFeatureRequest) error {
 
 	var edit bool
 	if err := survey.AskOne(
@@ -115,10 +115,10 @@ func (ac *featureActivator) buildActivateReqInteractively(req *pipeline.Activate
 	}
 
 	if !edit {
-		return ac.buildCustomAnchoreFeatureRequest(req)
+		return fa.buildCustomAnchoreFeatureRequest(req)
 	}
 
-	spec, err := ac.securityScanSpecAsMap(nil)
+	spec, err := fa.securityScanSpecAsMap(nil)
 	if err != nil {
 		return errors.WrapIf(err, "failed to decode spec into map")
 	}
@@ -137,22 +137,13 @@ func (ac *featureActivator) buildActivateReqInteractively(req *pipeline.Activate
 			AppendDefault: true,
 		},
 		&result,
-		survey.WithValidator(validateActivateClusterFeatureRequest),
+		survey.WithValidator(fa.validateActivateClusterFeatureRequest),
 	); err != nil {
 		return errors.WrapIf(err, "failure during survey")
 	}
 
 	if err := json.Unmarshal([]byte(result), req); err != nil {
 		return errors.WrapIf(err, "failed to unmarshal JSON as request")
-	}
-
-	return nil
-}
-
-func validateActivateClusterFeatureRequest(req interface{}) error {
-	var request pipeline.ActivateClusterFeatureRequest
-	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
-		return errors.WrapIf(err, "request is not valid JSON")
 	}
 
 	return nil
@@ -170,7 +161,7 @@ func MakeFeatureActivator(banzaiCLI cli.Cli) *featureActivator {
 	return ac
 }
 
-func (ac *featureActivator) securityScanSpecAsMap(spec *SecurityScanFeatureSpec) (map[string]interface{}, error) {
+func (fa *featureActivator) securityScanSpecAsMap(spec *SecurityScanFeatureSpec) (map[string]interface{}, error) {
 	// fill the structure of the config - make filling up the values easier
 	if spec == nil {
 		spec = &SecurityScanFeatureSpec{
@@ -189,24 +180,24 @@ func (ac *featureActivator) securityScanSpecAsMap(spec *SecurityScanFeatureSpec)
 	return specMap, nil
 }
 
-func (ac *featureActivator) buildCustomAnchoreFeatureRequest(activateRequest *pipeline.ActivateClusterFeatureRequest) error {
+func (fa *featureActivator) buildCustomAnchoreFeatureRequest(activateRequest *pipeline.ActivateClusterFeatureRequest) error {
 
-	anchoreConfig, err := ac.askForAnchoreConfig(nil)
+	anchoreConfig, err := fa.askForAnchoreConfig(nil)
 	if err != nil {
 		return errors.WrapIf(err, "failed to read Anchore configuration details")
 	}
 
-	policy, err := ac.askForPolicy(nil)
+	policy, err := fa.askForPolicy(nil)
 	if err != nil {
 		return errors.WrapIf(err, "failed to read Anchore Policy configuration details")
 	}
 
-	whiteLists, err := ac.askForWhiteLists()
+	whiteLists, err := fa.askForWhiteLists()
 	if err != nil {
 		return errors.WrapIf(err, "failed to read whitelists")
 	}
 
-	webhookConfig, err := ac.askForWebHookConfig(nil)
+	webhookConfig, err := fa.askForWebHookConfig(nil)
 	if err != nil {
 		return errors.WrapIf(err, "failed to read webhook configuration")
 	}
@@ -217,7 +208,7 @@ func (ac *featureActivator) buildCustomAnchoreFeatureRequest(activateRequest *pi
 	securityScanFeatureRequest.ReleaseWhiteList = whiteLists
 	securityScanFeatureRequest.WebhookConfig = *webhookConfig
 
-	ssfMap, err := ac.securityScanSpecAsMap(securityScanFeatureRequest)
+	ssfMap, err := fa.securityScanSpecAsMap(securityScanFeatureRequest)
 	if err != nil {
 		return errors.WrapIf(err, "failed to transform request to map")
 	}
@@ -227,7 +218,7 @@ func (ac *featureActivator) buildCustomAnchoreFeatureRequest(activateRequest *pi
 	return nil
 }
 
-func (ac *featureActivator) askForWhiteLists() ([]releaseSpec, error) {
+func (fa *featureActivator) askForWhiteLists() ([]releaseSpec, error) {
 
 	addMore := true
 	releaseWhiteList := make([]releaseSpec, 0)
@@ -246,7 +237,7 @@ func (ac *featureActivator) askForWhiteLists() ([]releaseSpec, error) {
 			continue
 		}
 
-		item, err := ac.askForWhiteListItem()
+		item, err := fa.askForWhiteListItem()
 		if err != nil {
 			return nil, errors.WrapIf(err, "failed to read release whitelist item")
 		}
@@ -256,7 +247,7 @@ func (ac *featureActivator) askForWhiteLists() ([]releaseSpec, error) {
 	return releaseWhiteList, nil
 }
 
-func (ac *featureActivator) askForWhiteListItem() (*releaseSpec, error) {
+func (fa *featureActivator) askForWhiteListItem() (*releaseSpec, error) {
 
 	var releaseName string
 	if err := survey.AskOne(
@@ -293,4 +284,13 @@ func (ac *featureActivator) askForWhiteListItem() (*releaseSpec, error) {
 		Reason: reason,
 		Regexp: regexp,
 	}, nil
+}
+
+func (fa *featureActivator) validateActivateClusterFeatureRequest(req interface{}) error {
+	var request pipeline.ActivateClusterFeatureRequest
+	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
+		return errors.WrapIf(err, "request is not valid JSON")
+	}
+
+	return nil
 }
