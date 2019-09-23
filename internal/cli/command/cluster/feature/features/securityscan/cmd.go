@@ -24,7 +24,7 @@ func NewSecurityScanCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := getOptions{}
 
 	cmd := &cobra.Command{
-		Use:   "securityscan",
+		Use:   featureName,
 		Short: "Set up security scan for the cluster",
 		Args:  cobra.NoArgs,
 		RunE: func(_ *cobra.Command, args []string) error {
@@ -35,7 +35,7 @@ func NewSecurityScanCommand(banzaiCli cli.Cli) *cobra.Command {
 	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "manage security scan cluster feature of")
 
 	cmd.AddCommand(
-		//NewActivateCommand(banzaiCli),
+		NewActivateCommand(banzaiCli),
 		NewDeactivateCommand(banzaiCli),
 		NewGetCommand(banzaiCli),
 		//NewUpdateCommand(banzaiCli),

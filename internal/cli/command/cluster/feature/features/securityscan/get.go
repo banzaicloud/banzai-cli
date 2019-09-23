@@ -16,6 +16,7 @@ package securityscan
 
 import (
 	"context"
+	"fmt"
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
@@ -32,14 +33,14 @@ func NewGetCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "get",
 		Aliases: []string{"details", "show", "query"},
-		Short:   "Get details of the securityScan feature for a cluster",
+		Short:   fmt.Sprintf("Get details of the %s feature for a cluster", featureName),
 		Args:    cobra.NoArgs,
 		RunE: func(_ *cobra.Command, args []string) error {
 			return runGet(banzaiCli, options, args)
 		},
 	}
 
-	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "get securityScan cluster feature details of")
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, fmt.Sprintf("get %s cluster feature details of", featureName))
 
 	return cmd
 }
@@ -47,8 +48,6 @@ func NewGetCommand(banzaiCli cli.Cli) *cobra.Command {
 type getOptions struct {
 	clustercontext.Context
 }
-
-const featureName = "securityscan"
 
 func runGet(banzaiCli cli.Cli, options getOptions, args []string) error {
 	if err := options.Init(args...); err != nil {
@@ -61,8 +60,8 @@ func runGet(banzaiCli cli.Cli, options getOptions, args []string) error {
 
 	details, resp, err := pipeline.ClusterFeaturesApi.ClusterFeatureDetails(context.Background(), orgId, clusterId, featureName)
 	if err != nil {
-		cli.LogAPIError("get securityScan cluster feature details", err, resp.Request)
-		log.Fatalf("could not get securityScan cluster feature details: %v", err)
+		cli.LogAPIError(fmt.Sprintf("get %s cluster feature details", featureName), err, resp.Request)
+		log.Fatalf("could not get %s cluster feature details: %v", featureName, err)
 		return err
 	}
 
