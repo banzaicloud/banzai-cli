@@ -22,16 +22,17 @@ const (
 	featureName = "securityscan"
 )
 
-//featureSpec security scan cluster feature specific specification
-type featureSpec struct {
+//SecurityScanFeatureSpec security scan cluster feature specific specification
+type SecurityScanFeatureSpec struct {
 	CustomAnchore    anchoreSpec       `json:"customAnchore" mapstructure:"customAnchore"`
 	Policy           policySpec        `json:"policy" mapstructure:"policy"`
 	ReleaseWhiteList []releaseSpec     `json:"releaseWhiteList,omitempty" mapstructure:"releaseWhiteList"`
 	WebhookConfig    webHookConfigSpec `json:"webhookConfig" mapstructure:"webhookConfig"`
 }
 
+
 // Validate validates the input security scan specification.
-func (s featureSpec) Validate() error {
+func (s SecurityScanFeatureSpec) Validate() error {
 
 	var validationErrors error
 
