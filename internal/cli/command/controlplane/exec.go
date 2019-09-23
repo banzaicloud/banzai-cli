@@ -26,6 +26,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	runtimeDocker     = "docker"
+	runtimeContainerd = "containerd"
+	runtimeExec       = "exec"
+)
+
 func runTerraform(command string, options *cpContext, banzaiCli cli.Cli, env map[string]string, targets ...string) error {
 	var err error
 	options.installerPulled.Do(func() { err = pullImage(options, banzaiCli) })
@@ -55,11 +61,11 @@ func runTerraform(command string, options *cpContext, banzaiCli cli.Cli, env map
 	}
 
 	switch options.containerRuntime {
-	case "exec":
+	case runtimeExec:
 		return runLocally(cmd, cmdEnv)
-	case "docker":
+	case runtimeDocker:
 		return runDocker(cmd, options, banzaiCli, cmdEnv)
-	case "containerd":
+	case runtimeContainerd:
 		return runContainer(cmd, options, banzaiCli, cmdEnv)
 	default:
 		return errors.Errorf("unknown container runtime: %q", options.containerRuntime)
@@ -153,7 +159,7 @@ func runDocker(command []string, options *cpContext, banzaiCli cli.Cli, env map[
 	return errors.WithStack(cmd.Run())
 }
 
-func pullImage(options *cpContext, banzaiCli cli.Cli) error {
+func pullImage(options *cpContext, _ cli.Cli) error {
 	if !options.pullInstaller {
 		return nil
 	}
@@ -162,13 +168,13 @@ func pullImage(options *cpContext, banzaiCli cli.Cli) error {
 
 	tool := options.containerRuntime
 	switch options.containerRuntime {
-	case "docker":
+	case runtimeDocker:
 		args = []string{"pull"}
-	case "containerd":
+	case runtimeContainerd:
 		tool = "ctr"
 		args = []string{"image", "pull"}
 
-	case "exec":
+	case runtimeExec:
 		return nil
 	default:
 		return errors.Errorf("unknown container runtime: %q", options.containerRuntime)
@@ -224,9 +230,9 @@ func hasTool(tool string) error {
 			}
 		}
 		if out != "" {
-			return errors.Errorf("`%s version` failed: %s", out)
+			return errors.Errorf("`%s version` failed: %s", tool, out)
 		}
 	}
 
-	return errors.Wrapf(err, "%s check failed")
+	return errors.Wrapf(err, "%s check failed", tool)
 }

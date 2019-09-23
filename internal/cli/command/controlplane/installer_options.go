@@ -205,21 +205,21 @@ func (c *cpContext) Init() error {
 	switch c.containerRuntime {
 	case "auto":
 		if hasTool("docker") == nil {
-			c.containerRuntime = "docker"
+			c.containerRuntime = runtimeDocker
 		} else if hasTool("ctr") == nil || checkPKESupported() == nil {
-			c.containerRuntime = "containerd"
+			c.containerRuntime = runtimeContainerd
 		} else {
 			return errors.Errorf("neither docker, nor containerd is installed and working correctly on this machine")
 		}
-	case "docker":
+	case runtimeDocker:
 		if err := hasTool("docker"); err != nil {
 			return err
 		}
-	case "containerd":
+	case runtimeContainerd:
 		if err := hasTool("ctr"); err != nil {
 			return err
 		}
-	case "exec":
+	case runtimeExec:
 	default:
 		return errors.Errorf("unknown container runtime: %q", c.containerRuntime)
 	}
