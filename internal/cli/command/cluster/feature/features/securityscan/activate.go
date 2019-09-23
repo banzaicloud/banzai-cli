@@ -32,7 +32,7 @@ import (
 
 func NewActivateCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := activateOptions{}
-	ac := MakeActivateCommander(banzaiCli)
+	ac := MakeFeatureActivator(banzaiCli)
 
 	cmd := &cobra.Command{
 		Use:           "activate",
@@ -59,7 +59,7 @@ type activateOptions struct {
 	filePath string
 }
 
-func (ac *activateCommander) runActivate(options activateOptions, args []string) error {
+func (ac *featureActivator) runActivate(options activateOptions, args []string) error {
 
 	if err := options.Init(args...); err != nil {
 		return errors.Wrap(err, "failed to initialize options")
@@ -102,7 +102,7 @@ func readActivateReqFromFileOrStdin(filePath string, req *pipeline.ActivateClust
 	return nil
 }
 
-func (ac *activateCommander) buildActivateReqInteractively(req *pipeline.ActivateClusterFeatureRequest) error {
+func (ac *featureActivator) buildActivateReqInteractively(req *pipeline.ActivateClusterFeatureRequest) error {
 
 	var edit bool
 	if err := survey.AskOne(
@@ -158,19 +158,19 @@ func validateActivateClusterFeatureRequest(req interface{}) error {
 	return nil
 }
 
-// activateCommander helper struct for gathering activate command realated operations
-type activateCommander struct {
+// featureActivator helper struct for gathering activate command realated operations
+type featureActivator struct {
 	specAssembler
 }
 
-// MakeActivateCommander returns a reference to an activateCommander instance
-func MakeActivateCommander(banzaiCLI cli.Cli) *activateCommander {
-	ac := new(activateCommander)
+// MakeFeatureActivator returns a reference to an featureActivator instance
+func MakeFeatureActivator(banzaiCLI cli.Cli) *featureActivator {
+	ac := new(featureActivator)
 	ac.banzaiCLI = banzaiCLI
 	return ac
 }
 
-func (ac *activateCommander) securityScanSpecAsMap(spec *SecurityScanFeatureSpec) (map[string]interface{}, error) {
+func (ac *featureActivator) securityScanSpecAsMap(spec *SecurityScanFeatureSpec) (map[string]interface{}, error) {
 	// fill the structure of the config - make filling up the values easier
 	if spec == nil {
 		spec = &SecurityScanFeatureSpec{
@@ -189,7 +189,7 @@ func (ac *activateCommander) securityScanSpecAsMap(spec *SecurityScanFeatureSpec
 	return specMap, nil
 }
 
-func (ac *activateCommander) buildCustomAnchoreFeatureRequest(activateRequest *pipeline.ActivateClusterFeatureRequest) error {
+func (ac *featureActivator) buildCustomAnchoreFeatureRequest(activateRequest *pipeline.ActivateClusterFeatureRequest) error {
 
 	anchoreConfig, err := ac.askForAnchoreConfig(nil)
 	if err != nil {
@@ -227,7 +227,7 @@ func (ac *activateCommander) buildCustomAnchoreFeatureRequest(activateRequest *p
 	return nil
 }
 
-func (ac *activateCommander) askForWhiteLists() ([]releaseSpec, error) {
+func (ac *featureActivator) askForWhiteLists() ([]releaseSpec, error) {
 
 	addMore := true
 	releaseWhiteList := make([]releaseSpec, 0)
@@ -256,7 +256,7 @@ func (ac *activateCommander) askForWhiteLists() ([]releaseSpec, error) {
 	return releaseWhiteList, nil
 }
 
-func (ac *activateCommander) askForWhiteListItem() (*releaseSpec, error) {
+func (ac *featureActivator) askForWhiteListItem() (*releaseSpec, error) {
 
 	var releaseName string
 	if err := survey.AskOne(
