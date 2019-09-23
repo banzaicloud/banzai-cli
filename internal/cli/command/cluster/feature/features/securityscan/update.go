@@ -200,6 +200,9 @@ func (fu *featureUpdater) buildCustomAnchoreFeatureRequest(updateRequest *pipeli
 	securityScanFeatureRequest.WebhookConfig = *webhookConfig
 
 	ssfMap, err := fu.securityScanSpecAsMap(securityScanFeatureRequest)
+	if err != nil {
+		return errors.WrapIf(err, "failed to transform request to map")
+	}
 
 	updateRequest.Spec = ssfMap
 

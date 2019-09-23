@@ -218,6 +218,9 @@ func (ac *activateCommander) buildCustomAnchoreFeatureRequest(activateRequest *p
 	securityScanFeatureRequest.WebhookConfig = *webhookConfig
 
 	ssfMap, err := ac.securityScanSpecAsMap(securityScanFeatureRequest)
+	if err != nil {
+		return errors.WrapIf(err, "failed to transform request to map")
+	}
 
 	activateRequest.Spec = ssfMap
 
