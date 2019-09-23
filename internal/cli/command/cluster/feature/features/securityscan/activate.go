@@ -25,6 +25,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
+	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -118,6 +119,14 @@ func buildActivateReqInteractively(
 		return nil
 	}
 
+	aCommander := MakeActivateCommander()
+	spec, err := aCommander.securityScanSpecAsMap(nil)
+	if err != nil {
+		return errors.WrapIf(err, "failed to decode spec into map")
+	}
+
+	req.Spec = spec
+
 	content, err := json.MarshalIndent(*req, "", "  ")
 	if err != nil {
 		return errors.WrapIf(err, "failed to marshal request to JSON")
@@ -153,4 +162,32 @@ func validateActivateClusterFeatureRequest(req interface{}) error {
 func buildScurityscanFeatureRequest(banzaiCli cli.Cli, req *pipeline.ActivateClusterFeatureRequest) error {
 
 	return nil
+}
+
+// activateComamnder helper struct for gathering activate command realated operations
+type activateComamnder struct {
+}
+
+// MakeActivateCommander returns a reference to an activateComamnder instance
+func MakeActivateCommander() *activateComamnder {
+	return new(activateComamnder)
+}
+
+func (ac *activateComamnder) securityScanSpecAsMap(spec *SecurityScanFeatureSpec) (map[string]interface{}, error) {
+	// fill the structure of the config - make filling up the values easier
+	if spec == nil {
+		spec = &SecurityScanFeatureSpec{
+			CustomAnchore:    anchoreSpec{},
+			Policy:           policySpec{},
+			ReleaseWhiteList: nil,
+			WebhookConfig:    webHookConfigSpec{},
+		}
+	}
+
+	var specMap map[string]interface{}
+	if err := mapstructure.Decode(spec, &specMap); err != nil {
+		return nil, err
+	}
+
+	return specMap, nil
 }
