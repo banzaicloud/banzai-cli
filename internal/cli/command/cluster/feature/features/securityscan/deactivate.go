@@ -16,6 +16,7 @@ package securityscan
 
 import (
 	"context"
+	"fmt"
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -37,7 +38,7 @@ func NewDeactivateCommand(banzaiCli cli.Cli) *cobra.Command {
 		},
 	}
 
-	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "deactivate securityScan cluster feature of")
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, fmt.Sprintf("deactivate %s cluster feature of", featureName))
 
 	return cmd
 }
@@ -57,8 +58,8 @@ func runDeactivate(banzaiCli cli.Cli, options deactivateOptions, args []string) 
 
 	resp, err := pipeline.ClusterFeaturesApi.DeactivateClusterFeature(context.Background(), orgId, clusterId, featureName)
 	if err != nil {
-		cli.LogAPIError("deactivate securityScan cluster feature", err, resp.Request)
-		log.Fatalf("could not deactivate securityScan cluster feature: %v", err)
+		cli.LogAPIError(fmt.Sprintf("deactivate %s cluster feature", featureName), err, resp.Request)
+		log.Fatalf("could not deactivate %s cluster feature: %v", featureName, err)
 	}
 
 	log.Infof("feature %q started to deactivate", featureName)
