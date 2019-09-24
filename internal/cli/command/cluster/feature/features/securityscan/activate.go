@@ -70,10 +70,10 @@ func (fa *featureActivator) runActivate(options activateOptions, args []string) 
 		if err := fa.buildActivateReqInteractively(&req); err != nil {
 			return errors.WrapIf(err, "failed to build activate request interactively")
 		}
-	}
-
-	if err := fa.readActivateReqFromFileOrStdin(options.filePath, &req); err != nil {
-		return errors.WrapIff(err, "failed to read %s cluster feature specification", featureName)
+	} else {
+		if err := fa.readActivateReqFromFileOrStdin(options.filePath, &req); err != nil {
+			return errors.WrapIff(err, "failed to read %s cluster feature specification", featureName)
+		}
 	}
 
 	orgId := fa.banzaiCLI.Context().OrganizationID()

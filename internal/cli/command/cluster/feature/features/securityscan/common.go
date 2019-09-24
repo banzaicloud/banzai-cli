@@ -124,10 +124,10 @@ type specAssembler struct {
 	banzaiCLI cli.Cli
 }
 
-func (sa *specAssembler) askForAnchoreConfig(currentSpec *anchoreSpec) (*anchoreSpec, error) {
+func (sa *specAssembler) askForAnchoreConfig(currentAnchoreSpec *anchoreSpec) (*anchoreSpec, error) {
 
-	if currentSpec == nil {
-		currentSpec = new(anchoreSpec)
+	if currentAnchoreSpec == nil {
+		currentAnchoreSpec = new(anchoreSpec)
 	}
 
 	var customAnchore bool
@@ -151,14 +151,14 @@ func (sa *specAssembler) askForAnchoreConfig(currentSpec *anchoreSpec) (*anchore
 	if err := survey.AskOne(
 		&survey.Input{
 			Message: "Please enter the custom anchore URL:",
-			Default: currentSpec.Url,
+			Default: currentAnchoreSpec.Url,
 		},
 		&anchoreURL,
 	); err != nil {
 		return nil, errors.WrapIf(err, "failed to read custom Anchore URL")
 	}
 
-	secretID, err := sa.askForSecret(currentSpec.SecretID)
+	secretID, err := sa.askForSecret(currentAnchoreSpec.SecretID)
 	if err != nil {
 		return nil, errors.WrapIf(err, "failed to read secret for accessing custom Anchore ")
 	}
@@ -170,7 +170,7 @@ func (sa *specAssembler) askForAnchoreConfig(currentSpec *anchoreSpec) (*anchore
 	}, nil
 }
 
-func (sa *specAssembler) askForSecret(secretID string) (string, error) {
+func (sa *specAssembler) askForSecret(currentSecretID string) (string, error) {
 	const (
 		PasswordSecretType = "password"
 	)
@@ -191,7 +191,7 @@ func (sa *specAssembler) askForSecret(secretID string) (string, error) {
 	currentSecretName := ""
 	for i, s := range secrets {
 		options[i] = s.Name
-		if s.Id == secretID {
+		if s.Id == currentSecretID {
 			currentSecretName = s.Name
 		}
 	}
@@ -217,9 +217,9 @@ func (sa *specAssembler) askForSecret(secretID string) (string, error) {
 	return "", errors.Errorf("no secret with name %q", secretName)
 }
 
-func (sa *specAssembler) askForPolicy(currentPolicy *policySpec) (*policySpec, error) {
-	if currentPolicy == nil {
-		currentPolicy = new(policySpec)
+func (sa *specAssembler) askForPolicy(currentPolicySpec *policySpec) (*policySpec, error) {
+	if currentPolicySpec == nil {
+		currentPolicySpec = new(policySpec)
 	}
 
 	type policy struct {
@@ -233,7 +233,7 @@ func (sa *specAssembler) askForPolicy(currentPolicy *policySpec) (*policySpec, e
 	currentPolicyName := ""
 	for i, s := range policies {
 		options[i] = s.name
-		if s.id == currentPolicy.PolicyID {
+		if s.id == currentPolicySpec.PolicyID {
 			currentPolicyName = s.name
 		}
 	}
@@ -262,9 +262,9 @@ func (sa *specAssembler) askForPolicy(currentPolicy *policySpec) (*policySpec, e
 	}, nil
 }
 
-func (sa *specAssembler) askForWebHookConfig(currentWH *webHookConfigSpec) (*webHookConfigSpec, error) {
-	if currentWH == nil {
-		currentWH = new(webHookConfigSpec)
+func (sa *specAssembler) askForWebHookConfig(currentWebHookSpec *webHookConfigSpec) (*webHookConfigSpec, error) {
+	if currentWebHookSpec == nil {
+		currentWebHookSpec = new(webHookConfigSpec)
 	}
 	var enable bool
 	if err := survey.AskOne(
@@ -287,7 +287,7 @@ func (sa *specAssembler) askForWebHookConfig(currentWH *webHookConfigSpec) (*web
 		&survey.Select{
 			Message: "Please choose the selector for the webhook configuration:",
 			Options: []string{"Exclude", "Include"},
-			Default: currentWH.Selector,
+			Default: currentWebHookSpec.Selector,
 		},
 		&selector,
 	); err != nil {
@@ -298,7 +298,7 @@ func (sa *specAssembler) askForWebHookConfig(currentWH *webHookConfigSpec) (*web
 	if err := survey.AskOne(
 		&survey.Input{
 			Message: "Please enter the comma separated list of namespaces:",
-			Default: strings.Join(currentWH.Namespaces, ","),
+			Default: strings.Join(currentWebHookSpec.Namespaces, ","),
 		},
 		&namespaces,
 	); err != nil {

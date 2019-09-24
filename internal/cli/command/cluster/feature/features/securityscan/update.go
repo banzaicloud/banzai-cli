@@ -78,7 +78,7 @@ func (fu *featureUpdater) getSecurityScanFeature(orgID int32, clusterID int32) (
 	return clusterFeatureDetails.Spec, nil
 }
 
-func ValidateUpdateClusterFeatureRequest(req interface{}) error {
+func (fu *featureUpdater) validateUpdateClusterFeatureRequest(req interface{}) error {
 	var request pipeline.UpdateClusterFeatureRequest
 	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
 		return errors.WrapIf(err, "request is not valid JSON")
@@ -107,10 +107,10 @@ func (fu *featureUpdater) runUpdate(options updateOptions, args []string) error 
 		if err := fu.buildUpdateReqInteractively(options, req); err != nil {
 			return errors.WrapIf(err, "failed to build update request interactively")
 		}
-	}
-
-	if err := readUpdateReqFromFileOrStdin(options.filePath, req); err != nil {
-		return errors.WrapIff(err, "failed to read %s cluster feature specification", featureName)
+	} else {
+		if err := fu.readUpdateReqFromFileOrStdin(options.filePath, req); err != nil {
+			return errors.WrapIff(err, "failed to read %s cluster feature specification", featureName)
+		}
 	}
 
 	resp, err := fu.banzaiCLI.Client().ClusterFeaturesApi.UpdateClusterFeature(context.Background(), orgId, clusterId, featureName, *req)
@@ -124,7 +124,7 @@ func (fu *featureUpdater) runUpdate(options updateOptions, args []string) error 
 	return nil
 }
 
-func readUpdateReqFromFileOrStdin(filePath string, req *pipeline.UpdateClusterFeatureRequest) error {
+func (fu *featureUpdater) readUpdateReqFromFileOrStdin(filePath string, req *pipeline.UpdateClusterFeatureRequest) error {
 	filename, raw, err := utils.ReadFileOrStdin(filePath)
 	if err != nil {
 		return errors.WrapIfWithDetails(err, "failed to read", "filename", filename)
@@ -142,7 +142,7 @@ func (fu *featureUpdater) buildUpdateReqInteractively(_ updateOptions, req *pipe
 	if err := survey.AskOne(
 		&survey.Confirm{Message: "Edit the cluster feature update request in your text editor?"},
 		&edit,
-		survey.WithValidator(ValidateUpdateClusterFeatureRequest)); err != nil {
+		survey.WithValidator(fu.validateUpdateClusterFeatureRequest)); err != nil {
 		return errors.WrapIf(err, "failure during survey")
 	}
 
