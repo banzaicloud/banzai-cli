@@ -15,8 +15,6 @@
 package vault
 
 import (
-	"fmt"
-
 	"emperror.dev/errors"
 	"github.com/mitchellh/mapstructure"
 )
@@ -59,7 +57,6 @@ func validateSpec(specObj map[string]interface{}) error {
 	if err := mapstructure.Decode(specObj, &spec); err != nil {
 		return errors.WrapIf(err, "feature specification does not conform to schema")
 	}
-	fmt.Println("spec", spec)
 
 	if spec.CustomVault.Enabled && len(spec.CustomVault.Address) == 0 {
 		return errors.New("Vault address cannot be empty in case of custom Vault option")
