@@ -32,7 +32,4 @@ banzai cluster list [flags]
 ### SEE ALSO
 
 * [banzai cluster](banzai_cluster.md)	 - Manage clusters
-* [banzai cluster feature dns](banzai_cluster_feature_dns.md)	 - Manage cluster DNS feature
-* [banzai cluster feature list](banzai_cluster_feature_list.md)	 - List active (and pending) features of a cluster
-* [banzai cluster feature vault](banzai_cluster_feature_vault.md)	 - Manage cluster Vault feature
 
