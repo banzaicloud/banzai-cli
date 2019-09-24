@@ -40,6 +40,11 @@ type questionInput struct {
 	output       *string
 }
 
+type questionSelect struct {
+	questionInput
+	options []string
+}
+
 func (q questionConfirm) Do() error {
 	if err := survey.AskOne(
 		&survey.Confirm{
@@ -65,6 +70,23 @@ func (q questionInput) Do() error {
 	); err != nil {
 		return errors.WrapIf(err, "failure during survey")
 	}
+	return nil
+}
+
+func (q questionSelect) Do() error {
+	err := survey.AskOne(
+		&survey.Select{
+			Message: q.message,
+			Help:    q.help,
+			Options: q.options,
+			Default: q.defaultValue,
+		},
+		q.output,
+	)
+	if err != nil {
+		return errors.WrapIf(err, "failure during survey")
+	}
+
 	return nil
 }
 

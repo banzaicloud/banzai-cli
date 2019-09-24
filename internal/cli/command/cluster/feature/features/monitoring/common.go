@@ -25,6 +25,8 @@ const (
 	ingressTypeGrafana      = "Grafana"
 	ingressTypePrometheus   = "Prometheus"
 	ingressTypeAlertmanager = "Alertmanager"
+
+	passwordSecretType = "password"
 )
 
 func NewDeactivateManager() *ActivateManager {

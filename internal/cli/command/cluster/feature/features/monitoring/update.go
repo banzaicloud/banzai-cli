@@ -45,12 +45,12 @@ func (m *UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeli
 		return errors.WrapIf(err, "feature specification does not conform to schema")
 	}
 
-	grafana, err := askGrafana(spec.Grafana)
+	grafana, err := askGrafana(banzaiCLI, spec.Grafana)
 	if err != nil {
 		return errors.WrapIf(err, "error during getting Grafana options")
 	}
 
-	prometheus, err := askPrometheus(spec.Prometheus)
+	prometheus, err := askPrometheus(banzaiCLI, spec.Prometheus)
 	if err != nil {
 		return errors.WrapIf(err, "error during getting Prometheus options")
 	}

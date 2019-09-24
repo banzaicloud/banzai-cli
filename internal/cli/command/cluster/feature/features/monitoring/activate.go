@@ -15,10 +15,12 @@
 package monitoring
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
 	"emperror.dev/errors"
+	"github.com/antihax/optional"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 )
@@ -29,14 +31,14 @@ func (m *ActivateManager) GetName() string {
 	return featureName
 }
 
-func (m *ActivateManager) BuildRequestInteractively(_ cli.Cli) (*pipeline.ActivateClusterFeatureRequest, error) {
+func (m *ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.ActivateClusterFeatureRequest, error) {
 
-	grafana, err := askGrafana(grafanaAndPrometheusSpec{})
+	grafana, err := askGrafana(banzaiCLI, grafanaAndPrometheusSpec{})
 	if err != nil {
 		return nil, errors.WrapIf(err, "error during getting Grafana options")
 	}
 
-	prometheus, err := askPrometheus(grafanaAndPrometheusSpec{})
+	prometheus, err := askPrometheus(banzaiCLI, grafanaAndPrometheusSpec{})
 	if err != nil {
 		return nil, errors.WrapIf(err, "error during getting Prometheus options")
 	}
@@ -134,31 +136,43 @@ func askIngress(compType string, defaults baseSpec) (*baseSpec, error) {
 	}, nil
 }
 
-func askGrafana(defaults grafanaAndPrometheusSpec) (*grafanaAndPrometheusSpec, error) {
+func askGrafana(banzaiCLI cli.Cli, defaults grafanaAndPrometheusSpec) (*grafanaAndPrometheusSpec, error) {
 	grafanaBase, err := askIngress("Grafana", defaults.baseSpec)
 	if err != nil {
 		return nil, errors.WrapIf(err, "error during getting Grafana options")
 	}
 
-	// todo (colin): ask secret
+	var secretId string
+	if grafanaBase.Enabled {
+		secretId, err = askSecret(banzaiCLI, passwordSecretType, defaults.SecretId)
+		if err != nil {
+			return nil, errors.WrapIf(err, "error during getting Grafana secret")
+		}
+	}
 
 	return &grafanaAndPrometheusSpec{
 		baseSpec: *grafanaBase,
-		SecretId: "",
+		SecretId: secretId,
 	}, nil
 }
 
-func askPrometheus(defaults grafanaAndPrometheusSpec) (*grafanaAndPrometheusSpec, error) {
+func askPrometheus(banzaiCLI cli.Cli, defaults grafanaAndPrometheusSpec) (*grafanaAndPrometheusSpec, error) {
 	prometheusBase, err := askIngress("Prometheus", defaults.baseSpec)
 	if err != nil {
 		return nil, errors.WrapIf(err, "error during getting Prometheus options")
 	}
 
-	// todo (colin): ask secret
+	var secretId string
+	if prometheusBase.Enabled {
+		secretId, err = askSecret(banzaiCLI, passwordSecretType, defaults.SecretId)
+		if err != nil {
+			return nil, errors.WrapIf(err, "error during getting Grafana secret")
+		}
+	}
 
 	return &grafanaAndPrometheusSpec{
 		baseSpec: *prometheusBase,
-		SecretId: "",
+		SecretId: secretId,
 	}, nil
 }
 
@@ -367,4 +381,58 @@ func askEmailProperties() (*emailPropertiesSpec, error) {
 	}
 
 	return &emailSpec, nil
+}
+
+func askSecret(banzaiCLI cli.Cli, secretType, defaultValue string) (string, error) {
+
+	orgID := banzaiCLI.Context().OrganizationID()
+	secrets, _, err := banzaiCLI.Client().SecretsApi.GetSecrets(
+		context.Background(),
+		orgID,
+		&pipeline.GetSecretsOpts{
+			Type_: optional.NewString(secretType),
+		},
+	)
+	if err != nil {
+		return "", errors.WrapIf(err, "failed to get Vault secret(s)")
+	}
+
+	if len(secrets) == 0 {
+		// TODO (colin): add option to create new secret
+		return "", nil
+	}
+
+	const skip = "skip"
+
+	var secretName string
+	var defaultSecretName = skip
+	secretOptions := make([]string, len(secrets)+1)
+	secretIds := make(map[string]string, len(secrets))
+	secretOptions[0] = skip
+	for i, s := range secrets {
+		secretOptions[i+1] = s.Name
+		secretIds[s.Name] = s.Id
+		if s.Id == defaultValue {
+			defaultSecretName = s.Name
+		}
+	}
+
+	if err := doQuestions([]questionMaker{questionSelect{
+		questionInput: questionInput{
+			questionBase: questionBase{
+				message: "Provider secret:",
+			},
+			defaultValue: defaultSecretName,
+			output:       &secretName,
+		},
+		options: secretOptions,
+	}}); err != nil {
+		return "", errors.WrapIf(err, "error during getting secret")
+	}
+
+	if secretName == skip {
+		return "", nil
+	}
+
+	return secretIds[secretName], nil
 }
