@@ -205,7 +205,6 @@ func askVaultAddress(defaultValue string) (string, error) {
 
 func askVaultSecret(banzaiCLI cli.Cli, defaultValue string) (string, error) {
 	// todo (colin) make it optional
-	// todo (colin) defaultValue
 	orgID := banzaiCLI.Context().OrganizationID()
 	secrets, _, err := banzaiCLI.Client().SecretsApi.GetSecrets(
 		context.Background(),
@@ -224,13 +223,25 @@ func askVaultSecret(banzaiCLI cli.Cli, defaultValue string) (string, error) {
 	}
 
 	var secretName string
+	var defaultSecretName string
 	secretOptions := make([]string, len(secrets))
 	secretIds := make(map[string]string, len(secrets))
 	for i, s := range secrets {
 		secretOptions[i] = s.Name
 		secretIds[s.Name] = s.Id
+		if s.Id == defaultValue {
+			defaultSecretName = s.Name
+		}
 	}
-	err = survey.AskOne(&survey.Select{Message: "Secret:", Options: secretOptions}, &secretName, survey.WithValidator(survey.Required))
+	err = survey.AskOne(
+		&survey.Select{
+			Message: "Provide secret to access Vault:",
+			Options: secretOptions,
+			Default: defaultSecretName,
+		},
+		&secretName,
+		survey.WithValidator(survey.Required),
+	)
 	if err != nil {
 		return "", errors.WrapIf(err, "failed to select secret")
 	}
