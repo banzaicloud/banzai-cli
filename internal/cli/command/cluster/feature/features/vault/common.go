@@ -49,6 +49,7 @@ func validateSpec(specObj map[string]interface{}) error {
 			Enabled  bool   `mapstructure:"enabled"`
 			SecretID string `mapstructure:"secretId"`
 			Address  string `mapstructure:"address"`
+			Policy   string `mapstructure:"policy"`
 		} `mapstructure:"customVault"`
 		Settings struct {
 			Namespaces      []string `mapstructure:"namespaces"`
@@ -60,16 +61,22 @@ func validateSpec(specObj map[string]interface{}) error {
 		return errors.WrapIf(err, "feature specification does not conform to schema")
 	}
 
-	if spec.CustomVault.Enabled && len(spec.CustomVault.Address) == 0 {
-		return errors.New("Vault address cannot be empty in case of custom Vault option")
+	if spec.CustomVault.Enabled {
+		// address is required in case of custom Vault
+		if spec.CustomVault.Address == "" {
+			return errors.New("Vault address cannot be empty in case of custom Vault option")
+		}
+
+		// policy is required in case of custom Vault with token
+		if spec.CustomVault.Policy == "" && spec.CustomVault.SecretID != "" {
+			return errors.New("policy field is required in case of custom Vault")
+		}
 	}
 
 	if len(spec.Settings.Namespaces) == 1 && spec.Settings.Namespaces[0] == "*" &&
 		len(spec.Settings.ServiceAccounts) == 1 && spec.Settings.ServiceAccounts[0] == "*" {
-		return errors.New("both namespaces and service accounts can not be \"*\"")
+		return errors.New(`both namespaces and service accounts cannot be "*"`)
 	}
-
-	// todo (colin): expand validation!
 
 	return nil
 }
