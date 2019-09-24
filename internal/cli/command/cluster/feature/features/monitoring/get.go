@@ -82,7 +82,7 @@ func (m *GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) m
 			secretID = output.Grafana.SecretID
 		}
 		tableData["Grafana_url"] = output.Grafana.Url
-		tableData["Grafana_secretID"] = output.Grafana.SecretID
+		tableData["Grafana_secretID"] = secretID
 		tableData["Grafana_version"] = output.Grafana.Version
 
 		tableData["Grafana_public"] = spec.Grafana.Public.Enabled
@@ -95,7 +95,7 @@ func (m *GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) m
 			secretID = output.Prometheus.SecretID
 		}
 		tableData["Prometheus_url"] = output.Prometheus.Url
-		tableData["Prometheus_secretID"] = output.Prometheus.SecretID
+		tableData["Prometheus_secretID"] = secretID
 		tableData["Prometheus_version"] = output.Prometheus.Version
 
 		tableData["Prometheus_public"] = spec.Prometheus.Public.Enabled
