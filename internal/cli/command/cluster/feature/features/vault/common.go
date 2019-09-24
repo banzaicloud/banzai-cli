@@ -24,13 +24,15 @@ const (
 
 	vaultCustom = "Custom vault"
 	vaultCP     = "Pipeline's Vault"
+
+	vaultSecretType = "vault"
 )
 
 type obj = map[string]interface{}
 
 type defaults struct {
 	address         string
-	token           string
+	secretID        string
 	policy          string
 	namespaces      []string
 	serviceAccounts []string
@@ -44,9 +46,9 @@ func validateSpec(specObj map[string]interface{}) error {
 
 	var spec struct {
 		CustomVault struct {
-			Enabled bool   `mapstructure:"enabled"`
-			Token   string `mapstructure:"token"`
-			Address string `mapstructure:"address"`
+			Enabled  bool   `mapstructure:"enabled"`
+			SecretID string `mapstructure:"secretId"`
+			Address  string `mapstructure:"address"`
 		} `mapstructure:"customVault"`
 		Settings struct {
 			Namespaces      []string `mapstructure:"namespaces"`
@@ -66,6 +68,8 @@ func validateSpec(specObj map[string]interface{}) error {
 		len(spec.Settings.ServiceAccounts) == 1 && spec.Settings.ServiceAccounts[0] == "*" {
 		return errors.New("both namespaces and service accounts can not be \"*\"")
 	}
+
+	// todo (colin): expand validation!
 
 	return nil
 }
