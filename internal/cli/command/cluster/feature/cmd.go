@@ -44,6 +44,7 @@ func NewFeatureCommand(banzaiCli cli.Cli) *cobra.Command {
 		// NOTE: add feature commands here
 		featureCommandFactory(banzaiCli, "dns", features.NewDNSSubCommandManager()),
 		featureCommandFactory(banzaiCli, "vault", features.NewVaultSubCommandManager()),
+		featureCommandFactory(banzaiCli, "monitoring", features.NewMonitoringSubCommandManager()),
 	)
 
 	return cmd
