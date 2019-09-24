@@ -15,11 +15,13 @@
 package vault
 
 import (
+	"context"
 	"encoding/json"
 	"strings"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/antihax/optional"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 )
@@ -30,7 +32,7 @@ func (m *ActivateManager) GetName() string {
 	return featureName
 }
 
-func (m *ActivateManager) BuildRequestInteractively(_ cli.Cli) (*pipeline.ActivateClusterFeatureRequest, error) {
+func (m *ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.ActivateClusterFeatureRequest, error) {
 	var request pipeline.ActivateClusterFeatureRequest
 
 	vaultType, err := askVaultComponent(vaultCustom)
@@ -40,7 +42,7 @@ func (m *ActivateManager) BuildRequestInteractively(_ cli.Cli) (*pipeline.Activa
 
 	switch vaultType {
 	case vaultCustom:
-		customSpec, err := buildCustomVaultFeatureRequest(defaults{})
+		customSpec, err := buildCustomVaultFeatureRequest(banzaiCLI, defaults{})
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to build custom Vault feature request")
 		}
@@ -82,13 +84,13 @@ func NewActivateManager() *ActivateManager {
 	return &ActivateManager{}
 }
 
-func buildCustomVaultFeatureRequest(defaults defaults) (map[string]interface{}, error) {
+func buildCustomVaultFeatureRequest(banzaiCLI cli.Cli, defaults defaults) (map[string]interface{}, error) {
 	address, err := askVaultAddress(defaults.address)
 	if err != nil {
 		return nil, err
 	}
 
-	token, err := askVaultToken(defaults.token)
+	secretID, err := askVaultSecret(banzaiCLI, defaults.secretID)
 	if err != nil {
 		return nil, err
 	}
@@ -100,10 +102,10 @@ func buildCustomVaultFeatureRequest(defaults defaults) (map[string]interface{}, 
 
 	return obj{
 		"customVault": obj{
-			"enabled": true,
-			"address": address,
-			"token":   token,
-			"policy":  policy,
+			"enabled":  true,
+			"address":  address,
+			"secretId": secretID,
+			"policy":   policy,
 		},
 	}, nil
 }
@@ -201,18 +203,39 @@ func askVaultAddress(defaultValue string) (string, error) {
 	return address, nil
 }
 
-func askVaultToken(defaultValue string) (string, error) {
-	var token string
-	if err := survey.AskOne(
-		&survey.Input{
-			Message: "Please provide a Vault token",
-			Default: defaultValue,
+func askVaultSecret(banzaiCLI cli.Cli, defaultValue string) (string, error) {
+	// todo (colin) make it optional
+	// todo (colin) defaultValue
+	orgID := banzaiCLI.Context().OrganizationID()
+	secrets, _, err := banzaiCLI.Client().SecretsApi.GetSecrets(
+		context.Background(),
+		orgID,
+		&pipeline.GetSecretsOpts{
+			Type_: optional.NewString(vaultSecretType),
 		},
-		&token,
-	); err != nil {
-		return "", errors.WrapIf(err, "failure during survey")
+	)
+	if err != nil {
+		return "", errors.WrapIf(err, "failed to get Vault secret(s)")
 	}
-	return token, nil
+
+	if len(secrets) == 0 {
+		// TODO (colin): add option to create new Vault secret
+		return "", errors.New("there's no Vault secrets, create a new one")
+	}
+
+	var secretName string
+	secretOptions := make([]string, len(secrets))
+	secretIds := make(map[string]string, len(secrets))
+	for i, s := range secrets {
+		secretOptions[i] = s.Name
+		secretIds[s.Name] = s.Id
+	}
+	err = survey.AskOne(&survey.Select{Message: "Secret:", Options: secretOptions}, &secretName, survey.WithValidator(survey.Required))
+	if err != nil {
+		return "", errors.WrapIf(err, "failed to select secret")
+	}
+
+	return secretIds[secretName], nil
 }
 
 func askPolicy(defaultValue string) (string, error) {

@@ -43,11 +43,11 @@ type outputResponse struct {
 
 type specResponse struct {
 	CustomVault struct {
-		Enabled bool   `json:"enabled"`
-		Address string `json:"address"`
-		Token   string `json:"token"`
-		Policy  string `json:"policy"`
-	} `json:"custom_vault"`
+		Enabled  bool   `json:"enabled"`
+		Address  string `json:"address"`
+		SecretID string `json:"secretId"`
+		Policy   string `json:"policy"`
+	} `json:"customVault"`
 	Settings struct {
 		Namespaces      []string `json:"namespaces"`
 		ServiceAccounts []string `json:"serviceAccounts"`
@@ -81,7 +81,9 @@ func (m *GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) m
 	var policy string
 	if spec.CustomVault.Enabled {
 		tableData["Vault_address"] = spec.CustomVault.Address
-		tableData["Vault_token"] = spec.CustomVault.Token
+		if spec.CustomVault.SecretID != "" {
+			tableData["SecretID"] = spec.CustomVault.SecretID
+		}
 
 		policy = spec.CustomVault.Policy
 	} else {
