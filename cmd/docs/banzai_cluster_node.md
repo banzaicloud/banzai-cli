@@ -1,22 +1,17 @@
-## banzai cluster feature vault activate
+## banzai cluster node
 
-Activate the Vault feature of a cluster
+Work with cluster nodes
 
 ### Synopsis
 
-Activate the Vault feature of a cluster
-
-```
-banzai cluster feature vault activate [flags]
-```
+Work with cluster nodes
 
 ### Options
 
 ```
-      --cluster int32         ID of cluster to activate Vault cluster feature for
-      --cluster-name string   Name of cluster to activate Vault cluster feature for
-  -f, --file string           Feature specification file
-  -h, --help                  help for activate
+      --cluster int32         ID of cluster to node
+      --cluster-name string   Name of cluster to node
+  -h, --help                  help for node
 ```
 
 ### Options inherited from parent commands
@@ -34,5 +29,7 @@ banzai cluster feature vault activate [flags]
 
 ### SEE ALSO
 
-* [banzai cluster feature vault](banzai_cluster_feature_vault.md)	 - Manage cluster Vault feature
+* [banzai cluster](banzai_cluster.md)	 - Manage clusters
+* [banzai cluster node list](banzai_cluster_node_list.md)	 - List cluster nodes
+* [banzai cluster node ssh](banzai_cluster_node_ssh.md)	 - Connect to node with SSH
 
