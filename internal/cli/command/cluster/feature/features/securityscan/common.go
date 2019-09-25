@@ -188,7 +188,7 @@ func (sa *specAssembler) askForSecret(currentSecretID string) (string, error) {
 	}
 
 	options := make([]string, len(secrets))
-	currentSecretName := ""
+	currentSecretName := secrets[0].Name // default!
 	for i, s := range secrets {
 		options[i] = s.Name
 		if s.Id == currentSecretID {
@@ -230,7 +230,8 @@ func (sa *specAssembler) askForPolicy(currentPolicySpec *policySpec) (*policySpe
 	policies := []policy{{"Default bundle", "1"}}
 
 	options := make([]string, len(policies))
-	currentPolicyName := ""
+	currentPolicyName := policies[0].name
+
 	for i, s := range policies {
 		options[i] = s.name
 		if s.id == currentPolicySpec.PolicyID {
@@ -280,6 +281,11 @@ func (sa *specAssembler) askForWebHookConfig(currentWebHookSpec *webHookConfigSp
 		return &webHookConfigSpec{
 			Enabled: false,
 		}, nil
+	}
+
+	if currentWebHookSpec.Selector == "" {
+		// select the default selector
+		currentWebHookSpec.Selector = "exclude"
 	}
 
 	var selector string

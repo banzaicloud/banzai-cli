@@ -139,10 +139,8 @@ func (fu *featureUpdater) readUpdateReqFromFileOrStdin(filePath string, req *pip
 
 func (fu *featureUpdater) buildUpdateReqInteractively(_ updateOptions, req *pipeline.UpdateClusterFeatureRequest) error {
 	var edit bool
-	if err := survey.AskOne(
-		&survey.Confirm{Message: "Edit the cluster feature update request in your text editor?"},
-		&edit,
-		survey.WithValidator(fu.validateUpdateClusterFeatureRequest)); err != nil {
+	if err := survey.AskOne(&survey.Confirm{Message: "Edit the cluster feature update request in your text editor?"},
+		&edit); err != nil {
 		return errors.WrapIf(err, "failure during survey")
 	}
 
@@ -155,14 +153,18 @@ func (fu *featureUpdater) buildUpdateReqInteractively(_ updateOptions, req *pipe
 		return errors.WrapIf(err, "failed to marshal request to JSON")
 	}
 
-	prompt := &survey.Editor{Default: string(content), HideDefault: true, AppendDefault: true}
-
-	var updated string
-	if err := survey.AskOne(prompt, &updated); err != nil {
+	var result string
+	if err := survey.AskOne(
+		&survey.Editor{
+			Default:       string(content),
+			HideDefault:   true,
+			AppendDefault: true},
+		&result,
+		survey.WithValidator(fu.validateUpdateClusterFeatureRequest)); err != nil {
 		return errors.WrapIf(err, "failure during survey")
 	}
 
-	if err := json.Unmarshal([]byte(updated), req); err != nil {
+	if err := json.Unmarshal([]byte(result), req); err != nil {
 		return errors.WrapIf(err, "failed to unmarshal JSON as request")
 	}
 
