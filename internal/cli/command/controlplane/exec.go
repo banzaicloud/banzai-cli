@@ -60,13 +60,21 @@ func runTerraform(command string, options *cpContext, banzaiCli cli.Cli, env map
 		cmd = append(cmd, "-target", target)
 	}
 
+	volumes := map[string]string{
+		options.workspace: "/workspace",
+	}
+
+	if dir := optChartsDir(options); dir != "" {
+		volumes["/workspace/charts"] = dir
+	}
+
 	switch options.containerRuntime {
 	case runtimeExec:
 		return runLocally(cmd, cmdEnv)
 	case runtimeDocker:
-		return runDocker(cmd, options, banzaiCli, cmdEnv)
+		return runDocker(cmd, options, banzaiCli, cmdEnv, volumes)
 	case runtimeContainerd:
-		return runContainer(cmd, options, banzaiCli, cmdEnv)
+		return runContainer(cmd, options, banzaiCli, cmdEnv, volumes)
 	default:
 		return errors.Errorf("unknown container runtime: %q", options.containerRuntime)
 	}
@@ -90,12 +98,15 @@ func runLocally(command []string, env map[string]string) error {
 }
 
 // runContainer runs the given installer command in the installer container with containerd (crictl)
-func runContainer(command []string, options *cpContext, banzaiCli cli.Cli, env map[string]string) error {
+func runContainer(command []string, options *cpContext, banzaiCli cli.Cli, env, volumes map[string]string) error {
 
 	args := []string{
 		"run", "--rm", "--net-host",
 		// fmt.Sprintf("--user=%d", os.Getuid()), // TODO
-		"--mount", fmt.Sprintf("type=bind,src=%s,dst=/workspace,options=rbind:rw", options.workspace),
+	}
+
+	for src, dst := range volumes {
+		args = append(args, "--mount", fmt.Sprintf("type=bind,src=%s,dst=%s,options=rbind:rw", src, dst))
 	}
 
 	if banzaiCli.Interactive() {
@@ -127,12 +138,15 @@ func runContainer(command []string, options *cpContext, banzaiCli cli.Cli, env m
 }
 
 // runDocker runs the given installer command in the installer docker container
-func runDocker(command []string, options *cpContext, banzaiCli cli.Cli, env map[string]string) error {
+func runDocker(command []string, options *cpContext, banzaiCli cli.Cli, env, volumes map[string]string) error {
 
 	args := []string{
 		"run", "--rm", "--net=host",
 		fmt.Sprintf("--user=%d", os.Getuid()),
-		"-v", fmt.Sprintf("%s:/workspace", options.workspace),
+	}
+
+	for src, dst := range volumes {
+		args = append(args, "-v", fmt.Sprintf("%s:%s", src, dst))
 	}
 
 	if banzaiCli.Interactive() {
@@ -235,4 +249,21 @@ func hasTool(tool string) error {
 	}
 
 	return errors.Wrapf(err, "%s check failed", tool)
+}
+
+func optChartsDir(options *cpContext) string {
+	const charts = "charts"
+	path := filepath.Join(options.workspace, charts)
+	info, err := os.Stat(path)
+	if err == nil && info.IsDir() {
+		return ""
+	}
+
+	path = filepath.Join("/opt/banzaicloud", charts)
+	info, err = os.Stat(path)
+	if err == nil && info.IsDir() {
+		return path
+	}
+
+	return ""
 }
