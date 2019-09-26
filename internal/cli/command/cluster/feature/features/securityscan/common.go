@@ -292,7 +292,7 @@ func (sa *specAssembler) askForWebHookConfig(currentWebHookSpec *webHookConfigSp
 	if err := survey.AskOne(
 		&survey.Select{
 			Message: "Please choose the selector for the webhook configuration:",
-			Options: []string{"Exclude", "Include"},
+			Options: []string{"exclude", "include"},
 			Default: currentWebHookSpec.Selector,
 		},
 		&selector,
