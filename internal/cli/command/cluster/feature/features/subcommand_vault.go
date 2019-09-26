@@ -18,29 +18,28 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features/vault"
 )
 
-type vaultSubCommandManager struct {
-}
+type VaultSubCommandManager struct{}
 
-func (scm *vaultSubCommandManager) GetName() string {
+func (VaultSubCommandManager) GetName() string {
 	return "Vault"
 }
 
-func (scm *vaultSubCommandManager) ActivateManager() ActivateManager {
+func (VaultSubCommandManager) ActivateManager() ActivateManager {
 	return vault.NewActivateManager()
 }
 
-func (scm *vaultSubCommandManager) DeactivateManager() DeactivateManager {
+func (VaultSubCommandManager) DeactivateManager() DeactivateManager {
 	return vault.NewDeactivateManager()
 }
 
-func (scm *vaultSubCommandManager) GetManager() GetManager {
+func (VaultSubCommandManager) GetManager() GetManager {
 	return vault.NewGetManager()
 }
 
-func (scm *vaultSubCommandManager) UpdateManager() UpdateManager {
-	return vault.UpdateGetManager()
+func (VaultSubCommandManager) UpdateManager() UpdateManager {
+	return vault.NewUpdateManager()
 }
 
-func NewVaultSubCommandManager() *vaultSubCommandManager {
-	return &vaultSubCommandManager{}
+func NewVaultSubCommandManager() *VaultSubCommandManager {
+	return &VaultSubCommandManager{}
 }

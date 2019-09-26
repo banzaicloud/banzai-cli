@@ -18,29 +18,28 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features/monitoring"
 )
 
-type monitoringSubCommandManager struct {
-}
+type MonitoringSubCommandManager struct{}
 
-func (scm *monitoringSubCommandManager) GetName() string {
+func (MonitoringSubCommandManager) GetName() string {
 	return "Monitoring"
 }
 
-func (scm *monitoringSubCommandManager) ActivateManager() ActivateManager {
+func (MonitoringSubCommandManager) ActivateManager() ActivateManager {
 	return monitoring.NewActivateManager()
 }
 
-func (scm *monitoringSubCommandManager) DeactivateManager() DeactivateManager {
+func (MonitoringSubCommandManager) DeactivateManager() DeactivateManager {
 	return monitoring.NewDeactivateManager()
 }
 
-func (scm *monitoringSubCommandManager) GetManager() GetManager {
+func (MonitoringSubCommandManager) GetManager() GetManager {
 	return monitoring.NewGetManager()
 }
 
-func (scm *monitoringSubCommandManager) UpdateManager() UpdateManager {
-	return monitoring.UpdateGetManager()
+func (MonitoringSubCommandManager) UpdateManager() UpdateManager {
+	return monitoring.NewUpdateManager()
 }
 
-func NewMonitoringSubCommandManager() *monitoringSubCommandManager {
-	return &monitoringSubCommandManager{}
+func NewMonitoringSubCommandManager() *MonitoringSubCommandManager {
+	return &MonitoringSubCommandManager{}
 }

@@ -27,7 +27,7 @@ type UpdateManager struct{
 	baseManager
 }
 
-func UpdateGetManager() *UpdateManager {
+func NewUpdateManager() *UpdateManager {
 	return &UpdateManager{}
 }
 

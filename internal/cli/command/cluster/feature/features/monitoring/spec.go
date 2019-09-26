@@ -82,7 +82,7 @@ func (e requiredFieldError) Error() string {
 }
 
 func (s ingressSpec) Validate(ingressType string) error {
-	if len(s.Path) == 0 {
+	if s.Path == "" {
 		return requiredFieldError{fieldName: fmt.Sprintf("%s path", ingressType)}
 	}
 
