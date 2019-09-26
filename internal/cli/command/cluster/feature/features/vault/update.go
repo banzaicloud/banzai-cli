@@ -85,6 +85,6 @@ func (UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.
 	return nil
 }
 
-func UpdateGetManager() *UpdateManager {
+func NewUpdateManager() *UpdateManager {
 	return &UpdateManager{}
 }

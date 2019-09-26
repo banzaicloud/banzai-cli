@@ -22,7 +22,7 @@ import (
 
 type GetManager struct{}
 
-func (m *GetManager) GetCommandName() string {
+func (GetManager) GetCommandName() string {
 	return featureName
 }
 
@@ -50,7 +50,7 @@ type outputResponse struct {
 	} `mapstructure:"pushgateway"`
 }
 
-func (m *GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]interface{} {
+func (GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]interface{} {
 	tableData := map[string]interface{}{
 		"Status": details.Status,
 	}
@@ -78,7 +78,7 @@ func (m *GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) m
 	// Grafana outputs
 	if spec.Grafana.Enabled {
 		var secretID = spec.Grafana.SecretId
-		if len(secretID) == 0 {
+		if secretID == "" {
 			secretID = output.Grafana.SecretID
 		}
 		tableData["Grafana_url"] = output.Grafana.Url
@@ -91,7 +91,7 @@ func (m *GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) m
 	// Prometheus outputs
 	if spec.Prometheus.Enabled {
 		var secretID = spec.Prometheus.SecretId
-		if len(secretID) == 0 {
+		if secretID == "" {
 			secretID = output.Prometheus.SecretID
 		}
 		tableData["Prometheus_url"] = output.Prometheus.Url

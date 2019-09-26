@@ -18,28 +18,28 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features/dns"
 )
 
-type dnsSubCommandManager struct{}
+type DnsSubCommandManager struct{}
 
-func (scm *dnsSubCommandManager) GetName() string {
+func (DnsSubCommandManager) GetName() string {
 	return "DNS"
 }
 
-func (scm *dnsSubCommandManager) ActivateManager() ActivateManager {
+func (DnsSubCommandManager) ActivateManager() ActivateManager {
 	return dns.NewActivateManager()
 }
 
-func (scm *dnsSubCommandManager) DeactivateManager() DeactivateManager {
+func (DnsSubCommandManager) DeactivateManager() DeactivateManager {
 	return dns.NewDeactivateManager()
 }
 
-func (scm *dnsSubCommandManager) GetManager() GetManager {
+func (DnsSubCommandManager) GetManager() GetManager {
 	return dns.NewGetManager()
 }
 
-func (scm *dnsSubCommandManager) UpdateManager() UpdateManager {
-	return dns.UpdateGetManager()
+func (DnsSubCommandManager) UpdateManager() UpdateManager {
+	return dns.NewUpdateManager()
 }
 
-func NewDNSSubCommandManager() *dnsSubCommandManager {
-	return &dnsSubCommandManager{}
+func NewDNSSubCommandManager() *DnsSubCommandManager {
+	return &DnsSubCommandManager{}
 }
