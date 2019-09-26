@@ -34,8 +34,14 @@ const (
 
 type obj = map[string]interface{}
 
-func NewDeactivateManager() *ActivateManager {
-	return &ActivateManager{}
+type baseManager struct{}
+
+func (baseManager) GetName() string {
+	return featureName
+}
+
+func NewDeactivateManager() *baseManager {
+	return &baseManager{}
 }
 
 func validateSpec(specObj map[string]interface{}) error {

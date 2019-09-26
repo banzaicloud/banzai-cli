@@ -26,13 +26,11 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 )
 
-type ActivateManager struct{}
-
-func (m *ActivateManager) GetName() string {
-	return featureName
+type ActivateManager struct{
+	baseManager
 }
 
-func (m *ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.ActivateClusterFeatureRequest, error) {
+func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.ActivateClusterFeatureRequest, error) {
 	var request pipeline.ActivateClusterFeatureRequest
 
 	vaultType, err := askVaultComponent(vaultCustom)
@@ -63,7 +61,7 @@ func (m *ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipelin
 	}
 
 	if request.Spec == nil {
-		request.Spec = make(map[string]interface{}, 0)
+		request.Spec = make(map[string]interface{}, 1)
 	}
 
 	request.Spec["settings"] = settings
@@ -71,7 +69,7 @@ func (m *ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipelin
 	return &request, nil
 }
 
-func (m *ActivateManager) ValidateRequest(req interface{}) error {
+func (ActivateManager) ValidateRequest(req interface{}) error {
 	var request pipeline.ActivateClusterFeatureRequest
 	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
 		return errors.WrapIf(err, "request is not valid JSON")

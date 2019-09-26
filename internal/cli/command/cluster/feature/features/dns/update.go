@@ -23,17 +23,15 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-type UpdateManager struct{}
-
-func (m *UpdateManager) GetName() string {
-	return featureName
+type UpdateManager struct{
+	baseManager
 }
 
 func UpdateGetManager() *UpdateManager {
 	return &UpdateManager{}
 }
 
-func (m *UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.UpdateClusterFeatureRequest) error {
+func (UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.UpdateClusterFeatureRequest) error {
 
 	var spec specResponse
 	if err := mapstructure.Decode(req.Spec, &spec); err != nil {
@@ -76,7 +74,7 @@ func (m *UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeli
 	return nil
 }
 
-func (m *UpdateManager) ValidateRequest(req interface{}) error {
+func (UpdateManager) ValidateRequest(req interface{}) error {
 	var request pipeline.UpdateClusterFeatureRequest
 	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
 		return errors.WrapIf(err, "request is not valid JSON")

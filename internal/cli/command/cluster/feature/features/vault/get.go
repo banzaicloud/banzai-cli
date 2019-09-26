@@ -25,7 +25,7 @@ import (
 
 type GetManager struct{}
 
-func (m *GetManager) GetCommandName() string {
+func (GetManager) GetCommandName() string {
 	return featureName
 }
 
@@ -54,7 +54,7 @@ type specResponse struct {
 	} `json:"settings"`
 }
 
-func (m *GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]interface{} {
+func (GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]interface{} {
 	tableData := map[string]interface{}{
 		"Status": details.Status,
 	}

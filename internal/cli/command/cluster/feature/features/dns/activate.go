@@ -29,13 +29,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type ActivateManager struct{}
-
-func (m *ActivateManager) GetName() string {
-	return featureName
+type ActivateManager struct {
+	baseManager
 }
 
-func (m *ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.ActivateClusterFeatureRequest, error) {
+func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.ActivateClusterFeatureRequest, error) {
 	var request pipeline.ActivateClusterFeatureRequest
 
 	comp, err := askDnsComponent(dnsAuto)
@@ -57,7 +55,7 @@ func (m *ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipelin
 	return &request, nil
 }
 
-func (m *ActivateManager) ValidateRequest(req interface{}) error {
+func (ActivateManager) ValidateRequest(req interface{}) error {
 	var request pipeline.ActivateClusterFeatureRequest
 	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
 		return errors.WrapIf(err, "request is not valid JSON")
