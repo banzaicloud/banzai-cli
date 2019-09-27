@@ -32,7 +32,7 @@ type activateManager struct {
 }
 
 func NewActivateManager() features.ActivateManager {
-	return &activateManager{}
+	return new(activateManager)
 }
 
 func (am *activateManager) BuildRequestInteractively(cli.Cli) (*pipeline.ActivateClusterFeatureRequest, error) {
