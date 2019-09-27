@@ -26,11 +26,6 @@ func NewGetManager() *getManager {
 	return new(getManager)
 }
 
-// todo remove this once the called method gets renamed
-func (g getManager) GetCommandName() string {
-	return g.GetName()
-}
-
 func (g getManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]interface{} {
 	tableData := map[string]interface{}{
 		"Status": details.Status,

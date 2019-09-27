@@ -33,8 +33,7 @@ type getOptions struct {
 }
 
 type GetManager interface {
-	// todo rename the method to getName
-	GetCommandName() string
+	GetName() string
 	WriteDetailsTable(pipeline.ClusterFeatureDetails) map[string]interface{}
 }
 
@@ -70,10 +69,10 @@ func runGet(
 	orgId := banzaiCLI.Context().OrganizationID()
 	clusterId := options.ClusterID()
 
-	details, resp, err := pipelineClient.ClusterFeaturesApi.ClusterFeatureDetails(context.Background(), orgId, clusterId, m.GetCommandName())
+	details, resp, err := pipelineClient.ClusterFeaturesApi.ClusterFeatureDetails(context.Background(), orgId, clusterId, m.GetName())
 	if err != nil {
-		cli.LogAPIError(fmt.Sprintf("get %s cluster feature details", m.GetCommandName()), err, resp.Request)
-		log.Fatalf("could not get %s cluster feature details: %v", m.GetCommandName(), err)
+		cli.LogAPIError(fmt.Sprintf("get %s cluster feature details", m.GetName()), err, resp.Request)
+		log.Fatalf("could not get %s cluster feature details: %v", m.GetName(), err)
 		return err
 	}
 
