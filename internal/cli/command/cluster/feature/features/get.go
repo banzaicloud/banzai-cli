@@ -33,6 +33,7 @@ type getOptions struct {
 }
 
 type GetManager interface {
+	// todo rename the method to getName
 	GetCommandName() string
 	WriteDetailsTable(pipeline.ClusterFeatureDetails) map[string]interface{}
 }

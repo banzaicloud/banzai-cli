@@ -17,68 +17,26 @@ package securityscan
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	"github.com/mitchellh/mapstructure"
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
 )
 
-func NewUpdateCommand(banzaiCli cli.Cli) *cobra.Command {
-	options := updateOptions{}
-	fu := MakeFeatureUpdater(banzaiCli)
-
-	cmd := &cobra.Command{
-		Use:     "update",
-		Aliases: []string{"change", "modify", "set"},
-		Short:   fmt.Sprintf("Update the %s feature of a cluster", featureName),
-		Args:    cobra.NoArgs,
-		RunE: func(_ *cobra.Command, args []string) error {
-			return fu.runUpdate(options, args)
-		},
-	}
-
-	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, fmt.Sprintf("update the %s cluster feature for", featureName))
-
-	flags := cmd.Flags()
-	flags.StringVarP(&options.filePath, "file", "f", "", "Feature specification file")
-
-	return cmd
-}
-
-type updateOptions struct {
-	clustercontext.Context
-	filePath string
-}
-
-// featureUpdater struct for gathering helper operations for the feature update
-type featureUpdater struct {
+type updateManager struct {
+	baseManager
 	specAssembler
 }
 
-func MakeFeatureUpdater(banzaiCLI cli.Cli) *featureUpdater {
-	fu := new(featureUpdater)
-	fu.banzaiCLI = banzaiCLI
-	return fu
+func NewUpdateManager() features.UpdateManager {
+	return new(updateManager)
 }
 
-func (fu *featureUpdater) getSecurityScanFeature(orgID int32, clusterID int32) (map[string]interface{}, error) {
-
-	clusterFeatureDetails, _, err := fu.banzaiCLI.Client().ClusterFeaturesApi.ClusterFeatureDetails(context.Background(), orgID, clusterID, featureName)
-	if err != nil {
-		return nil, errors.WrapIf(err, "failed to retrieve the feature to update")
-	}
-
-	return clusterFeatureDetails.Spec, nil
-}
-
-func (fu *featureUpdater) validateUpdateClusterFeatureRequest(req interface{}) error {
+func (u *updateManager) ValidateRequest(req interface{}) error {
 	var request pipeline.UpdateClusterFeatureRequest
 	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
 		return errors.WrapIf(err, "request is not valid JSON")
@@ -87,57 +45,7 @@ func (fu *featureUpdater) validateUpdateClusterFeatureRequest(req interface{}) e
 	return nil
 }
 
-func (fu *featureUpdater) runUpdate(options updateOptions, args []string) error {
-	if err := options.Init(args...); err != nil {
-		return errors.Wrap(err, "failed to initialize options")
-	}
-
-	orgId := fu.banzaiCLI.Context().OrganizationID()
-	clusterId := options.ClusterID()
-
-	securityScanFeatureSpec, err := fu.getSecurityScanFeature(orgId, clusterId)
-	if err != nil {
-		return errors.WrapIf(err, "failed to update feature")
-	}
-
-	req := new(pipeline.UpdateClusterFeatureRequest)
-	req.Spec = securityScanFeatureSpec
-
-	if options.filePath == "" && fu.banzaiCLI.Interactive() {
-		if err := fu.buildUpdateReqInteractively(options, req); err != nil {
-			return errors.WrapIf(err, "failed to build update request interactively")
-		}
-	} else {
-		if err := fu.readUpdateReqFromFileOrStdin(options.filePath, req); err != nil {
-			return errors.WrapIff(err, "failed to read %s cluster feature specification", featureName)
-		}
-	}
-
-	resp, err := fu.banzaiCLI.Client().ClusterFeaturesApi.UpdateClusterFeature(context.Background(), orgId, clusterId, featureName, *req)
-	if err != nil {
-		cli.LogAPIError(fmt.Sprintf("activate %s cluster feature", featureName), err, resp)
-		log.Fatalf("could not activate %s cluster feature: %v", featureName, err)
-	}
-
-	log.Infof("feature %q started to update", featureName)
-
-	return nil
-}
-
-func (fu *featureUpdater) readUpdateReqFromFileOrStdin(filePath string, req *pipeline.UpdateClusterFeatureRequest) error {
-	filename, raw, err := utils.ReadFileOrStdin(filePath)
-	if err != nil {
-		return errors.WrapIfWithDetails(err, "failed to read", "filename", filename)
-	}
-
-	if err := json.Unmarshal(raw, &req); err != nil {
-		return errors.WrapIf(err, "failed to unmarshal input")
-	}
-
-	return nil
-}
-
-func (fu *featureUpdater) buildUpdateReqInteractively(_ updateOptions, req *pipeline.UpdateClusterFeatureRequest) error {
+func (u *updateManager) BuildRequestInteractively(cli cli.Cli, req *pipeline.UpdateClusterFeatureRequest) error {
 	var edit bool
 	if err := survey.AskOne(&survey.Confirm{Message: "Edit the cluster feature update request in your text editor?"},
 		&edit); err != nil {
@@ -145,7 +53,7 @@ func (fu *featureUpdater) buildUpdateReqInteractively(_ updateOptions, req *pipe
 	}
 
 	if !edit {
-		return fu.buildCustomAnchoreFeatureRequest(req)
+		return u.buildCustomAnchoreFeatureRequest(req)
 	}
 
 	content, err := json.MarshalIndent(*req, "", "  ")
@@ -160,7 +68,7 @@ func (fu *featureUpdater) buildUpdateReqInteractively(_ updateOptions, req *pipe
 			HideDefault:   true,
 			AppendDefault: true},
 		&result,
-		survey.WithValidator(fu.validateUpdateClusterFeatureRequest)); err != nil {
+		survey.WithValidator(u.ValidateRequest)); err != nil {
 		return errors.WrapIf(err, "failure during survey")
 	}
 
@@ -171,7 +79,64 @@ func (fu *featureUpdater) buildUpdateReqInteractively(_ updateOptions, req *pipe
 	return nil
 }
 
-func (fu *featureUpdater) buildCustomAnchoreFeatureRequest(updateRequest *pipeline.UpdateClusterFeatureRequest) error {
+func (u *updateManager) getSecurityScanFeature(bnazaiCLI cli.Cli, orgID int32, clusterID int32) (map[string]interface{}, error) {
+
+	clusterFeatureDetails, _, err := bnazaiCLI.Client().ClusterFeaturesApi.ClusterFeatureDetails(context.Background(), orgID, clusterID, featureName)
+	if err != nil {
+		return nil, errors.WrapIf(err, "failed to retrieve the feature to update")
+	}
+
+	return clusterFeatureDetails.Spec, nil
+}
+
+func (u *updateManager) readUpdateReqFromFileOrStdin(filePath string, req *pipeline.UpdateClusterFeatureRequest) error {
+	filename, raw, err := utils.ReadFileOrStdin(filePath)
+	if err != nil {
+		return errors.WrapIfWithDetails(err, "failed to read", "filename", filename)
+	}
+
+	if err := json.Unmarshal(raw, &req); err != nil {
+		return errors.WrapIf(err, "failed to unmarshal input")
+	}
+
+	return nil
+}
+
+func (u *updateManager) buildUpdateReqInteractively(req *pipeline.UpdateClusterFeatureRequest) error {
+	var edit bool
+	if err := survey.AskOne(&survey.Confirm{Message: "Edit the cluster feature update request in your text editor?"},
+		&edit); err != nil {
+		return errors.WrapIf(err, "failure during survey")
+	}
+
+	if !edit {
+		return u.buildCustomAnchoreFeatureRequest(req)
+	}
+
+	content, err := json.MarshalIndent(*req, "", "  ")
+	if err != nil {
+		return errors.WrapIf(err, "failed to marshal request to JSON")
+	}
+
+	var result string
+	if err := survey.AskOne(
+		&survey.Editor{
+			Default:       string(content),
+			HideDefault:   true,
+			AppendDefault: true},
+		&result,
+		survey.WithValidator(u.ValidateRequest)); err != nil {
+		return errors.WrapIf(err, "failure during survey")
+	}
+
+	if err := json.Unmarshal([]byte(result), req); err != nil {
+		return errors.WrapIf(err, "failed to unmarshal JSON as request")
+	}
+
+	return nil
+}
+
+func (u *updateManager) buildCustomAnchoreFeatureRequest(updateRequest *pipeline.UpdateClusterFeatureRequest) error {
 
 	// get the type from the req
 	securityFeatureSpec := new(SecurityScanFeatureSpec)
@@ -179,18 +144,18 @@ func (fu *featureUpdater) buildCustomAnchoreFeatureRequest(updateRequest *pipeli
 		return errors.WrapIf(err, "failed to decode the feature to update")
 	}
 
-	anchoreConfig, err := fu.askForAnchoreConfig(&securityFeatureSpec.CustomAnchore)
+	anchoreConfig, err := u.askForAnchoreConfig(&securityFeatureSpec.CustomAnchore)
 	if err != nil {
 		return errors.WrapIf(err, "failed to read Anchore configuration details")
 	}
 
-	policy, err := fu.askForPolicy(&securityFeatureSpec.Policy)
+	policy, err := u.askForPolicy(&securityFeatureSpec.Policy)
 	if err != nil {
 		return errors.WrapIf(err, "failed to read Anchore Policy configuration details")
 	}
 
-	// todo whitelist updates not supported fro now
-	webhookConfig, err := fu.askForWebHookConfig(&securityFeatureSpec.WebhookConfig)
+	// todo whitelist updates not supported for now
+	webhookConfig, err := u.askForWebHookConfig(&securityFeatureSpec.WebhookConfig)
 	if err != nil {
 		return errors.WrapIf(err, "failed to read webhook configuration")
 	}
@@ -201,7 +166,7 @@ func (fu *featureUpdater) buildCustomAnchoreFeatureRequest(updateRequest *pipeli
 	securityScanFeatureRequest.ReleaseWhiteList = securityFeatureSpec.ReleaseWhiteList
 	securityScanFeatureRequest.WebhookConfig = *webhookConfig
 
-	ssfMap, err := fu.securityScanSpecAsMap(securityScanFeatureRequest)
+	ssfMap, err := u.securityScanSpecAsMap(securityScanFeatureRequest)
 	if err != nil {
 		return errors.WrapIf(err, "failed to transform request to map")
 	}

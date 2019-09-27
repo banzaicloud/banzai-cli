@@ -19,9 +19,8 @@ import (
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features/dns"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features/securityscan"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features/securityscan"
 	"github.com/spf13/cobra"
 )
 
@@ -46,6 +45,7 @@ func NewFeatureCommand(banzaiCli cli.Cli) *cobra.Command {
 		// NOTE: add feature commands here
 		featureCommandFactory(banzaiCli, "dns", features.NewDNSSubCommandManager()),
 		featureCommandFactory(banzaiCli, "vault", features.NewVaultSubCommandManager()),
+		featureCommandFactory(banzaiCli, "securityscan", securityscan.NewSecurityScanSubCommandManager()),
 		featureCommandFactory(banzaiCli, "monitoring", features.NewMonitoringSubCommandManager()),
 	)
 
