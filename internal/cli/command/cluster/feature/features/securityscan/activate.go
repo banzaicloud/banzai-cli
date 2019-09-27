@@ -79,7 +79,7 @@ func (am *activateManager) BuildRequestInteractively(cli.Cli) (*pipeline.Activat
 		return nil, errors.WrapIf(err, "failure during survey")
 	}
 
-	if err := json.Unmarshal([]byte(result), req); err != nil {
+	if err := json.Unmarshal([]byte(result), &req); err != nil {
 		return nil, errors.WrapIf(err, "failed to unmarshal JSON as request")
 	}
 
