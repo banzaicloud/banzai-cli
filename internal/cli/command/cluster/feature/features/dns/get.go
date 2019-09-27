@@ -22,7 +22,7 @@ import (
 
 type GetManager struct{}
 
-func (GetManager) GetCommandName() string {
+func (GetManager) GetName() string {
 	return featureName
 }
 
