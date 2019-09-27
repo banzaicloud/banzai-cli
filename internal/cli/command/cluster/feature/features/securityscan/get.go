@@ -15,89 +15,23 @@
 package securityscan
 
 import (
-	"context"
-	"fmt"
-
-	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
-	"github.com/banzaicloud/banzai-cli/internal/cli"
-	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
-	"github.com/banzaicloud/banzai-cli/internal/cli/output"
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
 )
 
-func NewGetCommand(banzaiCli cli.Cli) *cobra.Command {
-	options := getOptions{}
-
-	cmd := &cobra.Command{
-		Use:     "get",
-		Aliases: []string{"details", "show", "query"},
-		Short:   fmt.Sprintf("Get details of the %s feature for a cluster", featureName),
-		Args:    cobra.NoArgs,
-		RunE: func(_ *cobra.Command, args []string) error {
-			return runGet(banzaiCli, options, args)
-		},
-	}
-
-	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, fmt.Sprintf("get %s cluster feature details of", featureName))
-
-	return cmd
+type getManager struct {
+	baseManager
 }
 
-type getOptions struct {
-	clustercontext.Context
+func NewGetManager() *getManager {
+	return new(getManager)
 }
 
-func runGet(banzaiCli cli.Cli, options getOptions, args []string) error {
-	if err := options.Init(args...); err != nil {
-		return errors.WrapIf(err, "failed to initialize options")
-	}
-
-	pipeline := banzaiCli.Client()
-	orgId := banzaiCli.Context().OrganizationID()
-	clusterId := options.ClusterID()
-
-	details, resp, err := pipeline.ClusterFeaturesApi.ClusterFeatureDetails(context.Background(), orgId, clusterId, featureName)
-	if err != nil {
-		cli.LogAPIError(fmt.Sprintf("get %s cluster feature details", featureName), err, resp.Request)
-		log.Fatalf("could not get %s cluster feature details: %v", featureName, err)
-		return err
-	}
-
-	writeSecurityScanFeatureDetails(banzaiCli, details)
-	return nil
+// todo remove this once the called method gets renamed
+func (g getManager) GetCommandName() string {
+	return g.GetName()
 }
 
-func writeSecurityScanFeatureDetails(banzaiCli cli.Cli, details pipeline.ClusterFeatureDetails) error {
-	var (
-		data   interface{}
-		fields []string
-	)
-
-	if banzaiCli.OutputFormat() == output.OutputFormatDefault {
-		tableData := getTableData(details)
-
-		data = tableData
-		fields = make([]string, 0, len(tableData))
-		for k := range tableData {
-			fields = append(fields, k)
-		}
-	} else {
-		data = details
-	}
-
-	ctx := &output.Context{
-		Out:    banzaiCli.Out(),
-		Color:  banzaiCli.Color(),
-		Format: banzaiCli.OutputFormat(),
-		Fields: fields,
-	}
-
-	return output.Output(ctx, data)
-}
-
-func getTableData(details pipeline.ClusterFeatureDetails) map[string]interface{} {
+func (g getManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]interface{} {
 	tableData := map[string]interface{}{
 		"Status": details.Status,
 	}

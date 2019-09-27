@@ -39,6 +39,16 @@ type SecurityScanFeatureSpec struct {
 	WebhookConfig    webHookConfigSpec `json:"webhookConfig" mapstructure:"webhookConfig"`
 }
 
+type baseManager struct{}
+
+func (baseManager) GetName() string {
+	return featureName
+}
+
+func NewDeactivateManager() *baseManager {
+	return &baseManager{}
+}
+
 // Validate validates the input security scan specification.
 func (s SecurityScanFeatureSpec) Validate() error {
 
@@ -335,4 +345,72 @@ func (sa *specAssembler) securityScanSpecAsMap(spec *SecurityScanFeatureSpec) (m
 	}
 
 	return specMap, nil
+}
+
+func (sa *specAssembler) askForWhiteLists() ([]releaseSpec, error) {
+
+	addMore := true
+	releaseWhiteList := make([]releaseSpec, 0)
+
+	for addMore {
+		if err := survey.AskOne(
+			&survey.Confirm{
+				Message: "Add a release whitelist item to the security scan? ",
+			},
+			&addMore,
+		); err != nil {
+			return nil, errors.WrapIf(err, "failure during survey")
+		}
+
+		if !addMore {
+			continue
+		}
+
+		item, err := sa.askForWhiteListItem()
+		if err != nil {
+			return nil, errors.WrapIf(err, "failed to read release whitelist item")
+		}
+		releaseWhiteList = append(releaseWhiteList, *item)
+	}
+
+	return releaseWhiteList, nil
+}
+
+func (sa *specAssembler) askForWhiteListItem() (*releaseSpec, error) {
+
+	var releaseName string
+	if err := survey.AskOne(
+		&survey.Input{
+			Message: "Please enter the name of the release whitelist item:",
+		},
+		&releaseName,
+	); err != nil {
+		return nil, errors.WrapIf(err, "failed to read the name of the release whitelist item")
+	}
+
+	var reason string
+	if err := survey.AskOne(
+		&survey.Input{
+			Message: "Please enter the reason of the release whitelist item:",
+		},
+		&reason,
+	); err != nil {
+		return nil, errors.WrapIf(err, "failed to read the reason of the release whitelist item")
+	}
+
+	var regexp string
+	if err := survey.AskOne(
+		&survey.Input{
+			Message: "Please enter the regexp for the release whitelist item:",
+		},
+		&regexp,
+	); err != nil {
+		return nil, errors.WrapIf(err, "failed to read the regexp of the release whitelist item")
+	}
+
+	return &releaseSpec{
+		Name:   releaseName,
+		Reason: reason,
+		Regexp: regexp,
+	}, nil
 }
