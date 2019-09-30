@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"log"
 	"sort"
+	"net/http"
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
@@ -70,6 +71,12 @@ func runGet(
 	clusterId := options.ClusterID()
 
 	details, resp, err := pipelineClient.ClusterFeaturesApi.ClusterFeatureDetails(context.Background(), orgId, clusterId, m.GetName())
+
+	if resp.StatusCode == http.StatusNotFound {
+		log.Printf("cluster feature [%s] not found", m.GetName())
+		return nil
+	}
+
 	if err != nil {
 		cli.LogAPIError(fmt.Sprintf("get %s cluster feature details", m.GetName()), err, resp.Request)
 		log.Fatalf("could not get %s cluster feature details: %v", m.GetName(), err)
