@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sort"
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
@@ -85,6 +86,7 @@ func runGet(
 		for k := range tableData {
 			fields = append(fields, k)
 		}
+		sort.Strings(fields)
 	} else {
 		data = details
 	}
