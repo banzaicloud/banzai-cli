@@ -33,7 +33,7 @@ type outputResponse struct {
 	Vault struct {
 		Version        string `mapstructure:"version"`
 		AuthMethodPath string `mapstructure:"authMethodPath"`
-		RolePath       string `mapstructure:"rolePath"`
+		Role           string `mapstructure:"role"`
 		Policy         string `mapstructure:"policy"`
 	} `mapstructure:"vault"`
 	Wehhook struct {
@@ -73,7 +73,7 @@ func (GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[
 
 	tableData["Vault_version"] = output.Vault.Version
 	tableData["Auth_method_path"] = output.Vault.AuthMethodPath
-	tableData["Role_path"] = output.Vault.RolePath
+	tableData["Role"] = output.Vault.Role
 	tableData["Webhook_version"] = output.Wehhook.Version
 	tableData["Namespaces"] = spec.Settings.Namespaces
 	tableData["Service_accounts"] = spec.Settings.ServiceAccounts
