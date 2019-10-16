@@ -86,7 +86,7 @@ func runServer(banzaiCli cli.Cli, pipelineBasePath string) (string, error) {
 		pipelineBasePath: pipelineBasePath,
 		banzaiCli:        banzaiCli,
 		client: &http.Client{
-			Transport: banzaiCli.HTTPTransport(),
+			Transport: banzaiCli.RoundTripper(),
 		},
 	}
 

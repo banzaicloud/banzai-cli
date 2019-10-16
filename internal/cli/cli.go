@@ -34,10 +34,10 @@ import (
 	"time"
 
 	"emperror.dev/errors"
-	"github.com/banzaicloud/banzai-cli/.gen/telescopes"
-
 	"github.com/banzaicloud/banzai-cli/.gen/cloudinfo"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
+	"github.com/banzaicloud/banzai-cli/.gen/telescopes"
+	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 
 	"github.com/mattn/go-isatty"
 	"github.com/mitchellh/go-homedir"
@@ -54,7 +54,7 @@ type Cli interface {
 	Color() bool
 	Interactive() bool
 	Client() *pipeline.APIClient
-	HTTPTransport() *http.Transport
+	RoundTripper() http.RoundTripper
 	CloudinfoClient() *cloudinfo.APIClient
 	TelescopesClient() *telescopes.APIClient
 	Context() Context
@@ -70,11 +70,11 @@ type Context interface {
 }
 
 type banzaiCli struct {
-	out                 io.Writer
-	client              *pipeline.APIClient
-	clientOnce          sync.Once
-	cloudinfoClient     *cloudinfo.APIClient
-	cloudinfoClientOnce sync.Once
+	out                  io.Writer
+	client               *pipeline.APIClient
+	clientOnce           sync.Once
+	cloudinfoClient      *cloudinfo.APIClient
+	cloudinfoClientOnce  sync.Once
 	telescopesClient     *telescopes.APIClient
 	telescopesClientOnce sync.Once
 }
@@ -129,7 +129,7 @@ func (c *banzaiCli) Client() *pipeline.APIClient {
 			&oauth2.Token{AccessToken: viper.GetString("pipeline.token")},
 		))
 
-		config.HTTPClient.Transport.(*oauth2.Transport).Base = c.HTTPTransport()
+		config.HTTPClient.Transport.(*oauth2.Transport).Base = c.RoundTripper()
 
 		c.client = pipeline.NewAPIClient(config)
 	})
@@ -137,7 +137,7 @@ func (c *banzaiCli) Client() *pipeline.APIClient {
 	return c.client
 }
 
-func (c *banzaiCli) HTTPTransport() *http.Transport {
+func (c *banzaiCli) RoundTripper() http.RoundTripper {
 	skip := viper.GetBool("pipeline.tls-skip-verify")
 	fingerprint := viper.GetString("pipeline.tls-fingerprint")
 	fingerprintBytes, err := hex.DecodeString(fingerprint)
@@ -155,6 +155,8 @@ func (c *banzaiCli) HTTPTransport() *http.Transport {
 			pemCerts = dat
 		}
 	}
+
+	roundTriper := http.DefaultTransport
 
 	/* #nosec G402 */
 	if skip || len(pemCerts) > 0 || fingerprint != "" {
@@ -176,12 +178,28 @@ func (c *banzaiCli) HTTPTransport() *http.Transport {
 			tls.VerifyPeerCertificate = makeFingerprintVerifier(fingerprintBytes)
 		}
 
-		return &http.Transport{
+		roundTriper = &http.Transport{
 			TLSClientConfig: tls,
 		}
 	}
 
-	return http.DefaultTransport.(*http.Transport)
+	return curlRoundTripper{base: roundTriper, insecureSkipVerify: skip}
+}
+
+type curlRoundTripper struct {
+	base               http.RoundTripper
+	insecureSkipVerify bool
+}
+
+func (c curlRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) {
+	command, err := utils.GetCurlCommand(r, c.insecureSkipVerify)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Debugf("\n%s\n\n", command.String())
+
+	return c.base.RoundTrip(r)
 }
 
 func makeFingerprintVerifier(expected []byte) func(certificates [][]byte, verifiedChains [][]*x509.Certificate) error {
