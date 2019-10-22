@@ -33,7 +33,7 @@ func NewGetCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := getOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "get [--cluster=ID | [--cluster-name=]NAME]",
+		Use:     "get [--cluster=ID] | [--cluster-name=NAME]",
 		Aliases: []string{"g", "show"},
 		Short:   "Get cluster details",
 		Args:    cobra.MaximumNArgs(1),
