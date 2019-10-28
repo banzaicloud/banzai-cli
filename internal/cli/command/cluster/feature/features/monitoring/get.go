@@ -15,14 +15,15 @@
 package monitoring
 
 import (
-	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 )
 
 type GetManager struct{}
 
-func (GetManager) GetCommandName() string {
+func (GetManager) GetName() string {
 	return featureName
 }
 
