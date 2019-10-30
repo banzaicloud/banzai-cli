@@ -85,11 +85,22 @@ func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.A
 		return nil, errors.WrapIf(err, "error during getting Alertmanager options")
 	}
 
+	pushgateway, err := askPushgateway(banzaiCLI, pushgatewaySpec{
+		Enabled: true,
+		Ingress: ingressSpecWithSecret{
+			baseIngressSpec: baseIngressSpec{
+				Enabled: false,
+				Path:    "/pushgateway",
+			},
+		},
+	})
+
 	return &pipeline.ActivateClusterFeatureRequest{
 		Spec: map[string]interface{}{
 			"grafana":      grafana,
 			"prometheus":   prometheus,
 			"alertmanager": alertmanager,
+			"pushgateway":  pushgateway,
 		},
 	}, nil
 }
@@ -509,6 +520,43 @@ func askNotificationProviderPagerDuty(banzaiCLI cli.Cli, defaultsInterface inter
 		},
 	}); err != nil {
 		return nil, errors.WrapIf(err, "error during getting PagerDuty send resolved option")
+	}
+
+	return result, nil
+}
+
+func askPushgateway(banzaiCLI cli.Cli, defaults pushgatewaySpec) (*pushgatewaySpec, error) {
+	var isEnabled bool
+	if err := doQuestions([]questionMaker{
+		questionConfirm{
+			questionBase: questionBase{
+				message: "Do you want to enable Pushgateway?",
+			},
+			defaultValue: defaults.Enabled,
+			output:       &isEnabled,
+		},
+	}); err != nil {
+		return nil, errors.WrapIf(err, "error during getting Pushgateway enabled")
+	}
+
+	var result = &pushgatewaySpec{
+		Enabled: isEnabled,
+	}
+
+	if isEnabled {
+		// ask ingress
+		ingressSpec, err := askIngress("Pushgateway", defaults.Ingress.baseIngressSpec)
+		if err != nil {
+			return nil, errors.WrapIf(err, "error during getting Pushgateway ingress options")
+		}
+		result.Ingress.baseIngressSpec = *ingressSpec
+
+		if ingressSpec.Enabled {
+			result.Ingress.SecretId, err = askSecret(banzaiCLI, htPasswordSecretType, defaults.Ingress.SecretId)
+			if err != nil {
+				return nil, errors.WrapIf(err, "error during getting secret for Pushgateway ingress")
+			}
+		}
 	}
 
 	return result, nil
