@@ -18,12 +18,13 @@ import (
 	"encoding/json"
 
 	"emperror.dev/errors"
+	"github.com/mitchellh/mapstructure"
+
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/mitchellh/mapstructure"
 )
 
-type UpdateManager struct{
+type UpdateManager struct {
 	baseManager
 }
 
@@ -38,38 +39,12 @@ func (UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.
 		return errors.WrapIf(err, "feature specification does not conform to schema")
 	}
 
-	defaultDnsType := dnsCustom
-	if spec.AutoDNS != nil && spec.AutoDNS.Enabled {
-		defaultDnsType = dnsAuto
-	}
-
-	comp, err := askDnsComponent(defaultDnsType)
+	externalDNS, err := buildExternalDNSFeatureRequest(banzaiCLI, defaults{
+	})
 	if err != nil {
-		return errors.WrapIf(err, "error during choosing DNS component")
+		return errors.Wrap(err, "failed to build custom DNS feature request")
 	}
-
-	switch comp {
-	case dnsAuto:
-		req.Spec = buildAutoDNSFeatureRequest()
-	case dnsCustom:
-		customDNS, err := buildCustomDNSFeatureRequest(banzaiCLI, defaults{
-			clusterDomain: spec.CustomDNS.ClusterDomain,
-			domainFilters: spec.CustomDNS.DomainFilters,
-			provider: struct {
-				name     string
-				options  map[string]string
-				secretId string
-			}{
-				name:     spec.CustomDNS.Provider.Name,
-				options:  spec.CustomDNS.Provider.Options,
-				secretId: spec.CustomDNS.Provider.SecretID,
-			},
-		})
-		if err != nil {
-			return errors.Wrap(err, "failed to build custom DNS feature request")
-		}
-		req.Spec = customDNS
-	}
+	req.Spec = externalDNS
 
 	return nil
 }

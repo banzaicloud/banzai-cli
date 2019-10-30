@@ -17,42 +17,34 @@ package dns
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"strings"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/antihax/optional"
+
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
-	log "github.com/sirupsen/logrus"
 )
 
 type ActivateManager struct {
 	baseManager
 }
 
+func NewActivateManager() *ActivateManager {
+	return &ActivateManager{}
+}
+
 func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.ActivateClusterFeatureRequest, error) {
-	var request pipeline.ActivateClusterFeatureRequest
-
-	comp, err := askDnsComponent(dnsAuto)
+	builtSpec, err := buildExternalDNSFeatureRequest(banzaiCLI, defaults{})
 	if err != nil {
-		return nil, errors.WrapIf(err, "error during choosing DNS component")
+		return nil, errors.Wrap(err, "failed to build external DNS feature request")
 	}
 
-	switch comp {
-	case dnsAuto:
-		request.Spec = buildAutoDNSFeatureRequest()
-	case dnsCustom:
-		customDNS, err := buildCustomDNSFeatureRequest(banzaiCLI, defaults{})
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to build custom DNS feature request")
-		}
-		request.Spec = customDNS
-	}
-
-	return &request, nil
+	return &pipeline.ActivateClusterFeatureRequest{
+		Spec: builtSpec,
+	}, nil
 }
 
 func (ActivateManager) ValidateRequest(req interface{}) error {
@@ -64,21 +56,7 @@ func (ActivateManager) ValidateRequest(req interface{}) error {
 	return validateSpec(request.Spec)
 }
 
-func NewActivateManager() *ActivateManager {
-	return &ActivateManager{}
-}
-
-func buildCustomDNSFeatureRequest(banzaiCli cli.Cli, defaults defaults) (map[string]interface{}, error) {
-	domainFilters, err := askDomainFilter(defaults.domainFilters)
-	if err != nil {
-		return nil, err
-	}
-
-	clusterDomain, err := askDomain(defaults.clusterDomain)
-	if err != nil {
-		return nil, err
-	}
-
+func buildExternalDNSFeatureRequest(banzaiCli cli.Cli, defaults defaults) (map[string]interface{}, error) {
 	provider, err := askDnsProvider(defaults)
 	if err != nil {
 		return nil, err
@@ -89,13 +67,40 @@ func buildCustomDNSFeatureRequest(banzaiCli cli.Cli, defaults defaults) (map[str
 		return nil, err
 	}
 
+	domainFilters, err := askDomainFilter(defaults.domainFilters)
+	if err != nil {
+		return nil, err
+	}
+
+	policy, err := askForPolicy(defaults.policy)
+	if err != nil {
+		return nil, err
+	}
+
+	sources, err := askForSources(defaults.sources)
+	if err != nil {
+		return nil, err
+	}
+
+	txtOwner, err := askForTxtOwner(defaults.txtOwner)
+	if err != nil {
+		return nil, err
+	}
+
+	clusterDomain, err := askForClusterDomain(defaults.clusterDomain)
+	if err != nil {
+		return nil, err
+	}
+
 	return obj{
-		"customDns": obj{
-			"enabled":       true,
-			"domainFilters": domainFilters,
-			"clusterDomain": clusterDomain,
+		"externalDns": obj{
 			"provider":      providerSpec,
+			"domainFilters": domainFilters,
+			"policy":        policy,
+			"sources":       sources,
+			"txtOwnerId":    txtOwner,
 		},
+		"clusterDomain": clusterDomain,
 	}, nil
 }
 
@@ -105,7 +110,7 @@ func askDomainFilter(defaultValues []string) ([]string, error) {
 		&survey.Input{
 			Message: "Please provide a domain filter to match domains against",
 			Default: strings.Join(defaultValues, ","),
-			Help:    "To add multiple domains separate with commna (,) character. Like: foo.com, bar.com",
+			Help:    "To add multiple domains separate with commna (,) character. Example: foo.com, bar.com",
 		},
 		&domainFilter,
 	); err != nil {
@@ -121,68 +126,60 @@ func askDomainFilter(defaultValues []string) ([]string, error) {
 	return filters, nil
 }
 
-func askDomain(defaultValue string) (string, error) {
+func askForClusterDomain(defaultClusterDomain string) (string, error) {
 	var clusterDomain string
 	if err := survey.AskOne(
 		&survey.Input{
 			Message: "Please specify the cluster's domain:",
-			Default: defaultValue,
+			Default: defaultClusterDomain,
 		},
 		&clusterDomain,
 	); err != nil {
-		return "", errors.WrapIf(err, "failure during survey")
+		return "", errors.WrapIf(err, "failed to read cluster domain")
 	}
 
 	return clusterDomain, nil
 }
 
 func askDnsProvider(defaults defaults) (string, error) {
-	options := make([]string, 0, len(providers))
-	for _, p := range providers {
+	options := make([]string, 0, len(providerMeta))
+	for _, p := range providerMeta {
 		options = append(options, p.Name)
 	}
 
-	var defaultProvider struct {
-		Name       string
-		SecretType string
-	}
-	if len(defaults.provider.name) != 0 {
-		defaultProvider = providers[defaults.provider.name]
-	}
-
-	var provider string
+	var selectedProvider string
 	if err := survey.AskOne(
 		&survey.Select{
 			Message: "Please select a DNS provider:",
 			Options: options,
-			Default: defaultProvider.Name,
+			Default: defaults.provider.name,
 		},
-		&provider,
+		&selectedProvider,
 	); err != nil {
-		return "", errors.WrapIf(err, "failure during survey")
+		return "", errors.WrapIf(err, "faieled to select dns provider")
 	}
-	for id, p := range providers {
-		if p.Name == provider {
+
+	for id, p := range providerMeta {
+		if p.Name == selectedProvider {
 			return id, nil
 		}
 	}
-	return "", errors.Errorf("unsupported provider %q", provider)
+	return "", errors.Errorf("unsupported provider %q", selectedProvider)
 }
 
 func askSecret(banzaiCli cli.Cli, provider string, defaultID string) (string, error) {
 
-	log.Debugf("load %s secrets", provider)
-
 	orgID := banzaiCli.Context().OrganizationID()
-	secretType := providers[provider].SecretType
-	secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{Type_: optional.NewString(secretType)})
+	secretType := providerMeta[provider].SecretType
+	secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID,
+		&pipeline.GetSecretsOpts{Type_: optional.NewString(secretType)})
 	if err != nil {
 		return "", errors.Wrap(err, "failed to retrieve secrets")
 	}
 
 	// TODO (colin): add create secret option
 	if len(secrets) == 0 {
-		return "", errors.New(fmt.Sprintf("there are no secrets with type %q", secretType))
+		return "", errors.Errorf("there are no secrets with type %q", secretType)
 	}
 
 	var defaultName interface{}
@@ -218,49 +215,54 @@ func askSecret(banzaiCli cli.Cli, provider string, defaultID string) (string, er
 func askDnsProviderSpecificOptions(banzaiCli cli.Cli, provider string, defaults defaults) (interface{}, error) {
 	orgID := banzaiCli.Context().OrganizationID()
 
-	secretID, err := askSecret(banzaiCli, provider, defaults.provider.secretId)
-	if err != nil {
-		return nil, errors.WrapIf(err, fmt.Sprintf("failed to get secret for %q provider", provider))
-	}
-
-	r := activateCustomRequest{
-		Name:     provider,
-		SecretID: secretID,
-	}
+	var (
+		secretID string
+		options  providerOptions
+		err      error
+	)
 
 	switch provider {
+	case dnsBanzaiCloud:
 	case dnsRoute53:
+		secretID, err = askSecret(banzaiCli, provider, defaults.provider.secretId)
+		if err != nil {
+			return nil, errors.WrapIff(err, "failed to get secret for %q provider", provider)
+		}
 	case dnsGoogle:
+		secretID, err = askSecret(banzaiCli, provider, defaults.provider.secretId)
+		if err != nil {
+			return nil, errors.WrapIff(err, "failed to get secret for %q provider", provider)
+		}
+
 		project, err := askGoogleProject(banzaiCli, secretID, orgID, defaults.provider.options["project"])
 		if err != nil {
 			return nil, err
 		}
-		r.Options = providerOptions{
-			Project: project,
-		}
+
+		options.Project = project
+
 	case dnsAzure:
+		secretID, err = askSecret(banzaiCli, provider, defaults.provider.secretId)
+		if err != nil {
+			return nil, errors.WrapIff(err, "failed to get secret for %q provider", provider)
+		}
+
 		resourceGroup, err := input.AskResourceGroup(banzaiCli, orgID, secretID, defaults.provider.options["resourceGroup"])
 		if err != nil {
 			return nil, err
 		}
-		r.Options = providerOptions{
-			ResourceGroup: resourceGroup,
-		}
+
+		options.ResourceGroup = resourceGroup
+
 	default:
-		return nil, &NotSupportedProviderError{
-			provider: provider,
-		}
+		return nil, errors.Errorf("unsupported provider: %q", provider)
 	}
 
-	return r, nil
-}
-
-type NotSupportedProviderError struct {
-	provider string
-}
-
-func (e *NotSupportedProviderError) Error() string {
-	return fmt.Sprintf("not supported provider: %s", e.provider)
+	return activateCustomRequest{
+		Name:     provider,
+		SecretID: secretID,
+		Options:  options,
+	}, nil
 }
 
 func askGoogleProject(banzaiCli cli.Cli, secretID string, orgID int32, defaultID string) (string, error) {
@@ -299,27 +301,55 @@ func askGoogleProject(banzaiCli cli.Cli, secretID string, orgID int32, defaultID
 	return "", errors.Errorf("unknown project name %q", projectName)
 }
 
-func buildAutoDNSFeatureRequest() map[string]interface{} {
-	return obj{
-		"autoDns": obj{
-			"enabled": true,
-		},
-	}
-}
+func askForPolicy(defaultPolicyValue string) (string, error) {
+	var policy string
 
-func askDnsComponent(defaultValue string) (string, error) {
-	var comp string
 	if err := survey.AskOne(
 		&survey.Select{
-			Message: "Please select a DNS component to activate:",
-			Options: []string{dnsAuto, dnsCustom},
-			Default: defaultValue,
+			Message: "Please select the policy for the provider:",
+			Options: []string{"sync", "upsert-only"},
+			Default: defaultPolicyValue,
 		},
-		&comp,
+		&policy,
 	); err != nil {
-		return "", errors.WrapIf(err, "failure during survey")
+		return "", errors.WrapIf(err, "failed to select policy")
 	}
-	return comp, nil
+
+	return policy, nil
+}
+
+func askForSources(defaultSources []string) ([]string, error) {
+	var sources []string
+
+	if err := survey.AskOne(
+		&survey.MultiSelect{
+			Message: "Please select resource types to monitor:",
+			Options: []string{"ingress", "service"},
+			Default: defaultSources,
+		},
+		&sources,
+	); err != nil {
+		return nil, errors.WrapIf(err, "failed to select sources")
+	}
+
+	return sources, nil
+}
+
+func askForTxtOwner(defaultTxtOwner string) (string, error) {
+	var txtOwner string
+
+	if err := survey.AskOne(
+		&survey.Input{
+			Message: "Please specify the TXT owner id for the external dns instance:",
+			Default: defaultTxtOwner,
+			Help:    "When using the TXT registry, a name that identifies this instance of ExternalDNS",
+		},
+		&txtOwner,
+	); err != nil {
+		return "", errors.WrapIf(err, "failed to read in the txt owner")
+	}
+
+	return txtOwner, nil
 }
 
 type activateCustomRequest struct {

@@ -22,19 +22,124 @@ import (
 const (
 	featureName = "dns"
 
-	dnsAuto   = "Auto DNS"
-	dnsCustom = "Custom DNS"
+	dnsRoute53     = "route53"
+	dnsAzure       = "azure"
+	dnsGoogle      = "google"
+	dnsBanzaiCloud = "banzaicloud-dns"
+)
 
-	dnsRoute53      = "route53"
-	dnsAzure        = "azure"
-	dnsGoogle       = "google"
-	dnsDigitalOcean = "digitalocean"
-	dnsCloudFlare   = "cloudflare"
+var (
+	providers = []string{dnsBanzaiCloud, dnsRoute53, dnsAzure, dnsGoogle}
+
+	providerMeta = map[string]struct {
+		Name       string
+		SecretType string
+	}{
+		dnsBanzaiCloud: {
+			Name:       "Banzai Cloud DNS",
+			SecretType: "amazon",
+		},
+		dnsRoute53: {
+			Name:       "Amazon Route 53",
+			SecretType: "amazon",
+		},
+		dnsAzure: {
+			Name:       "Azure DNS",
+			SecretType: "azure",
+		},
+		dnsGoogle: {
+			Name:       "Google Cloud DNS",
+			SecretType: "google",
+		},
+	}
 )
 
 type obj = map[string]interface{}
 
 type baseManager struct{}
+
+type ExternalDNS struct {
+	DomainFilters []string  `mapstructure:"domainFilters"`
+	Policy        string    `mapstructure:"policy"` // sync | upsert-only
+	Sources       []string  `mapstructure:"sources"`
+	TxtOwnerId    string    `mapstructure:"txtOwnerId"`
+	Provider      *Provider `mapstructure:"provider"`
+}
+
+type Provider struct {
+	Name     string                 `mapstructure:"name"`
+	SecretID string                 `mapstructure:"secretId"`
+	Options  map[string]interface{} `mapstructure:"options"`
+}
+
+func (e ExternalDNS) Validate() error {
+	var validationErrors error
+
+	if len(e.DomainFilters) == 0 {
+		validationErrors = errors.Append(validationErrors, errors.New("at least one domain filter must be specified"))
+	}
+
+	for _, df := range e.DomainFilters {
+		if df == "" {
+			validationErrors = errors.Append(validationErrors, errors.New("domain filters must not be empty strings"))
+		}
+	}
+
+	if e.Policy == "" || (e.Policy != "sync" && e.Policy != "upsert-only") {
+		validationErrors = errors.Append(validationErrors,
+			errors.New("policy must not be empty, it should be one of the values sync|upsert-only"))
+	}
+
+	if len(e.Sources) == 0 {
+		validationErrors = errors.Append(validationErrors, errors.New("sources must not be empty"))
+	}
+
+	for _, src := range e.Sources {
+		if src != "service" && src != "ingress" {
+			validationErrors = errors.Append(validationErrors, errors.Errorf("invalid source value: %s", src))
+		}
+	}
+
+	if e.TxtOwnerId == "" {
+		validationErrors = errors.Append(validationErrors, errors.New("txtOwnerId must not be empty"))
+	}
+
+	if e.Provider == nil {
+		validationErrors = errors.Append(validationErrors, errors.New("provider must be specified"))
+	} else {
+		validationErrors = errors.Append(validationErrors, e.Provider.Validate())
+	}
+
+	return validationErrors
+}
+
+func (p Provider) Validate() error {
+
+	var validationErrors error
+
+	if p.Name != dnsBanzaiCloud {
+		if p.SecretID == "" {
+			validationErrors = errors.Append(validationErrors, errors.Errorf("secret id must be specified for provider %s", p.Name))
+		}
+	}
+
+	// todo validate specific options
+	switch current := p.Name; current {
+	case dnsBanzaiCloud:
+	case dnsRoute53:
+	case dnsGoogle:
+	case dnsAzure:
+	default:
+		validationErrors = errors.Append(validationErrors, errors.Errorf("provider %s is not supported", current))
+	}
+
+	return validationErrors
+}
+
+type spec struct {
+	ExternalDNS   ExternalDNS `mapstructure:"externalDns"`
+	ClusterDomain string      `mapstructure:"clusterDomain"`
+}
 
 func (baseManager) GetName() string {
 	return featureName
@@ -45,107 +150,34 @@ func NewDeactivateManager() *baseManager {
 }
 
 func validateSpec(specObj map[string]interface{}) error {
-	providers := map[string]bool{
-		dnsRoute53: true,
-		dnsAzure:   true,
-		dnsGoogle:  true,
-	}
+	var dnsSpec spec
 
-	var spec struct {
-		AutoDNS *struct {
-			Enabled bool `mapstructure:"enabled"`
-		} `mapstructure:"autoDns"`
-		CustomDNS *struct {
-			Enabled       bool     `mapstructure:"enabled"`
-			DomainFilters []string `mapstructure:"domainFilters"`
-			ClusterDomain string   `mapstructure:"clusterDomain"`
-			Provider      *struct {
-				Name     string                 `mapstructure:"name"`
-				Options  map[string]interface{} `mapstructure:"options"`
-				SecretID string                 `mapstructure:"secretId"`
-			} `mapstructure:"provider"`
-		} `mapstructure:"customDns"`
-	}
-
-	if err := mapstructure.Decode(specObj, &spec); err != nil {
+	if err := mapstructure.Decode(specObj, &dnsSpec); err != nil {
 		return errors.WrapIf(err, "feature specification does not conform to schema")
 	}
-	if spec.AutoDNS != nil && spec.AutoDNS.Enabled && spec.CustomDNS != nil && spec.CustomDNS.Enabled {
-		return errors.New("Cannot enable 'autoDns' and 'customDns' at the same time")
-	}
-	if spec.CustomDNS != nil && spec.CustomDNS.Enabled {
-		if len(spec.CustomDNS.DomainFilters) == 0 {
-			return errors.New("At least one domain filter must be specified")
-		}
-		for _, df := range spec.CustomDNS.DomainFilters {
-			if df == "" {
-				return errors.New("Domain filter must not be empty")
-			}
-		}
-		if spec.CustomDNS.ClusterDomain == "" {
-			return errors.New("Cluster domain must not be empty")
-		}
-		if spec.CustomDNS.Provider == nil {
-			return errors.New("Provider must be specified")
-		}
-		if !providers[spec.CustomDNS.Provider.Name] {
-			return errors.Errorf("Unsupported provider %q", spec.CustomDNS.Provider.Name)
-		}
-		if spec.CustomDNS.Provider.SecretID == "" {
-			return errors.New("Secret ID must be specified")
-		}
-	}
-	return nil
-}
 
-var providers = map[string]struct {
-	Name       string
-	SecretType string
-}{
-	dnsRoute53: {
-		Name:       "Amazon Route 53",
-		SecretType: "amazon",
-	},
-	dnsAzure: {
-		Name:       "Azure DNS",
-		SecretType: "azure",
-	},
-	dnsCloudFlare: {
-		Name:       "Cloudflare DNS",
-		SecretType: "cloudflare",
-	},
-	dnsDigitalOcean: {
-		Name:       "DigitalOcean DNS",
-		SecretType: "digitalocean",
-	},
-	dnsGoogle: {
-		Name:       "Google Cloud DNS",
-		SecretType: "google",
-	},
+	err := dnsSpec.ExternalDNS.Validate()
+
+	if dnsSpec.ClusterDomain == "" {
+		err = errors.Append(err, errors.New("cluster domain must not be empty"))
+	}
+
+	return err
 }
 
 type specResponse struct {
-	CustomDNS *struct {
-		Enabled       bool     `mapstructure:"enabled"`
-		DomainFilters []string `mapstructure:"domainFilters"`
-		ClusterDomain string   `mapstructure:"clusterDomain"`
-		Provider      struct {
-			Name     string            `mapstructure:"name"`
-			SecretID string            `mapstructure:"secretId"`
-			Options  map[string]string `mapstructure:"options"`
-		} `mapstructure:"provider"`
-	} `mapstructure:"customDns"`
-	AutoDNS *struct {
-		Enabled bool `mapstructure:"enabled"`
-	} `mapstructure:"autoDns"`
 }
 
+// type for porviding default input for feature requests
 type defaults struct {
-	clusterDomain string
-	domainFilters []string
-	provider      struct {
+	provider struct {
 		name     string
 		options  map[string]string
 		secretId string
 	}
+	clusterDomain string
+	domainFilters []string
+	policy string
+	txtOwner string
+	sources []string
 }
