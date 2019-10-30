@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"emperror.dev/errors"
 	"github.com/antihax/optional"
@@ -43,7 +44,19 @@ func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.A
 		return nil, errors.WrapIf(err, "error during getting Grafana options")
 	}
 
-	prometheus, err := askPrometheus(banzaiCLI, grafanaAndPrometheusSpec{})
+	prometheus, err := askPrometheus(banzaiCLI, prometheusSpec{
+		Enabled: true,
+		Storage: storageSpec{
+			Size:      100,
+			Retention: "10d",
+		},
+		Ingress: ingressSpecWithSecret{
+			baseIngressSpec: baseIngressSpec{
+				Enabled: true,
+				Path:    "/prometheus",
+			},
+		},
+	})
 	if err != nil {
 		return nil, errors.WrapIf(err, "error during getting Prometheus options")
 	}
@@ -93,8 +106,7 @@ func askIngress(compType string, defaults baseIngressSpec) (*baseIngressSpec, er
 	}
 
 	if isIngressEnabled {
-
-		if err := doQuestions([]questionMaker{
+		var questions = []questionMaker{
 			questionInput{
 				questionBase: questionBase{
 					message: fmt.Sprintf("Please provide %s Ingress domain:", compType),
@@ -110,7 +122,8 @@ func askIngress(compType string, defaults baseIngressSpec) (*baseIngressSpec, er
 				defaultValue: defaults.Path,
 				output:       &path,
 			},
-		}); err != nil {
+		}
+		if err := doQuestions(questions); err != nil {
 			return nil, errors.WrapIf(err, "error during asking ingress fields")
 		}
 
@@ -171,24 +184,61 @@ func askGrafana(banzaiCLI cli.Cli, defaults grafanaSpec) (*grafanaSpec, error) {
 	return result, nil
 }
 
-func askPrometheus(banzaiCLI cli.Cli, defaults grafanaAndPrometheusSpec) (*grafanaAndPrometheusSpec, error) {
-	prometheusBase, err := askIngress("Prometheus", defaults.baseSpec)
-	if err != nil {
+func askPrometheus(banzaiCLI cli.Cli, defaults prometheusSpec) (*prometheusSpec, error) {
+	var result = &prometheusSpec{
+		Enabled: true,
+	}
+
+	// storage class, storage size and retention
+	var storageSize = fmt.Sprint(defaults.Storage.Size)
+	if err := doQuestions([]questionMaker{
+		questionInput{
+			questionBase: questionBase{
+				message: "Please provide storage class name:",
+				help:    "Leave empty to use default storage class",
+			},
+			defaultValue: defaults.Storage.Class,
+			output:       &result.Storage.Class,
+		},
+		questionInput{
+			questionBase: questionBase{
+				message: "Please provide storage size:",
+			},
+			defaultValue: storageSize,
+			output:       &storageSize,
+		},
+		questionInput{
+			questionBase: questionBase{
+				message: "Please provide retention:",
+			},
+			defaultValue: defaults.Storage.Retention,
+			output:       &result.Storage.Retention,
+		},
+	}); err != nil {
 		return nil, errors.WrapIf(err, "error during getting Prometheus options")
 	}
 
-	var secretId string
-	if prometheusBase.Enabled {
-		secretId, err = askSecret(banzaiCLI, passwordSecretType, defaults.SecretId)
+	storageSizeInt, err := strconv.ParseUint(storageSize, 10, 64)
+	if err != nil {
+		return nil, errors.WrapIf(err, "failed to parse storage size")
+	}
+	result.Storage.Size = uint(storageSizeInt)
+
+	// ingress
+	ingressSpec, err := askIngress("Prometheus", defaults.Ingress.baseIngressSpec)
+	if err != nil {
+		return nil, errors.WrapIf(err, "error during getting Prometheus ingress options")
+	}
+	result.Ingress.baseIngressSpec = *ingressSpec
+
+	if ingressSpec.Enabled {
+		result.Ingress.SecretId, err = askSecret(banzaiCLI, htPasswordSecretType, defaults.Ingress.SecretId)
 		if err != nil {
-			return nil, errors.WrapIf(err, "error during getting Grafana secret")
+			return nil, errors.WrapIf(err, "error during getting secret for Prometheus ingress")
 		}
 	}
 
-	return &grafanaAndPrometheusSpec{
-		baseSpec: *prometheusBase,
-		SecretId: secretId,
-	}, nil
+	return result, nil
 }
 
 func askAlertManager(defaults alertmanagerSpec) (*alertmanagerSpec, error) {
