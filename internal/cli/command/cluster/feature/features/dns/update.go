@@ -39,8 +39,7 @@ func (UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.
 		return errors.WrapIf(err, "feature specification does not conform to schema")
 	}
 
-	externalDNS, err := buildExternalDNSFeatureRequest(banzaiCLI, defaults{
-	})
+	externalDNS, err := buildExternalDNSFeatureRequest(banzaiCLI, nil)
 	if err != nil {
 		return errors.Wrap(err, "failed to build custom DNS feature request")
 	}
