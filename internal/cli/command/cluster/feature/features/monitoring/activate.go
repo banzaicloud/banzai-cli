@@ -24,6 +24,7 @@ import (
 	"github.com/antihax/optional"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/mitchellh/mapstructure"
 )
 
 type ActivateManager struct {
@@ -61,7 +62,25 @@ func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.A
 		return nil, errors.WrapIf(err, "error during getting Prometheus options")
 	}
 
-	alertmanager, err := askAlertManager(alertmanagerSpec{})
+	alertmanager, err := askAlertmanager(banzaiCLI, alertmanagerSpec{
+		Enabled: true,
+		Ingress: ingressSpecWithSecret{
+			baseIngressSpec: baseIngressSpec{
+				Enabled: true,
+				Path:    "/alertmanager",
+			},
+		},
+		Provider: map[string]interface{}{
+			alertmanagerProviderSlack: slackSpec{
+				Enabled:      false,
+				SendResolved: true,
+			},
+			alertmanagerProviderPagerDuty: pagerDutySpec{
+				Enabled:      false,
+				SendResolved: true,
+			},
+		},
+	})
 	if err != nil {
 		return nil, errors.WrapIf(err, "error during getting Alertmanager options")
 	}
@@ -241,211 +260,92 @@ func askPrometheus(banzaiCLI cli.Cli, defaults prometheusSpec) (*prometheusSpec,
 	return result, nil
 }
 
-func askAlertManager(defaults alertmanagerSpec) (*alertmanagerSpec, error) {
-	alertmanagerBase, err := askIngress("Alertmanager", defaults.baseSpec)
-	if err != nil {
-		return nil, errors.WrapIf(err, "error during getting Alertmanager options")
-	}
-
-	var response = &alertmanagerSpec{baseSpec: *alertmanagerBase}
-
-	if alertmanagerBase.Enabled {
-		// Slack
-		slackProperties, err := askSlackProperties()
-		if err != nil {
-			return nil, errors.WrapIf(err, "failed to get Slack options")
-		}
-
-		// Pagerduty
-		pagerdutyProperties, err := askPagerdutyProperties()
-		if err != nil {
-			return nil, errors.WrapIf(err, "failed to get Pagerduty options")
-		}
-
-		// Email
-		emailProperties, err := askEmailProperties()
-		if err != nil {
-			return nil, errors.WrapIf(err, "failed to get Email options")
-		}
-
-		response.Provider = providerSpec{
-			Slack:     *slackProperties,
-			Pagerduty: *pagerdutyProperties,
-			Email:     *emailProperties,
-		}
-	}
-
-	return response, nil
-}
-
-func askSlackProperties() (*slackPropertiesSpec, error) {
-	var slackSpec slackPropertiesSpec
-	var needSlack bool
+func askAlertmanager(banzaiCLI cli.Cli, defaults alertmanagerSpec) (*alertmanagerSpec, error) {
+	var isEnabled bool
 	if err := doQuestions([]questionMaker{
 		questionConfirm{
 			questionBase: questionBase{
-				message: "Do you want to enable Slack provider?",
+				message: "Do you want to enable Alertmanager?",
 			},
-			defaultValue: false,
-			output:       &needSlack,
+			defaultValue: defaults.Enabled,
+			output:       &isEnabled,
 		},
 	}); err != nil {
-		return nil, errors.WrapIf(err, "error during getting Slack enabled")
+		return nil, errors.WrapIf(err, "error during getting Alertmanager enabled")
 	}
 
-	if needSlack {
-		var url string
-		var channel string
-		var sendResolved bool
-		if err := doQuestions([]questionMaker{
-			questionInput{
-				questionBase: questionBase{
-					message: "Provide Slack API url:",
-				},
-				output: &url,
+	var result = &alertmanagerSpec{
+		Enabled: isEnabled,
+	}
+
+	if isEnabled {
+		result.Provider = map[string]interface{}{
+			alertmanagerProviderSlack: slackSpec{
+				Enabled: false,
 			},
-			questionInput{
-				questionBase: questionBase{
-					message: "Provide Slack channel:",
-				},
-				output: &channel,
+			alertmanagerProviderPagerDuty: pagerDutySpec{
+				Enabled: false,
 			},
-			questionConfirm{
-				questionBase: questionBase{
-					message: "Send resolved notifications as well",
-				},
-				defaultValue: false,
-				output:       &sendResolved,
-			},
-		}); err != nil {
-			return nil, errors.WrapIf(err, "error during getting Slack options")
 		}
 
-		return &slackPropertiesSpec{
-			Enabled:      needSlack,
-			ApiUrl:       url,
-			Channel:      channel,
-			SendResolved: sendResolved,
-		}, nil
-	}
-
-	return &slackSpec, nil
-}
-
-func askPagerdutyProperties() (*pagerdutyPropertiesSpec, error) {
-	var pagerdutySpec pagerdutyPropertiesSpec
-	var needPagerduty bool
-	if err := doQuestions([]questionMaker{
-		questionConfirm{
-			questionBase: questionBase{
-				message: "Do you want to enable Pagerduty provider?",
-			},
-			defaultValue: false,
-			output:       &needPagerduty,
-		},
-	}); err != nil {
-		return nil, errors.WrapIf(err, "error during getting Pagerduty enabled")
-	}
-
-	if needPagerduty {
-		var routingKey string
-		var serviceKey string
-		var url string
-		var sendResolved bool
+		// ask provider options
+		var notificationProvider string
+		var defaultNotificationProviderValue = alertmanagerNotificationNameSlack
+		if pdProp, ok := defaults.Provider[alertmanagerProviderPagerDuty]; ok {
+			var pd pagerDutySpec
+			if err := mapstructure.Decode(pdProp, &pd); err == nil {
+				if pd.Enabled {
+					defaultNotificationProviderValue = alertmanagerNotificationNamePagerDuty
+				}
+			}
+		}
 		if err := doQuestions([]questionMaker{
-			questionInput{
-				questionBase: questionBase{
-					message: "Provide Pagerduty url:",
+			questionSelect{
+				questionInput: questionInput{
+					questionBase: questionBase{
+						message: "Select notification provider",
+					},
+					defaultValue: defaultNotificationProviderValue,
+					output:       &notificationProvider,
 				},
-				output: &url,
-			},
-			questionInput{
-				questionBase: questionBase{
-					message: "Provide routing key:",
-				},
-				output: &routingKey,
-			},
-			questionInput{
-				questionBase: questionBase{
-					message: "Provide service key:",
-				},
-				output: &serviceKey,
-			},
-			questionConfirm{
-				questionBase: questionBase{
-					message: "Send resolved notifications as well",
-				},
-				defaultValue: false,
-				output:       &sendResolved,
+				options: []string{alertmanagerNotificationNameSlack, alertmanagerNotificationNamePagerDuty},
 			},
 		}); err != nil {
-			return nil, errors.WrapIf(err, "error during getting Slack options")
+			return nil, errors.WrapIf(err, "error during getting notification provider")
 		}
 
-		return &pagerdutyPropertiesSpec{
-			Enabled:      needPagerduty,
-			RoutingKey:   routingKey,
-			ServiceKey:   serviceKey,
-			Url:          url,
-			SendResolved: sendResolved,
-		}, nil
-	}
-
-	return &pagerdutySpec, nil
-}
-
-func askEmailProperties() (*emailPropertiesSpec, error) {
-	var emailSpec emailPropertiesSpec
-	var needEmail bool
-	if err := doQuestions([]questionMaker{
-		questionConfirm{
-			questionBase: questionBase{
-				message: "Do you want to enable Email provider?",
-			},
-			defaultValue: false,
-			output:       &needEmail,
-		},
-	}); err != nil {
-		return nil, errors.WrapIf(err, "error during getting Email enabled")
-	}
-
-	if needEmail {
-		var to string
-		var from string
-		var sendResolved bool
-		if err := doQuestions([]questionMaker{
-			questionInput{
-				questionBase: questionBase{
-					message: "Provide destination of the alert message:",
-				},
-				output: &to,
-			},
-			questionInput{
-				questionBase: questionBase{
-					message: "Provide sender of the alert message:",
-				},
-				output: &from,
-			},
-			questionConfirm{
-				questionBase: questionBase{
-					message: "Send resolved notifications as well",
-				},
-				defaultValue: false,
-				output:       &sendResolved,
-			},
-		}); err != nil {
-			return nil, errors.WrapIf(err, "error during getting Slack options")
+		var err error
+		switch notificationProvider {
+		case alertmanagerNotificationNameSlack:
+			result.Provider[alertmanagerProviderSlack], err = askNotificationProviderSlack(banzaiCLI, defaults.Provider[alertmanagerProviderSlack])
+			if err != nil {
+				return nil, errors.WrapIf(err, "error during getting Slack provider options")
+			}
+		case alertmanagerNotificationNamePagerDuty:
+			result.Provider[alertmanagerProviderPagerDuty], err = askNotificationProviderPagerDuty(banzaiCLI, defaults.Provider[alertmanagerProviderPagerDuty])
+			if err != nil {
+				return nil, errors.WrapIf(err, "error during getting PagerDuty provider options")
+			}
+		default:
+			return nil, errors.NewWithDetails("not supported provider type", "provider", notificationProvider)
 		}
 
-		return &emailPropertiesSpec{
-			Enabled:      needEmail,
-			To:           to,
-			From:         from,
-			SendResolved: sendResolved,
-		}, nil
+		// ask ingress
+		ingressSpec, err := askIngress("Alertmanager", defaults.Ingress.baseIngressSpec)
+		if err != nil {
+			return nil, errors.WrapIf(err, "error during getting Alertmanager ingress options")
+		}
+		result.Ingress.baseIngressSpec = *ingressSpec
+
+		if ingressSpec.Enabled {
+			result.Ingress.SecretId, err = askSecret(banzaiCLI, htPasswordSecretType, defaults.Ingress.SecretId)
+			if err != nil {
+				return nil, errors.WrapIf(err, "error during getting secret for Alertmanager ingress")
+			}
+		}
 	}
 
-	return &emailSpec, nil
+	return result, nil
 }
 
 func askSecret(banzaiCLI cli.Cli, secretType, defaultValue string) (string, error) {
@@ -500,4 +400,116 @@ func askSecret(banzaiCLI cli.Cli, secretType, defaultValue string) (string, erro
 	}
 
 	return secretIds[secretName], nil
+}
+
+func askNotificationProviderSlack(banzaiCLI cli.Cli, defaultsInterface interface{}) (*slackSpec, error) {
+	var defaults slackSpec
+	if err := mapstructure.Decode(defaultsInterface, &defaults); err != nil {
+		return nil, errors.WrapIf(err, "failed to bind Slack config")
+	}
+
+	var err error
+	var result = &slackSpec{
+		Enabled: true,
+	}
+	result.SecretId, err = askSecret(banzaiCLI, slackSecretType, defaults.SecretId)
+	if err != nil {
+		return nil, errors.WrapIf(err, "error during getting Slack secret")
+	}
+
+	if err := doQuestions([]questionMaker{
+		questionInput{
+			questionBase: questionBase{
+				message: "Provide Slack channel name for the alerts:",
+			},
+			output: &result.Channel,
+		},
+		questionConfirm{
+			questionBase: questionBase{
+				message: "Send resolved notifications as well",
+			},
+			defaultValue: defaults.SendResolved,
+			output:       &result.SendResolved,
+		},
+	}); err != nil {
+		return nil, errors.WrapIf(err, "error during getting Slack options")
+	}
+
+	return result, nil
+}
+
+func askNotificationProviderPagerDuty(banzaiCLI cli.Cli, defaultsInterface interface{}) (*pagerDutySpec, error) {
+	var defaults pagerDutySpec
+	if err := mapstructure.Decode(defaultsInterface, &defaults); err != nil {
+		return nil, errors.WrapIf(err, "failed to bind PagerDuty config")
+	}
+
+	var result = &pagerDutySpec{
+		Enabled: true,
+	}
+
+	// ask for pd URL
+	if err := doQuestions([]questionMaker{
+		questionInput{
+			questionBase: questionBase{
+				message: "Provide PagerDuty service endpoint:",
+			},
+			defaultValue: defaults.Url,
+			output:       &result.Url,
+		},
+	}); err != nil {
+		return nil, errors.WrapIf(err, "error during getting PagerDuty url")
+	}
+
+	// ask for pd integration type
+	var integrationType string
+	var defaultIntegrationValue = pdIntegrationTypePrometheusName
+	if defaults.IntegrationType == pdIntegrationTypeEventsApiV2 {
+		defaultIntegrationValue = pdIntegrationTypeEventsApiV2Name
+	}
+
+	if err := doQuestions([]questionMaker{
+		questionSelect{
+			questionInput: questionInput{
+				questionBase: questionBase{
+					message: "Select PagerDuty integration type:",
+				},
+				defaultValue: defaultIntegrationValue,
+				output:       &integrationType,
+			},
+			options: []string{pdIntegrationTypePrometheusName, pdIntegrationTypeEventsApiV2Name},
+		},
+	}); err != nil {
+		return nil, errors.WrapIf(err, "error during getting PagerDuty integration type")
+	}
+
+	switch integrationType {
+	case pdIntegrationTypePrometheusName:
+		result.IntegrationType = pdIntegrationTypePrometheus
+	case pdIntegrationTypeEventsApiV2Name:
+		result.IntegrationType = pdIntegrationTypeEventsApiV2
+	default:
+		return nil, errors.NewWithDetails("invalid integration type", "type", integrationType)
+	}
+
+	// ask for pd secret
+	var err error
+	result.SecretId, err = askSecret(banzaiCLI, pagerDutySecretType, defaults.SecretId)
+	if err != nil {
+		return nil, errors.WrapIf(err, "error during getting PagerDuty secret")
+	}
+
+	if err := doQuestions([]questionMaker{
+		questionConfirm{
+			questionBase: questionBase{
+				message: "Send resolved notifications as well",
+			},
+			defaultValue: defaults.SendResolved,
+			output:       &result.SendResolved,
+		},
+	}); err != nil {
+		return nil, errors.WrapIf(err, "error during getting PagerDuty send resolved option")
+	}
+
+	return result, nil
 }

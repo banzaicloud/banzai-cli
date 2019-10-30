@@ -29,12 +29,21 @@ const (
 
 	passwordSecretType   = "password"
 	htPasswordSecretType = "htpasswd"
+	slackSecretType      = "slack"
+	pagerDutySecretType  = "pagerduty"
 
 	pagerDutyIntegrationEventApiV2 = "eventsApiV2"
 	pagerDutyIntegrationPrometheus = "prometheus"
 
-	alertmanagerProviderSlack     = "slack"
-	alertmanagerProviderPagerDuty = "pagerDuty"
+	alertmanagerProviderSlack             = "slack"
+	alertmanagerProviderPagerDuty         = "pagerDuty"
+	alertmanagerNotificationNameSlack     = "Slack"
+	alertmanagerNotificationNamePagerDuty = "PagerDuty"
+
+	pdIntegrationTypePrometheus      = "prometheus"
+	pdIntegrationTypePrometheusName  = "Prometheus"
+	pdIntegrationTypeEventsApiV2     = "eventsApiV2"
+	pdIntegrationTypeEventsApiV2Name = "Events API V2"
 )
 
 type baseManager struct{}
