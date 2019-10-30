@@ -21,11 +21,13 @@ import (
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/AlecAivazis/survey/v2/core"
 	"github.com/antihax/optional"
+	"github.com/mitchellh/mapstructure"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/banzaicloud/banzai-cli/internal/cli/input"
+	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 )
 
 type ActivateManager struct {
@@ -57,308 +59,295 @@ func (ActivateManager) ValidateRequest(req interface{}) error {
 }
 
 func buildExternalDNSFeatureRequest(banzaiCli cli.Cli, defaults defaults) (map[string]interface{}, error) {
-	provider, err := askDnsProvider(defaults)
+
+	// select the provider
+	p := Provider{}
+	providerInfo, err := selectProvider(&p)
 	if err != nil {
-		return nil, err
+		return nil, errors.WrapIf(err, "failed to read provider data")
 	}
 
-	providerSpec, err := askDnsProviderSpecificOptions(banzaiCli, provider, defaults)
+	// read provider specifics
+	providerInfo, err = decorateProviderSecret(banzaiCli, providerInfo)
 	if err != nil {
-		return nil, err
+		return nil, errors.WrapIf(err, "failed to read provider data")
 	}
 
-	domainFilters, err := askDomainFilter(defaults.domainFilters)
-	if err != nil {
-		return nil, err
+	externalDNS := ExternalDNS{
+		Provider: &providerInfo,
 	}
 
-	policy, err := askForPolicy(defaults.policy)
+	externalDNS, err = readExternalDNS(&externalDNS)
 	if err != nil {
-		return nil, err
+		return nil, errors.WrapIf(err, "failed to read external dns data")
 	}
 
-	sources, err := askForSources(defaults.sources)
-	if err != nil {
-		return nil, err
+	var jsonSpec map[string]interface{}
+	if err := mapstructure.Decode(externalDNS, &jsonSpec); err != nil {
+		return nil, errors.WrapIf(err, "failed to assemble spec")
 	}
 
-	txtOwner, err := askForTxtOwner(defaults.txtOwner)
-	if err != nil {
-		return nil, err
-	}
-
-	clusterDomain, err := askForClusterDomain(defaults.clusterDomain)
-	if err != nil {
-		return nil, err
-	}
-
-	return obj{
-		"externalDns": obj{
-			"provider":      providerSpec,
-			"domainFilters": domainFilters,
-			"policy":        policy,
-			"sources":       sources,
-			"txtOwnerId":    txtOwner,
-		},
-		"clusterDomain": clusterDomain,
-	}, nil
+	return jsonSpec, nil
 }
 
-func askDomainFilter(defaultValues []string) ([]string, error) {
-	var domainFilter string
-	if err := survey.AskOne(
-		&survey.Input{
-			Message: "Please provide a domain filter to match domains against",
-			Default: strings.Join(defaultValues, ","),
-			Help:    "To add multiple domains separate with commna (,) character. Example: foo.com, bar.com",
+// decorateProviderSecret decorates the selected provider with secret information
+func decorateProviderSecret(banzaiCLI cli.Cli, selectedProvider Provider) (Provider, error) {
+
+	// todo is this required?
+	providerWithSecret := selectedProvider
+
+	// collects provider specific questions
+	questions := make([]*survey.Question, 0)
+
+	secretsMap, err := getSecretsForProvider(banzaiCLI, selectedProvider.Name)
+	if err != nil {
+		return Provider{}, errors.WrapIf(err, "failed to retrieve secrets for provider")
+	}
+
+	secretIDQuestion := survey.Question{
+		Name: "SecretID",
+		Prompt: &survey.Select{
+			Message: "Please select the secret to access the DNS provider",
+			Options: Names(secretsMap),
+			Default: NameForID(secretsMap, selectedProvider.SecretID),
 		},
-		&domainFilter,
-	); err != nil {
-		return nil, errors.WrapIf(err, "failure during survey")
+		Validate:  survey.Required,
+		Transform: nameToIDTransformer(secretsMap),
 	}
 
-	filterItems := strings.Split(domainFilter, ",")
-	filters := make([]string, 0, len(filterItems))
-	for _, s := range filterItems {
-		filters = append(filters, strings.TrimSpace(s))
+	switch selectedProvider.Name {
+	case dnsBanzaiCloud:
+		// no need for secrets
+
+	case dnsRoute53:
+		questions = append(questions, &secretIDQuestion)
+	case dnsGoogle:
+		questions = append(questions, &secretIDQuestion)
+	case dnsAzure:
+		questions = append(questions, &secretIDQuestion)
+	default:
+
 	}
 
-	return filters, nil
+	if err := survey.Ask(questions, &providerWithSecret); err != nil {
+		return Provider{}, errors.WrapIf(err, "request assembly failed")
+	}
+
+	return providerWithSecret, nil
 }
 
-func askForClusterDomain(defaultClusterDomain string) (string, error) {
-	var clusterDomain string
-	if err := survey.AskOne(
-		&survey.Input{
-			Message: "Please specify the cluster's domain:",
-			Default: defaultClusterDomain,
-		},
-		&clusterDomain,
-	); err != nil {
-		return "", errors.WrapIf(err, "failed to read cluster domain")
+func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Provider, error) {
+	type providerOptions struct {
+		Project       string `json:"project,omitempty"`
+		ResourceGroup string `json:"resourceGroup,omitempty"`
 	}
 
-	return clusterDomain, nil
+	providerWithOptions := selectedProvider
+	// collects provider specific questions
+	questions := make([]*survey.Question, 0)
+
+	switch selectedProvider.Name {
+	case dnsBanzaiCloud:
+		// no need for secrets
+
+	case dnsRoute53:
+	case dnsGoogle:
+		projectsMap, err := getGoogleProjectsMap(banzaiCLI, providerWithOptions)
+		if err != nil {
+			return Provider{}, errors.WrapIf(err, "failed to get google projects")
+		}
+
+		questions = append(questions,
+			&survey.Question{
+				Name: "",
+				Prompt: &survey.Select{
+					Message: "Please select the google project",
+					Options: Names(projectsMap),
+					Default: NameForID(projectsMap, selectedProvider.Options["project"].(string)),
+				},
+				Validate:  survey.Required,
+				Transform: nameToIDTransformer(projectsMap),
+			},
+		)
+
+	case dnsAzure:
+		resourceGroups, err := getAzurResourceGroupMap(banzaiCLI, providerWithOptions)
+		if err != nil {
+			return Provider{}, errors.WrapIf(err, "failed to get azure resourceGroups")
+		}
+
+		questions = append(questions,
+			&survey.Question{
+				Name: "",
+				Prompt: &survey.Select{
+					Message: "Please select the google project",
+					Options: resourceGroups,
+					Default: selectedProvider.Options["resourcegroup"].(string),
+				},
+				Validate: survey.Required,
+			},
+		)
+	default:
+		// do nothing ?
+	}
+
+	options := providerOptions{}
+	if err := survey.Ask(questions, &options); err != nil {
+		return Provider{}, errors.WrapIf(err, "request assembly failed")
+	}
+
+	if err := mapstructure.Decode(&options, &providerWithOptions.Options); err != nil {
+		return Provider{}, errors.WrapIf(err, "failed to assemble provider options")
+	}
+
+	return providerWithOptions, nil
 }
 
-func askDnsProvider(defaults defaults) (string, error) {
-	options := make([]string, 0, len(providerMeta))
+//getGoogleProjectsMap retrieves google projects
+func getGoogleProjectsMap(banzaiCLI cli.Cli, provider Provider) (idNameMap, error) {
+
+	projects, _, err := banzaiCLI.Client().ProjectsApi.GetProjects(
+		context.Background(),
+		banzaiCLI.Context().OrganizationID(),
+		provider.SecretID) // it's assumed, that the secret id is already filled
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve google projects")
+	}
+
+	projectMap := make(idNameMap, 0)
+	for _, p := range projects.Projects {
+		projectMap[p.ProjectId] = p.Name
+	}
+
+	return projectMap, nil
+}
+
+//getGoogleProjectsMap retrieves google projects
+func getAzurResourceGroupMap(banzaiCLI cli.Cli, provider Provider) ([]string, error) {
+
+	resourceGroups, _, err := banzaiCLI.Client().InfoApi.GetResourceGroups(
+		context.Background(),
+		banzaiCLI.Context().OrganizationID(),
+		provider.SecretID)
+	if err != nil {
+		return nil, errors.WrapIf(utils.ConvertError(err), "can't list resource groups")
+	}
+
+	return resourceGroups, nil
+}
+
+func providerTransformer(ans interface{}) interface{} {
+	selected := ans.(core.OptionAnswer).Value
+	for provider, meta := range providerMeta {
+		if meta.Name == selected {
+			return core.OptionAnswer{
+				Value: provider,
+			}
+		}
+	}
+	return core.OptionAnswer{}
+}
+
+func selectProvider(providerIn *Provider) (Provider, error) {
+	retProvider := *providerIn
+
+	if providerIn == nil {
+		retProvider = Provider{}
+	}
+
+	providerOptions := make([]string, 0, len(providerMeta))
 	for _, p := range providerMeta {
-		options = append(options, p.Name)
+		providerOptions = append(providerOptions, p.Name)
 	}
 
-	var selectedProvider string
-	if err := survey.AskOne(
-		&survey.Select{
-			Message: "Please select a DNS provider:",
-			Options: options,
-			Default: defaults.provider.name,
+	providerQuestions := []*survey.Question{
+		{
+			Name: "Name",
+			Prompt: &survey.Select{
+				Message: "Please select the DNS provider",
+				Options: providerOptions,
+				Default: providerMeta[dnsBanzaiCloud].Name,
+			},
+			Validate:  survey.Required,
+			Transform: providerTransformer,
 		},
-		&selectedProvider,
-	); err != nil {
-		return "", errors.WrapIf(err, "faieled to select dns provider")
 	}
 
-	for id, p := range providerMeta {
-		if p.Name == selectedProvider {
-			return id, nil
-		}
+	if err := survey.Ask(providerQuestions, &retProvider); err != nil {
+		return Provider{}, errors.WrapIf(err, "request assembly failed")
 	}
-	return "", errors.Errorf("unsupported provider %q", selectedProvider)
+
+	return retProvider, nil
 }
 
-func askSecret(banzaiCli cli.Cli, provider string, defaultID string) (string, error) {
+func readExternalDNS(extDnsIn *ExternalDNS) (ExternalDNS, error) {
+	retExtDns := *extDnsIn
 
-	orgID := banzaiCli.Context().OrganizationID()
-	secretType := providerMeta[provider].SecretType
-	secrets, _, err := banzaiCli.Client().SecretsApi.GetSecrets(context.Background(), orgID,
-		&pipeline.GetSecretsOpts{Type_: optional.NewString(secretType)})
-	if err != nil {
-		return "", errors.Wrap(err, "failed to retrieve secrets")
+	if extDnsIn == nil {
+		retExtDns = ExternalDNS{}
 	}
 
-	// TODO (colin): add create secret option
-	if len(secrets) == 0 {
-		return "", errors.Errorf("there are no secrets with type %q", secretType)
-	}
-
-	var defaultName interface{}
-	options := make([]string, len(secrets))
-	for i, s := range secrets {
-		options[i] = s.Name
-		if s.Id == defaultID {
-			defaultName = s.Name
-		}
-	}
-
-	var secretName string
-	if err := survey.AskOne(
-		&survey.Select{
-			Message: "Please select a secret for accessing the provider:",
-			Options: options,
-			Default: defaultName,
+	providerQuestions := []*survey.Question{
+		{
+			Name: "DomainFilters",
+			Prompt: &survey.Input{
+				Message: "Please provide domain filters to match domains against",
+				Default: strings.Join(retExtDns.DomainFilters, ","),
+				Help:    "To add multiple domains separate with commna (,) character. Example: foo.com,bar.com",
+			},
 		},
-		&secretName,
-	); err != nil {
-		return "", errors.WrapIf(err, "failed to retrieve secrets")
+		{
+			Name: "Policy",
+			Prompt: &survey.Select{
+				Message: "Please select the policy for the provider:",
+				Options: []string{"sync", "upsert-only"},
+				Default: retExtDns.Policy,
+			},
+		},
+		{
+			Name: "Sources",
+			Prompt: &survey.MultiSelect{
+				Message: "Please select resource types to monitor:",
+				Options: []string{"ingress", "service"},
+				Default: retExtDns.Sources,
+			},
+		},
+		{
+			Name: "TxtOwnerId",
+			Prompt: &survey.Input{
+				Message: "Please specify the TXT record owner id:",
+				Default: retExtDns.TxtOwnerId,
+				Help:    "When using the TXT registry, a name that identifies this instance of ExternalDNS",
+			},
+		},
+	}
+
+	if err := survey.Ask(providerQuestions, &retExtDns); err != nil {
+		return ExternalDNS{}, errors.WrapIf(err, "request assembly failed")
+	}
+
+	return retExtDns, nil
+}
+
+// getSecretsForProvider retrieves the available secrets for the provider as a map (secretID -> secretName)
+func getSecretsForProvider(banzaiCLI cli.Cli, dnsProvider string) (idNameMap, error) {
+	secretMap := make(idNameMap, 0)
+
+	secrets, _, err := banzaiCLI.Client().SecretsApi.GetSecrets(
+		context.Background(),
+		banzaiCLI.Context().OrganizationID(),
+		&pipeline.GetSecretsOpts{Type_: optional.NewString(providerMeta[dnsProvider].SecretType)})
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve secrets")
+	}
+
+	if len(secrets) == 0 {
+		return nil, errors.Errorf("there are no available secrets for the provider %q", dnsProvider)
 	}
 
 	for _, s := range secrets {
-		if s.Name == secretName {
-			return s.Id, nil
-		}
+		secretMap[s.Id] = s.Name
 	}
 
-	return "", errors.Errorf("no secret with name %q", secretName)
-}
-
-func askDnsProviderSpecificOptions(banzaiCli cli.Cli, provider string, defaults defaults) (interface{}, error) {
-	orgID := banzaiCli.Context().OrganizationID()
-
-	var (
-		secretID string
-		options  providerOptions
-		err      error
-	)
-
-	switch provider {
-	case dnsBanzaiCloud:
-	case dnsRoute53:
-		secretID, err = askSecret(banzaiCli, provider, defaults.provider.secretId)
-		if err != nil {
-			return nil, errors.WrapIff(err, "failed to get secret for %q provider", provider)
-		}
-	case dnsGoogle:
-		secretID, err = askSecret(banzaiCli, provider, defaults.provider.secretId)
-		if err != nil {
-			return nil, errors.WrapIff(err, "failed to get secret for %q provider", provider)
-		}
-
-		project, err := askGoogleProject(banzaiCli, secretID, orgID, defaults.provider.options["project"])
-		if err != nil {
-			return nil, err
-		}
-
-		options.Project = project
-
-	case dnsAzure:
-		secretID, err = askSecret(banzaiCli, provider, defaults.provider.secretId)
-		if err != nil {
-			return nil, errors.WrapIff(err, "failed to get secret for %q provider", provider)
-		}
-
-		resourceGroup, err := input.AskResourceGroup(banzaiCli, orgID, secretID, defaults.provider.options["resourceGroup"])
-		if err != nil {
-			return nil, err
-		}
-
-		options.ResourceGroup = resourceGroup
-
-	default:
-		return nil, errors.Errorf("unsupported provider: %q", provider)
-	}
-
-	return activateCustomRequest{
-		Name:     provider,
-		SecretID: secretID,
-		Options:  options,
-	}, nil
-}
-
-func askGoogleProject(banzaiCli cli.Cli, secretID string, orgID int32, defaultID string) (string, error) {
-	projects, _, err := banzaiCli.Client().ProjectsApi.GetProjects(context.Background(), orgID, secretID)
-	if err != nil {
-		return "", errors.Wrap(err, "failed to retrieve google projects")
-	}
-
-	var defaultName interface{}
-	options := make([]string, len(projects.Projects))
-	for i, p := range projects.Projects {
-		options[i] = p.Name
-		if p.ProjectId == defaultID {
-			defaultName = p.Name
-		}
-	}
-
-	var projectName string
-	if err := survey.AskOne(
-		&survey.Select{
-			Message: "Please select a project:",
-			Options: options,
-			Default: defaultName,
-		},
-		&projectName,
-	); err != nil {
-		return "", errors.WrapIf(err, "failed to retrieve projects")
-	}
-
-	for _, p := range projects.Projects {
-		if p.Name == projectName {
-			return p.ProjectId, nil
-		}
-	}
-
-	return "", errors.Errorf("unknown project name %q", projectName)
-}
-
-func askForPolicy(defaultPolicyValue string) (string, error) {
-	var policy string
-
-	if err := survey.AskOne(
-		&survey.Select{
-			Message: "Please select the policy for the provider:",
-			Options: []string{"sync", "upsert-only"},
-			Default: defaultPolicyValue,
-		},
-		&policy,
-	); err != nil {
-		return "", errors.WrapIf(err, "failed to select policy")
-	}
-
-	return policy, nil
-}
-
-func askForSources(defaultSources []string) ([]string, error) {
-	var sources []string
-
-	if err := survey.AskOne(
-		&survey.MultiSelect{
-			Message: "Please select resource types to monitor:",
-			Options: []string{"ingress", "service"},
-			Default: defaultSources,
-		},
-		&sources,
-	); err != nil {
-		return nil, errors.WrapIf(err, "failed to select sources")
-	}
-
-	return sources, nil
-}
-
-func askForTxtOwner(defaultTxtOwner string) (string, error) {
-	var txtOwner string
-
-	if err := survey.AskOne(
-		&survey.Input{
-			Message: "Please specify the TXT owner id for the external dns instance:",
-			Default: defaultTxtOwner,
-			Help:    "When using the TXT registry, a name that identifies this instance of ExternalDNS",
-		},
-		&txtOwner,
-	); err != nil {
-		return "", errors.WrapIf(err, "failed to read in the txt owner")
-	}
-
-	return txtOwner, nil
-}
-
-type activateCustomRequest struct {
-	Name     string          `json:"name"`
-	SecretID string          `json:"secretId"`
-	Options  providerOptions `json:"options,omitempty"`
-}
-
-type providerOptions struct {
-	Project       string `json:"project,omitempty"`
-	ResourceGroup string `json:"resourceGroup,omitempty"`
+	return secretMap, nil
 }

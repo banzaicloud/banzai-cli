@@ -15,7 +15,10 @@
 package dns
 
 import (
+	"strings"
+
 	"emperror.dev/errors"
+	"github.com/AlecAivazis/survey/v2/core"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -29,8 +32,6 @@ const (
 )
 
 var (
-	providers = []string{dnsBanzaiCloud, dnsRoute53, dnsAzure, dnsGoogle}
-
 	providerMeta = map[string]struct {
 		Name       string
 		SecretType string
@@ -53,8 +54,6 @@ var (
 		},
 	}
 )
-
-type obj = map[string]interface{}
 
 type baseManager struct{}
 
@@ -113,8 +112,29 @@ func (e ExternalDNS) Validate() error {
 	return validationErrors
 }
 
-func (p Provider) Validate() error {
+func (e *ExternalDNS) WriteAnswer(field string, value interface{}) error {
+	// todo use reflection here
+	switch field {
+	case "DomainFilters":
+		e.DomainFilters = strings.Split(value.(string), ",")
+	case "Policy ":
+		e.Policy = value.(string)
+	case "Sources":
+		answers, _ := value.([]core.OptionAnswer)
+		srcs := make([]string, 0)
+		for _, ov := range answers {
+			srcs = append(srcs, ov.Value)
+		}
+		e.Sources = srcs
+	case "TxtOwnerId":
+		e.TxtOwnerId = value.(string)
+	default:
+	}
 
+	return nil
+}
+
+func (p Provider) Validate() error {
 	var validationErrors error
 
 	if p.Name != dnsBanzaiCloud {
@@ -177,7 +197,49 @@ type defaults struct {
 	}
 	clusterDomain string
 	domainFilters []string
-	policy string
-	txtOwner string
-	sources []string
+	policy        string
+	txtOwner      string
+	sources       []string
+}
+
+// helper type alias for id -> name maps
+type idNameMap = map[string]string
+
+func Names(sm idNameMap) []string {
+	names := make([]string, len(sm))
+	for _, name := range sm {
+		names = append(names, name)
+	}
+	return names
+}
+
+func IDForName(sm idNameMap, name string) string {
+	for id, n := range sm {
+		if n == name {
+			return id
+		}
+	}
+	return ""
+}
+
+func NameForID(sm idNameMap, idOf string) string {
+	for id, n := range sm {
+		if id == idOf {
+			return n
+		}
+	}
+	return ""
+}
+
+func nameToIDTransformer(sm idNameMap) func(name interface{}) interface{} {
+	return func(name interface{}) interface{} {
+		for id, n := range sm {
+			if n == name.(core.OptionAnswer).Value {
+				return core.OptionAnswer{
+					Value: id,
+				}
+			}
+		}
+		return nil
+	}
 }
