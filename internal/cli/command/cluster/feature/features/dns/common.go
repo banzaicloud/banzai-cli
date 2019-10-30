@@ -188,20 +188,6 @@ func validateSpec(specObj map[string]interface{}) error {
 type specResponse struct {
 }
 
-// type for porviding default input for feature requests
-type defaults struct {
-	provider struct {
-		name     string
-		options  map[string]string
-		secretId string
-	}
-	clusterDomain string
-	domainFilters []string
-	policy        string
-	txtOwner      string
-	sources       []string
-}
-
 // helper type alias for id -> name maps
 type idNameMap = map[string]string
 
@@ -211,15 +197,6 @@ func Names(sm idNameMap) []string {
 		names = append(names, name)
 	}
 	return names
-}
-
-func IDForName(sm idNameMap, name string) string {
-	for id, n := range sm {
-		if n == name {
-			return id
-		}
-	}
-	return ""
 }
 
 func NameForID(sm idNameMap, idOf string) string {
