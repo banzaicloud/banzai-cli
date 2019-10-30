@@ -101,6 +101,11 @@ func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.A
 			"prometheus":   prometheus,
 			"alertmanager": alertmanager,
 			"pushgateway":  pushgateway,
+			"exporters": exportersSpec{
+				Enabled:          true,
+				NodeExporter:     true,
+				KubeStateMetrics: true,
+			},
 		},
 	}, nil
 }
