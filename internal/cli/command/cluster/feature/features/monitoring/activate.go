@@ -31,7 +31,14 @@ type ActivateManager struct {
 
 func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.ActivateClusterFeatureRequest, error) {
 
-	grafana, err := askGrafana(banzaiCLI, grafanaAndPrometheusSpec{})
+	grafana, err := askGrafana(banzaiCLI, grafanaSpec{
+		Enabled:    true,
+		Dashboards: true,
+		Ingress: baseIngressSpec{
+			Enabled: true,
+			Path:    "/grafana",
+		},
+	})
 	if err != nil {
 		return nil, errors.WrapIf(err, "error during getting Grafana options")
 	}
@@ -68,90 +75,100 @@ func NewActivateManager() *ActivateManager {
 	return &ActivateManager{}
 }
 
-func askIngress(compType string, defaults baseSpec) (*baseSpec, error) {
-	var isEnabled bool
+func askIngress(compType string, defaults baseIngressSpec) (*baseIngressSpec, error) {
 	var isIngressEnabled bool
-
 	var domain string
 	var path string
 
 	if err := doQuestions([]questionMaker{
 		questionConfirm{
 			questionBase: questionBase{
-				message: fmt.Sprintf("Do you want to enable %s?", compType),
+				message: fmt.Sprintf("Do you want to enable %s Ingress?", compType),
+			},
+			defaultValue: defaults.Enabled,
+			output:       &isIngressEnabled,
+		},
+	}); err != nil {
+		return nil, errors.WrapIf(err, fmt.Sprintf("error during getting %s ingress enabled", compType))
+	}
+
+	if isIngressEnabled {
+
+		if err := doQuestions([]questionMaker{
+			questionInput{
+				questionBase: questionBase{
+					message: fmt.Sprintf("Please provide %s Ingress domain:", compType),
+					help:    "Leave empty to use cluster's IP",
+				},
+				defaultValue: defaults.Domain,
+				output:       &domain,
+			},
+			questionInput{
+				questionBase: questionBase{
+					message: fmt.Sprintf("Please provide %s Ingress path:", compType),
+				},
+				defaultValue: defaults.Path,
+				output:       &path,
+			},
+		}); err != nil {
+			return nil, errors.WrapIf(err, "error during asking ingress fields")
+		}
+
+	}
+	return &baseIngressSpec{
+		Enabled: isIngressEnabled,
+		Domain:  domain,
+		Path:    path,
+	}, nil
+}
+
+func askGrafana(banzaiCLI cli.Cli, defaults grafanaSpec) (*grafanaSpec, error) {
+	var isEnabled bool
+	if err := doQuestions([]questionMaker{
+		questionConfirm{
+			questionBase: questionBase{
+				message: "Do you want to enable Grafana?",
 			},
 			defaultValue: defaults.Enabled,
 			output:       &isEnabled,
 		},
 	}); err != nil {
-		return nil, errors.WrapIf(err, fmt.Sprintf("error during getting %s enabled", compType))
+		return nil, errors.WrapIf(err, "error during getting Grafana enabled")
 	}
 
-	if isEnabled {
-		if err := doQuestions([]questionMaker{
-			questionConfirm{
-				questionBase: questionBase{
-					message: fmt.Sprintf("Do you want to enable %s Ingress?", compType),
-				},
-				defaultValue: defaults.Public.Enabled,
-				output:       &isIngressEnabled,
-			},
-		}); err != nil {
-			return nil, errors.WrapIf(err, fmt.Sprintf("error during getting %s ingress enabled", compType))
-		}
-
-		if isIngressEnabled {
-
-			if err := doQuestions([]questionMaker{
-				questionInput{
-					questionBase: questionBase{
-						message: fmt.Sprintf("Please provide %s Ingress domain:", compType),
-						help:    "Leave empty to use cluster's IP",
-					},
-					defaultValue: defaults.Public.Domain,
-					output:       &domain,
-				},
-				questionInput{
-					questionBase: questionBase{
-						message: fmt.Sprintf("Please provide %s Ingress path:", compType),
-					},
-					defaultValue: defaults.Public.Path,
-					output:       &path,
-				},
-			}); err != nil {
-				return nil, errors.WrapIf(err, "error during asking ingress fields")
-			}
-
-		}
-	}
-	return &baseSpec{
+	var result = &grafanaSpec{
 		Enabled: isEnabled,
-		Public: ingressSpec{
-			Enabled: isIngressEnabled,
-			Domain:  domain,
-			Path:    path,
-		},
-	}, nil
-}
-
-func askGrafana(banzaiCLI cli.Cli, defaults grafanaAndPrometheusSpec) (*grafanaAndPrometheusSpec, error) {
-	grafanaBase, err := askIngress("Grafana", defaults.baseSpec)
-	if err != nil {
-		return nil, errors.WrapIf(err, "error during getting Grafana options")
 	}
-
-	var secretId string
-	if grafanaBase.Enabled {
-		secretId, err = askSecret(banzaiCLI, passwordSecretType, defaults.SecretId)
+	if isEnabled {
+		var err error
+		// secret
+		result.SecretId, err = askSecret(banzaiCLI, passwordSecretType, defaults.SecretId)
 		if err != nil {
 			return nil, errors.WrapIf(err, "error during getting Grafana secret")
 		}
+
+		// ingress
+		ingressSpec, err := askIngress("Grafana", defaults.Ingress)
+		if err != nil {
+			return nil, errors.WrapIf(err, "error during getting Grafana ingress options")
+		}
+		result.Ingress = *ingressSpec
+
+		// default dashboards
+		if err := doQuestions([]questionMaker{
+			questionConfirm{
+				questionBase: questionBase{
+					message: "Do you want to add default dashboards to Grafana?",
+				},
+				defaultValue: defaults.Dashboards,
+				output:       &result.Dashboards,
+			},
+		}); err != nil {
+			return nil, errors.WrapIf(err, "error during getting default dashboards")
+		}
 	}
 
-	return &grafanaAndPrometheusSpec{
-		baseSpec: *grafanaBase,
-		SecretId: secretId,
-	}, nil
+	return result, nil
 }
 
 func askPrometheus(banzaiCLI cli.Cli, defaults grafanaAndPrometheusSpec) (*grafanaAndPrometheusSpec, error) {
