@@ -16,74 +16,267 @@ package monitoring
 
 import (
 	"fmt"
+	"regexp"
+
+	"emperror.dev/errors"
+	"github.com/mitchellh/mapstructure"
 )
 
 type featureSpec struct {
-	Grafana      grafanaAndPrometheusSpec `json:"grafana" mapstructure:"grafana"`
-	Alertmanager alertmanagerSpec         `json:"alertmanager" mapstructure:"alertmanager"`
-	Prometheus   grafanaAndPrometheusSpec `json:"prometheus" mapstructure:"prometheus"`
+	Prometheus   prometheusSpec   `json:"prometheus" mapstructure:"prometheus"`
+	Grafana      grafanaSpec      `json:"grafana" mapstructure:"grafana"`
+	Exporters    exportersSpec    `json:"exporters" mapstructure:"exporters"`
+	Alertmanager alertmanagerSpec `json:"alertmanager" mapstructure:"alertmanager"`
+	Pushgateway  pushgatewaySpec  `json:"pushgateway" mapstructure:"pushgateway"`
 }
 
-type baseSpec struct {
-	Enabled bool        `json:"enabled" mapstructure:"enabled"`
-	Public  ingressSpec `json:"public,omitempty" mapstructure:"public"`
+type prometheusSpec struct {
+	Enabled bool                  `json:"enabled" mapstructure:"enabled"`
+	Storage storageSpec           `json:"storage" mapstructure:"storage"`
+	Ingress ingressSpecWithSecret `json:"ingress" mapstructure:"ingress"`
 }
 
-type grafanaAndPrometheusSpec struct {
-	baseSpec `mapstructure:",squash"`
-	SecretId string `json:"secretId,omitempty" mapstructure:"secretId"`
+type grafanaSpec struct {
+	Enabled    bool            `json:"enabled" mapstructure:"enabled"`
+	SecretId   string          `json:"secretId" mapstructure:"secretId"`
+	Dashboards bool            `json:"defaultDashboards" mapstructure:"defaultDashboards"`
+	Ingress    baseIngressSpec `json:"ingress" mapstructure:"ingress"`
+}
+
+type storageSpec struct {
+	Class     string `json:"class" mapstructure:"class"`
+	Size      uint   `json:"size" mapstructure:"size"`
+	Retention string `json:"retention" mapstructure:"retention"`
+}
+
+type ingressSpecWithSecret struct {
+	baseIngressSpec `mapstructure:",squash"`
+	SecretId        string `json:"secretId" mapstructure:"secretId"`
+}
+
+type baseIngressSpec struct {
+	Enabled bool   `json:"enabled" mapstructure:"enabled"`
+	Domain  string `json:"domain" mapstructure:"domain"`
+	Path    string `json:"path" mapstructure:"path"`
+}
+
+type exportersSpec struct {
+	Enabled          bool
+	NodeExporter     bool `json:"nodeExporter" mapstructure:"nodeExporter"`
+	KubeStateMetrics bool `json:"kubeStateMetrics" mapstructure:"kubeStateMetrics"`
 }
 
 type alertmanagerSpec struct {
-	baseSpec `mapstructure:",squash"`
-	Provider providerSpec `json:"provider" mapstructure:"provider"`
+	Enabled  bool                   `json:"enabled" mapstructure:"enabled"`
+	Provider map[string]interface{} `json:"provider" mapstructure:"provider"`
+	Ingress  ingressSpecWithSecret  `json:"ingress" mapstructure:"ingress"`
 }
 
-type providerSpec struct {
-	Slack     slackPropertiesSpec     `json:"slack" mapstructure:"slack"`
-	Pagerduty pagerdutyPropertiesSpec `json:"pagerduty" mapstructure:"pagerduty"`
-	Email     emailPropertiesSpec     `json:"email" mapstructure:"email"`
+type pushgatewaySpec struct {
+	Enabled bool                  `json:"enabled" mapstructure:"enabled"`
+	Ingress ingressSpecWithSecret `json:"ingress" mapstructure:"ingress"`
 }
 
-type slackPropertiesSpec struct {
+type pagerDutySpec struct {
+	Enabled         bool   `json:"enabled" mapstructure:"enabled"`
+	Url             string `json:"url" mapstructure:"url"`
+	SecretId        string `json:"secretId" mapstructure:"secretId"`
+	IntegrationType string `json:"integrationType" mapstructure:"integrationType"`
+	SendResolved    bool   `json:"sendResolved" mapstructure:"sendResolved"`
+}
+
+type slackSpec struct {
 	Enabled      bool   `json:"enabled" mapstructure:"enabled"`
-	ApiUrl       string `json:"apiUrl,omitempty" mapstructure:"apiUrl"`
-	Channel      string `json:"channel,omitempty" mapstructure:"channel"`
+	SecretId     string `json:"secretId" mapstructure:"secretId"`
+	Channel      string `json:"channel" mapstructure:"channel"`
 	SendResolved bool   `json:"sendResolved" mapstructure:"sendResolved"`
 }
 
-type emailPropertiesSpec struct {
-	Enabled      bool   `json:"enabled" mapstructure:"enabled"`
-	To           string `json:"to,omitempty" mapstructure:"to"`
-	From         string `json:"from,omitempty" mapstructure:"from"`
-	SendResolved bool   `json:"sendResolved" mapstructure:"sendResolved"`
+func (s featureSpec) Validate() error {
+	// Prometheus validation
+	if err := s.Prometheus.Validate(); err != nil {
+		return err
+	}
+
+	// Grafana validation
+	if err := s.Grafana.Validate(); err != nil {
+		return err
+	}
+
+	// Alertmanager validation
+	if err := s.Alertmanager.Validate(); err != nil {
+		return err
+	}
+
+	// Pushgateway validation
+	if err := s.Pushgateway.Validate(); err != nil {
+		return err
+	}
+
+	if !s.Exporters.Enabled {
+		return cannotDisabledError{fieldName: "exporters"}
+	}
+
+	if !s.Exporters.KubeStateMetrics {
+		return cannotDisabledError{fieldName: "kubeStateMetrics"}
+	}
+
+	if !s.Exporters.NodeExporter {
+		return cannotDisabledError{fieldName: "nodeExporter"}
+	}
+
+	return nil
 }
 
-type pagerdutyPropertiesSpec struct {
-	Enabled      bool   `json:"enabled" mapstructure:"enabled"`
-	RoutingKey   string `json:"routingKey,omitempty" mapstructure:"routingKey"`
-	ServiceKey   string `json:"serviceKey,omitempty" mapstructure:"serviceKey"`
-	Url          string `json:"url,omitempty" mapstructure:"url"`
-	SendResolved bool   `json:"sendResolved" mapstructure:"sendResolved"`
+func (s prometheusSpec) Validate() error {
+	if !s.Enabled {
+		// Prometheus cannot be disabled
+		return cannotDisabledError{fieldName: "prometheus"}
+	}
+
+	// ingress validation
+	if err := s.Ingress.Validate(ingressTypePrometheus); err != nil {
+		return errors.WrapIf(err, "error during validate Prometheus ingress")
+	}
+
+	// storage validation
+	if err := s.Storage.Validate(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-type ingressSpec struct {
-	Enabled bool   `json:"enabled" mapstructure:"enabled"`
-	Domain  string `json:"domain,omitempty" mapstructure:"domain"`
-	Path    string `json:"path,omitempty" mapstructure:"path"`
+func (s ingressSpecWithSecret) Validate(ingressType string) error {
+	return s.baseIngressSpec.Validate(ingressType)
 }
 
-type requiredFieldError struct {
-	fieldName string
+func (s baseIngressSpec) Validate(ingressType string) error {
+	if s.Enabled {
+		if s.Path == "" {
+			return requiredFieldError{fieldName: fmt.Sprintf("%s path", ingressType)}
+		}
+	}
+
+	return nil
 }
 
-func (e requiredFieldError) Error() string {
-	return fmt.Sprintf("%q cannot be empty", e.fieldName)
+func (s storageSpec) Validate() error {
+	if s.Size < 0 {
+		return errors.New("storage size must be a positive number")
+	}
+
+	if s.Retention == "" {
+		return requiredFieldError{fieldName: "retention"}
+	}
+
+	matched, err := regexp.MatchString("[0-9]+(ms|s|m|h|d|w|y)", s.Retention)
+	if err != nil {
+		return errors.WrapIf(err, "failed to check retention field")
+	}
+	if !matched {
+		return errors.New("invalid retention field")
+	}
+
+	return nil
 }
 
-func (s ingressSpec) Validate(ingressType string) error {
-	if s.Path == "" {
-		return requiredFieldError{fieldName: fmt.Sprintf("%s path", ingressType)}
+func (s grafanaSpec) Validate() error {
+	if s.Enabled {
+		if err := s.Ingress.Validate(ingressTypeGrafana); err != nil {
+			return errors.WrapIf(err, "error during validate Grafana ingress")
+		}
+	}
+
+	return nil
+}
+
+func (s alertmanagerSpec) Validate() error {
+	if s.Enabled {
+		// ingress validation
+		if err := s.Ingress.Validate(ingressTypeAlertmanager); err != nil {
+			return err
+		}
+
+		var hasProvider bool
+		// validate Slack notification provider
+		if slackProv, ok := s.Provider[alertmanagerProviderSlack]; ok {
+			var slack slackSpec
+			if err := mapstructure.Decode(slackProv, &slack); err != nil {
+				return errors.WrapIf(err, "failed to bind Slack config")
+			}
+			if slack.Enabled {
+				hasProvider = true
+			}
+			if err := slack.Validate(); err != nil {
+				return errors.WrapIf(err, "error during validating Slack")
+			}
+		}
+
+		// validate PagerDuty notification provider
+		if pagerDutyProv, ok := s.Provider[alertmanagerProviderPagerDuty]; ok {
+			var pd pagerDutySpec
+			if err := mapstructure.Decode(pagerDutyProv, &pd); err != nil {
+				return errors.WrapIf(err, "failed to bind PagerDuty config")
+			}
+			if pd.Enabled {
+				hasProvider = true
+			}
+			if err := pd.Validate(); err != nil {
+				return errors.WrapIf(err, "error during validating PagerDuty")
+			}
+		}
+
+		if !hasProvider {
+			return errors.New("at least one notification provider required")
+		}
+
+	}
+
+	return nil
+}
+
+func (s slackSpec) Validate() error {
+	if s.Enabled {
+		if s.SecretId == "" {
+			return requiredFieldError{fieldName: "secretId"}
+		}
+
+		if s.Channel == "" {
+			return requiredFieldError{fieldName: "channel"}
+		}
+	}
+
+	return nil
+}
+
+func (s pagerDutySpec) Validate() error {
+	if s.Enabled {
+		if s.SecretId == "" {
+			return requiredFieldError{fieldName: "secretId"}
+		}
+
+		if s.Url == "" {
+			return requiredFieldError{fieldName: "url"}
+		}
+
+		if s.IntegrationType == "" {
+			return requiredFieldError{fieldName: "integrationType"}
+		}
+
+		if s.IntegrationType != pagerDutyIntegrationEventApiV2 && s.IntegrationType != pagerDutyIntegrationPrometheus {
+			return errors.New(fmt.Sprintf("integration type should be only just: %s or %s", pagerDutyIntegrationEventApiV2, pagerDutyIntegrationPrometheus))
+		}
+	}
+
+	return nil
+}
+
+func (s pushgatewaySpec) Validate() error {
+	if s.Enabled {
+		if err := s.Ingress.Validate(ingressTypePushgateway); err != nil {
+			return err
+		}
 	}
 
 	return nil

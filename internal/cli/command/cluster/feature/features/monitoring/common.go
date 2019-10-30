@@ -25,8 +25,15 @@ const (
 	ingressTypeGrafana      = "Grafana"
 	ingressTypePrometheus   = "Prometheus"
 	ingressTypeAlertmanager = "Alertmanager"
+	ingressTypePushgateway  = "Pushgateway"
 
 	passwordSecretType = "password"
+
+	pagerDutyIntegrationEventApiV2 = "eventsApiV2"
+	pagerDutyIntegrationPrometheus = "prometheus"
+
+	alertmanagerProviderSlack     = "slack"
+	alertmanagerProviderPagerDuty = "pagerDuty"
 )
 
 type baseManager struct{}
@@ -47,26 +54,5 @@ func validateSpec(specObj map[string]interface{}) error {
 		return errors.WrapIf(err, "feature specification does not conform to schema")
 	}
 
-	// Grafana spec validation
-	if spec.Grafana.Enabled && spec.Grafana.Public.Enabled {
-		if err := spec.Grafana.Public.Validate(ingressTypeGrafana); err != nil {
-			return err
-		}
-	}
-
-	// Prometheus spec validation
-	if spec.Prometheus.Enabled && spec.Prometheus.Public.Enabled {
-		if err := spec.Prometheus.Public.Validate(ingressTypePrometheus); err != nil {
-			return err
-		}
-	}
-
-	// Alertmanager spec validation
-	if spec.Alertmanager.Enabled && spec.Alertmanager.Public.Enabled {
-		if err := spec.Alertmanager.Public.Validate(ingressTypeAlertmanager); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return spec.Validate()
 }
