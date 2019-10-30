@@ -53,14 +53,20 @@ func (UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.
 		return errors.WrapIf(err, "error during getting Prometheus options")
 	}
 
-	alertmanager, err := askAlertManager(spec.Alertmanager)
+	alertmanager, err := askAlertmanager(banzaiCLI, spec.Alertmanager)
 	if err != nil {
 		return errors.WrapIf(err, "error during getting Alertmanager options")
+	}
+
+	pushgateway, err := askPushgateway(banzaiCLI, spec.Pushgateway)
+	if err != nil {
+		return errors.WrapIf(err, "error during getting Pushgateway options")
 	}
 
 	req.Spec["grafana"] = grafana
 	req.Spec["prometheus"] = prometheus
 	req.Spec["alertmanager"] = alertmanager
+	req.Spec["pushgateway"] = pushgateway
 
 	return nil
 }
