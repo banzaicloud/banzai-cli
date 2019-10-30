@@ -228,7 +228,7 @@ func buildInteractiveCreateSecretRequest(banzaiCli cli.Cli, options *createSecre
 		return readCreateSecretRequestFromFile(options.file, out)
 	}
 
-	allowedTypes, _, err := banzaiCli.Client().SecretsApi.AllowedSecretsTypes(context.Background())
+	secretTypes, _, err := banzaiCli.Client().SecretsApi.ListSecretTypes(context.Background())
 	if err != nil {
 		cli.LogAPIError("could not list secret types", err, nil)
 		log.Fatalf("could not list secret types: %v", err)
@@ -236,13 +236,13 @@ func buildInteractiveCreateSecretRequest(banzaiCli cli.Cli, options *createSecre
 
 	surveySecretName(options)
 
-	surveySecretType(options, allowedTypes)
+	surveySecretType(options, secretTypes)
 
 	values, err := importLocalCredential(banzaiCli, options)
 	if err != nil {
 		return err
 	} else if values == nil {
-		if err := surveySecretFields(options, allowedTypes, out); err != nil {
+		if err := surveySecretFields(options, secretTypes, out); err != nil {
 			log.Fatalf("could not get secret fields: %v", err)
 		}
 	} else {
@@ -346,10 +346,10 @@ func surveySecretName(options *createSecretOptions) {
 }
 
 // surveySecretType starts to get secret type from the user
-func surveySecretType(options *createSecretOptions, allowedTypes map[string]pipeline.AllowedSecretTypeResponse) {
+func surveySecretType(options *createSecretOptions, secretTypes map[string]pipeline.SecretTypeResponse) {
 	if len(options.secretType) == 0 {
 		var typeOptions []string
-		for name := range allowedTypes {
+		for name := range secretTypes {
 			typeOptions = append(typeOptions, name)
 		}
 
@@ -363,13 +363,13 @@ func surveySecretType(options *createSecretOptions, allowedTypes map[string]pipe
 }
 
 // surveySecretFields starts to get secret fields base on selected secret type and pipeline response
-func surveySecretFields(options *createSecretOptions, allowedTypes map[string]pipeline.AllowedSecretTypeResponse, out *pipeline.CreateSecretRequest) error {
+func surveySecretFields(options *createSecretOptions, secretTypes map[string]pipeline.SecretTypeResponse, out *pipeline.CreateSecretRequest) error {
 	if options.secretType == TypeGeneric {
 		surveyGenericSecretType(out)
-	} else if allowedSecret, ok := allowedTypes[options.secretType]; ok {
+	} else if secretType, ok := secretTypes[options.secretType]; ok {
 
 		// set fields
-		fields := allowedSecret.Fields
+		fields := secretType.Fields
 		questions := make([]secretFieldQuestion, len(fields))
 		for index, f := range fields {
 			questions[index] = secretFieldQuestion{
