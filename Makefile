@@ -21,7 +21,7 @@ endif
 TEST_FORMAT = short-verbose
 endif
 
-PIPELINE_VERSION = 18142989e88a64eb4df0167b68a039e7375751ec
+PIPELINE_VERSION = 0.31.0
 CLOUDINFO_VERSION = 0.7.8
 TELESCOPES_VERSION = 0.5.2
 
@@ -31,7 +31,7 @@ GOLANGCI_VERSION = 1.18.0
 LICENSEI_VERSION = 0.1.0
 GORELEASER_VERSION = 0.112.2
 PACKR_VERSION = 2.6.0
-OPENAPI_GENERATOR_VERSION = PR1869
+OPENAPI_GENERATOR_VERSION = v4.1.3
 
 GOLANG_VERSION = 1.12
 
@@ -125,15 +125,16 @@ license-cache: bin/licensei ## Generate license cache
 
 .PHONY: generate-pipeline-client
 generate-pipeline-client: ## Generate client from Pipeline OpenAPI spec
-	curl https://raw.githubusercontent.com/banzaicloud/pipeline/${PIPELINE_VERSION}/docs/openapi/pipeline.yaml > pipeline-openapi.yaml
+	curl https://raw.githubusercontent.com/banzaicloud/pipeline/${PIPELINE_VERSION}/apis/pipeline/pipeline.yaml > pipeline-openapi.yaml
 	rm -rf .gen/pipeline
-	docker run --rm -v ${PWD}:/local banzaicloud/openapi-generator-cli:${OPENAPI_GENERATOR_VERSION} generate \
+	docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli:${OPENAPI_GENERATOR_VERSION} generate \
 	--additional-properties packageName=pipeline \
 	--additional-properties withGoCodegenComment=true \
 	-i /local/pipeline-openapi.yaml \
 	-g go \
 	-o /local/.gen/pipeline
 	echo "package pipeline\n\nconst PipelineVersion = \"${PIPELINE_VERSION}\"" > .gen/pipeline/version.go
+	rm .gen/pipeline/{.travis.yml,git_push.sh,go.*}
 
 .PHONY: generate-cloudinfo-client
 generate-cloudinfo-client: ## Generate client from Cloudinfo OpenAPI spec

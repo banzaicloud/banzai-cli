@@ -206,13 +206,13 @@ func buildInteractiveEKSCreateRequest(banzaiCli cli.Cli, out map[string]interfac
 		return errors.Wrap(err, "failed to retrieve recommendation for EKS")
 	}
 
-	eksNodePools:= make(map[string]pipeline.NodePoolsAmazon, 0)
+	eksNodePools:= make(map[string]pipeline.EksNodePool, 0)
 	for i, np := range recommendationResponse.NodePools {
 		if np.Role != "worker" {
 			continue
 		}
 		poolName := fmt.Sprintf("%s-%v", np.Role, i)
-		eksNodePool := pipeline.NodePoolsAmazon{
+		eksNodePool := pipeline.EksNodePool{
 			InstanceType: np.Vm.Type,
 			Autoscaling:  false,
 			Count:     int32(np.SumNodes),
