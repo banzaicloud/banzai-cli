@@ -190,7 +190,7 @@ func askGrafana(banzaiCLI cli.Cli, defaults grafanaSpec) (*grafanaSpec, error) {
 	if isEnabled {
 		var err error
 		// secret
-		result.SecretId, err = askSecret(banzaiCLI, passwordSecretType, defaults.SecretId)
+		result.SecretId, err = askSecret(banzaiCLI, passwordSecretType, defaults.SecretId, true)
 		if err != nil {
 			return nil, errors.WrapIf(err, "error during getting Grafana secret")
 		}
@@ -267,7 +267,7 @@ func askPrometheus(banzaiCLI cli.Cli, defaults prometheusSpec) (*prometheusSpec,
 	result.Ingress.baseIngressSpec = *ingressSpec
 
 	if ingressSpec.Enabled {
-		result.Ingress.SecretId, err = askSecret(banzaiCLI, htPasswordSecretType, defaults.Ingress.SecretId)
+		result.Ingress.SecretId, err = askSecret(banzaiCLI, htPasswordSecretType, defaults.Ingress.SecretId, true)
 		if err != nil {
 			return nil, errors.WrapIf(err, "error during getting secret for Prometheus ingress")
 		}
@@ -354,7 +354,7 @@ func askAlertmanager(banzaiCLI cli.Cli, defaults alertmanagerSpec) (*alertmanage
 		result.Ingress.baseIngressSpec = *ingressSpec
 
 		if ingressSpec.Enabled {
-			result.Ingress.SecretId, err = askSecret(banzaiCLI, htPasswordSecretType, defaults.Ingress.SecretId)
+			result.Ingress.SecretId, err = askSecret(banzaiCLI, htPasswordSecretType, defaults.Ingress.SecretId, true)
 			if err != nil {
 				return nil, errors.WrapIf(err, "error during getting secret for Alertmanager ingress")
 			}
@@ -364,7 +364,7 @@ func askAlertmanager(banzaiCLI cli.Cli, defaults alertmanagerSpec) (*alertmanage
 	return result, nil
 }
 
-func askSecret(banzaiCLI cli.Cli, secretType, defaultValue string) (string, error) {
+func askSecret(banzaiCLI cli.Cli, secretType, defaultValue string, withSkipOption bool) (string, error) {
 
 	orgID := banzaiCLI.Context().OrganizationID()
 	secrets, _, err := banzaiCLI.Client().SecretsApi.GetSecrets(
@@ -375,7 +375,7 @@ func askSecret(banzaiCLI cli.Cli, secretType, defaultValue string) (string, erro
 		},
 	)
 	if err != nil {
-		return "", errors.WrapIf(err, "failed to get Vault secret(s)")
+		return "", errors.WrapIfWithDetails(err, "failed to get secret(s)", "secretType", secretType)
 	}
 
 	if len(secrets) == 0 {
@@ -386,12 +386,23 @@ func askSecret(banzaiCLI cli.Cli, secretType, defaultValue string) (string, erro
 	const skip = "skip"
 
 	var secretName string
-	var defaultSecretName = skip
-	secretOptions := make([]string, len(secrets)+1)
-	secretIds := make(map[string]string, len(secrets))
-	secretOptions[0] = skip
+	var defaultSecretName string
+	var secretLen = len(secrets)
+	var secretIds = make(map[string]string, secretLen)
+	if withSkipOption {
+		defaultSecretName = skip
+		secretLen = secretLen + 1
+	}
+	secretOptions := make([]string, secretLen)
+	if withSkipOption {
+		secretOptions[0] = skip
+	}
 	for i, s := range secrets {
-		secretOptions[i+1] = s.Name
+		var idx = i
+		if withSkipOption {
+			idx = idx + 1
+		}
+		secretOptions[idx] = s.Name
 		secretIds[s.Name] = s.Id
 		if s.Id == defaultValue {
 			defaultSecretName = s.Name
@@ -428,7 +439,7 @@ func askNotificationProviderSlack(banzaiCLI cli.Cli, defaultsInterface interface
 	var result = &slackSpec{
 		Enabled: true,
 	}
-	result.SecretId, err = askSecret(banzaiCLI, slackSecretType, defaults.SecretId)
+	result.SecretId, err = askSecret(banzaiCLI, slackSecretType, defaults.SecretId, false)
 	if err != nil {
 		return nil, errors.WrapIf(err, "error during getting Slack secret")
 	}
@@ -510,7 +521,7 @@ func askNotificationProviderPagerDuty(banzaiCLI cli.Cli, defaultsInterface inter
 
 	// ask for pd secret
 	var err error
-	result.SecretId, err = askSecret(banzaiCLI, pagerDutySecretType, defaults.SecretId)
+	result.SecretId, err = askSecret(banzaiCLI, pagerDutySecretType, defaults.SecretId, false)
 	if err != nil {
 		return nil, errors.WrapIf(err, "error during getting PagerDuty secret")
 	}
@@ -557,7 +568,7 @@ func askPushgateway(banzaiCLI cli.Cli, defaults pushgatewaySpec) (*pushgatewaySp
 		result.Ingress.baseIngressSpec = *ingressSpec
 
 		if ingressSpec.Enabled {
-			result.Ingress.SecretId, err = askSecret(banzaiCLI, htPasswordSecretType, defaults.Ingress.SecretId)
+			result.Ingress.SecretId, err = askSecret(banzaiCLI, htPasswordSecretType, defaults.Ingress.SecretId, true)
 			if err != nil {
 				return nil, errors.WrapIf(err, "error during getting secret for Pushgateway ingress")
 			}
