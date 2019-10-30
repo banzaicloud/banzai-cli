@@ -229,7 +229,7 @@ func askPrometheus(banzaiCLI cli.Cli, defaults prometheusSpec) (*prometheusSpec,
 	if err := doQuestions([]questionMaker{
 		questionInput{
 			questionBase: questionBase{
-				message: "Please provide storage class name:",
+				message: "Please provide storage class name for Prometheus:",
 				help:    "Leave empty to use default storage class",
 			},
 			defaultValue: defaults.Storage.Class,
@@ -237,14 +237,14 @@ func askPrometheus(banzaiCLI cli.Cli, defaults prometheusSpec) (*prometheusSpec,
 		},
 		questionInput{
 			questionBase: questionBase{
-				message: "Please provide storage size:",
+				message: "Please provide storage size for Prometheus:",
 			},
 			defaultValue: storageSize,
 			output:       &storageSize,
 		},
 		questionInput{
 			questionBase: questionBase{
-				message: "Please provide retention:",
+				message: "Please provide retention for Prometheus:",
 			},
 			defaultValue: defaults.Storage.Retention,
 			output:       &result.Storage.Retention,
