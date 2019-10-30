@@ -27,7 +27,8 @@ const (
 	ingressTypeAlertmanager = "Alertmanager"
 	ingressTypePushgateway  = "Pushgateway"
 
-	passwordSecretType = "password"
+	passwordSecretType   = "password"
+	htPasswordSecretType = "htpasswd"
 
 	pagerDutyIntegrationEventApiV2 = "eventsApiV2"
 	pagerDutyIntegrationPrometheus = "prometheus"
