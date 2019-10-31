@@ -59,21 +59,27 @@ func (ActivateManager) ValidateRequest(req interface{}) error {
 	return validateSpec(request.Spec)
 }
 
-func buildExternalDNSFeatureRequest(banzaiCli cli.Cli, defaultSpec interface{}) (map[string]interface{}, error) {
-
-	externalDNSDefaults := ExternalDNS{
-		DomainFilters: []string{"example.com", "cluster.org.io"},
-		Policy:        "upsert-only",
-		Sources:       []string{"ingress", "service"},
-		TxtOwnerId:    "",
-		Provider: &Provider{
-			Name: dnsBanzaiCloud,
-		},
+func buildExternalDNSFeatureRequest(banzaiCli cli.Cli, currentSpec interface{}) (map[string]interface{}, error) {
+	var currentExternalDNS ExternalDNS
+	if currentSpec == nil {
+		currentExternalDNS = ExternalDNS{
+			DomainFilters: []string{"example.com", "cluster.org.io"},
+			Policy:        "upsert-only",
+			Sources:       []string{"ingress", "service"},
+			TxtOwnerId:    "",
+			Provider: &Provider{
+				Name: dnsBanzaiCloud,
+			},
+		}
+	} else {
+		if err := mapstructure.Decode(currentSpec, &currentExternalDNS); err != nil {
+			return nil, errors.WrapIf(err, "failed to decode feature spec")
+		}
 	}
 
 	// select the provider
 	p := Provider{}
-	providerInfo, err := selectProvider(&p, *externalDNSDefaults.Provider)
+	providerInfo, err := selectProvider(&p, *currentExternalDNS.Provider)
 	if err != nil {
 		return nil, errors.WrapIf(err, "failed to read provider data")
 	}
@@ -90,7 +96,7 @@ func buildExternalDNSFeatureRequest(banzaiCli cli.Cli, defaultSpec interface{}) 
 		return nil, errors.WrapIf(err, "failed to read provider options")
 	}
 
-	externalDNS := externalDNSDefaults
+	externalDNS := currentExternalDNS
 	externalDNS.Provider = &providerInfo
 
 	externalDNS, err = readExternalDNS(&externalDNS)
@@ -108,9 +114,7 @@ func buildExternalDNSFeatureRequest(banzaiCli cli.Cli, defaultSpec interface{}) 
 
 // decorateProviderSecret decorates the selected provider with secret information
 func decorateProviderSecret(banzaiCLI cli.Cli, selectedProvider Provider) (Provider, error) {
-
-	// todo is this required?
-	providerWithSecret := selectedProvider
+	providerWithSecret := selectedProvider // just for naming
 
 	// collects provider specific questions
 	questions := make([]*survey.Question, 0)

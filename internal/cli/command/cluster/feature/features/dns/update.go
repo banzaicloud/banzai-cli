@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 
 	"emperror.dev/errors"
-	"github.com/mitchellh/mapstructure"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -34,15 +33,11 @@ func NewUpdateManager() *UpdateManager {
 
 func (UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.UpdateClusterFeatureRequest) error {
 
-	var spec specResponse
-	if err := mapstructure.Decode(req.Spec, &spec); err != nil {
-		return errors.WrapIf(err, "feature specification does not conform to schema")
-	}
-
-	externalDNS, err := buildExternalDNSFeatureRequest(banzaiCLI, nil)
+	externalDNS, err := buildExternalDNSFeatureRequest(banzaiCLI, req.Spec)
 	if err != nil {
 		return errors.Wrap(err, "failed to build custom DNS feature request")
 	}
+	// set the modified spec into the request
 	req.Spec = externalDNS
 
 	return nil
