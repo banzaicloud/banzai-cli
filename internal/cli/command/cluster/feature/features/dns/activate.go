@@ -39,6 +39,7 @@ func NewActivateManager() *ActivateManager {
 }
 
 func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.ActivateClusterFeatureRequest, error) {
+
 	builtSpec, err := buildExternalDNSFeatureRequest(banzaiCLI, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to build external DNS feature request")
@@ -58,24 +59,39 @@ func (ActivateManager) ValidateRequest(req interface{}) error {
 	return validateSpec(request.Spec)
 }
 
-func buildExternalDNSFeatureRequest(banzaiCli cli.Cli, _ interface{}) (map[string]interface{}, error) {
+func buildExternalDNSFeatureRequest(banzaiCli cli.Cli, defaultSpec interface{}) (map[string]interface{}, error) {
+
+	externalDNSDefaults := ExternalDNS{
+		DomainFilters: []string{"example.com", "cluster.org.io"},
+		Policy:        "upsert-only",
+		Sources:       []string{"ingress", "service"},
+		TxtOwnerId:    "",
+		Provider: &Provider{
+			Name: dnsBanzaiCloud,
+		},
+	}
 
 	// select the provider
 	p := Provider{}
-	providerInfo, err := selectProvider(&p)
+	providerInfo, err := selectProvider(&p, *externalDNSDefaults.Provider)
 	if err != nil {
 		return nil, errors.WrapIf(err, "failed to read provider data")
 	}
 
-	// read provider specifics
+	// read secret
 	providerInfo, err = decorateProviderSecret(banzaiCli, providerInfo)
 	if err != nil {
-		return nil, errors.WrapIf(err, "failed to read provider data")
+		return nil, errors.WrapIf(err, "failed to read provider secret")
 	}
 
-	externalDNS := ExternalDNS{
-		Provider: &providerInfo,
+	// read options
+	providerInfo, err = decorateProviderOptions(banzaiCli, providerInfo)
+	if err != nil {
+		return nil, errors.WrapIf(err, "failed to read provider options")
 	}
+
+	externalDNS := externalDNSDefaults
+	externalDNS.Provider = &providerInfo
 
 	externalDNS, err = readExternalDNS(&externalDNS)
 	if err != nil {
@@ -104,12 +120,18 @@ func decorateProviderSecret(banzaiCLI cli.Cli, selectedProvider Provider) (Provi
 		return Provider{}, errors.WrapIf(err, "failed to retrieve secrets for provider")
 	}
 
+	defaultSecret := NameForID(secretsMap, selectedProvider.SecretID)
+	if defaultSecret == "" {
+		// if no secrets is set so far, the first secret is  the default
+		defaultSecret = Names(secretsMap)[0]
+	}
+
 	secretIDQuestion := survey.Question{
 		Name: "SecretID",
 		Prompt: &survey.Select{
 			Message: "Please select the secret to access the DNS provider",
 			Options: Names(secretsMap),
-			Default: NameForID(secretsMap, selectedProvider.SecretID),
+			Default: defaultSecret,
 		},
 		Validate:  survey.Required,
 		Transform: nameToIDTransformer(secretsMap),
@@ -118,15 +140,12 @@ func decorateProviderSecret(banzaiCLI cli.Cli, selectedProvider Provider) (Provi
 	switch selectedProvider.Name {
 	case dnsBanzaiCloud:
 		// no need for secrets
-
 	case dnsRoute53:
 		questions = append(questions, &secretIDQuestion)
 	case dnsGoogle:
 		questions = append(questions, &secretIDQuestion)
 	case dnsAzure:
 		questions = append(questions, &secretIDQuestion)
-	default:
-
 	}
 
 	if err := survey.Ask(questions, &providerWithSecret); err != nil {
@@ -156,6 +175,11 @@ func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Prov
 		if err != nil {
 			return Provider{}, errors.WrapIf(err, "failed to get google projects")
 		}
+		defaultProject := NameForID(projectsMap, selectedProvider.Options["project"].(string))
+		if defaultProject == "" {
+			// the default is the first project
+			defaultProject = Names(projectsMap)[0]
+		}
 
 		questions = append(questions,
 			&survey.Question{
@@ -163,7 +187,7 @@ func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Prov
 				Prompt: &survey.Select{
 					Message: "Please select the google project",
 					Options: Names(projectsMap),
-					Default: NameForID(projectsMap, selectedProvider.Options["project"].(string)),
+					Default: defaultProject,
 				},
 				Validate:  survey.Required,
 				Transform: nameToIDTransformer(projectsMap),
@@ -171,7 +195,7 @@ func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Prov
 		)
 
 	case dnsAzure:
-		resourceGroups, err := getAzurResourceGroupMap(banzaiCLI, providerWithOptions)
+		resourceGroups, err := getAzureResourceGroupMap(banzaiCLI, providerWithOptions)
 		if err != nil {
 			return Provider{}, errors.WrapIf(err, "failed to get azure resourceGroups")
 		}
@@ -223,7 +247,7 @@ func getGoogleProjectsMap(banzaiCLI cli.Cli, provider Provider) (idNameMap, erro
 }
 
 //getGoogleProjectsMap retrieves google projects
-func getAzurResourceGroupMap(banzaiCLI cli.Cli, provider Provider) ([]string, error) {
+func getAzureResourceGroupMap(banzaiCLI cli.Cli, provider Provider) ([]string, error) {
 
 	resourceGroups, _, err := banzaiCLI.Client().InfoApi.GetResourceGroups(
 		context.Background(),
@@ -248,7 +272,7 @@ func providerTransformer(ans interface{}) interface{} {
 	return core.OptionAnswer{}
 }
 
-func selectProvider(providerIn *Provider) (Provider, error) {
+func selectProvider(providerIn *Provider, defaultProvider Provider) (Provider, error) {
 	retProvider := *providerIn
 
 	if providerIn == nil {
@@ -266,7 +290,7 @@ func selectProvider(providerIn *Provider) (Provider, error) {
 			Prompt: &survey.Select{
 				Message: "Please select the DNS provider",
 				Options: providerOptions,
-				Default: providerMeta[dnsBanzaiCloud].Name,
+				Default: providerMeta[defaultProvider.Name].Name,
 			},
 			Validate:  survey.Required,
 			Transform: providerTransformer,
