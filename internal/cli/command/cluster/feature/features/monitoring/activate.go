@@ -102,9 +102,13 @@ func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.A
 			"alertmanager": alertmanager,
 			"pushgateway":  pushgateway,
 			"exporters": exportersSpec{
-				Enabled:          true,
-				NodeExporter:     true,
-				KubeStateMetrics: true,
+				Enabled: true,
+				NodeExporter: exporterBaseSpec{
+					Enabled: true,
+				},
+				KubeStateMetrics: exporterBaseSpec{
+					Enabled: true,
+				},
 			},
 		},
 	}, nil
