@@ -58,17 +58,17 @@ var (
 type baseManager struct{}
 
 type ExternalDNS struct {
-	DomainFilters []string  `mapstructure:"domainFilters"`
-	Policy        string    `mapstructure:"policy"` // sync | upsert-only
-	Sources       []string  `mapstructure:"sources"`
-	TxtOwnerId    string    `mapstructure:"txtOwnerId"`
-	Provider      *Provider `mapstructure:"provider"`
+	DomainFilters []string  `json:"domainFilters" mapstructure:"domainFilters"`
+	Policy        string    `json:"policy" mapstructure:"policy"` // sync | upsert-only
+	Sources       []string  `json:"sources" mapstructure:"sources"`
+	TxtOwnerId    string    `json:"txtOwnerId,omitempty" mapstructure:"txtOwnerId"`
+	Provider      *Provider `json:"provider" mapstructure:"provider"`
 }
 
 type Provider struct {
-	Name     string                 `mapstructure:"name"`
-	SecretID string                 `mapstructure:"secretId"`
-	Options  map[string]interface{} `mapstructure:"options"`
+	Name     string                 `json:"name" mapstructure:"name"`
+	SecretID string                 `json:"secretId,omitempty" mapstructure:"secretId"`
+	Options  map[string]interface{} `json:"options,omitempty" mapstructure:"options"`
 }
 
 func (e ExternalDNS) Validate() error {
@@ -156,7 +156,7 @@ func (p Provider) Validate() error {
 	return validationErrors
 }
 
-type spec struct {
+type DNSFeatureSpec struct {
 	ExternalDNS   ExternalDNS `mapstructure:"externalDns"`
 	ClusterDomain string      `mapstructure:"clusterDomain"`
 }
@@ -170,7 +170,7 @@ func NewDeactivateManager() *baseManager {
 }
 
 func validateSpec(specObj map[string]interface{}) error {
-	var dnsSpec spec
+	var dnsSpec DNSFeatureSpec
 
 	if err := mapstructure.Decode(specObj, &dnsSpec); err != nil {
 		return errors.WrapIf(err, "feature specification does not conform to schema")

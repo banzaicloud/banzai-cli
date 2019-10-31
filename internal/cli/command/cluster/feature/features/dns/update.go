@@ -33,11 +33,11 @@ func NewUpdateManager() *UpdateManager {
 
 func (UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.UpdateClusterFeatureRequest) error {
 
-	externalDNS, err := buildExternalDNSFeatureRequest(banzaiCLI, req.Spec)
+	externalDNS, err := assembleFeatureRequest(banzaiCLI, req.Spec)
 	if err != nil {
 		return errors.Wrap(err, "failed to build custom DNS feature request")
 	}
-	// set the modified spec into the request
+	// set the modified DNSFeatureSpec into the request
 	req.Spec = externalDNS
 
 	return nil

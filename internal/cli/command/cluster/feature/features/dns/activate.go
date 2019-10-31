@@ -39,8 +39,7 @@ func NewActivateManager() *ActivateManager {
 }
 
 func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.ActivateClusterFeatureRequest, error) {
-
-	builtSpec, err := buildExternalDNSFeatureRequest(banzaiCLI, nil)
+	builtSpec, err := assembleFeatureRequest(banzaiCLI, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to build external DNS feature request")
 	}
@@ -59,7 +58,8 @@ func (ActivateManager) ValidateRequest(req interface{}) error {
 	return validateSpec(request.Spec)
 }
 
-func buildExternalDNSFeatureRequest(banzaiCli cli.Cli, currentSpec interface{}) (map[string]interface{}, error) {
+// assembleFeatureRequest assembles the request for activate and update the ExternalDNS feature
+func assembleFeatureRequest(banzaiCli cli.Cli, currentSpec interface{}) (map[string]interface{}, error) {
 	var currentExternalDNS ExternalDNS
 	if currentSpec == nil {
 		currentExternalDNS = ExternalDNS{
@@ -73,7 +73,7 @@ func buildExternalDNSFeatureRequest(banzaiCli cli.Cli, currentSpec interface{}) 
 		}
 	} else {
 		if err := mapstructure.Decode(currentSpec, &currentExternalDNS); err != nil {
-			return nil, errors.WrapIf(err, "failed to decode feature spec")
+			return nil, errors.WrapIf(err, "failed to decode feature DNSFeatureSpec")
 		}
 	}
 
@@ -104,12 +104,43 @@ func buildExternalDNSFeatureRequest(banzaiCli cli.Cli, currentSpec interface{}) 
 		return nil, errors.WrapIf(err, "failed to read external dns data")
 	}
 
+	clusterDomain, err := readClusterDomain()
+	if err != nil {
+		return nil, errors.WrapIf(err, "failed to read cluster domain")
+	}
+
 	var jsonSpec map[string]interface{}
-	if err := mapstructure.Decode(externalDNS, &jsonSpec); err != nil {
-		return nil, errors.WrapIf(err, "failed to assemble spec")
+	if err := mapstructure.Decode(
+		&DNSFeatureSpec{
+			ExternalDNS:   externalDNS,
+			ClusterDomain: clusterDomain,
+		},
+		&jsonSpec);
+		err != nil {
+		return nil, errors.WrapIf(err, "failed to assemble DNSFeatureSpec")
 	}
 
 	return jsonSpec, nil
+}
+
+func readClusterDomain() (string, error) {
+	qs := []*survey.Question{
+		&survey.Question{
+			Name: "ClusterDomain",
+			Prompt: &survey.Input{
+				Message: "Please specify the cluster domain",
+				Default: "",
+				Help:    "cluster domain",
+			},
+		},
+	}
+
+	var clusterDomain string
+	if err := survey.Ask(qs, &clusterDomain); err != nil {
+		return "", errors.WrapIf(err, "failed to read cluster domain")
+	}
+
+	return clusterDomain, nil
 }
 
 // decorateProviderSecret decorates the selected provider with secret information
