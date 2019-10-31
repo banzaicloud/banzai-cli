@@ -1,6 +1,7 @@
 # CreateClusterRequestV2
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Name** | **string** |  | 
@@ -11,6 +12,7 @@ Name | Type | Description | Notes
 **ScaleOptions** | [**ScaleOptions**](ScaleOptions.md) |  | [optional] 
 **Type** | **string** |  | 
 **Kubernetes** | [**CreatePkeClusterKubernetes**](CreatePKEClusterKubernetes.md) |  | 
+**Proxy** | [**PkeClusterHttpProxy**](PKEClusterHTTPProxy.md) |  | [optional] 
 **Location** | **string** | Non-existent resources will be created in this location. Existing resources that must have the same location as the cluster will be validated against this. | [optional] 
 **ResourceGroup** | **string** | Required resources will be created in this resource group. | 
 **Network** | [**PkeOnAzureClusterNetwork**](PKEOnAzureClusterNetwork.md) |  | [optional] 

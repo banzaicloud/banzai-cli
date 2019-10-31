@@ -1,6 +1,7 @@
 # GetClusterStatusResponse
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Status** | **string** |  | [optional] 
@@ -14,7 +15,6 @@ Name | Type | Description | Notes
 **Id** | **int32** |  | [optional] 
 **Logging** | **bool** |  | [optional] 
 **Monitoring** | **bool** |  | [optional] 
-**Servicemesh** | **bool** |  | [optional] 
 **Securityscan** | **bool** |  | [optional] 
 **CreatedAt** | **string** |  | [optional] 
 **StartedAt** | **string** |  | [optional] 

@@ -13,7 +13,7 @@ package pipeline
 import (
 	"time"
 )
-
+// CreateSecretResponse struct for CreateSecretResponse
 type CreateSecretResponse struct {
 	Name string `json:"name"`
 	Type string `json:"type"`
