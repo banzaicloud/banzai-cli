@@ -117,8 +117,8 @@ func (e *ExternalDNS) WriteAnswer(field string, value interface{}) error {
 	switch field {
 	case "DomainFilters":
 		e.DomainFilters = strings.Split(value.(string), ",")
-	case "Policy ":
-		e.Policy = value.(string)
+	case "Policy":
+		e.Policy = value.(core.OptionAnswer).Value
 	case "Sources":
 		answers, _ := value.([]core.OptionAnswer)
 		srcs := make([]string, 0)
@@ -196,8 +196,10 @@ type idNameMap = map[string]string
 
 func Names(sm idNameMap) []string {
 	names := make([]string, len(sm))
+	i := 0
 	for _, name := range sm {
-		names = append(names, name)
+		names[i] = name
+		i = i + 1
 	}
 	return names
 }

@@ -80,8 +80,7 @@ func assembleFeatureRequest(banzaiCli cli.Cli, currentSpec interface{}) (map[str
 	}
 
 	// select the provider
-	p := Provider{}
-	providerInfo, err := selectProvider(&p, *currentDnsFeatureSpec.ExternalDNS.Provider)
+	providerInfo, err := selectProvider(*currentDnsFeatureSpec.ExternalDNS.Provider)
 	if err != nil {
 		return nil, errors.WrapIf(err, "failed to read provider data")
 	}
@@ -101,12 +100,12 @@ func assembleFeatureRequest(banzaiCli cli.Cli, currentSpec interface{}) (map[str
 	externalDNS := currentDnsFeatureSpec.ExternalDNS
 	externalDNS.Provider = &providerInfo
 
-	externalDNS, err = readExternalDNS(&externalDNS)
+	externalDNS, err = readExternalDNS(externalDNS)
 	if err != nil {
 		return nil, errors.WrapIf(err, "failed to read external dns data")
 	}
 
-	clusterDomain, err := readClusterDomain()
+	clusterDomain, err := readClusterDomain(currentDnsFeatureSpec.ClusterDomain)
 	if err != nil {
 		return nil, errors.WrapIf(err, "failed to read cluster domain")
 	}
@@ -125,13 +124,13 @@ func assembleFeatureRequest(banzaiCli cli.Cli, currentSpec interface{}) (map[str
 	return jsonSpec, nil
 }
 
-func readClusterDomain() (string, error) {
+func readClusterDomain(currentDomain string) (string, error) {
 	qs := []*survey.Question{
 		{
 			Name: "ClusterDomain",
 			Prompt: &survey.Input{
 				Message: "Please specify the cluster domain",
-				Default: "",
+				Default: currentDomain,
 				Help:    "cluster domain",
 			},
 		},
@@ -309,11 +308,10 @@ func providerTransformer(ans interface{}) interface{} {
 	return core.OptionAnswer{}
 }
 
-func selectProvider(providerIn *Provider, defaultProvider Provider) (Provider, error) {
-	retProvider := *providerIn
-
-	if providerIn == nil {
-		retProvider = Provider{}
+func selectProvider(providerIn Provider) (Provider, error) {
+	var defaultProviderName string
+	if providerIn.Name != "" {
+		defaultProviderName = providerMeta[providerIn.Name].Name
 	}
 
 	providerOptions := make([]string, 0, len(providerMeta))
@@ -327,33 +325,28 @@ func selectProvider(providerIn *Provider, defaultProvider Provider) (Provider, e
 			Prompt: &survey.Select{
 				Message: "Please select the DNS provider",
 				Options: providerOptions,
-				Default: providerMeta[defaultProvider.Name].Name,
+				Default: defaultProviderName,
 			},
 			Validate:  survey.Required,
 			Transform: providerTransformer,
 		},
 	}
 
-	if err := survey.Ask(providerQuestions, &retProvider); err != nil {
+	if err := survey.Ask(providerQuestions, &providerIn); err != nil {
 		return Provider{}, errors.WrapIf(err, "request assembly failed")
 	}
 
-	return retProvider, nil
+	return providerIn, nil
 }
 
-func readExternalDNS(extDnsIn *ExternalDNS) (ExternalDNS, error) {
-	retExtDns := *extDnsIn
-
-	if extDnsIn == nil {
-		retExtDns = ExternalDNS{}
-	}
+func readExternalDNS(extDnsIn ExternalDNS) (ExternalDNS, error) {
 
 	providerQuestions := []*survey.Question{
 		{
 			Name: "DomainFilters",
 			Prompt: &survey.Input{
 				Message: "Please provide domain filters to match domains against",
-				Default: strings.Join(retExtDns.DomainFilters, ","),
+				Default: strings.Join(extDnsIn.DomainFilters, ","),
 				Help:    "To add multiple domains separate with commna (,) character. Example: foo.com,bar.com",
 			},
 		},
@@ -362,7 +355,7 @@ func readExternalDNS(extDnsIn *ExternalDNS) (ExternalDNS, error) {
 			Prompt: &survey.Select{
 				Message: "Please select the policy for the provider:",
 				Options: []string{"sync", "upsert-only"},
-				Default: retExtDns.Policy,
+				Default: extDnsIn.Policy,
 			},
 		},
 		{
@@ -370,24 +363,24 @@ func readExternalDNS(extDnsIn *ExternalDNS) (ExternalDNS, error) {
 			Prompt: &survey.MultiSelect{
 				Message: "Please select resource types to monitor:",
 				Options: []string{"ingress", "service"},
-				Default: retExtDns.Sources,
+				Default: extDnsIn.Sources,
 			},
 		},
 		{
 			Name: "TxtOwnerId",
 			Prompt: &survey.Input{
 				Message: "Please specify the TXT record owner id:",
-				Default: retExtDns.TxtOwnerId,
+				Default: extDnsIn.TxtOwnerId,
 				Help:    "When using the TXT registry, a name that identifies this instance of ExternalDNS",
 			},
 		},
 	}
 
-	if err := survey.Ask(providerQuestions, &retExtDns); err != nil {
+	if err := survey.Ask(providerQuestions, &extDnsIn); err != nil {
 		return ExternalDNS{}, errors.WrapIf(err, "request assembly failed")
 	}
 
-	return retExtDns, nil
+	return extDnsIn, nil
 }
 
 // getSecretsForProvider retrieves the available secrets for the provider as a map (secretID -> secretName)
