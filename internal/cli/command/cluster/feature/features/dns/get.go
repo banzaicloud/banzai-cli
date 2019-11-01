@@ -15,7 +15,10 @@
 package dns
 
 import (
+	"fmt"
 	"strings"
+
+	"github.com/mitchellh/mapstructure"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 )
@@ -26,9 +29,15 @@ func (GetManager) GetName() string {
 	return featureName
 }
 
-func (GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]interface{} {
+func (g GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]interface{} {
 	tableData := map[string]interface{}{
 		"Status": details.Status,
+	}
+
+	featuresSpec := DNSFeatureSpec{}
+	if err := mapstructure.Decode(details.Spec, &featuresSpec); err != nil {
+		tableData["error"] = fmt.Sprintf("failed to decode spec %q", err)
+		return tableData
 	}
 
 	if autodns, ok := getObj(details.Output, "autoDns"); ok {

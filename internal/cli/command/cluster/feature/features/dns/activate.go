@@ -74,7 +74,7 @@ func assembleFeatureRequest(banzaiCli cli.Cli, currentSpec interface{}) (map[str
 		}
 	} else {
 		// update feature case
-		if err := mapstructure.Decode(currentSpec, &currentDnsFeatureSpec.ExternalDNS); err != nil {
+		if err := mapstructure.Decode(currentSpec, &currentDnsFeatureSpec); err != nil {
 			return nil, errors.WrapIf(err, "failed to decode feature DNSFeatureSpec")
 		}
 	}

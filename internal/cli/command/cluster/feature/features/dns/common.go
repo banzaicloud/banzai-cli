@@ -161,6 +161,9 @@ type DNSFeatureSpec struct {
 	ClusterDomain string      `mapstructure:"clusterDomain"`
 }
 
+type DNSFeatureOutput struct {
+}
+
 func (baseManager) GetName() string {
 	return featureName
 }
