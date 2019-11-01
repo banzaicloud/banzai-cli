@@ -60,21 +60,16 @@ func (ActivateManager) ValidateRequest(req interface{}) error {
 }
 
 // assembleFeatureRequest assembles the request for activate and update the ExternalDNS feature
-func assembleFeatureRequest(banzaiCli cli.Cli, currentSpec interface{}) (map[string]interface{}, error) {
-	var (
-		currentDnsFeatureSpec DNSFeatureSpec
-		err                   error
-	)
+func assembleFeatureRequest(banzaiCli cli.Cli, rawSpec interface{}) (map[string]interface{}, error) {
 
-	if currentSpec == nil {
-		// activate flow
-		currentDnsFeatureSpec, err = getDefaultFeatureSpec(banzaiCli);
-		if err != nil {
-			return nil, errors.WrapIf(err, "failed to get dns feature defaults")
-		}
-	} else {
+	currentDnsFeatureSpec := DNSFeatureSpec{
+		ExternalDNS: ExternalDNS{
+			Provider: &Provider{},
+		},
+	}
+	if rawSpec != nil {
 		// update feature case
-		if err := mapstructure.Decode(currentSpec, &currentDnsFeatureSpec); err != nil {
+		if err := mapstructure.Decode(rawSpec, &currentDnsFeatureSpec); err != nil {
 			return nil, errors.WrapIf(err, "failed to decode feature DNSFeatureSpec")
 		}
 	}
@@ -83,6 +78,14 @@ func assembleFeatureRequest(banzaiCli cli.Cli, currentSpec interface{}) (map[str
 	providerInfo, err := selectProvider(*currentDnsFeatureSpec.ExternalDNS.Provider)
 	if err != nil {
 		return nil, errors.WrapIf(err, "failed to read provider data")
+	}
+
+	if rawSpec == nil {
+		// activate flow
+		currentDnsFeatureSpec, err = getFeatureSpecDefaults(banzaiCli, providerInfo);
+		if err != nil {
+			return nil, errors.WrapIf(err, "failed to get dns feature defaults")
+		}
 	}
 
 	// read secret
@@ -314,6 +317,15 @@ func selectProvider(providerIn Provider) (Provider, error) {
 		defaultProviderName = providerMeta[providerIn.Name].Name
 	}
 
+	if defaultProviderName == "" {
+		// select the first from the list
+		for _, v := range providerMeta {
+			defaultProviderName = v.Name
+			break
+		}
+
+	}
+
 	providerOptions := make([]string, 0, len(providerMeta))
 	for _, p := range providerMeta {
 		providerOptions = append(providerOptions, p.Name)
@@ -406,41 +418,55 @@ func getSecretsForProvider(banzaiCLI cli.Cli, dnsProvider string) (idNameMap, er
 	return secretMap, nil
 }
 
-// getDefaultFeatureSpec sets up the dns spec with the defaults from the capabilities
-func getDefaultFeatureSpec(banzaiCLI cli.Cli) (DNSFeatureSpec, error) {
-	caps, r, err := banzaiCLI.Client().PipelineApi.ListCapabilities(context.Background(), )
-	if err != nil || r.StatusCode != http.StatusOK {
-		return DNSFeatureSpec{}, errors.WrapIf(err, "failed to retrieve capabilities")
+// getFeatureSpecDefaults fills the spec with provider specific defaults (activate flow only)
+func getFeatureSpecDefaults(banzaiCLI cli.Cli, provider Provider) (DNSFeatureSpec, error) {
+	switch provider.Name {
+	case dnsBanzaiCloud:
+		caps, r, err := banzaiCLI.Client().PipelineApi.ListCapabilities(context.Background(), )
+		if err != nil || r.StatusCode != http.StatusOK {
+			return DNSFeatureSpec{}, errors.WrapIf(err, "failed to retrieve capabilities")
+		}
+
+		rawDnsCaps, ok := caps["features"]["dns"]
+		if !ok {
+			return DNSFeatureSpec{}, errors.New("no DNS capabilities found")
+		}
+
+		var dnsCapability = struct {
+			Enabled    bool   `json:"enabled" mapstructure:"enabled"`
+			BaseDomain string `json:"baseDomain" mapstructure:"baseDomain"`
+		}{}
+
+		if err := mapstructure.Decode(rawDnsCaps, &dnsCapability); err != nil {
+			return DNSFeatureSpec{}, errors.WrapIf(err, "failed to parse DNS capabilities")
+		}
+
+		retSpec := DNSFeatureSpec{
+			ExternalDNS: ExternalDNS{
+				Policy:     "upsert-only",
+				Sources:    []string{"ingress", "service"},
+				TxtOwnerId: "",
+				Provider: &Provider{
+					Name: dnsBanzaiCloud,
+				},
+			},
+		}
+
+		if dnsCapability.Enabled {
+			retSpec.ClusterDomain = dnsCapability.BaseDomain
+		}
+		return retSpec, nil
+
+	default:
+		// fill the provider specifics if required
 	}
 
-	rawDnsCaps, ok := caps["features"]["dns"]
-	if !ok {
-		return DNSFeatureSpec{}, errors.New("no DNS capabilities found")
-	}
-
-	var dnsCapability = struct {
-		Enabled    bool   `json:"enabled" mapstructure:"enabled"`
-		BaseDomain string `json:"baseDomain" mapstructure:"baseDomain"`
-	}{}
-
-	if err := mapstructure.Decode(rawDnsCaps, &dnsCapability); err != nil {
-		return DNSFeatureSpec{}, errors.WrapIf(err, "failed to parse DNS capabilities")
-	}
-
-	retSpec := DNSFeatureSpec{
+	return DNSFeatureSpec{
 		ExternalDNS: ExternalDNS{
 			Policy:     "upsert-only",
 			Sources:    []string{"ingress", "service"},
 			TxtOwnerId: "",
-			Provider: &Provider{
-				Name: dnsBanzaiCloud,
-			},
+			Provider:   &provider,
 		},
-	}
-
-	if dnsCapability.Enabled {
-		retSpec.ClusterDomain = dnsCapability.BaseDomain
-	}
-
-	return retSpec, nil
+	}, nil
 }
