@@ -118,9 +118,7 @@ func assembleFeatureRequest(banzaiCli cli.Cli, rawSpec interface{}) (map[string]
 		&DNSFeatureSpec{
 			ExternalDNS:   externalDNS,
 			ClusterDomain: clusterDomain,
-		},
-		&jsonSpec);
-		err != nil {
+		}, &jsonSpec); err != nil {
 		return nil, errors.WrapIf(err, "failed to assemble DNSFeatureSpec")
 	}
 
@@ -267,7 +265,7 @@ func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Prov
 }
 
 //getGoogleProjectsMap retrieves google projects
-func getGoogleProjectsMap(banzaiCLI cli.Cli, provider Provider) (idNameMap, error) {
+func getGoogleProjectsMap(banzaiCLI cli.Cli, provider Provider) (idToNameMap, error) {
 
 	projects, _, err := banzaiCLI.Client().ProjectsApi.GetProjects(
 		context.Background(),
@@ -277,7 +275,7 @@ func getGoogleProjectsMap(banzaiCLI cli.Cli, provider Provider) (idNameMap, erro
 		return nil, errors.Wrap(err, "failed to retrieve google projects")
 	}
 
-	projectMap := make(idNameMap, 0)
+	projectMap := make(idToNameMap, 0)
 	for _, p := range projects.Projects {
 		projectMap[p.ProjectId] = p.Name
 	}
@@ -374,7 +372,7 @@ func readExternalDNS(extDnsIn ExternalDNS) (ExternalDNS, error) {
 			Name: "Sources",
 			Prompt: &survey.MultiSelect{
 				Message: "Please select resource types to monitor:",
-				Options: []string{"ingress", "service"},
+				Options: sources,
 				Default: extDnsIn.Sources,
 			},
 		},
@@ -396,8 +394,8 @@ func readExternalDNS(extDnsIn ExternalDNS) (ExternalDNS, error) {
 }
 
 // getSecretsForProvider retrieves the available secrets for the provider as a map (secretID -> secretName)
-func getSecretsForProvider(banzaiCLI cli.Cli, dnsProvider string) (idNameMap, error) {
-	secretMap := make(idNameMap, 0)
+func getSecretsForProvider(banzaiCLI cli.Cli, dnsProvider string) (idToNameMap, error) {
+	secretMap := make(idToNameMap, 0)
 
 	secrets, _, err := banzaiCLI.Client().SecretsApi.GetSecrets(
 		context.Background(),
@@ -444,7 +442,7 @@ func getFeatureSpecDefaults(banzaiCLI cli.Cli, provider Provider) (DNSFeatureSpe
 		retSpec := DNSFeatureSpec{
 			ExternalDNS: ExternalDNS{
 				Policy:     "upsert-only",
-				Sources:    []string{"ingress", "service"},
+				Sources:    sources,
 				TxtOwnerId: "",
 				Provider: &Provider{
 					Name: dnsBanzaiCloud,

@@ -15,10 +15,7 @@
 package dns
 
 import (
-	"strings"
-
 	"emperror.dev/errors"
-	"github.com/AlecAivazis/survey/v2/core"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -29,9 +26,14 @@ const (
 	dnsAzure       = "azure"
 	dnsGoogle      = "google"
 	dnsBanzaiCloud = "banzaicloud-dns"
+
+	sourceIngress = "ingress"
+	sourceService = "service"
 )
 
 var (
+	sources = []string{sourceIngress, sourceService}
+
 	providerMeta = map[string]struct {
 		Name       string
 		SecretType string
@@ -57,113 +59,6 @@ var (
 
 type baseManager struct{}
 
-type ExternalDNS struct {
-	DomainFilters []string  `json:"domainFilters" mapstructure:"domainFilters"`
-	Policy        string    `json:"policy" mapstructure:"policy"` // sync | upsert-only
-	Sources       []string  `json:"sources" mapstructure:"sources"`
-	TxtOwnerId    string    `json:"txtOwnerId,omitempty" mapstructure:"txtOwnerId"`
-	Provider      *Provider `json:"provider" mapstructure:"provider"`
-}
-
-type Provider struct {
-	Name     string                 `json:"name" mapstructure:"name"`
-	SecretID string                 `json:"secretId,omitempty" mapstructure:"secretId"`
-	Options  map[string]interface{} `json:"options,omitempty" mapstructure:"options"`
-}
-
-func (e ExternalDNS) Validate() error {
-	var validationErrors error
-
-	if len(e.DomainFilters) == 0 {
-		validationErrors = errors.Append(validationErrors, errors.New("at least one domain filter must be specified"))
-	}
-
-	for _, df := range e.DomainFilters {
-		if df == "" {
-			validationErrors = errors.Append(validationErrors, errors.New("domain filters must not be empty strings"))
-		}
-	}
-
-	if e.Policy == "" || (e.Policy != "sync" && e.Policy != "upsert-only") {
-		validationErrors = errors.Append(validationErrors,
-			errors.New("policy must not be empty, it should be one of the values sync|upsert-only"))
-	}
-
-	if len(e.Sources) == 0 {
-		validationErrors = errors.Append(validationErrors, errors.New("sources must not be empty"))
-	}
-
-	for _, src := range e.Sources {
-		if src != "service" && src != "ingress" {
-			validationErrors = errors.Append(validationErrors, errors.Errorf("invalid source value: %s", src))
-		}
-	}
-
-	if e.TxtOwnerId == "" {
-		validationErrors = errors.Append(validationErrors, errors.New("txtOwnerId must not be empty"))
-	}
-
-	if e.Provider == nil {
-		validationErrors = errors.Append(validationErrors, errors.New("provider must be specified"))
-	} else {
-		validationErrors = errors.Append(validationErrors, e.Provider.Validate())
-	}
-
-	return validationErrors
-}
-
-func (e *ExternalDNS) WriteAnswer(field string, value interface{}) error {
-	// todo use reflection here
-	switch field {
-	case "DomainFilters":
-		e.DomainFilters = strings.Split(value.(string), ",")
-	case "Policy":
-		e.Policy = value.(core.OptionAnswer).Value
-	case "Sources":
-		answers, _ := value.([]core.OptionAnswer)
-		srcs := make([]string, 0)
-		for _, ov := range answers {
-			srcs = append(srcs, ov.Value)
-		}
-		e.Sources = srcs
-	case "TxtOwnerId":
-		e.TxtOwnerId = value.(string)
-	default:
-	}
-
-	return nil
-}
-
-func (p Provider) Validate() error {
-	var validationErrors error
-
-	if p.Name != dnsBanzaiCloud {
-		if p.SecretID == "" {
-			validationErrors = errors.Append(validationErrors, errors.Errorf("secret id must be specified for provider %s", p.Name))
-		}
-	}
-
-	// todo validate specific options
-	switch current := p.Name; current {
-	case dnsBanzaiCloud:
-	case dnsRoute53:
-	case dnsGoogle:
-	case dnsAzure:
-	default:
-		validationErrors = errors.Append(validationErrors, errors.Errorf("provider %s is not supported", current))
-	}
-
-	return validationErrors
-}
-
-type DNSFeatureSpec struct {
-	ExternalDNS   ExternalDNS `mapstructure:"externalDns"`
-	ClusterDomain string      `mapstructure:"clusterDomain"`
-}
-
-type DNSFeatureOutput struct {
-}
-
 func (baseManager) GetName() string {
 	return featureName
 }
@@ -186,42 +81,4 @@ func validateSpec(specObj map[string]interface{}) error {
 	}
 
 	return err
-}
-
-type specResponse struct {
-}
-
-// helper type alias for id -> name maps
-type idNameMap = map[string]string
-
-func Names(sm idNameMap) []string {
-	names := make([]string, len(sm))
-	i := 0
-	for _, name := range sm {
-		names[i] = name
-		i = i + 1
-	}
-	return names
-}
-
-func NameForID(sm idNameMap, idOf string) string {
-	for id, n := range sm {
-		if id == idOf {
-			return n
-		}
-	}
-	return ""
-}
-
-func nameToIDTransformer(sm idNameMap) func(name interface{}) interface{} {
-	return func(name interface{}) interface{} {
-		for id, n := range sm {
-			if n == name.(core.OptionAnswer).Value {
-				return core.OptionAnswer{
-					Value: id,
-				}
-			}
-		}
-		return nil
-	}
 }
