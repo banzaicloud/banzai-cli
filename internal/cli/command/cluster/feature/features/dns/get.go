@@ -16,7 +16,6 @@ package dns
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/mitchellh/mapstructure"
 
@@ -29,45 +28,23 @@ func (GetManager) GetName() string {
 	return featureName
 }
 
-func (g GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]interface{} {
-	tableData := map[string]interface{}{
-		"Status": details.Status,
+func (GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]interface{} {
+	// helper for response processing
+	type featureDetails struct {
+		Spec   DNSFeatureSpec   `json:"spec" mapstructure:"spec"`
+		Output DNSFeatureOutput `json:"output" mapstructure:"output"`
 	}
 
-	featuresSpec := DNSFeatureSpec{}
-	if err := mapstructure.Decode(details.Spec, &featuresSpec); err != nil {
+	tableData := map[string]interface{}{}
+
+	boundResponse := featureDetails{}
+	if err := mapstructure.Decode(details, &boundResponse); err != nil {
 		tableData["error"] = fmt.Sprintf("failed to decode spec %q", err)
 		return tableData
 	}
 
-	if autodns, ok := getObj(details.Output, "autoDns"); ok {
-		if zone, ok := getStr(autodns, "zone"); ok {
-			tableData["AutoDNS_zone"] = zone
-		}
-		if clusterDomain, ok := getStr(autodns, "clusterDomain"); ok {
-			tableData["AutoDNS_cluster domain"] = clusterDomain
-		}
-	}
-
-	if customDNS, ok := getObj(details.Spec, "customDns"); ok {
-		if clusterDomain, ok := getObj(customDNS, "clusterDomain"); ok {
-			tableData["CustomDNS_cluster_domain"] = clusterDomain
-		}
-		if domainFilters, ok := getList(customDNS, "domainFilters"); ok {
-			filters := make([]string, 0, len(domainFilters))
-			for _, f := range domainFilters {
-				if s, ok := f.(string); ok {
-					filters = append(filters, s)
-				}
-			}
-			tableData["CustomDNS_domain_filters"] = strings.Join(filters, ",")
-		}
-		if provider, ok := getObj(customDNS, "provider"); ok {
-			if name, ok := getStr(provider, "name"); ok {
-				tableData["CustomDNS_provider"] = name
-			}
-		}
-	}
+	tableData["Status"] = details.Status
+	tableData["Version"] = boundResponse.Output.ExternalDns.Version
 
 	return tableData
 }

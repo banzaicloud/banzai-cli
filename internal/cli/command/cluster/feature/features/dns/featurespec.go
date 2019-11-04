@@ -45,6 +45,9 @@ type DNSFeatureSpec struct {
 
 // DNSFeatureOutput used to parse / display feature output
 type DNSFeatureOutput struct {
+	ExternalDns struct {
+		Version string `json:"version" mapstructure:"version"`
+	} `json:"externalDns" mapstructure:"externalDns"`
 }
 
 func (e ExternalDNS) Validate() error {

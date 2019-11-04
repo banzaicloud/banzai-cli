@@ -42,7 +42,7 @@ func NewActivateManager() *ActivateManager {
 func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.ActivateClusterFeatureRequest, error) {
 	builtSpec, err := assembleFeatureRequest(banzaiCLI, nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to build external DNS feature request")
+		return nil, errors.WrapIf(err, "failed to build external DNS feature request")
 	}
 
 	return &pipeline.ActivateClusterFeatureRequest{
