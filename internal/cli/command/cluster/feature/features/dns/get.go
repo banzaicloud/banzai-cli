@@ -28,7 +28,7 @@ func (GetManager) GetName() string {
 	return featureName
 }
 
-func (GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]interface{} {
+func (GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]map[string]interface{} {
 	// helper for response processing
 	type featureDetails struct {
 		Spec   DNSFeatureSpec   `json:"spec" mapstructure:"spec"`
@@ -40,13 +40,17 @@ func (GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[
 	boundResponse := featureDetails{}
 	if err := mapstructure.Decode(details, &boundResponse); err != nil {
 		tableData["error"] = fmt.Sprintf("failed to decode spec %q", err)
-		return tableData
+		return map[string]map[string]interface{}{
+			"DNS": tableData,
+		}
 	}
 
 	tableData["Status"] = details.Status
 	tableData["Version"] = boundResponse.Output.ExternalDns.Version
 
-	return tableData
+	return map[string]map[string]interface{}{
+		"DNS": tableData,
+	}
 }
 
 func NewGetManager() *GetManager {
