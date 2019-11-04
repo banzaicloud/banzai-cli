@@ -28,9 +28,10 @@ func (GetManager) GetName() string {
 }
 
 type baseOutputItems struct {
-	Url      string `mapstructure:"url"`
-	SecretID string `mapstructure:"secretId"`
-	Version  string `mapstructure:"version"`
+	Url        string `mapstructure:"url"`
+	SecretID   string `mapstructure:"secretId"`
+	Version    string `mapstructure:"version"`
+	ServiceURL string `mapstructure:"serviceUrl"`
 }
 
 type outputResponse struct {
@@ -47,13 +48,21 @@ type outputResponse struct {
 		Version string `mapstructure:"version"`
 	} `mapstructure:"prometheusOperator"`
 	Pushgateway struct {
-		Version string `mapstructure:"version"`
+		baseOutputItems `mapstructure:",squash"`
 	} `mapstructure:"pushgateway"`
 }
 
-func (GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]interface{} {
-	tableData := map[string]interface{}{
-		"Status": details.Status,
+type TableData map[string]interface{}
+
+func (GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]map[string]interface{} {
+	tableData := map[string]map[string]interface{}{
+		"Monitoring": {
+			"Status": details.Status,
+		},
+	}
+
+	if details.Status == "INACTIVE" {
+		return tableData
 	}
 
 	var output outputResponse
@@ -70,10 +79,23 @@ func (GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[
 
 	// Alertmanager outputs
 	if spec.Alertmanager.Enabled {
-		tableData["Alertmanager_url"] = output.Alertmanager.Url
-		tableData["Alertmanager_version"] = output.Alertmanager.Version
-
-		tableData["Alertmanager_public"] = spec.Alertmanager.Public.Enabled
+		var secretID string
+		if spec.Alertmanager.Ingress.Enabled {
+			secretID = spec.Alertmanager.Ingress.SecretId
+			if secretID == "" {
+				secretID = output.Alertmanager.SecretID
+			}
+		}
+		var alertmanagerTable = TableData{
+			"url":        output.Alertmanager.Url,
+			"version":    output.Alertmanager.Version,
+			"serviceUrl": output.Alertmanager.ServiceURL,
+			"secretID":   secretID,
+			"path":       spec.Alertmanager.Ingress.Path,
+			"domain":     spec.Alertmanager.Ingress.Domain,
+		}
+		tableData["Alertmanager"] = alertmanagerTable
+		// todo (colin): add provider outputs
 	}
 
 	// Grafana outputs
@@ -82,28 +104,72 @@ func (GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[
 		if secretID == "" {
 			secretID = output.Grafana.SecretID
 		}
-		tableData["Grafana_url"] = output.Grafana.Url
-		tableData["Grafana_secretID"] = secretID
-		tableData["Grafana_version"] = output.Grafana.Version
-
-		tableData["Grafana_public"] = spec.Grafana.Public.Enabled
+		var grafanaTable = TableData{
+			"url":        output.Grafana.Url,
+			"version":    output.Grafana.Version,
+			"serviceUrl": output.Grafana.ServiceURL,
+			"secretID":   secretID,
+			"path":       spec.Grafana.Ingress.Path,
+			"domain":     spec.Grafana.Ingress.Domain,
+		}
+		tableData["Grafana"] = grafanaTable
 	}
 
 	// Prometheus outputs
 	if spec.Prometheus.Enabled {
-		var secretID = spec.Prometheus.SecretId
-		if secretID == "" {
-			secretID = output.Prometheus.SecretID
+		var secretID string
+		if spec.Prometheus.Ingress.Enabled {
+			secretID = spec.Prometheus.Ingress.SecretId
+			if secretID == "" {
+				secretID = output.Prometheus.SecretID
+			}
 		}
-		tableData["Prometheus_url"] = output.Prometheus.Url
-		tableData["Prometheus_secretID"] = secretID
-		tableData["Prometheus_version"] = output.Prometheus.Version
+		var prometheusTable = TableData{
+			"url":        output.Prometheus.Url,
+			"version":    output.Prometheus.Version,
+			"serviceUrl": output.Prometheus.ServiceURL,
+			"secretID":   secretID,
+			"path":       spec.Prometheus.Ingress.Path,
+			"domain":     spec.Prometheus.Ingress.Domain,
+		}
+		tableData["Prometheus"] = prometheusTable
 
-		tableData["Prometheus_public"] = spec.Prometheus.Public.Enabled
+		tableData["Prometheus_storage"] = TableData{
+			"class":     spec.Prometheus.Storage.Class,
+			"size":      spec.Prometheus.Storage.Size,
+			"retention": spec.Prometheus.Storage.Retention,
+		}
 	}
 
-	tableData["Pushgateway_version"] = output.Pushgateway.Version
-	tableData["Prometheus_operator_version"] = output.PrometheusOperator.Version
+	if spec.Pushgateway.Enabled {
+		var secretID string
+		if spec.Pushgateway.Ingress.Enabled {
+			secretID = spec.Pushgateway.Ingress.SecretId
+			if secretID == "" {
+				secretID = output.Pushgateway.SecretID
+			}
+		}
+		var pushgatewayTable = TableData{
+			"url":        output.Pushgateway.Url,
+			"version":    output.Pushgateway.Version,
+			"serviceUrl": output.Pushgateway.ServiceURL,
+			"secretID":   secretID,
+			"path":       spec.Pushgateway.Ingress.Path,
+			"domain":     spec.Pushgateway.Ingress.Domain,
+		}
+		tableData["Pushgateway"] = pushgatewayTable
+	}
+
+	if spec.Exporters.Enabled {
+		tableData["Exporters"] = TableData{
+			"nodeExporter":     spec.Exporters.NodeExporter.Enabled,
+			"kubeStateMetrics": spec.Exporters.KubeStateMetrics.Enabled,
+		}
+	}
+
+	tableData["Prometheus_operator"] = TableData{
+		"verison": output.PrometheusOperator.Version,
+	}
 
 	return tableData
 }

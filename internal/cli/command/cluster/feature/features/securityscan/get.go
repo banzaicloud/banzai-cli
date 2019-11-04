@@ -26,7 +26,7 @@ func NewGetManager() *getManager {
 	return new(getManager)
 }
 
-func (g getManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]interface{} {
+func (g getManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]map[string]interface{} {
 	tableData := map[string]interface{}{
 		"Status": details.Status,
 	}
@@ -43,7 +43,9 @@ func (g getManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) ma
 		}
 	}
 
-	return tableData
+	return map[string]map[string]interface{}{
+		"Security_scan": tableData,
+	}
 }
 
 func getList(target map[string]interface{}, key string) ([]interface{}, bool) {

@@ -18,8 +18,8 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"sort"
 	"net/http"
+	"sort"
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
@@ -35,7 +35,7 @@ type getOptions struct {
 
 type GetManager interface {
 	GetName() string
-	WriteDetailsTable(pipeline.ClusterFeatureDetails) map[string]interface{}
+	WriteDetailsTable(pipeline.ClusterFeatureDetails) map[string]map[string]interface{}
 }
 
 func GetCommandFactory(banzaiCLI cli.Cli, manager GetManager, name string) *cobra.Command {
@@ -83,27 +83,47 @@ func runGet(
 		return err
 	}
 
-	var data interface{}
-	var fields []string
+	// TODO (colin): refactor output writer, to use key/value pairs in each line
 	if banzaiCLI.OutputFormat() == output.OutputFormatDefault {
-		tableData := m.WriteDetailsTable(details)
+		for name, tableData := range m.WriteDetailsTable(details) {
+			var data interface{}
+			var fields []string
+			if banzaiCLI.OutputFormat() == output.OutputFormatDefault {
+				data = tableData
+				fields = make([]string, 0, len(tableData))
+				for k := range tableData {
+					fields = append(fields, k)
+				}
+				sort.Strings(fields)
+			} else {
+				data = details
+			}
 
-		data = tableData
-		fields = make([]string, 0, len(tableData))
-		for k := range tableData {
-			fields = append(fields, k)
+			ctx := &output.Context{
+				Out:    banzaiCLI.Out(),
+				Color:  banzaiCLI.Color(),
+				Format: banzaiCLI.OutputFormat(),
+				Fields: fields,
+			}
+			if _, err := fmt.Fprintln(ctx.Out, fmt.Sprintf(`
+%s
+----`, name)); err != nil {
+				return errors.WrapIf(err, "failed to write table header")
+			}
+
+			if err := output.Output(ctx, data); err != nil {
+				return errors.WrapIf(err, "failed to write output")
+			}
 		}
-		sort.Strings(fields)
 	} else {
-		data = details
+		ctx := &output.Context{
+			Out:    banzaiCLI.Out(),
+			Color:  banzaiCLI.Color(),
+			Format: banzaiCLI.OutputFormat(),
+		}
+
+		return output.Output(ctx, details)
 	}
 
-	ctx := &output.Context{
-		Out:    banzaiCLI.Out(),
-		Color:  banzaiCLI.Color(),
-		Format: banzaiCLI.OutputFormat(),
-		Fields: fields,
-	}
-
-	return output.Output(ctx, data)
+	return nil
 }

@@ -54,7 +54,7 @@ type specResponse struct {
 	} `json:"settings"`
 }
 
-func (GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]interface{} {
+func (GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]map[string]interface{} {
 	tableData := map[string]interface{}{
 		"Status": details.Status,
 	}
@@ -62,13 +62,13 @@ func (GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[
 	var output outputResponse
 	if err := mapstructure.Decode(details.Output, &output); err != nil {
 		log.Errorf("failed to unmarshal output: %s", err.Error())
-		return tableData
+		return nil
 	}
 
 	var spec specResponse
 	if err := mapstructure.Decode(details.Spec, &spec); err != nil {
 		log.Errorf("failed to unmarshal output: %s", err.Error())
-		return tableData
+		return nil
 	}
 
 	tableData["Vault_version"] = output.Vault.Version
@@ -92,7 +92,9 @@ func (GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[
 
 	tableData["Policy"] = fmt.Sprintf("%q", strings.TrimSpace(strings.ReplaceAll(strings.ReplaceAll(policy, "\t", " "), "\n", "")))
 
-	return tableData
+	return map[string]map[string]interface{}{
+		"Vault": tableData,
+	}
 }
 
 func NewGetManager() *GetManager {
