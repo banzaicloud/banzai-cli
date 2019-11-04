@@ -75,10 +75,6 @@ func (e ExternalDNS) Validate() error {
 		}
 	}
 
-	if e.TxtOwnerId == "" {
-		validationErrors = errors.Append(validationErrors, errors.New("txtOwnerId must not be empty"))
-	}
-
 	if e.Provider == nil {
 		validationErrors = errors.Append(validationErrors, errors.New("provider must be specified"))
 	} else {
