@@ -209,6 +209,7 @@ func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Prov
 		// no need for secrets
 
 	case dnsRoute53:
+		// todo add region option - should it be set??
 	case dnsGoogle:
 		projectsMap, err := getGoogleProjectsMap(banzaiCLI, providerWithOptions)
 		if err != nil {
