@@ -176,7 +176,8 @@ func decorateProviderSecret(banzaiCLI cli.Cli, selectedProvider Provider) (Provi
 
 	switch selectedProvider.Name {
 	case dnsBanzaiCloud:
-		// no need for secrets
+		// no need for secrets - remove if set (update flow)
+		providerWithSecret.SecretID = ""
 	case dnsRoute53:
 		questions = append(questions, &secretIDQuestion)
 	case dnsGoogle:
