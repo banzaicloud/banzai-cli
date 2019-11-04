@@ -168,7 +168,7 @@ func (GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[
 	}
 
 	tableData["Prometheus_operator"] = TableData{
-		"verison": output.PrometheusOperator.Version,
+		"version": output.PrometheusOperator.Version,
 	}
 
 	return tableData
