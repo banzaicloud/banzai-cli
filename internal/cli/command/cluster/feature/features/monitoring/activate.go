@@ -94,6 +94,9 @@ func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.A
 			},
 		},
 	})
+	if err != nil {
+		return nil, errors.WrapIf(err, "error during getting Pushgateway options")
+	}
 
 	return &pipeline.ActivateClusterFeatureRequest{
 		Spec: map[string]interface{}{
