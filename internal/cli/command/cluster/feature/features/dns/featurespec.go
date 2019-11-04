@@ -60,7 +60,7 @@ func (e ExternalDNS) Validate() error {
 		}
 	}
 
-	if e.Policy == "" || (e.Policy != "sync" && e.Policy != "upsert-only") {
+	if e.Policy == "" || (e.Policy != policySync && e.Policy != policyUpsertOnly) {
 		validationErrors = errors.Append(validationErrors,
 			errors.New("policy must not be empty, it should be one of the values sync|upsert-only"))
 	}
@@ -70,7 +70,7 @@ func (e ExternalDNS) Validate() error {
 	}
 
 	for _, src := range e.Sources {
-		if src != "service" && src != "ingress" {
+		if src != sourceService && src != sourceIngress {
 			validationErrors = errors.Append(validationErrors, errors.Errorf("invalid source value: %s", src))
 		}
 	}

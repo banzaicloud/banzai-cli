@@ -311,18 +311,14 @@ func providerTransformer(ans interface{}) interface{} {
 }
 
 func selectProvider(providerIn Provider) (Provider, error) {
-	var defaultProviderName string
+	// the banzaicloud-dns is the default!
+	defaultProviderName := providerMeta[dnsBanzaiCloud].Name
+
 	if providerIn.Name != "" {
-		defaultProviderName = providerMeta[providerIn.Name].Name
-	}
-
-	if defaultProviderName == "" {
-		// select the first from the list
-		for _, v := range providerMeta {
-			defaultProviderName = v.Name
-			break
+		pn, ok := providerMeta[providerIn.Name]
+		if ok {
+			defaultProviderName = pn.Name
 		}
-
 	}
 
 	providerOptions := make([]string, 0, len(providerMeta))
@@ -356,16 +352,16 @@ func readExternalDNS(extDnsIn ExternalDNS) (ExternalDNS, error) {
 		{
 			Name: "DomainFilters",
 			Prompt: &survey.Input{
-				Message: "Please provide domain filters to match domains against",
+				Message: "Please provide domain filters to match domains against:",
 				Default: strings.Join(extDnsIn.DomainFilters, ","),
-				Help:    "To add multiple domains separate with commna (,) character. Example: foo.com,bar.com",
+				Help:    "Comma separated list of domains that are expected to trigger the external dns. Example: foo.com,bar.com",
 			},
 		},
 		{
 			Name: "Policy",
 			Prompt: &survey.Select{
 				Message: "Please select the policy for the provider:",
-				Options: []string{"sync", "upsert-only"},
+				Options: policies,
 				Default: extDnsIn.Policy,
 			},
 		},
@@ -442,7 +438,7 @@ func getFeatureSpecDefaults(banzaiCLI cli.Cli, provider Provider) (DNSFeatureSpe
 
 		retSpec := DNSFeatureSpec{
 			ExternalDNS: ExternalDNS{
-				Policy:     "upsert-only",
+				Policy:     policySync,
 				Sources:    sources,
 				TxtOwnerId: "",
 				Provider: &Provider{
@@ -462,8 +458,8 @@ func getFeatureSpecDefaults(banzaiCLI cli.Cli, provider Provider) (DNSFeatureSpe
 
 	return DNSFeatureSpec{
 		ExternalDNS: ExternalDNS{
-			Policy:     "upsert-only",
-			Sources:    []string{"ingress", "service"},
+			Policy:     policySync,
+			Sources:    sources,
 			TxtOwnerId: "",
 			Provider:   &provider,
 		},

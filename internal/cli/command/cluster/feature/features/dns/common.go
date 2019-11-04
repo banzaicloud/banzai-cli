@@ -29,10 +29,14 @@ const (
 
 	sourceIngress = "ingress"
 	sourceService = "service"
+
+	policyUpsertOnly = "upsert-only"
+	policySync       = "sync"
 )
 
 var (
 	sources = []string{sourceIngress, sourceService}
+	policies = []string{policySync, policyUpsertOnly}
 
 	providerMeta = map[string]struct {
 		Name       string
