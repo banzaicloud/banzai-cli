@@ -28,6 +28,7 @@ import (
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 )
 
@@ -39,8 +40,8 @@ func NewActivateManager() *ActivateManager {
 	return &ActivateManager{}
 }
 
-func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.ActivateClusterFeatureRequest, error) {
-	builtSpec, err := assembleFeatureRequest(banzaiCLI, nil)
+func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error) {
+	builtSpec, err := assembleFeatureRequest(banzaiCli, nil)
 	if err != nil {
 		return nil, errors.WrapIf(err, "failed to build external DNS feature request")
 	}

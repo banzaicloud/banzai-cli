@@ -21,12 +21,13 @@ import (
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
+
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
 )
 
 type activateOptions struct {
@@ -36,7 +37,7 @@ type activateOptions struct {
 
 type ActivateManager interface {
 	GetName() string
-	BuildRequestInteractively(cli.Cli) (*pipeline.ActivateClusterFeatureRequest, error)
+	BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error)
 	ValidateRequest(interface{}) error
 }
 
@@ -76,7 +77,7 @@ func runActivate(
 	var err error
 	var request *pipeline.ActivateClusterFeatureRequest
 	if options.filePath == "" && banzaiCLI.Interactive() {
-		request, err = m.BuildRequestInteractively(banzaiCLI)
+		request, err = m.BuildRequestInteractively(banzaiCLI, options.Context)
 		if err != nil {
 			return errors.WrapIf(err, "failed to build activate request interactively")
 		}

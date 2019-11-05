@@ -19,11 +19,13 @@ import (
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/mitchellh/mapstructure"
+
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
-	"github.com/mitchellh/mapstructure"
 )
 
 type activateManager struct {
@@ -35,7 +37,7 @@ func NewActivateManager() features.ActivateManager {
 	return new(activateManager)
 }
 
-func (am *activateManager) BuildRequestInteractively(cli.Cli) (*pipeline.ActivateClusterFeatureRequest, error) {
+func (am *activateManager) BuildRequestInteractively(cli.Cli, clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error) {
 	var req pipeline.ActivateClusterFeatureRequest
 
 	var edit bool
