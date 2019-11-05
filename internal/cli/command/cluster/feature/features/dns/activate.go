@@ -17,6 +17,7 @@ package dns
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -62,7 +63,6 @@ func (ActivateManager) ValidateRequest(req interface{}) error {
 
 // assembleFeatureRequest assembles the request for activate and update the ExternalDNS feature
 func assembleFeatureRequest(banzaiCli cli.Cli, clusterCtx clustercontext.Context, rawSpec interface{}) (map[string]interface{}, error) {
-
 	currentDnsFeatureSpec := DNSFeatureSpec{
 		ExternalDNS: ExternalDNS{
 			Provider: &Provider{},
@@ -83,7 +83,7 @@ func assembleFeatureRequest(banzaiCli cli.Cli, clusterCtx clustercontext.Context
 
 	if rawSpec == nil {
 		// activate flow
-		currentDnsFeatureSpec, err = getFeatureSpecDefaults(banzaiCli, providerInfo);
+		currentDnsFeatureSpec, err = getFeatureSpecDefaults(banzaiCli, clusterCtx, providerInfo);
 		if err != nil {
 			return nil, errors.WrapIf(err, "failed to get dns feature defaults")
 		}
@@ -109,17 +109,21 @@ func assembleFeatureRequest(banzaiCli cli.Cli, clusterCtx clustercontext.Context
 		return nil, errors.WrapIf(err, "failed to read external dns data")
 	}
 
-	clusterDomain, err := readClusterDomain(currentDnsFeatureSpec.ClusterDomain)
-	if err != nil {
-		return nil, errors.WrapIf(err, "failed to read cluster domain")
+	filledSpec := DNSFeatureSpec{}
+	filledSpec.ExternalDNS = externalDNS
+	filledSpec.ClusterDomain = currentDnsFeatureSpec.ClusterDomain
+
+	if providerInfo.Name != dnsBanzaiCloud {
+		// in case of Banzai Cloud  DNS this value gets generated / it's read only
+		clusterDomain, err := readClusterDomain(currentDnsFeatureSpec.ClusterDomain)
+		if err != nil {
+			return nil, errors.WrapIf(err, "failed to read cluster domain")
+		}
+		filledSpec.ClusterDomain = clusterDomain
 	}
 
 	var jsonSpec map[string]interface{}
-	if err := mapstructure.Decode(
-		&DNSFeatureSpec{
-			ExternalDNS:   externalDNS,
-			ClusterDomain: clusterDomain,
-		}, &jsonSpec); err != nil {
+	if err := mapstructure.Decode(&filledSpec, &jsonSpec); err != nil {
 		return nil, errors.WrapIf(err, "failed to assemble DNSFeatureSpec")
 	}
 
@@ -350,13 +354,14 @@ func selectProvider(providerIn Provider) (Provider, error) {
 }
 
 func readExternalDNS(extDnsIn ExternalDNS) (ExternalDNS, error) {
+	defaultDomainFilters := strings.Join(extDnsIn.DomainFilters, ",")
 
 	providerQuestions := []*survey.Question{
 		{
 			Name: "DomainFilters",
 			Prompt: &survey.Input{
 				Message: "Please provide domain filters to match domains against:",
-				Default: strings.Join(extDnsIn.DomainFilters, ","),
+				Default: defaultDomainFilters,
 				Help:    "Comma separated list of domains that are expected to trigger the external dns. Example: foo.com,bar.com",
 			},
 		},
@@ -417,7 +422,7 @@ func getSecretsForProvider(banzaiCLI cli.Cli, dnsProvider string) (idToNameMap, 
 }
 
 // getFeatureSpecDefaults fills the spec with provider specific defaults (activate flow only)
-func getFeatureSpecDefaults(banzaiCLI cli.Cli, provider Provider) (DNSFeatureSpec, error) {
+func getFeatureSpecDefaults(banzaiCLI cli.Cli, clusterCtx clustercontext.Context, provider Provider) (DNSFeatureSpec, error) {
 	switch provider.Name {
 	case dnsBanzaiCloud:
 		caps, r, err := banzaiCLI.Client().PipelineApi.ListCapabilities(context.Background(), )
@@ -439,6 +444,8 @@ func getFeatureSpecDefaults(banzaiCLI cli.Cli, provider Provider) (DNSFeatureSpe
 			return DNSFeatureSpec{}, errors.WrapIf(err, "failed to parse DNS capabilities")
 		}
 
+		clusterDomain := fmt.Sprintf("%s.%s", clusterCtx.ClusterName(), dnsCapability.BaseDomain)
+
 		retSpec := DNSFeatureSpec{
 			ExternalDNS: ExternalDNS{
 				Policy:     policySync,
@@ -447,12 +454,12 @@ func getFeatureSpecDefaults(banzaiCLI cli.Cli, provider Provider) (DNSFeatureSpe
 				Provider: &Provider{
 					Name: dnsBanzaiCloud,
 				},
+				// defaults to the clusterdomain
+				DomainFilters: strings.Split(clusterDomain, ","),
 			},
+			ClusterDomain: clusterDomain,
 		}
 
-		if dnsCapability.Enabled {
-			retSpec.ClusterDomain = dnsCapability.BaseDomain
-		}
 		return retSpec, nil
 
 	default:
