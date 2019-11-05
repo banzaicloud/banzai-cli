@@ -197,7 +197,7 @@ func (c curlRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 
-	log.Debugf("\n%s\n\n", command.String())
+	log.Debug(command.String())
 
 	return c.base.RoundTrip(r)
 }
