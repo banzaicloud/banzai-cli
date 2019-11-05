@@ -21,6 +21,7 @@ import (
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 )
 
 type UpdateManager struct {
@@ -31,14 +32,14 @@ func NewUpdateManager() *UpdateManager {
 	return &UpdateManager{}
 }
 
-func (UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.UpdateClusterFeatureRequest) error {
+func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateClusterFeatureRequest *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error {
 
-	externalDNS, err := assembleFeatureRequest(banzaiCLI, req.Spec)
+	externalDNS, err := assembleFeatureRequest(banzaiCli, clusterCtx, updateClusterFeatureRequest.Spec)
 	if err != nil {
 		return errors.Wrap(err, "failed to build custom DNS feature request")
 	}
 	// set the modified DNSFeatureSpec into the request
-	req.Spec = externalDNS
+	updateClusterFeatureRequest.Spec = externalDNS
 
 	return nil
 }

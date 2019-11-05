@@ -41,7 +41,7 @@ func NewActivateManager() *ActivateManager {
 }
 
 func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error) {
-	builtSpec, err := assembleFeatureRequest(banzaiCli, nil)
+	builtSpec, err := assembleFeatureRequest(banzaiCli, clusterCtx, nil)
 	if err != nil {
 		return nil, errors.WrapIf(err, "failed to build external DNS feature request")
 	}
@@ -61,7 +61,7 @@ func (ActivateManager) ValidateRequest(req interface{}) error {
 }
 
 // assembleFeatureRequest assembles the request for activate and update the ExternalDNS feature
-func assembleFeatureRequest(banzaiCli cli.Cli, rawSpec interface{}) (map[string]interface{}, error) {
+func assembleFeatureRequest(banzaiCli cli.Cli, clusterCtx clustercontext.Context, rawSpec interface{}) (map[string]interface{}, error) {
 
 	currentDnsFeatureSpec := DNSFeatureSpec{
 		ExternalDNS: ExternalDNS{

@@ -21,12 +21,13 @@ import (
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
+
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
 )
 
 type updateOptions struct {
@@ -37,7 +38,7 @@ type updateOptions struct {
 type UpdateManager interface {
 	GetName() string
 	ValidateRequest(interface{}) error
-	BuildRequestInteractively(cli.Cli, *pipeline.UpdateClusterFeatureRequest) error
+	BuildRequestInteractively(banzaiCli cli.Cli, updateClusterFeatureRequest *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error
 }
 
 func UpdateCommandFactory(banzaiCLI cli.Cli, manager UpdateManager, name string) *cobra.Command {
@@ -88,7 +89,7 @@ func runUpdate(
 			Spec: details.Spec,
 		}
 
-		if err := m.BuildRequestInteractively(banzaiCLI, request); err != nil {
+		if err := m.BuildRequestInteractively(banzaiCLI, request, options.Context); err != nil {
 			return errors.WrapIf(err, "failed to build update request interactively")
 		}
 
