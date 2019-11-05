@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"emperror.dev/errors"
@@ -199,10 +200,18 @@ func decorateProviderSecret(banzaiCLI cli.Cli, selectedProvider Provider) (Provi
 }
 
 func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Provider, error) {
+
 	// helper struct for requesting provider specific feature-options
 	type providerOptions struct {
-		Project       string `json:"project,omitempty"`
-		ResourceGroup string `json:"resourceGroup,omitempty"`
+		Project       string `json:"project,omitempty" mapstructure:"project"`
+		ResourceGroup string `json:"resourceGroup,omitempty" mapstructure:"resourceGroup"`
+		Region        string `json:"region,omitempty" mapstructure:"region"`
+		BatchSize     int    `json:"batchSize,omitempty" mapstructure:"batchSize"`
+	}
+
+	var currentProviderOpts providerOptions
+	if err := mapstructure.Decode(selectedProvider.Options, &currentProviderOpts); err != nil {
+		return Provider{}, errors.WrapIf(err, "failed to decode provider options")
 	}
 
 	providerWithOptions := selectedProvider
@@ -214,7 +223,33 @@ func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Prov
 		// no need for secrets
 
 	case dnsRoute53:
-		// todo add region option - should it be set??
+		regions, r, err := banzaiCLI.CloudinfoClient().RegionsApi.GetRegions(context.Background(), "amazon", "eks")
+		if err != nil || r.StatusCode != http.StatusOK {
+			return Provider{}, errors.Wrap(err, "failed to get regions")
+		}
+
+		regOptions := idToNameMap{}
+		for _, reg := range regions {
+			regOptions[reg.Id] = reg.Name
+		}
+		questions = append(questions,
+			&survey.Question{
+				Name: "Region",
+				Prompt: &survey.Select{
+					Message: "Please select the Amazon region:",
+					Options: Names(regOptions),
+					Default: NameForID(regOptions, currentProviderOpts.Region),
+				},
+				Transform: nameToIDTransformer(regOptions),
+			},
+			&survey.Question{
+				Name: "BatchSize",
+				Prompt: &survey.Input{
+					Message: "Please provide the batch size",
+					Default: strconv.Itoa(currentProviderOpts.BatchSize),
+				},
+			},
+		)
 	case dnsGoogle:
 		projectsMap, err := getGoogleProjectsMap(banzaiCLI, providerWithOptions)
 		if err != nil {
@@ -247,9 +282,9 @@ func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Prov
 
 		questions = append(questions,
 			&survey.Question{
-				Name: "",
+				Name: "ResourceGroup",
 				Prompt: &survey.Select{
-					Message: "Please select the google project",
+					Message: "Please select the Azure Resource Group",
 					Options: resourceGroups,
 					Default: selectedProvider.Options["resourcegroup"].(string),
 				},
