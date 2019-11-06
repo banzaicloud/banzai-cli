@@ -312,13 +312,21 @@ func askAlertmanager(banzaiCLI cli.Cli, defaults alertmanagerSpec) (*alertmanage
 		}
 
 		// ask provider options
+		const skip = "skip"
 		var notificationProvider string
-		var defaultNotificationProviderValue = alertmanagerNotificationNameSlack
+		var defaultNotificationProviderValue = skip
 		if pdProp, ok := defaults.Provider[alertmanagerProviderPagerDuty]; ok {
 			var pd pagerDutySpec
 			if err := mapstructure.Decode(pdProp, &pd); err == nil {
 				if pd.Enabled {
 					defaultNotificationProviderValue = alertmanagerNotificationNamePagerDuty
+				}
+			}
+		} else if slackProp, ok := defaults.Provider[alertmanagerProviderSlack]; ok {
+			var slack slackSpec
+			if err := mapstructure.Decode(slackProp, &slack); err == nil {
+				if slack.Enabled {
+					defaultNotificationProviderValue = alertmanagerNotificationNameSlack
 				}
 			}
 		}
@@ -331,7 +339,7 @@ func askAlertmanager(banzaiCLI cli.Cli, defaults alertmanagerSpec) (*alertmanage
 					defaultValue: defaultNotificationProviderValue,
 					output:       &notificationProvider,
 				},
-				options: []string{alertmanagerNotificationNameSlack, alertmanagerNotificationNamePagerDuty},
+				options: []string{skip, alertmanagerNotificationNameSlack, alertmanagerNotificationNamePagerDuty},
 			},
 		}); err != nil {
 			return nil, errors.WrapIf(err, "error during getting notification provider")
@@ -349,6 +357,7 @@ func askAlertmanager(banzaiCLI cli.Cli, defaults alertmanagerSpec) (*alertmanage
 			if err != nil {
 				return nil, errors.WrapIf(err, "error during getting PagerDuty provider options")
 			}
+		case skip:
 		default:
 			return nil, errors.NewWithDetails("not supported provider type", "provider", notificationProvider)
 		}
