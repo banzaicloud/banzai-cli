@@ -63,6 +63,7 @@ func (ActivateManager) ValidateRequest(req interface{}) error {
 }
 
 // assembleFeatureRequest assembles the request for activate and update the ExternalDNS feature
+// if the input rawSpec is nil -> activate flow, otherwise update flow
 func assembleFeatureRequest(banzaiCli cli.Cli, clusterCtx clustercontext.Context, rawSpec interface{}) (map[string]interface{}, error) {
 	currentDnsFeatureSpec := DNSFeatureSpec{
 		ExternalDNS: ExternalDNS{
@@ -110,9 +111,10 @@ func assembleFeatureRequest(banzaiCli cli.Cli, clusterCtx clustercontext.Context
 		return nil, errors.WrapIf(err, "failed to read external dns data")
 	}
 
-	filledSpec := DNSFeatureSpec{}
-	filledSpec.ExternalDNS = externalDNS
-	filledSpec.ClusterDomain = currentDnsFeatureSpec.ClusterDomain
+	filledSpec := DNSFeatureSpec{
+		ExternalDNS:   externalDNS,
+		ClusterDomain: currentDnsFeatureSpec.ClusterDomain,
+	}
 
 	if providerInfo.Name != dnsBanzaiCloud {
 		// in case of Banzai Cloud  DNS this value gets generated / it's read only
@@ -124,7 +126,7 @@ func assembleFeatureRequest(banzaiCli cli.Cli, clusterCtx clustercontext.Context
 	}
 
 	var jsonSpec map[string]interface{}
-	if err := mapstructure.Decode(&filledSpec, &jsonSpec); err != nil {
+	if err := mapstructure.Decode(filledSpec, &jsonSpec); err != nil {
 		return nil, errors.WrapIf(err, "failed to assemble DNSFeatureSpec")
 	}
 
@@ -228,7 +230,7 @@ func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Prov
 			return Provider{}, errors.Wrap(err, "failed to get regions")
 		}
 
-		regOptions := idToNameMap{}
+		regOptions := make(idToNameMap, len(regions))
 		for _, reg := range regions {
 			regOptions[reg.Id] = reg.Name
 		}
@@ -479,7 +481,12 @@ func getFeatureSpecDefaults(banzaiCLI cli.Cli, clusterCtx clustercontext.Context
 			return DNSFeatureSpec{}, errors.WrapIf(err, "failed to parse DNS capabilities")
 		}
 
-		clusterDomain := fmt.Sprintf("%s.%s", clusterCtx.ClusterName(), dnsCapability.BaseDomain)
+		org, r, err := banzaiCLI.Client().OrganizationsApi.GetOrg(context.Background(), banzaiCLI.Context().OrganizationID())
+		if err != nil || r.StatusCode != http.StatusOK {
+			return DNSFeatureSpec{}, errors.WrapIf(err, "failed to retrieves organizaton")
+		}
+
+		clusterDomain := fmt.Sprintf("%s.%s.%s", clusterCtx.ClusterName(), org.Name, dnsCapability.BaseDomain)
 
 		retSpec := DNSFeatureSpec{
 			ExternalDNS: ExternalDNS{
