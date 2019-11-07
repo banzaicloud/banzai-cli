@@ -22,8 +22,11 @@ import (
 
 	"emperror.dev/errors"
 	"github.com/antihax/optional"
+
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
+
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -31,7 +34,7 @@ type ActivateManager struct {
 	baseManager
 }
 
-func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.ActivateClusterFeatureRequest, error) {
+func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error) {
 
 	grafana, err := askGrafana(banzaiCLI, grafanaSpec{
 		Enabled:    true,
