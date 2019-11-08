@@ -148,6 +148,16 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		}
 		env = creds
 
+	case providerEks:
+		_, creds, err := input.GetAmazonCredentials()
+		if err != nil {
+			return errors.WrapIf(err, "failed to get AWS credentials")
+		}
+
+		if err := ensureEKSCluster(banzaiCli, options.cpContext, creds); err != nil {
+			return errors.WrapIf(err, "failed to create Amazon EKS cluster")
+		}
+
 	default:
 		if !options.kubeconfigExists() {
 			return errors.New("could not find Kubeconfig in workspace")
