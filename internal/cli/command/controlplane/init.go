@@ -35,6 +35,7 @@ const (
 	providerEc2      = "ec2"
 	providerKind     = "kind"
 	providerPke      = "pke"
+	providerEks      = "eks"
 	defaultLocalhost = "default.localhost.banzaicloud.io"
 	autoHost         = "auto"
 	externalHost     = "externalHost"
@@ -97,6 +98,9 @@ func askProvider(k8sContext string) (string, error) {
 		choices = append(choices, fmt.Sprintf("Use %q Kubernetes context", k8sContext))
 		lookup = append(lookup, providerK8s)
 	}
+
+	choices = append(choices, "Create Amazon EKS cluster")
+	lookup = append(lookup, providerEks)
 
 	if hasTool("docker") == nil {
 		choices = append(choices, "Create KIND (Kubernetes in Docker) cluster locally")

@@ -39,6 +39,8 @@ const (
 	traefikAddressFilename  = "traefik-address"
 	externalAddressFilename = "external-address"
 	tfstateFilename         = "terraform.tfstate"
+	eksK8sConfig            = "eks_k8s_config.yaml"
+	eksAuthCM               = "eks_auth_cm.yaml"
 )
 
 type cpContext struct {
@@ -171,6 +173,32 @@ func (c *cpContext) readEc2Host() (string, error) {
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return "", errors.WrapIf(err, "can't read address of created EC2 instance")
+	}
+	return strings.Trim(string(bytes), "\n"), nil
+}
+
+func (c *cpContext) eksK8sConfigPath() string {
+	return filepath.Join(c.workspace, eksK8sConfig)
+}
+
+func (c *cpContext) readEksK8sConfig() ([]byte, error) {
+	path := c.eksK8sConfigPath()
+	bytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		return []byte{}, errors.WrapIf(err, "can't read EKS K8s config")
+	}
+	return bytes, nil
+}
+
+func (c *cpContext) eksAuthCMPath() string {
+	return filepath.Join(c.workspace, eksAuthCM)
+}
+
+func (c *cpContext) readEksAuthCm() (string, error) {
+	path := c.eksAuthCMPath()
+	bytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "", errors.WrapIf(err, "can't read EKS Auth ConfigMap")
 	}
 	return strings.Trim(string(bytes), "\n"), nil
 }
