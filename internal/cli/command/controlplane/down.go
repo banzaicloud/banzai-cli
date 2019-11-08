@@ -113,6 +113,16 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 		if err := options.deleteKubeconfig(); err != nil {
 			return errors.WrapIf(err, "failed to remove Kubeconfig")
 		}
+
+	case providerEks:
+		if err := deleteEKSCluster(banzaiCli, options.cpContext, env); err != nil {
+			return errors.WrapIf(err, "Amazon EKS cluster destroy failed")
+		}
+
+		if err := options.deleteKubeconfig(); err != nil {
+			return errors.WrapIf(err, "failed to remove Kubeconfig")
+		}
+
 	default:
 		err := runTerraform("destroy", options.cpContext, banzaiCli, env)
 		if err != nil {
