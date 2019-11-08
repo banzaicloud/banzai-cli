@@ -30,7 +30,7 @@ func ensureEKSCluster(banzaiCli cli.Cli, options *cpContext, creds map[string]st
 	}
 
 	log.Info("Creating Amazon EKS Kubernetes cluster...")
-	if err := runTerraform("apply", options, banzaiCli, creds, eksModule); err != nil {
+	if err := runTerraform("apply", options, banzaiCli, creds, eksModule, "local_file.eks_k8s_config", "local_file.eks_map_auth"); err != nil {
 		return errors.WrapIf(err, "failed to create Amazon EKS Kubernetes cluster")
 	}
 
@@ -38,6 +38,7 @@ func ensureEKSCluster(banzaiCli cli.Cli, options *cpContext, creds map[string]st
 	if err != nil {
 		return errors.WrapIf(err, "failed to read Amazon EKS kubeconfig")
 	}
+
 	return options.writeKubeconfig(config)
 }
 
