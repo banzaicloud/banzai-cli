@@ -115,6 +115,22 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 		}
 
 	case providerEks:
+		id, creds, err := input.GetAmazonCredentials()
+		if err != nil {
+			return errors.WrapIf(err, "failed to get AWS credentials")
+		}
+
+		if valuesConfig, ok := values["providerConfig"]; ok {
+			if valuesConfig, ok := valuesConfig.(map[string]interface{}); ok {
+				if ak := valuesConfig["accessKey"]; ak != "" {
+					if ak != id {
+						return errors.Errorf("Current AWS access key %q differs from the one used earlier: %q", ak, id)
+					}
+				}
+			}
+		}
+		env = creds
+
 		if err := deleteEKSCluster(banzaiCli, options.cpContext, env); err != nil {
 			return errors.WrapIf(err, "Amazon EKS cluster destroy failed")
 		}

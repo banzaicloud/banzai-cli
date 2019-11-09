@@ -165,6 +165,15 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 	}
 
 	log.Info("Deploying Banzai Cloud Pipeline to Kubernetes cluster...")
+	if values["provider"] == providerEks {
+		_, creds, err := input.GetAmazonCredentials()
+		if err != nil {
+			return errors.WrapIf(err, "failed to get AWS credentials")
+		}
+		for k, v := range creds {
+			env[k] = v
+		}
+	}
 	if err := runTerraform("apply", options.cpContext, banzaiCli, env); err != nil {
 		return errors.WrapIf(err, "failed to deploy pipeline components")
 	}
