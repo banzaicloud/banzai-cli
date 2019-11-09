@@ -170,6 +170,7 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		if err != nil {
 			return errors.WrapIf(err, "failed to get AWS credentials")
 		}
+		env = map[string]string{}
 		for k, v := range creds {
 			env[k] = v
 		}
