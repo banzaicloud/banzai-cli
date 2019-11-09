@@ -15,6 +15,10 @@
 package controlplane
 
 import (
+	"os"
+	"os/exec"
+	"strings"
+
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	log "github.com/sirupsen/logrus"
@@ -34,12 +38,13 @@ func ensureEKSCluster(banzaiCli cli.Cli, options *cpContext, creds map[string]st
 		return errors.WrapIf(err, "failed to create Amazon EKS Kubernetes cluster")
 	}
 
-	config, err := options.readEksK8sConfig()
+	err := deployEKSAuthCM(banzaiCli, options)
+	log.Info("Deploying EKS Auth ConfigMap...")
 	if err != nil {
-		return errors.WrapIf(err, "failed to read Amazon EKS kubeconfig")
+		return err
 	}
 
-	return options.writeKubeconfig(config)
+	return nil
 }
 
 func deleteEKSCluster(banzaiCli cli.Cli, options *cpContext, creds map[string]string) error {
@@ -47,6 +52,22 @@ func deleteEKSCluster(banzaiCli cli.Cli, options *cpContext, creds map[string]st
 	if err := runTerraform("destroy", options, banzaiCli, creds, eksModule); err != nil {
 		return errors.WrapIf(err, "failed to delete Amazon EKS infrastructure")
 	}
+
+	return nil
+}
+
+func deployEKSAuthCM(banzaiCli cli.Cli, options *cpContext) error {
+	argv := []string{"apply", "-f"}
+	argv = append(argv, options.eksAuthCMPath())
+	log.Infof("kubectl %s", strings.Join(argv, " "))
+
+	cmd := exec.Command("kubectl", argv...)
+	cmd.Stderr = os.Stderr
+	config, err := cmd.Output()
+	if err != nil {
+		return errors.WrapIf(err, "failed to deploy auth configMap")
+	}
+	log.Debug(config)
 
 	return nil
 }
