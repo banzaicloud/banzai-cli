@@ -247,14 +247,12 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		out[externalHost] = guessExternalAddr()
 
 	case providerEks:
-		id, region, _, err := input.GetAmazonCredentialsRegion("")
+		id, _, err := input.GetAmazonCredentials()
 		if err != nil {
-			id, region, _, err = input.GetAmazonCredentialsRegion(defaultAwsRegion)
+			id, _, err = input.GetAmazonCredentials()
 			if err != nil {
 				log.Info("Please set your AWS credentials using aws-cli. See https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#cli-quick-configuration")
 				return errors.WrapIf(err, "failed to use local AWS credentials")
-			} else {
-				log.Infof("Using AWS region: %q", region)
 			}
 		}
 		providerConfig["cluster_name"] = "poke-banzaicli-eks"
