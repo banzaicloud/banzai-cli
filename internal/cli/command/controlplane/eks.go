@@ -38,7 +38,7 @@ func ensureEKSCluster(banzaiCli cli.Cli, options *cpContext, creds map[string]st
 		return errors.WrapIf(err, "failed to create Amazon EKS Kubernetes cluster")
 	}
 
-	err := deployEKSAuthCM(banzaiCli, options)
+	err := deployEKSAuthCM(options)
 	log.Info("Deploying EKS Auth ConfigMap...")
 	if err != nil {
 		return err
@@ -56,7 +56,7 @@ func deleteEKSCluster(banzaiCli cli.Cli, options *cpContext, creds map[string]st
 	return nil
 }
 
-func deployEKSAuthCM(banzaiCli cli.Cli, options *cpContext) error {
+func deployEKSAuthCM(options *cpContext) error {
 	argv := []string{"apply", "-f"}
 	argv = append(argv, options.eksAuthCMPath())
 	log.Infof("kubectl %s", strings.Join(argv, " "))
