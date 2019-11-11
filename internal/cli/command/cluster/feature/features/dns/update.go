@@ -18,9 +18,11 @@ import (
 	"encoding/json"
 
 	"emperror.dev/errors"
+	"github.com/mitchellh/mapstructure"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 )
 
 type UpdateManager struct {
@@ -31,14 +33,27 @@ func NewUpdateManager() *UpdateManager {
 	return &UpdateManager{}
 }
 
-func (UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.UpdateClusterFeatureRequest) error {
+func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateClusterFeatureRequest *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error {
 
-	externalDNS, err := assembleFeatureRequest(banzaiCLI, req.Spec)
+	currentDnsFeatureSpec := DNSFeatureSpec{
+		ExternalDNS: ExternalDNS{
+			Provider: &Provider{},
+		},
+	}
+
+	if updateClusterFeatureRequest.Spec != nil {
+		// update feature case
+		if err := mapstructure.Decode(updateClusterFeatureRequest.Spec, &currentDnsFeatureSpec); err != nil {
+			return errors.WrapIf(err, "failed to decode feature DNSFeatureSpec")
+		}
+	}
+
+	externalDNS, err := assembleFeatureRequest(banzaiCli, clusterCtx, currentDnsFeatureSpec, NewActionContext(actionUpdate))
 	if err != nil {
 		return errors.Wrap(err, "failed to build custom DNS feature request")
 	}
 	// set the modified DNSFeatureSpec into the request
-	req.Spec = externalDNS
+	updateClusterFeatureRequest.Spec = externalDNS
 
 	return nil
 }

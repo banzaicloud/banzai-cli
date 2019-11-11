@@ -18,9 +18,12 @@ import (
 	"encoding/json"
 
 	"emperror.dev/errors"
+
+	"github.com/mitchellh/mapstructure"
+
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/mitchellh/mapstructure"
+	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 )
 
 type UpdateManager struct {
@@ -36,7 +39,7 @@ func (UpdateManager) ValidateRequest(req interface{}) error {
 	return validateSpec(request.Spec)
 }
 
-func (UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.UpdateClusterFeatureRequest) error {
+func (UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context, ) error {
 
 	var spec featureSpec
 	if err := mapstructure.Decode(req.Spec, &spec); err != nil {

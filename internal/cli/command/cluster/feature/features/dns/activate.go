@@ -17,7 +17,9 @@ package dns
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"emperror.dev/errors"
@@ -28,6 +30,7 @@ import (
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 )
 
@@ -39,8 +42,17 @@ func NewActivateManager() *ActivateManager {
 	return &ActivateManager{}
 }
 
-func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.ActivateClusterFeatureRequest, error) {
-	builtSpec, err := assembleFeatureRequest(banzaiCLI, nil)
+func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error) {
+
+	defaultSpec := DNSFeatureSpec{
+		ExternalDNS: ExternalDNS{
+			Provider: &Provider{
+				Name: dnsBanzaiCloud,
+			},
+		},
+	}
+
+	builtSpec, err := assembleFeatureRequest(banzaiCli, clusterCtx, defaultSpec, NewActionContext(actionNew))
 	if err != nil {
 		return nil, errors.WrapIf(err, "failed to build external DNS feature request")
 	}
@@ -57,72 +69,6 @@ func (ActivateManager) ValidateRequest(req interface{}) error {
 	}
 
 	return validateSpec(request.Spec)
-}
-
-// assembleFeatureRequest assembles the request for activate and update the ExternalDNS feature
-func assembleFeatureRequest(banzaiCli cli.Cli, rawSpec interface{}) (map[string]interface{}, error) {
-
-	currentDnsFeatureSpec := DNSFeatureSpec{
-		ExternalDNS: ExternalDNS{
-			Provider: &Provider{},
-		},
-	}
-	if rawSpec != nil {
-		// update feature case
-		if err := mapstructure.Decode(rawSpec, &currentDnsFeatureSpec); err != nil {
-			return nil, errors.WrapIf(err, "failed to decode feature DNSFeatureSpec")
-		}
-	}
-
-	// select the provider
-	providerInfo, err := selectProvider(*currentDnsFeatureSpec.ExternalDNS.Provider)
-	if err != nil {
-		return nil, errors.WrapIf(err, "failed to read provider data")
-	}
-
-	if rawSpec == nil {
-		// activate flow
-		currentDnsFeatureSpec, err = getFeatureSpecDefaults(banzaiCli, providerInfo);
-		if err != nil {
-			return nil, errors.WrapIf(err, "failed to get dns feature defaults")
-		}
-	}
-
-	// read secret
-	providerInfo, err = decorateProviderSecret(banzaiCli, providerInfo)
-	if err != nil {
-		return nil, errors.WrapIf(err, "failed to read provider secret")
-	}
-
-	// read options
-	providerInfo, err = decorateProviderOptions(banzaiCli, providerInfo)
-	if err != nil {
-		return nil, errors.WrapIf(err, "failed to read provider options")
-	}
-
-	externalDNS := currentDnsFeatureSpec.ExternalDNS
-	externalDNS.Provider = &providerInfo
-
-	externalDNS, err = readExternalDNS(externalDNS)
-	if err != nil {
-		return nil, errors.WrapIf(err, "failed to read external dns data")
-	}
-
-	clusterDomain, err := readClusterDomain(currentDnsFeatureSpec.ClusterDomain)
-	if err != nil {
-		return nil, errors.WrapIf(err, "failed to read cluster domain")
-	}
-
-	var jsonSpec map[string]interface{}
-	if err := mapstructure.Decode(
-		&DNSFeatureSpec{
-			ExternalDNS:   externalDNS,
-			ClusterDomain: clusterDomain,
-		}, &jsonSpec); err != nil {
-		return nil, errors.WrapIf(err, "failed to assemble DNSFeatureSpec")
-	}
-
-	return jsonSpec, nil
 }
 
 func readClusterDomain(currentDomain string) (string, error) {
@@ -194,10 +140,18 @@ func decorateProviderSecret(banzaiCLI cli.Cli, selectedProvider Provider) (Provi
 }
 
 func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Provider, error) {
+
 	// helper struct for requesting provider specific feature-options
 	type providerOptions struct {
-		Project       string `json:"project,omitempty"`
-		ResourceGroup string `json:"resourceGroup,omitempty"`
+		Project       string `json:"project,omitempty" mapstructure:"project"`
+		ResourceGroup string `json:"resourceGroup,omitempty" mapstructure:"resourceGroup"`
+		Region        string `json:"region,omitempty" mapstructure:"region"`
+		BatchSize     int    `json:"batchSize,omitempty" mapstructure:"batchSize"`
+	}
+
+	var currentProviderOpts providerOptions
+	if err := mapstructure.Decode(selectedProvider.Options, &currentProviderOpts); err != nil {
+		return Provider{}, errors.WrapIf(err, "failed to decode provider options")
 	}
 
 	providerWithOptions := selectedProvider
@@ -209,7 +163,33 @@ func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Prov
 		// no need for secrets
 
 	case dnsRoute53:
-		// todo add region option - should it be set??
+		regions, r, err := banzaiCLI.CloudinfoClient().RegionsApi.GetRegions(context.Background(), "amazon", "eks")
+		if err != nil || r.StatusCode != http.StatusOK {
+			return Provider{}, errors.Wrap(err, "failed to get regions")
+		}
+
+		regOptions := make(idToNameMap, len(regions))
+		for _, reg := range regions {
+			regOptions[reg.Id] = reg.Name
+		}
+		questions = append(questions,
+			&survey.Question{
+				Name: "Region",
+				Prompt: &survey.Select{
+					Message: "Please select the Amazon region:",
+					Options: Names(regOptions),
+					Default: NameForID(regOptions, currentProviderOpts.Region),
+				},
+				Transform: nameToIDTransformer(regOptions),
+			},
+			&survey.Question{
+				Name: "BatchSize",
+				Prompt: &survey.Input{
+					Message: "Please provide the batch size",
+					Default: strconv.Itoa(currentProviderOpts.BatchSize),
+				},
+			},
+		)
 	case dnsGoogle:
 		projectsMap, err := getGoogleProjectsMap(banzaiCLI, providerWithOptions)
 		if err != nil {
@@ -242,9 +222,9 @@ func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Prov
 
 		questions = append(questions,
 			&survey.Question{
-				Name: "",
+				Name: "ResourceGroup",
 				Prompt: &survey.Select{
-					Message: "Please select the google project",
+					Message: "Please select the Azure Resource Group",
 					Options: resourceGroups,
 					Default: selectedProvider.Options["resourcegroup"].(string),
 				},
@@ -348,17 +328,22 @@ func selectProvider(providerIn Provider) (Provider, error) {
 	return providerIn, nil
 }
 
-func readExternalDNS(extDnsIn ExternalDNS) (ExternalDNS, error) {
+func readExternalDNS(extDnsIn ExternalDNS, actionCtx actionContext) (ExternalDNS, error) {
+	defaultDomainFilters := strings.Join(extDnsIn.DomainFilters, ",")
+	providerQuestions := make([]*survey.Question, 0)
 
-	providerQuestions := []*survey.Question{
-		{
+	if actionCtx.providerName != dnsBanzaiCloud {
+		providerQuestions = append(providerQuestions, &survey.Question{
 			Name: "DomainFilters",
 			Prompt: &survey.Input{
 				Message: "Please provide domain filters to match domains against:",
-				Default: strings.Join(extDnsIn.DomainFilters, ","),
+				Default: defaultDomainFilters,
 				Help:    "Comma separated list of domains that are expected to trigger the external dns. Example: foo.com,bar.com",
 			},
-		},
+		})
+	}
+
+	questions := []*survey.Question{
 		{
 			Name: "Policy",
 			Prompt: &survey.Select{
@@ -385,6 +370,7 @@ func readExternalDNS(extDnsIn ExternalDNS) (ExternalDNS, error) {
 		},
 	}
 
+	providerQuestions = append(providerQuestions, questions...)
 	if err := survey.Ask(providerQuestions, &extDnsIn); err != nil {
 		return ExternalDNS{}, errors.WrapIf(err, "request assembly failed")
 	}
@@ -416,8 +402,8 @@ func getSecretsForProvider(banzaiCLI cli.Cli, dnsProvider string) (idToNameMap, 
 }
 
 // getFeatureSpecDefaults fills the spec with provider specific defaults (activate flow only)
-func getFeatureSpecDefaults(banzaiCLI cli.Cli, provider Provider) (DNSFeatureSpec, error) {
-	switch provider.Name {
+func getFeatureSpecDefaults(banzaiCLI cli.Cli, clusterCtx clustercontext.Context, specIn DNSFeatureSpec, actionCtx actionContext) (DNSFeatureSpec, error) {
+	switch actionCtx.providerName {
 	case dnsBanzaiCloud:
 		caps, r, err := banzaiCLI.Client().PipelineApi.ListCapabilities(context.Background(), )
 		if err != nil || r.StatusCode != http.StatusOK {
@@ -438,7 +424,26 @@ func getFeatureSpecDefaults(banzaiCLI cli.Cli, provider Provider) (DNSFeatureSpe
 			return DNSFeatureSpec{}, errors.WrapIf(err, "failed to parse DNS capabilities")
 		}
 
-		retSpec := DNSFeatureSpec{
+		org, r, err := banzaiCLI.Client().OrganizationsApi.GetOrg(context.Background(), banzaiCLI.Context().OrganizationID())
+		if err != nil || r.StatusCode != http.StatusOK {
+			return DNSFeatureSpec{}, errors.WrapIf(err, "failed to retrieves organizaton")
+		}
+
+		clusterDomain := fmt.Sprintf("%s.%s.%s", clusterCtx.ClusterName(), org.Name, dnsCapability.BaseDomain)
+
+		if actionCtx.IsUpdate() {
+			// cleanup in case of update from another provider
+			retSpec := specIn
+			retSpec.ExternalDNS.Provider = &Provider{
+				Name: dnsBanzaiCloud,
+			}
+			retSpec.ClusterDomain = clusterDomain
+			retSpec.ExternalDNS.DomainFilters = []string{clusterDomain}
+			return retSpec, nil
+		}
+
+		// activate flow, plain new defaults
+		return DNSFeatureSpec{
 			ExternalDNS: ExternalDNS{
 				Policy:     policySync,
 				Sources:    sources,
@@ -446,24 +451,27 @@ func getFeatureSpecDefaults(banzaiCLI cli.Cli, provider Provider) (DNSFeatureSpe
 				Provider: &Provider{
 					Name: dnsBanzaiCloud,
 				},
+				// defaults to the clusterdomain
+				DomainFilters: []string{clusterDomain},
 			},
-		}
-
-		if dnsCapability.Enabled {
-			retSpec.ClusterDomain = dnsCapability.BaseDomain
-		}
-		return retSpec, nil
+			ClusterDomain: clusterDomain,
+		}, nil
 
 	default:
 		// fill the provider specifics if required
 	}
 
+	// update non banzai dns provider
+	if actionCtx.IsUpdate() {
+		return specIn, nil
+	}
+
+	// new non banzai dns provider
 	return DNSFeatureSpec{
 		ExternalDNS: ExternalDNS{
 			Policy:     policySync,
 			Sources:    sources,
 			TxtOwnerId: "",
-			Provider:   &provider,
 		},
 	}, nil
 }

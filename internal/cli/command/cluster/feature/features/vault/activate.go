@@ -24,13 +24,14 @@ import (
 	"github.com/antihax/optional"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 )
 
 type ActivateManager struct{
 	baseManager
 }
 
-func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.ActivateClusterFeatureRequest, error) {
+func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error) {
 	var request pipeline.ActivateClusterFeatureRequest
 
 	vaultType, err := askVaultComponent(vaultCustom)
@@ -40,7 +41,7 @@ func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli) (*pipeline.A
 
 	switch vaultType {
 	case vaultCustom:
-		customSpec, err := buildCustomVaultFeatureRequest(banzaiCLI, defaults{})
+		customSpec, err := buildCustomVaultFeatureRequest(banzaiCli, defaults{})
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to build custom Vault feature request")
 		}

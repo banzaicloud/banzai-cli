@@ -22,6 +22,7 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	"github.com/mitchellh/mapstructure"
@@ -45,7 +46,7 @@ func (u *updateManager) ValidateRequest(req interface{}) error {
 	return nil
 }
 
-func (u *updateManager) BuildRequestInteractively(cli cli.Cli, req *pipeline.UpdateClusterFeatureRequest) error {
+func (u *updateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateClusterFeatureRequest *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error {
 	var edit bool
 	if err := survey.AskOne(&survey.Confirm{Message: "Edit the cluster feature update request in your text editor?"},
 		&edit); err != nil {
@@ -53,10 +54,10 @@ func (u *updateManager) BuildRequestInteractively(cli cli.Cli, req *pipeline.Upd
 	}
 
 	if !edit {
-		return u.buildCustomAnchoreFeatureRequest(req)
+		return u.buildCustomAnchoreFeatureRequest(updateClusterFeatureRequest)
 	}
 
-	content, err := json.MarshalIndent(*req, "", "  ")
+	content, err := json.MarshalIndent(*updateClusterFeatureRequest, "", "  ")
 	if err != nil {
 		return errors.WrapIf(err, "failed to marshal request to JSON")
 	}
@@ -72,7 +73,7 @@ func (u *updateManager) BuildRequestInteractively(cli cli.Cli, req *pipeline.Upd
 		return errors.WrapIf(err, "failure during survey")
 	}
 
-	if err := json.Unmarshal([]byte(result), req); err != nil {
+	if err := json.Unmarshal([]byte(result), updateClusterFeatureRequest); err != nil {
 		return errors.WrapIf(err, "failed to unmarshal JSON as request")
 	}
 

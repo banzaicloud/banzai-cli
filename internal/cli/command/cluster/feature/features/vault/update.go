@@ -20,6 +20,8 @@ import (
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
+
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -36,10 +38,10 @@ func (UpdateManager) ValidateRequest(req interface{}) error {
 	return validateSpec(request.Spec)
 }
 
-func (UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.UpdateClusterFeatureRequest) error {
+func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateClusterFeatureRequest *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error {
 
 	var spec specResponse
-	if err := mapstructure.Decode(req.Spec, &spec); err != nil {
+	if err := mapstructure.Decode(updateClusterFeatureRequest.Spec, &spec); err != nil {
 		return errors.WrapIf(err, "feature specification does not conform to schema")
 	}
 
@@ -56,7 +58,7 @@ func (UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.
 
 	switch vaultType {
 	case vaultCustom:
-		customSpec, err := buildCustomVaultFeatureRequest(banzaiCLI, defaults{
+		customSpec, err := buildCustomVaultFeatureRequest(banzaiCli, defaults{
 			address:  spec.CustomVault.Address,
 			secretID: spec.CustomVault.SecretID,
 			policy:   spec.CustomVault.Policy,
@@ -64,7 +66,7 @@ func (UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.
 		if err != nil {
 			return errors.Wrap(err, "failed to build custom Vault feature request")
 		}
-		req.Spec = customSpec
+		updateClusterFeatureRequest.Spec = customSpec
 	case vaultCP:
 	default:
 		return errors.New("not supported type of Vault component")
@@ -80,7 +82,7 @@ func (UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.
 		return errors.WrapIf(err, "failed to build settings to feature update request")
 	}
 
-	req.Spec["settings"] = settings
+	updateClusterFeatureRequest.Spec["settings"] = settings
 
 	return nil
 }
