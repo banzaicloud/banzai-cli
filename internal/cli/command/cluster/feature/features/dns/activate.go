@@ -334,8 +334,7 @@ func readExternalDNS(extDnsIn ExternalDNS, actionCtx actionContext) (ExternalDNS
 
 	if actionCtx.providerName != dnsBanzaiCloud {
 		providerQuestions = append(providerQuestions, &survey.Question{
-			Name:
-			"DomainFilters",
+			Name: "DomainFilters",
 			Prompt: &survey.Input{
 				Message: "Please provide domain filters to match domains against:",
 				Default: defaultDomainFilters,
@@ -439,7 +438,7 @@ func getFeatureSpecDefaults(banzaiCLI cli.Cli, clusterCtx clustercontext.Context
 				Name: dnsBanzaiCloud,
 			}
 			retSpec.ClusterDomain = clusterDomain
-			retSpec.ExternalDNS.DomainFilters = strings.Split(clusterDomain, ",")
+			retSpec.ExternalDNS.DomainFilters = []string{clusterDomain}
 			return retSpec, nil
 		}
 
@@ -453,7 +452,7 @@ func getFeatureSpecDefaults(banzaiCLI cli.Cli, clusterCtx clustercontext.Context
 					Name: dnsBanzaiCloud,
 				},
 				// defaults to the clusterdomain
-				DomainFilters: strings.Split(clusterDomain, ","),
+				DomainFilters: []string{clusterDomain},
 			},
 			ClusterDomain: clusterDomain,
 		}, nil
