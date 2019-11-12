@@ -210,15 +210,9 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		out[externalHost] = defaultLocalhost
 		// TODO check if it resolves to 127.0.0.1 (user's dns recursor may drop this)
 	case providerEc2:
-		id, region, _, err := input.GetAmazonCredentialsRegion("")
+		id, region, err := getAmazonCredentialsRegion(defaultAwsRegion)
 		if err != nil {
-			id, region, _, err = input.GetAmazonCredentialsRegion(defaultAwsRegion)
-			if err != nil {
-				log.Info("Please set your AWS credentials using aws-cli. See https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#cli-quick-configuration")
-				return errors.WrapIf(err, "failed to use local AWS credentials")
-			} else {
-				log.Infof("Using AWS region: %q", region)
-			}
+			return err
 		}
 		providerConfig["region"] = region
 		providerConfig["accessKey"] = id
@@ -249,28 +243,20 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		out[externalHost] = guessExternalAddr()
 
 	case providerEks:
-		id, _, err := input.GetAmazonCredentials()
+		id, region, err := getAmazonCredentialsRegion(defaultEksRegion)
 		if err != nil {
-			id, _, err = input.GetAmazonCredentials()
-			if err != nil {
-				log.Info("Please set your AWS credentials using aws-cli. See https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#cli-quick-configuration")
-				return errors.WrapIf(err, "failed to use local AWS credentials")
-			}
+			return err
 		}
-		providerConfig["cluster_name"] = "poke-banzaicli-eks"
+
+		providerConfig["cluster_name"] = "poke-banzaicli"
 		providerConfig["instance_type"] = "m4.large"
 		providerConfig["eks_service_role"] = "eksServiceRole"
 		providerConfig["eks_node_role"] = "eksNodeRole"
 		providerConfig["max_size"] = 3
 		providerConfig["min_size"] = 2
-		providerConfig["desired_capacity"] = 3
-		providerConfig["region"] = "eu-central-1"
+		providerConfig["desired_capacity"] = 2
+		providerConfig["region"] = region
 		providerConfig["accessKey"] = id
-		hostname, _ := os.Hostname()
-		providerConfig["tags"] = map[string]string{
-			"banzaicloud-pipeline-controlplane-uuid": uuID,
-			"local-id":                               fmt.Sprintf("%s@%s/%s", os.Getenv("USER"), hostname, filepath.Base(options.workspace)),
-		}
 
 		var confirmed bool
 		_ = survey.AskOne(&survey.Confirm{Message: fmt.Sprintf("Do you want to use the following AWS access key: %s?", id)}, &confirmed)
@@ -301,4 +287,18 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	}
 
 	return options.writeValues(out)
+}
+
+func getAmazonCredentialsRegion(defaultEksRegion string) (string, string, error) {
+	id, region, _, err := input.GetAmazonCredentialsRegion("")
+	if err != nil {
+		id, region, _, err = input.GetAmazonCredentialsRegion(defaultEksRegion)
+		if err != nil {
+			log.Info("Please set your AWS credentials using aws-cli. See https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#cli-quick-configuration")
+			return "", "", errors.WrapIf(err, "failed to use local AWS credentials")
+		} else {
+			log.Infof("Using AWS region: %q", region)
+		}
+	}
+	return id, region, err
 }
