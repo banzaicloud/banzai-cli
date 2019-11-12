@@ -25,7 +25,8 @@ import (
 )
 
 const (
-	eksModule = "module.eks"
+	defaultEksRegion = "eu-central-1"
+	eksModule        = "module.eks"
 )
 
 func ensureEKSCluster(banzaiCli cli.Cli, options *cpContext, creds map[string]string) error {
