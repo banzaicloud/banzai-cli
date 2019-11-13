@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dns
+package utils
 
 import (
 	"github.com/AlecAivazis/survey/v2/core"
 )
 
 // helper type alias for id -> name maps
-type idToNameMap = map[string]string
+type IdToNameMap = map[string]string
 
-func Names(sm idToNameMap) []string {
+func Names(sm IdToNameMap) []string {
 	names := make([]string, len(sm))
 	i := 0
 	for _, name := range sm {
@@ -31,7 +31,7 @@ func Names(sm idToNameMap) []string {
 	return names
 }
 
-func NameForID(sm idToNameMap, idOf string) string {
+func NameForID(sm IdToNameMap, idOf string) string {
 	for id, n := range sm {
 		if id == idOf {
 			return n
@@ -40,9 +40,17 @@ func NameForID(sm idToNameMap, idOf string) string {
 	return ""
 }
 
-// nameToIDTransformer returns a survey.Transformer that transform the map value into it's key
+// returns the first value in the map
+func GetFirstName(sm IdToNameMap) string {
+	for _, name := range sm {
+		return name
+	}
+	return ""
+}
+
+// NameToIDTransformer returns a survey.Transformer that transform the map value into it's key
 // todo remove the direct dependency on the survey api
-func nameToIDTransformer(sm idToNameMap) func(name interface{}) interface{} {
+func NameToIDTransformer(sm IdToNameMap) func(name interface{}) interface{} {
 	return func(name interface{}) interface{} {
 		for id, n := range sm {
 			if n == name.(core.OptionAnswer).Value {
