@@ -20,12 +20,13 @@ import (
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/mitchellh/mapstructure"
+
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
-	"github.com/mitchellh/mapstructure"
 )
 
 type updateManager struct {
@@ -150,22 +151,16 @@ func (u *updateManager) buildCustomAnchoreFeatureRequest(updateRequest *pipeline
 		return errors.WrapIf(err, "failed to read Anchore configuration details")
 	}
 
-	policy, err := u.askForPolicy(&securityFeatureSpec.Policy)
-	if err != nil {
-		return errors.WrapIf(err, "failed to read Anchore Policy configuration details")
-	}
-
 	// todo whitelist updates not supported for now
-	webhookConfig, err := u.askForWebHookConfig(&securityFeatureSpec.WebhookConfig)
-	if err != nil {
-		return errors.WrapIf(err, "failed to read webhook configuration")
-	}
+	//webhookConfig, err := u.askForWebHookConfig(&securityFeatureSpec.WebhookConfig)
+	//if err != nil {
+	//	return errors.WrapIf(err, "failed to read webhook configuration")
+	//}
 
 	securityScanFeatureRequest := new(SecurityScanFeatureSpec)
 	securityScanFeatureRequest.CustomAnchore = *anchoreConfig
-	securityScanFeatureRequest.Policy = *policy
 	securityScanFeatureRequest.ReleaseWhiteList = securityFeatureSpec.ReleaseWhiteList
-	securityScanFeatureRequest.WebhookConfig = *webhookConfig
+	//securityScanFeatureRequest.WebhookConfig = *webhookConfig
 
 	ssfMap, err := u.securityScanSpecAsMap(securityScanFeatureRequest)
 	if err != nil {

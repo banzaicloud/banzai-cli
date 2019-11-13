@@ -15,10 +15,10 @@
 package securityscan
 
 import (
+	"context"
 	"encoding/json"
 
 	"emperror.dev/errors"
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/mitchellh/mapstructure"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
@@ -34,61 +34,26 @@ type activateManager struct {
 }
 
 func NewActivateManager() features.ActivateManager {
-	return new(activateManager)
+	return &activateManager{}
 }
 
-func (am *activateManager) BuildRequestInteractively(cli.Cli, clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error) {
+func (am activateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error) {
 	var req pipeline.ActivateClusterFeatureRequest
+	// todo infer the cli directly to the manager instead
+	am.specAssembler = specAssembler{banzaiCLI}
 
-	var edit bool
-	if err := survey.AskOne(
-		&survey.Confirm{
-			Message: "Edit the cluster feature activation request in your text editor?",
-		},
-		&edit,
-	); err != nil {
-		return nil, errors.WrapIf(err, "failure during survey")
+	if err := am.isFeatureEnabled(context.Background()); err != nil {
+		return nil, errors.WrapIf(err, "securityscan is not enabled")
 	}
 
-	if !edit {
-		if err := am.buildAnchoreConfigSpec(&req); err != nil {
-			return nil, err
-		}
-		return &req, nil
-	}
-
-	spec, err := am.securityScanSpecAsMap(nil)
-	if err != nil {
-		return nil, errors.WrapIf(err, "failed to decode spec into map")
-	}
-
-	req.Spec = spec
-
-	content, err := json.MarshalIndent(req, "", "  ")
-	if err != nil {
-		return nil, errors.WrapIf(err, "failed to marshal request to JSON")
-	}
-	var result string
-	if err := survey.AskOne(
-		&survey.Editor{
-			Default:       string(content),
-			HideDefault:   true,
-			AppendDefault: true,
-		},
-		&result,
-		survey.WithValidator(am.ValidateRequest),
-	); err != nil {
-		return nil, errors.WrapIf(err, "failure during survey")
-	}
-
-	if err := json.Unmarshal([]byte(result), &req); err != nil {
-		return nil, errors.WrapIf(err, "failed to unmarshal JSON as request")
+	if err := am.buildAnchoreConfigSpec(context.Background(), banzaiCLI.Context().OrganizationID(), clusterCtx.ClusterID(), &req); err != nil {
+		return nil, err
 	}
 
 	return &req, nil
 }
 
-func (a activateManager) ValidateRequest(req interface{}) error {
+func (am activateManager) ValidateRequest(req interface{}) error {
 	var request pipeline.ActivateClusterFeatureRequest
 	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
 		return errors.WrapIf(err, "request is not valid JSON")
@@ -97,7 +62,7 @@ func (a activateManager) ValidateRequest(req interface{}) error {
 	return nil
 }
 
-func (am *activateManager) readActivateReqFromFileOrStdin(filePath string, req *pipeline.ActivateClusterFeatureRequest) error {
+func (am activateManager) readActivateReqFromFileOrStdin(filePath string, req *pipeline.ActivateClusterFeatureRequest) error {
 	filename, raw, err := utils.ReadFileOrStdin(filePath)
 	if err != nil {
 		return errors.WrapIfWithDetails(err, "failed to read", "filename", filename)
@@ -110,7 +75,7 @@ func (am *activateManager) readActivateReqFromFileOrStdin(filePath string, req *
 	return nil
 }
 
-func (am *activateManager) securityScanSpecAsMap(spec *SecurityScanFeatureSpec) (map[string]interface{}, error) {
+func (am activateManager) securityScanSpecAsMap(spec *SecurityScanFeatureSpec) (map[string]interface{}, error) {
 	// fill the structure of the config - make filling up the values easier
 	if spec == nil {
 		spec = &SecurityScanFeatureSpec{
@@ -129,35 +94,36 @@ func (am *activateManager) securityScanSpecAsMap(spec *SecurityScanFeatureSpec) 
 	return specMap, nil
 }
 
-func (am *activateManager) buildAnchoreConfigSpec(activateRequest *pipeline.ActivateClusterFeatureRequest) error {
+func (am activateManager) buildAnchoreConfigSpec(ctx context.Context, orgID int32, clusterID int32, activateRequest *pipeline.ActivateClusterFeatureRequest) error {
 
-	anchoreConfig, err := am.askForAnchoreConfig(nil)
-	if err != nil {
-		return errors.WrapIf(err, "failed to read Anchore configuration details")
-	}
+	// todo uncomment this for supporting custom anchore
+	//anchoreConfig, err := am.askForAnchoreConfig(nil)
+	//if err != nil {
+	//	return errors.WrapIf(err, "failed to read Anchore configuration details")
+	//}
 
-	policy, err := am.askForPolicy(nil)
+	policy, err := am.askForPolicy(ctx, orgID, clusterID, policySpec{})
 	if err != nil {
 		return errors.WrapIf(err, "failed to read Anchore Policy configuration details")
 	}
 
-	whiteLists, err := am.askForWhiteLists()
-	if err != nil {
-		return errors.WrapIf(err, "failed to read whitelists")
-	}
+	// todo uncomment this for supporting whitelist management
+	//whiteLists, err := am.askForWhiteLists()
+	//if err != nil {
+	//	return errors.WrapIf(err, "failed to read whitelists")
+	//}
 
-	webhookConfig, err := am.askForWebHookConfig(nil)
+	webhookConfig, err := am.askForWebHookConfig(ctx, orgID, clusterID, webHookConfigSpec{})
 	if err != nil {
 		return errors.WrapIf(err, "failed to read webhook configuration")
 	}
 
-	securityScanFeatureRequest := new(SecurityScanFeatureSpec)
-	securityScanFeatureRequest.CustomAnchore = *anchoreConfig
-	securityScanFeatureRequest.Policy = *policy
-	securityScanFeatureRequest.ReleaseWhiteList = whiteLists
-	securityScanFeatureRequest.WebhookConfig = *webhookConfig
+	featureSpec := SecurityScanFeatureSpec{
+		Policy:        policy,
+		WebhookConfig: webhookConfig,
+	}
 
-	ssfMap, err := am.securityScanSpecAsMap(securityScanFeatureRequest)
+	ssfMap, err := am.securityScanSpecAsMap(&featureSpec)
 	if err != nil {
 		return errors.WrapIf(err, "failed to transform request to map")
 	}
