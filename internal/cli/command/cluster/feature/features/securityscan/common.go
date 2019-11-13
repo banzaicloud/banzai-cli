@@ -262,7 +262,7 @@ func (sa specAssembler) askForSecret(currentSecretID string) (string, error) {
 func (sa specAssembler) getPolicyOptions(ctx context.Context, orgID int32, clusterID int32) (utils.IdToNameMap, error) {
 	policyMap := make(utils.IdToNameMap)
 
-	policyBundleRecords, response, err := sa.banzaiCLI.Client().PoliciesApi.ListPolicies(context.Background(), clusterID, orgID, &pipeline.ListPoliciesOpts{Detail: optional.NewBool(true)})
+	policyBundleRecords, response, err := sa.banzaiCLI.Client().PoliciesApi.ListPolicies(ctx, clusterID, orgID, &pipeline.ListPoliciesOpts{Detail: optional.NewBool(true)})
 	if err != nil || response.StatusCode != http.StatusOK {
 		return nil, errors.WrapIf(err, "failed to retrieve policies")
 	}
