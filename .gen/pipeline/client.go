@@ -73,8 +73,6 @@ type APIClient struct {
 
 	DeploymentsApi *DeploymentsApiService
 
-	DomainApi *DomainApiService
-
 	GoogleApi *GoogleApiService
 
 	HelmApi *HelmApiService
@@ -139,7 +137,6 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.ClustersApi = (*ClustersApiService)(&c.common)
 	c.CommonApi = (*CommonApiService)(&c.common)
 	c.DeploymentsApi = (*DeploymentsApiService)(&c.common)
-	c.DomainApi = (*DomainApiService)(&c.common)
 	c.GoogleApi = (*GoogleApiService)(&c.common)
 	c.HelmApi = (*HelmApiService)(&c.common)
 	c.HpaApi = (*HpaApiService)(&c.common)

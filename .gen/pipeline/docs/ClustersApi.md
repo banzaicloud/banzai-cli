@@ -24,6 +24,7 @@ Method | HTTP request | Description
 [**ListClusterEndpoints**](ClustersApi.md#ListClusterEndpoints) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/endpoints | List service public endpoints
 [**ListClusterSecrets**](ClustersApi.md#ListClusterSecrets) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/secrets | List secrets which belongs to cluster
 [**ListClusters**](ClustersApi.md#ListClusters) | **Get** /api/v1/orgs/{orgId}/clusters | List clusters
+[**ListNamespaces**](ClustersApi.md#ListNamespaces) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/namespaces | Lists namespaces for a cluster
 [**ListNodepoolLabels**](ClustersApi.md#ListNodepoolLabels) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodepools/labels | List cluser nodepool labels
 [**ListNodes**](ClustersApi.md#ListNodes) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodes | List cluser nodes
 [**MergeSecret**](ClustersApi.md#MergeSecret) | **Patch** /api/v1/orgs/{orgId}/clusters/{id}/secrets/{secretName} | Merge a particular secret with an existing one with optional remapping
@@ -733,6 +734,40 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**[]GetClusterStatusResponse**](GetClusterStatusResponse.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## ListNamespaces
+
+> []string ListNamespaces(ctx, orgId, id)
+Lists namespaces for a cluster
+
+Lists namespaces for a cluster
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**orgId** | **int32**| Organization identification | 
+**id** | **int32**| Selected cluster identification (number) | 
+
+### Return type
+
+**[]string**
 
 ### Authorization
 
