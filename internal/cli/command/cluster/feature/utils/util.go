@@ -15,6 +15,9 @@
 package utils
 
 import (
+	"net/http"
+
+	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2/core"
 )
 
@@ -61,4 +64,15 @@ func NameToIDTransformer(sm IdToNameMap) func(name interface{}) interface{} {
 		}
 		return nil
 	}
+}
+
+// checks for errors and unexpected error code in the response data
+func CheckCallResults(r *http.Response, err error) error {
+	if err != nil {
+		return errors.WrapIf(err, "failure during callout to pipeline")
+	}
+	if r.StatusCode != http.StatusOK {
+		return errors.Errorf("received unexpected status code: %d, status: %s", r.StatusCode, r.Status)
+	}
+	return nil
 }

@@ -18,7 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"strconv"
 	"strings"
 
@@ -165,7 +164,7 @@ func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Prov
 
 	case dnsRoute53:
 		regions, r, err := banzaiCLI.CloudinfoClient().RegionsApi.GetRegions(context.Background(), "amazon", "eks")
-		if err != nil || r.StatusCode != http.StatusOK {
+		if err := utils.CheckCallResults(r, err); err != nil {
 			return Provider{}, errors.Wrap(err, "failed to get regions")
 		}
 
@@ -407,7 +406,7 @@ func getFeatureSpecDefaults(banzaiCLI cli.Cli, clusterCtx clustercontext.Context
 	switch actionCtx.providerName {
 	case dnsBanzaiCloud:
 		caps, r, err := banzaiCLI.Client().PipelineApi.ListCapabilities(context.Background(), )
-		if err != nil || r.StatusCode != http.StatusOK {
+		if err := utils.CheckCallResults(r, err); err != nil {
 			return DNSFeatureSpec{}, errors.WrapIf(err, "failed to retrieve capabilities")
 		}
 
@@ -426,7 +425,7 @@ func getFeatureSpecDefaults(banzaiCLI cli.Cli, clusterCtx clustercontext.Context
 		}
 
 		org, r, err := banzaiCLI.Client().OrganizationsApi.GetOrg(context.Background(), banzaiCLI.Context().OrganizationID())
-		if err != nil || r.StatusCode != http.StatusOK {
+		if err := utils.CheckCallResults(r, err); err != nil {
 			return DNSFeatureSpec{}, errors.WrapIf(err, "failed to retrieves organizaton")
 		}
 

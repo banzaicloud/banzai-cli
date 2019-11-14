@@ -17,7 +17,6 @@ package securityscan
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
@@ -150,7 +149,7 @@ type specAssembler struct {
 
 func (sa specAssembler) isFeatureEnabled(ctx context.Context) error {
 	capabilities, r, err := sa.banzaiCLI.Client().PipelineApi.ListCapabilities(ctx)
-	if err != nil || r.StatusCode != http.StatusOK {
+	if err := utils.CheckCallResults(r, err); err != nil {
 		return errors.WrapIf(err, "failed to retrieve capabilities")
 	}
 
@@ -271,7 +270,7 @@ func (sa specAssembler) askForSecret(currentSecretID string) (string, error) {
 
 func (sa specAssembler) getNamespaces(ctx context.Context, orgID int32, clusterID int32) ([]string, error) {
 	nsResponse, response, err := sa.banzaiCLI.Client().ClustersApi.ListNamespaces(ctx, orgID, clusterID)
-	if err != nil || response.StatusCode != http.StatusOK {
+	if err := utils.CheckCallResults(response, err); err != nil {
 		return nil, errors.WrapIf(err, "failed to retrieve policies")
 	}
 
