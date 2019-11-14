@@ -289,7 +289,7 @@ func (sa specAssembler) getNamespaces(ctx context.Context, orgID int32, clusterI
 }
 
 // policies are statically stored, the selection is made from a "wired" list
-func (sa *specAssembler) askForPolicy(_ context.Context, orgID int32, clusterID int32, policySpecIn policySpec) (policySpec, error) {
+func (sa *specAssembler) askForPolicy(policySpecIn policySpec) (policySpec, error) {
 
 	defaultPolicyBundle := utils.NameForID(policyBundles, policySpecIn.PolicyID)
 	if defaultPolicyBundle == "" {
@@ -355,7 +355,7 @@ func (sa specAssembler) askForWebHookConfig(ctx context.Context, orgID int32, cl
 	defaultNamespaces := webhookSpecIn.Namespaces
 	// empty the namespaces field
 	webhookSpecIn.Namespaces = make([]string, 0, len(defaultNamespaces))
-	
+
 	if len(defaultNamespaces) == 0 {
 		defaultNamespaces = []string{"*"}
 	}
@@ -487,7 +487,7 @@ func (sa *specAssembler) askForWhiteListItem() (*releaseSpec, error) {
 
 func (sa specAssembler) assembleFeatureSpec(ctx context.Context, orgID int32, clusterID int32, featureSpecIn SecurityScanFeatureSpec) (SecurityScanFeatureSpec, error) {
 
-	policy, err := sa.askForPolicy(ctx, orgID, clusterID, featureSpecIn.Policy)
+	policy, err := sa.askForPolicy(featureSpecIn.Policy)
 	if err != nil {
 		return SecurityScanFeatureSpec{}, errors.WrapIf(err, "failed to assembele policy data")
 	}
