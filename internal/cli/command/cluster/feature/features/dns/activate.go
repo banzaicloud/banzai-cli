@@ -107,16 +107,14 @@ func decorateProviderSecret(banzaiCLI cli.Cli, selectedProvider Provider) (Provi
 	defaultSecret := utils.NameForID(secretsMap, selectedProvider.SecretID)
 	if defaultSecret == "" {
 		// if no secrets is set so far, the first secret is  the default
-		defaultSecret = utils.Names(
-			secretsMap)[0]
+		defaultSecret = utils.Names(secretsMap)[0]
 	}
 
 	secretIDQuestion := survey.Question{
 		Name: "SecretID",
 		Prompt: &survey.Select{
 			Message: "Please select the secret to access the DNS provider",
-			Options: utils.Names(
-				secretsMap),
+			Options: utils.Names(secretsMap),
 			Default: defaultSecret,
 		},
 		Validate:  survey.Required,
@@ -180,8 +178,7 @@ func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Prov
 				Name: "Region",
 				Prompt: &survey.Select{
 					Message: "Please select the Amazon region:",
-					Options: utils.Names(
-						regOptions),
+					Options: utils.Names(regOptions),
 					Default: utils.NameForID(regOptions, currentProviderOpts.Region),
 				},
 				Transform: utils.NameToIDTransformer(regOptions),
@@ -202,8 +199,7 @@ func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Prov
 		defaultProject := utils.NameForID(projectsMap, selectedProvider.Options["project"].(string))
 		if defaultProject == "" {
 			// the default is the first project
-			defaultProject = utils.Names(
-				projectsMap)[0]
+			defaultProject = utils.Names(projectsMap)[0]
 		}
 
 		questions = append(questions,
@@ -211,8 +207,7 @@ func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Prov
 				Name: "",
 				Prompt: &survey.Select{
 					Message: "Please select the google project",
-					Options: utils.Names(
-						projectsMap),
+					Options: utils.Names(projectsMap),
 					Default: defaultProject,
 				},
 				Validate:  survey.Required,
