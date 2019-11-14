@@ -148,14 +148,15 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		}
 		env = creds
 
-	case providerEks:
+	case providerCustom:
 		_, creds, err := input.GetAmazonCredentials()
 		if err != nil {
 			return errors.WrapIf(err, "failed to get AWS credentials")
 		}
 
-		if err := ensureEKSCluster(banzaiCli, options.cpContext, creds); err != nil {
-			return errors.WrapIf(err, "failed to create Amazon EKS cluster")
+		targets := []string{"module.custom", "local_file.k8s_config"}
+		if err := ensureCustomCluster(banzaiCli, options.cpContext, creds, targets); err != nil {
+			return errors.WrapIf(err, "failed to create Custmo EKS cluster")
 		}
 
 	default:
@@ -165,7 +166,7 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 	}
 
 	log.Info("Deploying Banzai Cloud Pipeline to Kubernetes cluster...")
-	if values["provider"] == providerEks {
+	if values["provider"] == providerCustom {
 		_, creds, err := input.GetAmazonCredentials()
 		if err != nil {
 			return errors.WrapIf(err, "failed to get AWS credentials")
@@ -202,7 +203,7 @@ func postInstall(options *createOptions, banzaiCli cli.Cli, values map[string]in
 			if err != nil {
 				log.Errorf("%v", err)
 			}
-		case providerK8s:
+		case providerK8s, providerCustom:
 			target, err = options.readTraefikAddress()
 			if err != nil {
 				log.Errorf("%v", err)

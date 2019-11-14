@@ -198,10 +198,6 @@ func (c *cpContext) readEc2Host() (string, error) {
 	return strings.Trim(string(bytes), "\n"), nil
 }
 
-func (c *cpContext) eksAuthCMPath() string {
-	return filepath.Join(c.workspace, eksAuthCM)
-}
-
 // Init completes the cp context from the options, env vars, and if possible from the user
 func (c *cpContext) Init() error {
 	if c.workspace == "" {
