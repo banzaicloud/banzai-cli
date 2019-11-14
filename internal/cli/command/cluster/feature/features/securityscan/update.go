@@ -59,7 +59,7 @@ func (um updateManager) BuildRequestInteractively(banzaiCLI cli.Cli, updateClust
 		return errors.WrapIf(err, "failed to decode feature specification for update")
 	}
 
-	featureSpec, err := um.assembleFeatureSpec(context.Background(), banzaiCLI.Context().OrganizationID(), clusterCtx.ClusterID(), SecurityScanFeatureSpec{})
+	featureSpec, err := um.assembleFeatureSpec(context.Background(), banzaiCLI.Context().OrganizationID(), clusterCtx.ClusterID(), featureSpec)
 	if err != nil {
 		return errors.WrapIf(err, "failed to assemble feature specification")
 	}

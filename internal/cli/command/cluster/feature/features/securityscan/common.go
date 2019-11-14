@@ -289,11 +289,11 @@ func (sa specAssembler) getNamespaces(ctx context.Context, orgID int32, clusterI
 }
 
 // policies are statically stored, the selection is made from a "wired" list
-func (sa *specAssembler) askForPolicy(ctx context.Context, orgID int32, clusterID int32, policySpecIn policySpec) (policySpec, error) {
+func (sa *specAssembler) askForPolicy(_ context.Context, orgID int32, clusterID int32, policySpecIn policySpec) (policySpec, error) {
 
 	defaultPolicyBundle := utils.NameForID(policyBundles, policySpecIn.PolicyID)
 	if defaultPolicyBundle == "" {
-		defaultPolicyBundle = utils.GetFirstName(policyBundles)
+		defaultPolicyBundle = "Default bundle"
 	}
 
 	qs := []*survey.Question{
@@ -344,9 +344,13 @@ func (sa specAssembler) askForWebHookConfig(ctx context.Context, orgID int32, cl
 
 	// ignore the error
 	namespaceOptions, _ := sa.getNamespaces(ctx, orgID, clusterID)
+	if len(namespaceOptions) == 0 {
+		// couldn't retrieve namespaces / namespaces are not available
+		namespaceOptions = append(namespaceOptions, "default")
+	}
 
 	// append the allStar
-	namespaceOptions = append([]string{"*", "default"}, namespaceOptions...)
+	namespaceOptions = append([]string{"*"}, namespaceOptions...)
 
 	defaultNamespaces := webhookSpecIn.Namespaces
 	if len(defaultNamespaces) == 0 {
@@ -480,12 +484,12 @@ func (sa *specAssembler) askForWhiteListItem() (*releaseSpec, error) {
 
 func (sa specAssembler) assembleFeatureSpec(ctx context.Context, orgID int32, clusterID int32, featureSpecIn SecurityScanFeatureSpec) (SecurityScanFeatureSpec, error) {
 
-	policy, err := sa.askForPolicy(ctx, orgID, clusterID, policySpec{})
+	policy, err := sa.askForPolicy(ctx, orgID, clusterID, featureSpecIn.Policy)
 	if err != nil {
 		return SecurityScanFeatureSpec{}, errors.WrapIf(err, "failed to assembele policy data")
 	}
 
-	webhookConfig, err := sa.askForWebHookConfig(ctx, orgID, clusterID, webHookConfigSpec{})
+	webhookConfig, err := sa.askForWebHookConfig(ctx, orgID, clusterID, featureSpecIn.WebhookConfig)
 	if err != nil {
 		return SecurityScanFeatureSpec{}, errors.WrapIf(err, "failed to assembele webhook data")
 
