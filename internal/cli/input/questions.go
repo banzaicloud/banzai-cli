@@ -12,76 +12,76 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package monitoring
+package input
 
 import (
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 )
 
-type questionMaker interface {
+type QuestionMaker interface {
 	Do() error
 }
 
-type questionBase struct {
-	message string
-	help    string
+type QuestionBase struct {
+	Message string
+	Help    string
 }
 
-type questionConfirm struct {
-	questionBase
-	defaultValue bool
-	output       *bool
+type QuestionConfirm struct {
+	QuestionBase
+	DefaultValue bool
+	Output       *bool
 }
 
-type questionInput struct {
-	questionBase
-	defaultValue string
-	output       *string
+type QuestionInput struct {
+	QuestionBase
+	DefaultValue string
+	Output       *string
 }
 
-type questionSelect struct {
-	questionInput
-	options []string
+type QuestionSelect struct {
+	QuestionInput
+	Options []string
 }
 
-func (q questionConfirm) Do() error {
+func (q QuestionConfirm) Do() error {
 	if err := survey.AskOne(
 		&survey.Confirm{
-			Message: q.message,
-			Default: q.defaultValue,
-			Help:    q.help,
+			Message: q.Message,
+			Default: q.DefaultValue,
+			Help:    q.Help,
 		},
-		q.output,
+		q.Output,
 	); err != nil {
 		return errors.WrapIf(err, "failure during survey")
 	}
 	return nil
 }
 
-func (q questionInput) Do() error {
+func (q QuestionInput) Do() error {
 	if err := survey.AskOne(
 		&survey.Input{
-			Message: q.message,
-			Help:    q.help,
-			Default: q.defaultValue,
+			Message: q.Message,
+			Help:    q.Help,
+			Default: q.DefaultValue,
 		},
-		q.output,
+		q.Output,
 	); err != nil {
 		return errors.WrapIf(err, "failure during survey")
 	}
 	return nil
 }
 
-func (q questionSelect) Do() error {
+func (q QuestionSelect) Do() error {
 	err := survey.AskOne(
 		&survey.Select{
-			Message: q.message,
-			Help:    q.help,
-			Options: q.options,
-			Default: q.defaultValue,
+			Message: q.Message,
+			Help:    q.Help,
+			Options: q.Options,
+			Default: q.DefaultValue,
 		},
-		q.output,
+		q.Output,
 	)
 	if err != nil {
 		return errors.WrapIf(err, "failure during survey")
@@ -90,7 +90,7 @@ func (q questionSelect) Do() error {
 	return nil
 }
 
-func doQuestions(questions []questionMaker) error {
+func DoQuestions(questions []QuestionMaker) error {
 	for _, q := range questions {
 		if err := q.Do(); err != nil {
 			return errors.WrapIf(err, "failure during survey")

@@ -22,6 +22,7 @@ import (
 
 	"emperror.dev/errors"
 	"github.com/antihax/optional"
+	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -138,37 +139,37 @@ func askIngress(compType string, defaults baseIngressSpec) (*baseIngressSpec, er
 	var domain string
 	var path string
 
-	if err := doQuestions([]questionMaker{
-		questionConfirm{
-			questionBase: questionBase{
-				message: fmt.Sprintf("Do you want to enable %s Ingress?", compType),
+	if err := input.DoQuestions([]input.QuestionMaker{
+		input.QuestionConfirm{
+			QuestionBase: input.QuestionBase{
+				Message: fmt.Sprintf("Do you want to enable %s Ingress?", compType),
 			},
-			defaultValue: defaults.Enabled,
-			output:       &isIngressEnabled,
+			DefaultValue: defaults.Enabled,
+			Output:       &isIngressEnabled,
 		},
 	}); err != nil {
 		return nil, errors.WrapIf(err, fmt.Sprintf("error during getting %s ingress enabled", compType))
 	}
 
 	if isIngressEnabled {
-		var questions = []questionMaker{
-			questionInput{
-				questionBase: questionBase{
-					message: fmt.Sprintf("Please provide %s Ingress domain:", compType),
-					help:    "Leave empty to use cluster's IP",
+		var questions = []input.QuestionMaker{
+			input.QuestionInput{
+				QuestionBase: input.QuestionBase{
+					Message: fmt.Sprintf("Please provide %s Ingress domain:", compType),
+					Help:    "Leave empty to use cluster's IP",
 				},
-				defaultValue: defaults.Domain,
-				output:       &domain,
+				DefaultValue: defaults.Domain,
+				Output:       &domain,
 			},
-			questionInput{
-				questionBase: questionBase{
-					message: fmt.Sprintf("Please provide %s Ingress path:", compType),
+			input.QuestionInput{
+				QuestionBase: input.QuestionBase{
+					Message: fmt.Sprintf("Please provide %s Ingress path:", compType),
 				},
-				defaultValue: defaults.Path,
-				output:       &path,
+				DefaultValue: defaults.Path,
+				Output:       &path,
 			},
 		}
-		if err := doQuestions(questions); err != nil {
+		if err := input.DoQuestions(questions); err != nil {
 			return nil, errors.WrapIf(err, "error during asking ingress fields")
 		}
 
@@ -182,13 +183,13 @@ func askIngress(compType string, defaults baseIngressSpec) (*baseIngressSpec, er
 
 func askGrafana(banzaiCLI cli.Cli, defaults grafanaSpec) (*grafanaSpec, error) {
 	var isEnabled bool
-	if err := doQuestions([]questionMaker{
-		questionConfirm{
-			questionBase: questionBase{
-				message: "Do you want to enable Grafana?",
+	if err := input.DoQuestions([]input.QuestionMaker{
+		input.QuestionConfirm{
+			QuestionBase: input.QuestionBase{
+				Message: "Do you want to enable Grafana?",
 			},
-			defaultValue: defaults.Enabled,
-			output:       &isEnabled,
+			DefaultValue: defaults.Enabled,
+			Output:       &isEnabled,
 		},
 	}); err != nil {
 		return nil, errors.WrapIf(err, "error during getting Grafana enabled")
@@ -213,13 +214,13 @@ func askGrafana(banzaiCLI cli.Cli, defaults grafanaSpec) (*grafanaSpec, error) {
 		result.Ingress = *ingressSpec
 
 		// default dashboards
-		if err := doQuestions([]questionMaker{
-			questionConfirm{
-				questionBase: questionBase{
-					message: "Do you want to add default dashboards to Grafana?",
+		if err := input.DoQuestions([]input.QuestionMaker{
+			input.QuestionConfirm{
+				QuestionBase: input.QuestionBase{
+					Message: "Do you want to add default dashboards to Grafana?",
 				},
-				defaultValue: defaults.Dashboards,
-				output:       &result.Dashboards,
+				DefaultValue: defaults.Dashboards,
+				Output:       &result.Dashboards,
 			},
 		}); err != nil {
 			return nil, errors.WrapIf(err, "error during getting default dashboards")
@@ -236,28 +237,28 @@ func askPrometheus(banzaiCLI cli.Cli, defaults prometheusSpec) (*prometheusSpec,
 
 	// storage class, storage size and retention
 	var storageSize = fmt.Sprint(defaults.Storage.Size)
-	if err := doQuestions([]questionMaker{
-		questionInput{
-			questionBase: questionBase{
-				message: "Please provide storage class name for Prometheus:",
-				help:    "Leave empty to use default storage class",
+	if err := input.DoQuestions([]input.QuestionMaker{
+		input.QuestionInput{
+			QuestionBase: input.QuestionBase{
+				Message: "Please provide storage class name for Prometheus:",
+				Help:    "Leave empty to use default storage class",
 			},
-			defaultValue: defaults.Storage.Class,
-			output:       &result.Storage.Class,
+			DefaultValue: defaults.Storage.Class,
+			Output:       &result.Storage.Class,
 		},
-		questionInput{
-			questionBase: questionBase{
-				message: "Please provide storage size for Prometheus:",
+		input.QuestionInput{
+			QuestionBase: input.QuestionBase{
+				Message: "Please provide storage size for Prometheus:",
 			},
-			defaultValue: storageSize,
-			output:       &storageSize,
+			DefaultValue: storageSize,
+			Output:       &storageSize,
 		},
-		questionInput{
-			questionBase: questionBase{
-				message: "Please provide retention for Prometheus:",
+		input.QuestionInput{
+			QuestionBase: input.QuestionBase{
+				Message: "Please provide retention for Prometheus:",
 			},
-			defaultValue: defaults.Storage.Retention,
-			output:       &result.Storage.Retention,
+			DefaultValue: defaults.Storage.Retention,
+			Output:       &result.Storage.Retention,
 		},
 	}); err != nil {
 		return nil, errors.WrapIf(err, "error during getting Prometheus options")
@@ -288,13 +289,13 @@ func askPrometheus(banzaiCLI cli.Cli, defaults prometheusSpec) (*prometheusSpec,
 
 func askAlertmanager(banzaiCLI cli.Cli, defaults alertmanagerSpec) (*alertmanagerSpec, error) {
 	var isEnabled bool
-	if err := doQuestions([]questionMaker{
-		questionConfirm{
-			questionBase: questionBase{
-				message: "Do you want to enable Alertmanager?",
+	if err := input.DoQuestions([]input.QuestionMaker{
+		input.QuestionConfirm{
+			QuestionBase: input.QuestionBase{
+				Message: "Do you want to enable Alertmanager?",
 			},
-			defaultValue: defaults.Enabled,
-			output:       &isEnabled,
+			DefaultValue: defaults.Enabled,
+			Output:       &isEnabled,
 		},
 	}); err != nil {
 		return nil, errors.WrapIf(err, "error during getting Alertmanager enabled")
@@ -333,16 +334,16 @@ func askAlertmanager(banzaiCLI cli.Cli, defaults alertmanagerSpec) (*alertmanage
 				}
 			}
 		}
-		if err := doQuestions([]questionMaker{
-			questionSelect{
-				questionInput: questionInput{
-					questionBase: questionBase{
-						message: "Select notification provider",
+		if err := input.DoQuestions([]input.QuestionMaker{
+			input.QuestionSelect{
+				QuestionInput: input.QuestionInput{
+					QuestionBase: input.QuestionBase{
+						Message: "Select notification provider",
 					},
-					defaultValue: defaultNotificationProviderValue,
-					output:       &notificationProvider,
+					DefaultValue: defaultNotificationProviderValue,
+					Output:       &notificationProvider,
 				},
-				options: []string{skip, alertmanagerNotificationNameSlack, alertmanagerNotificationNamePagerDuty},
+				Options: []string{skip, alertmanagerNotificationNameSlack, alertmanagerNotificationNamePagerDuty},
 			},
 		}); err != nil {
 			return nil, errors.WrapIf(err, "error during getting notification provider")
@@ -383,7 +384,7 @@ func askAlertmanager(banzaiCLI cli.Cli, defaults alertmanagerSpec) (*alertmanage
 	return result, nil
 }
 
-func askSecret(banzaiCLI cli.Cli, secretType, defaultValue string, withSkipOption bool) (string, error) {
+func askSecret(banzaiCLI cli.Cli, secretType, DefaultValue string, withSkipOption bool) (string, error) {
 
 	orgID := banzaiCLI.Context().OrganizationID()
 	secrets, _, err := banzaiCLI.Client().SecretsApi.GetSecrets(
@@ -423,20 +424,20 @@ func askSecret(banzaiCLI cli.Cli, secretType, defaultValue string, withSkipOptio
 		}
 		secretOptions[idx] = s.Name
 		secretIds[s.Name] = s.Id
-		if s.Id == defaultValue {
+		if s.Id == DefaultValue {
 			defaultSecretName = s.Name
 		}
 	}
 
-	if err := doQuestions([]questionMaker{questionSelect{
-		questionInput: questionInput{
-			questionBase: questionBase{
-				message: "Provider secret:",
+	if err := input.DoQuestions([]input.QuestionMaker{input.QuestionSelect{
+		QuestionInput: input.QuestionInput{
+			QuestionBase: input.QuestionBase{
+				Message: "Provider secret:",
 			},
-			defaultValue: defaultSecretName,
-			output:       &secretName,
+			DefaultValue: defaultSecretName,
+			Output:       &secretName,
 		},
-		options: secretOptions,
+		Options: secretOptions,
 	}}); err != nil {
 		return "", errors.WrapIf(err, "error during getting secret")
 	}
@@ -463,19 +464,19 @@ func askNotificationProviderSlack(banzaiCLI cli.Cli, defaultsInterface interface
 		return nil, errors.WrapIf(err, "error during getting Slack secret")
 	}
 
-	if err := doQuestions([]questionMaker{
-		questionInput{
-			questionBase: questionBase{
-				message: "Provide Slack channel name for the alerts:",
+	if err := input.DoQuestions([]input.QuestionMaker{
+		input.QuestionInput{
+			QuestionBase: input.QuestionBase{
+				Message: "Provide Slack channel name for the alerts:",
 			},
-			output: &result.Channel,
+			Output: &result.Channel,
 		},
-		questionConfirm{
-			questionBase: questionBase{
-				message: "Send resolved notifications as well",
+		input.QuestionConfirm{
+			QuestionBase: input.QuestionBase{
+				Message: "Send resolved notifications as well",
 			},
-			defaultValue: defaults.SendResolved,
-			output:       &result.SendResolved,
+			DefaultValue: defaults.SendResolved,
+			Output:       &result.SendResolved,
 		},
 	}); err != nil {
 		return nil, errors.WrapIf(err, "error during getting Slack options")
@@ -495,13 +496,13 @@ func askNotificationProviderPagerDuty(banzaiCLI cli.Cli, defaultsInterface inter
 	}
 
 	// ask for pd URL
-	if err := doQuestions([]questionMaker{
-		questionInput{
-			questionBase: questionBase{
-				message: "Provide PagerDuty service endpoint:",
+	if err := input.DoQuestions([]input.QuestionMaker{
+		input.QuestionInput{
+			QuestionBase: input.QuestionBase{
+				Message: "Provide PagerDuty service endpoint:",
 			},
-			defaultValue: defaults.Url,
-			output:       &result.Url,
+			DefaultValue: defaults.Url,
+			Output:       &result.Url,
 		},
 	}); err != nil {
 		return nil, errors.WrapIf(err, "error during getting PagerDuty url")
@@ -514,16 +515,16 @@ func askNotificationProviderPagerDuty(banzaiCLI cli.Cli, defaultsInterface inter
 		defaultIntegrationValue = pdIntegrationTypeEventsApiV2Name
 	}
 
-	if err := doQuestions([]questionMaker{
-		questionSelect{
-			questionInput: questionInput{
-				questionBase: questionBase{
-					message: "Select PagerDuty integration type:",
+	if err := input.DoQuestions([]input.QuestionMaker{
+		input.QuestionSelect{
+			QuestionInput: input.QuestionInput{
+				QuestionBase: input.QuestionBase{
+					Message: "Select PagerDuty integration type:",
 				},
-				defaultValue: defaultIntegrationValue,
-				output:       &integrationType,
+				DefaultValue: defaultIntegrationValue,
+				Output:       &integrationType,
 			},
-			options: []string{pdIntegrationTypePrometheusName, pdIntegrationTypeEventsApiV2Name},
+			Options: []string{pdIntegrationTypePrometheusName, pdIntegrationTypeEventsApiV2Name},
 		},
 	}); err != nil {
 		return nil, errors.WrapIf(err, "error during getting PagerDuty integration type")
@@ -545,13 +546,13 @@ func askNotificationProviderPagerDuty(banzaiCLI cli.Cli, defaultsInterface inter
 		return nil, errors.WrapIf(err, "error during getting PagerDuty secret")
 	}
 
-	if err := doQuestions([]questionMaker{
-		questionConfirm{
-			questionBase: questionBase{
-				message: "Send resolved notifications as well",
+	if err := input.DoQuestions([]input.QuestionMaker{
+		input.QuestionConfirm{
+			QuestionBase: input.QuestionBase{
+				Message: "Send resolved notifications as well",
 			},
-			defaultValue: defaults.SendResolved,
-			output:       &result.SendResolved,
+			DefaultValue: defaults.SendResolved,
+			Output:       &result.SendResolved,
 		},
 	}); err != nil {
 		return nil, errors.WrapIf(err, "error during getting PagerDuty send resolved option")
@@ -562,13 +563,13 @@ func askNotificationProviderPagerDuty(banzaiCLI cli.Cli, defaultsInterface inter
 
 func askPushgateway(banzaiCLI cli.Cli, defaults pushgatewaySpec) (*pushgatewaySpec, error) {
 	var isEnabled bool
-	if err := doQuestions([]questionMaker{
-		questionConfirm{
-			questionBase: questionBase{
-				message: "Do you want to enable Pushgateway?",
+	if err := input.DoQuestions([]input.QuestionMaker{
+		input.QuestionConfirm{
+			QuestionBase: input.QuestionBase{
+				Message: "Do you want to enable Pushgateway?",
 			},
-			defaultValue: defaults.Enabled,
-			output:       &isEnabled,
+			DefaultValue: defaults.Enabled,
+			Output:       &isEnabled,
 		},
 	}); err != nil {
 		return nil, errors.WrapIf(err, "error during getting Pushgateway enabled")

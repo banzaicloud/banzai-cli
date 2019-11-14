@@ -46,6 +46,7 @@ func NewFeatureCommand(banzaiCli cli.Cli) *cobra.Command {
 		featureCommandFactory(banzaiCli, "vault", features.NewVaultSubCommandManager()),
 		featureCommandFactory(banzaiCli, "securityscan", securityscan.NewSecurityScanSubCommandManager()),
 		featureCommandFactory(banzaiCli, "monitoring", features.NewMonitoringSubCommandManager()),
+		featureCommandFactory(banzaiCli, "logging", features.NewLoggingSubCommandManager()),
 	)
 
 	return cmd
