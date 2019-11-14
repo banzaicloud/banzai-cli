@@ -113,8 +113,8 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 		if err := options.deleteKubeconfig(); err != nil {
 			return errors.WrapIf(err, "failed to remove Kubeconfig")
 		}
-
-	case providerEks:
+		// TODO
+	case providerCustom:
 		id, creds, err := input.GetAmazonCredentials()
 		if err != nil {
 			return errors.WrapIf(err, "failed to get AWS credentials")
@@ -131,8 +131,8 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 		}
 		env = creds
 
-		if err := deleteEKSCluster(banzaiCli, options.cpContext, env); err != nil {
-			return errors.WrapIf(err, "Amazon EKS cluster destroy failed")
+		if err := deleteCustomCluster(banzaiCli, options.cpContext, env); err != nil {
+			return errors.WrapIf(err, "Custom Kubernetes cluster destroy failed")
 		}
 
 		if err := options.deleteKubeconfig(); err != nil {
