@@ -38,7 +38,7 @@ func NewActivateManager() features.ActivateManager {
 }
 
 func (am activateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error) {
-	var req pipeline.ActivateClusterFeatureRequest
+
 	// todo infer the cli directly to the manager instead
 	am.specAssembler = specAssembler{banzaiCLI}
 
@@ -46,11 +46,17 @@ func (am activateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCt
 		return nil, errors.WrapIf(err, "securityscan is not enabled")
 	}
 
-	if err := am.buildAnchoreConfigSpec(context.Background(), banzaiCLI.Context().OrganizationID(), clusterCtx.ClusterID(), &req); err != nil {
-		return nil, err
+	featureSpec, err := am.assembleFeatureSpec(context.Background(), banzaiCLI.Context().OrganizationID(), clusterCtx.ClusterID(), SecurityScanFeatureSpec{})
+	if err != nil {
+		return nil, errors.WrapIf(err, "failed to assemble feature specification")
 	}
 
-	return &req, nil
+	featureSpecMap, err := am.securityScanSpecAsMap(&featureSpec)
+	if err != nil {
+		return nil, errors.WrapIf(err, "failed to transform feature specification")
+	}
+
+	return &pipeline.ActivateClusterFeatureRequest{Spec: featureSpecMap}, nil
 }
 
 func (am activateManager) ValidateRequest(req interface{}) error {
@@ -94,41 +100,4 @@ func (am activateManager) securityScanSpecAsMap(spec *SecurityScanFeatureSpec) (
 	return specMap, nil
 }
 
-func (am activateManager) buildAnchoreConfigSpec(ctx context.Context, orgID int32, clusterID int32, activateRequest *pipeline.ActivateClusterFeatureRequest) error {
 
-	// todo uncomment this for supporting custom anchore
-	//anchoreConfig, err := am.askForAnchoreConfig(nil)
-	//if err != nil {
-	//	return errors.WrapIf(err, "failed to read Anchore configuration details")
-	//}
-
-	policy, err := am.askForPolicy(ctx, orgID, clusterID, policySpec{})
-	if err != nil {
-		return errors.WrapIf(err, "failed to read Anchore Policy configuration details")
-	}
-
-	// todo uncomment this for supporting whitelist management
-	//whiteLists, err := am.askForWhiteLists()
-	//if err != nil {
-	//	return errors.WrapIf(err, "failed to read whitelists")
-	//}
-
-	webhookConfig, err := am.askForWebHookConfig(ctx, orgID, clusterID, webHookConfigSpec{})
-	if err != nil {
-		return errors.WrapIf(err, "failed to read webhook configuration")
-	}
-
-	featureSpec := SecurityScanFeatureSpec{
-		Policy:        policy,
-		WebhookConfig: webhookConfig,
-	}
-
-	ssfMap, err := am.securityScanSpecAsMap(&featureSpec)
-	if err != nil {
-		return errors.WrapIf(err, "failed to transform request to map")
-	}
-
-	activateRequest.Spec = ssfMap
-
-	return nil
-}

@@ -36,6 +36,7 @@ const (
 
 var (
 	policyBundles = utils.IdToNameMap{
+		"2c53a13c-1765-11e8-82ef-23527761d060": "Default bundle",
 		"a81d4e45-6021-4b42-a217-a6554015d431": "DenyAll",
 		"0cd4785e-71fa-4273-8ea5-3b15f515cca4": "RejectHigh",
 		"bdb91dcc-62ca-49a2-a497-ee8a3bb7ec9f": "RejectCritical",
@@ -287,6 +288,7 @@ func (sa specAssembler) getNamespaces(ctx context.Context, orgID int32, clusterI
 	return filtered, nil
 }
 
+// policies are statically stored, the selection is made from a "wired" list
 func (sa *specAssembler) askForPolicy(ctx context.Context, orgID int32, clusterID int32, policySpecIn policySpec) (policySpec, error) {
 
 	defaultPolicyBundle := utils.NameForID(policyBundles, policySpecIn.PolicyID)
@@ -344,7 +346,7 @@ func (sa specAssembler) askForWebHookConfig(ctx context.Context, orgID int32, cl
 	namespaceOptions, _ := sa.getNamespaces(ctx, orgID, clusterID)
 
 	// append the allStar
-	namespaceOptions = append([]string{"*"}, namespaceOptions...)
+	namespaceOptions = append([]string{"*", "default"}, namespaceOptions...)
 
 	defaultNamespaces := webhookSpecIn.Namespaces
 	if len(defaultNamespaces) == 0 {
@@ -473,5 +475,24 @@ func (sa *specAssembler) askForWhiteListItem() (*releaseSpec, error) {
 		Name:   releaseName,
 		Reason: reason,
 		Regexp: regexp,
+	}, nil
+}
+
+func (sa specAssembler) assembleFeatureSpec(ctx context.Context, orgID int32, clusterID int32, featureSpecIn SecurityScanFeatureSpec) (SecurityScanFeatureSpec, error) {
+
+	policy, err := sa.askForPolicy(ctx, orgID, clusterID, policySpec{})
+	if err != nil {
+		return SecurityScanFeatureSpec{}, errors.WrapIf(err, "failed to assembele policy data")
+	}
+
+	webhookConfig, err := sa.askForWebHookConfig(ctx, orgID, clusterID, webHookConfigSpec{})
+	if err != nil {
+		return SecurityScanFeatureSpec{}, errors.WrapIf(err, "failed to assembele webhook data")
+
+	}
+
+	return SecurityScanFeatureSpec{
+		Policy:        policy,
+		WebhookConfig: webhookConfig,
 	}, nil
 }
