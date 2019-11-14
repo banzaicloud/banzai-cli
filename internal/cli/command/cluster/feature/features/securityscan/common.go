@@ -34,6 +34,16 @@ const (
 	featureName = "securityscan"
 )
 
+var (
+	policyBundles = utils.IdToNameMap{
+		"a81d4e45-6021-4b42-a217-a6554015d431": "DenyAll",
+		"0cd4785e-71fa-4273-8ea5-3b15f515cca4": "RejectHigh",
+		"bdb91dcc-62ca-49a2-a497-ee8a3bb7ec9f": "RejectCritical",
+		"377c130d-0af7-45d4-adf9-cd72878993e2": "BlockRoot",
+		"97b33e2c-3b57-4a3f-a12b-a8c0daa472a0": "AllowAll",
+	}
+)
+
 //SecurityScanFeatureSpec security scan cluster feature specific specification
 type SecurityScanFeatureSpec struct {
 	CustomAnchore    anchoreSpec       `json:"customAnchore" mapstructure:"customAnchore"`
@@ -258,49 +268,26 @@ func (sa specAssembler) askForSecret(currentSecretID string) (string, error) {
 	return "", errors.Errorf("no secret with name %q", secretName)
 }
 
-// retrieves the available policy options
-func (sa specAssembler) getPolicyOptions(ctx context.Context, orgID int32, clusterID int32) (utils.IdToNameMap, error) {
-	policyMap := make(utils.IdToNameMap)
-
-	policyBundleRecords, response, err := sa.banzaiCLI.Client().PoliciesApi.ListPolicies(ctx, clusterID, orgID, &pipeline.ListPoliciesOpts{Detail: optional.NewBool(true)})
-	if err != nil || response.StatusCode != http.StatusOK {
-		return nil, errors.WrapIf(err, "failed to retrieve policies")
-	}
-
-	for _, policyBundleRecord := range policyBundleRecords {
-		policyMap[policyBundleRecord.Policybundle.Id] = policyBundleRecord.Policybundle.Name
-	}
-
-	return policyMap, nil
-}
-
 func (sa specAssembler) getNamespaces(ctx context.Context, orgID int32, clusterID int32) ([]string, error) {
-	namespaces, response, err := sa.banzaiCLI.Client().ClustersApi.ListNamespaces(ctx, orgID, clusterID)
+	nsResponse, response, err := sa.banzaiCLI.Client().ClustersApi.ListNamespaces(ctx, orgID, clusterID)
 	if err != nil || response.StatusCode != http.StatusOK {
 		return nil, errors.WrapIf(err, "failed to retrieve policies")
 	}
 
 	// filter out system namespaces
-	filtered := make([]string, 0, len(namespaces))
-	for _, ns := range namespaces {
-		if ns == "kube-system" || ns == "pipeline-system" {
+	filtered := make([]string, 0, len(nsResponse.Namespaces))
+	for _, ns := range nsResponse.Namespaces {
+		if ns.Name == "kube-system" || ns.Name == "pipeline-system" {
 			continue
 		}
 
-		filtered = append(filtered, ns)
+		filtered = append(filtered, ns.Name)
 	}
 
 	return filtered, nil
 }
 
 func (sa *specAssembler) askForPolicy(ctx context.Context, orgID int32, clusterID int32, policySpecIn policySpec) (policySpec, error) {
-
-	policyBundles, err := sa.getPolicyOptions(ctx, orgID, clusterID)
-	if err != nil {
-		// ignore the error
-		policyBundles = map[string]string{"1": "Default Policy"}
-		//return policySpec{}, errors.WrapIf(err, "could not assemble policy options")
-	}
 
 	defaultPolicyBundle := utils.NameForID(policyBundles, policySpecIn.PolicyID)
 	if defaultPolicyBundle == "" {
