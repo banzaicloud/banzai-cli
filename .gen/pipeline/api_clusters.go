@@ -2340,16 +2340,16 @@ Lists namespaces for a cluster
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param orgId Organization identification
  * @param id Selected cluster identification (number)
-@return []string
+@return NamespaceListResponse
 */
-func (a *ClustersApiService) ListNamespaces(ctx _context.Context, orgId int32, id int32) ([]string, *_nethttp.Response, error) {
+func (a *ClustersApiService) ListNamespaces(ctx _context.Context, orgId int32, id int32) (NamespaceListResponse, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  []string
+		localVarReturnValue  NamespaceListResponse
 	)
 
 	// create path and map variables
@@ -2400,7 +2400,7 @@ func (a *ClustersApiService) ListNamespaces(ctx _context.Context, orgId int32, i
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 200 {
-			var v []string
+			var v NamespaceListResponse
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()

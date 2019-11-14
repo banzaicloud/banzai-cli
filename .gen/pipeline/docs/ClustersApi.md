@@ -751,7 +751,7 @@ Name | Type | Description  | Notes
 
 ## ListNamespaces
 
-> []string ListNamespaces(ctx, orgId, id)
+> NamespaceListResponse ListNamespaces(ctx, orgId, id)
 Lists namespaces for a cluster
 
 Lists namespaces for a cluster
@@ -767,7 +767,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**[]string**
+[**NamespaceListResponse**](NamespaceListResponse.md)
 
 ### Authorization
 

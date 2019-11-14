@@ -333,6 +333,8 @@ Class | Method | HTTP request | Description
  - [LoggingPostHook](docs/LoggingPostHook.md)
  - [LoggingPostHookInstallLogging](docs/LoggingPostHookInstallLogging.md)
  - [MappingRule](docs/MappingRule.md)
+ - [NamespaceItem](docs/NamespaceItem.md)
+ - [NamespaceListResponse](docs/NamespaceListResponse.md)
  - [NodeItem](docs/NodeItem.md)
  - [NodeItemMetadata](docs/NodeItemMetadata.md)
  - [NodeItemSpec](docs/NodeItemSpec.md)

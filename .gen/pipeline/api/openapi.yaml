@@ -5725,9 +5725,7 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  type: string
-                type: array
+                $ref: '#/components/schemas/NamespaceListResponse'
           description: Namespaces listed
         400:
           content:
@@ -14512,6 +14510,28 @@ components:
           type: string
         reserved:
           type: boolean
+      type: object
+    NamespaceListResponse:
+      example:
+        namespaces:
+        - name: name
+        - name: name
+      properties:
+        namespaces:
+          items:
+            $ref: '#/components/schemas/NamespaceItem'
+          type: array
+      type: object
+    NamespaceList:
+      items:
+        $ref: '#/components/schemas/NamespaceItem'
+      type: array
+    NamespaceItem:
+      example:
+        name: name
+      properties:
+        name:
+          type: string
       type: object
     CreatePKEClusterKubernetes_oidc:
       properties:
