@@ -35,7 +35,7 @@ const (
 	providerEc2      = "ec2"
 	providerKind     = "kind"
 	providerPke      = "pke"
-	providerEks      = "eks"
+	providerCustom   = "custom"
 	defaultLocalhost = "default.localhost.banzaicloud.io"
 	autoHost         = "auto"
 	externalHost     = "externalHost"
@@ -99,8 +99,8 @@ func askProvider(k8sContext string) (string, error) {
 		lookup = append(lookup, providerK8s)
 	}
 
-	choices = append(choices, "Create Amazon EKS cluster")
-	lookup = append(lookup, providerEks)
+	choices = append(choices, "Create Custom Kubernetes cluster")
+	lookup = append(lookup, providerCustom)
 
 	if hasTool("docker") == nil {
 		choices = append(choices, "Create KIND (Kubernetes in Docker) cluster locally")
@@ -116,6 +116,11 @@ func askProvider(k8sContext string) (string, error) {
 	}
 
 	return lookup[provider], nil
+}
+
+// TODO implement
+func askCredential() (string, error) {
+	return "", nil
 }
 
 func runInit(options initOptions, banzaiCli cli.Cli) error {
@@ -201,7 +206,7 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		out["uuid"] = uuID
 	}
 
-	out["ingressHostPort"] = options.provider != providerK8s
+	out["ingressHostPort"] = true
 
 	switch options.provider {
 	case providerKind:
@@ -236,31 +241,32 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		if out[externalHost] == nil {
 			out[externalHost] = autoHost // address of lb service
 		}
+		out["ingressHostPort"] = false
 
 	case providerPke:
 		out[externalHost] = guessExternalAddr()
 
-	case providerEks:
-		id, region, err := getAmazonCredentialsRegion(defaultEksRegion)
+	case providerCustom:
+		creds, err := askCredential()
 		if err != nil {
 			return err
 		}
+		// TODO implement
+		if creds == "aws" {
+			id, region, err := getAmazonCredentialsRegion(defaultAwsRegion)
+			if err != nil {
+				return err
+			}
+			providerConfig["region"] = region
+			providerConfig["accessKey"] = id
 
-		providerConfig["cluster_name"] = "poke-banzaicli"
-		providerConfig["instance_type"] = "m4.large"
-		providerConfig["eks_service_role"] = "eksServiceRole"
-		providerConfig["eks_node_role"] = "eksNodeRole"
-		providerConfig["max_size"] = 3
-		providerConfig["min_size"] = 2
-		providerConfig["desired_capacity"] = 2
-		providerConfig["region"] = region
-		providerConfig["accessKey"] = id
-
-		var confirmed bool
-		_ = survey.AskOne(&survey.Confirm{Message: fmt.Sprintf("Do you want to use the following AWS access key: %s?", id)}, &confirmed)
-		if !confirmed {
-			return errors.New("cancelled")
+			var confirmed bool
+			_ = survey.AskOne(&survey.Confirm{Message: fmt.Sprintf("Do you want to use the following AWS access key: %s?", id)}, &confirmed)
+			if !confirmed {
+				return errors.New("cancelled")
+			}
 		}
+		out["ingressHostPort"] = false
 	}
 
 	out["providerConfig"] = providerConfig
@@ -268,10 +274,10 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	return options.writeValues(out)
 }
 
-func getAmazonCredentialsRegion(defaultEksRegion string) (string, string, error) {
+func getAmazonCredentialsRegion(defaultAwsRegion string) (string, string, error) {
 	id, region, _, err := input.GetAmazonCredentialsRegion("")
 	if err != nil {
-		id, region, _, err = input.GetAmazonCredentialsRegion(defaultEksRegion)
+		id, region, _, err = input.GetAmazonCredentialsRegion(defaultAwsRegion)
 		if err != nil {
 			log.Info("Please set your AWS credentials using aws-cli. See https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#cli-quick-configuration")
 			return "", "", errors.WrapIf(err, "failed to use local AWS credentials")

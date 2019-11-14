@@ -39,7 +39,6 @@ const (
 	traefikAddressFilename  = "traefik-address"
 	externalAddressFilename = "external-address"
 	tfstateFilename         = "terraform.tfstate"
-	eksAuthCM               = "eks_auth_cm.yaml"
 )
 
 type cpContext struct {
@@ -174,10 +173,6 @@ func (c *cpContext) readEc2Host() (string, error) {
 		return "", errors.WrapIf(err, "can't read address of created EC2 instance")
 	}
 	return strings.Trim(string(bytes), "\n"), nil
-}
-
-func (c *cpContext) eksAuthCMPath() string {
-	return filepath.Join(c.workspace, eksAuthCM)
 }
 
 // Init completes the cp context from the options, env vars, and if possible from the user
