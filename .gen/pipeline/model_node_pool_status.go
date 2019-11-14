@@ -13,7 +13,7 @@ package pipeline
 // NodePoolStatus struct for NodePoolStatus
 type NodePoolStatus struct {
 	InstanceType string `json:"instanceType,omitempty"`
-	SpotPrice string `json:"spot_price,omitempty"`
+	SpotPrice string `json:"spotPrice,omitempty"`
 	Autoscaling bool `json:"autoscaling,omitempty"`
 	Count int32 `json:"count,omitempty"`
 	MinCount int32 `json:"minCount,omitempty"`

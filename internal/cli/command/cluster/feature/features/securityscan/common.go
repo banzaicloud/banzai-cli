@@ -17,18 +17,31 @@ package securityscan
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/AlecAivazis/survey/v2/core"
 	"github.com/antihax/optional"
+	"github.com/mitchellh/mapstructure"
+
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/mitchellh/mapstructure"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/utils"
 )
 
 const (
 	featureName = "securityscan"
+)
+
+var (
+	policyBundles = utils.IdToNameMap{
+		"2c53a13c-1765-11e8-82ef-23527761d060": "Default bundle",
+		"a81d4e45-6021-4b42-a217-a6554015d431": "DenyAll",
+		"0cd4785e-71fa-4273-8ea5-3b15f515cca4": "RejectHigh",
+		"bdb91dcc-62ca-49a2-a497-ee8a3bb7ec9f": "RejectCritical",
+		"377c130d-0af7-45d4-adf9-cd72878993e2": "BlockRoot",
+		"97b33e2c-3b57-4a3f-a12b-a8c0daa472a0": "AllowAll",
+	}
 )
 
 //SecurityScanFeatureSpec security scan cluster feature specific specification
@@ -134,10 +147,38 @@ type specAssembler struct {
 	banzaiCLI cli.Cli
 }
 
-func (sa *specAssembler) askForAnchoreConfig(currentAnchoreSpec *anchoreSpec) (*anchoreSpec, error) {
+func (sa specAssembler) isFeatureEnabled(ctx context.Context) error {
+	capabilities, r, err := sa.banzaiCLI.Client().PipelineApi.ListCapabilities(ctx)
+	if err := utils.CheckCallResults(r, err); err != nil {
+		return errors.WrapIf(err, "failed to retrieve capabilities")
+	}
+
+	rawSecurityscanCapability, ok := capabilities["features"]["securityScan"]
+	if !ok {
+		return errors.New("no securityscan capabilities found")
+	}
+
+	var securityScanCapability = struct {
+		Enabled bool `json:"enabled" mapstructure:"enabled"`
+		Managed bool `json:"managed" mapstructure:"managed"`
+	}{}
+
+	if err := mapstructure.Decode(rawSecurityscanCapability, &securityScanCapability); err != nil {
+		return errors.WrapIf(err, "failed to parse securityscan capabilities")
+	}
+
+	// todo change this implementation when adding support for non-managed anchore
+	if !securityScanCapability.Enabled || !securityScanCapability.Managed {
+		return errors.New("security scan is not enabled")
+	}
+
+	return nil
+}
+
+func (sa specAssembler) askForAnchoreConfig(currentAnchoreSpec *anchoreSpec) (*anchoreSpec, error) {
 
 	if currentAnchoreSpec == nil {
-		currentAnchoreSpec = new(anchoreSpec)
+		currentAnchoreSpec = &anchoreSpec{}
 	}
 
 	var customAnchore bool
@@ -180,7 +221,7 @@ func (sa *specAssembler) askForAnchoreConfig(currentAnchoreSpec *anchoreSpec) (*
 	}, nil
 }
 
-func (sa *specAssembler) askForSecret(currentSecretID string) (string, error) {
+func (sa specAssembler) askForSecret(currentSecretID string) (string, error) {
 	const (
 		PasswordSecretType = "password"
 	)
@@ -227,105 +268,133 @@ func (sa *specAssembler) askForSecret(currentSecretID string) (string, error) {
 	return "", errors.Errorf("no secret with name %q", secretName)
 }
 
-func (sa *specAssembler) askForPolicy(currentPolicySpec *policySpec) (*policySpec, error) {
-	if currentPolicySpec == nil {
-		currentPolicySpec = new(policySpec)
+func (sa specAssembler) getNamespaces(ctx context.Context, orgID int32, clusterID int32) ([]string, error) {
+	nsResponse, response, err := sa.banzaiCLI.Client().ClustersApi.ListNamespaces(ctx, orgID, clusterID)
+	if err := utils.CheckCallResults(response, err); err != nil {
+		return nil, errors.WrapIf(err, "failed to retrieve policies")
 	}
 
-	type policy struct {
-		name string
-		id   string
-	}
-	// todo add all supported policies here
-	policies := []policy{{"Default bundle", "1"}}
-
-	options := make([]string, len(policies))
-	currentPolicyName := policies[0].name
-
-	for i, s := range policies {
-		options[i] = s.name
-		if s.id == currentPolicySpec.PolicyID {
-			currentPolicyName = s.name
+	// filter out system namespaces
+	filtered := make([]string, 0, len(nsResponse.Namespaces))
+	for _, ns := range nsResponse.Namespaces {
+		if ns.Name == "kube-system" || ns.Name == "pipeline-system" {
+			continue
 		}
+
+		filtered = append(filtered, ns.Name)
 	}
 
-	var policyName string
-	if err := survey.AskOne(
-		&survey.Select{
-			Message: "Please select a policy for the Anchor Engine:",
-			Options: options,
-			Default: currentPolicyName,
-		},
-		&policyName,
-	); err != nil {
-		return nil, errors.WrapIf(err, "failed to select policy")
-	}
-
-	var selected policy
-	for _, s := range policies {
-		if s.name == policyName {
-			selected = s
-		}
-	}
-
-	return &policySpec{
-		PolicyID: selected.id,
-	}, nil
+	return filtered, nil
 }
 
-func (sa *specAssembler) askForWebHookConfig(currentWebHookSpec *webHookConfigSpec) (*webHookConfigSpec, error) {
-	if currentWebHookSpec == nil {
-		currentWebHookSpec = new(webHookConfigSpec)
-	}
-	var enable bool
-	if err := survey.AskOne(
-		&survey.Confirm{
-			Message: "Configure the security scan webhook?",
-		},
-		&enable,
-	); err != nil {
-		return nil, errors.WrapIf(err, "failure during survey")
+// policies are statically stored, the selection is made from a "wired" list
+func (sa *specAssembler) askForPolicy(policySpecIn policySpec) (policySpec, error) {
+
+	defaultPolicyBundle := utils.NameForID(policyBundles, policySpecIn.PolicyID)
+	if defaultPolicyBundle == "" {
+		defaultPolicyBundle = "Default bundle"
 	}
 
-	if !enable {
-		return &webHookConfigSpec{
+	qs := []*survey.Question{
+		{
+			Name: "PolicyID",
+			Prompt: &survey.Select{
+				Message: "please select the policy bundle",
+				Options: utils.Names(policyBundles),
+				Default: defaultPolicyBundle,
+			},
+			Transform: utils.NameToIDTransformer(policyBundles),
+		},
+	}
+
+	if err := survey.Ask(qs, &policySpecIn); err != nil {
+		return policySpec{}, errors.WrapIf(err, "failed to read cluster domain")
+	}
+
+	return policySpecIn, nil
+}
+
+func (sa specAssembler) askForWebHookConfig(ctx context.Context, orgID int32, clusterID int32, webhookSpecIn webHookConfigSpec) (webHookConfigSpec, error) {
+
+	qs := []*survey.Question{
+		{
+			Name: "Enabled",
+			Prompt: &survey.Confirm{
+				Message: "enable the security scan webhook",
+				Default: webhookSpecIn.Enabled,
+			},
+		},
+	}
+
+	if err := survey.Ask(qs, &webhookSpecIn); err != nil {
+		return webHookConfigSpec{}, errors.WrapIf(err, "failed to read webhook configuration value")
+	}
+
+	if !webhookSpecIn.Enabled {
+		return webHookConfigSpec{
 			Enabled: false,
 		}, nil
 	}
 
-	if currentWebHookSpec.Selector == "" {
-		// select the default selector
-		currentWebHookSpec.Selector = "exclude"
+	// set the default selector
+	if webhookSpecIn.Selector == "" {
+		webhookSpecIn.Selector = "include"
 	}
 
-	var selector string
-	if err := survey.AskOne(
-		&survey.Select{
-			Message: "Please choose the selector for the webhook configuration:",
-			Options: []string{"exclude", "include"},
-			Default: currentWebHookSpec.Selector,
+	// ignore the error
+	namespaceOptions, _ := sa.getNamespaces(ctx, orgID, clusterID)
+	if len(namespaceOptions) == 0 {
+		// couldn't retrieve namespaces / namespaces are not available
+		namespaceOptions = append(namespaceOptions, "default")
+	}
+
+	// append the allStar
+	namespaceOptions = append([]string{"*"}, namespaceOptions...)
+
+	defaultNamespaces := webhookSpecIn.Namespaces
+	// empty the namespaces field
+	webhookSpecIn.Namespaces = make([]string, 0, len(defaultNamespaces))
+
+	if len(defaultNamespaces) == 0 {
+		defaultNamespaces = []string{"*"}
+	}
+
+	// questions to fill the remaining parts of the webhook configuration
+	qs = []*survey.Question{
+		{
+			Name: "Selector",
+			Prompt: &survey.Select{
+				Message: "choose the selector for namespaces:",
+				Options: []string{"include", "exclude"},
+				Default: webhookSpecIn.Selector,
+				Help:    "The selector defines whether the selected namespaces are included or excluded from security scans",
+			},
 		},
-		&selector,
-	); err != nil {
-		return nil, errors.WrapIf(err, "failed to select policy")
-	}
-
-	var namespaces string
-	if err := survey.AskOne(
-		&survey.Input{
-			Message: "Please enter the comma separated list of namespaces:",
-			Default: strings.Join(currentWebHookSpec.Namespaces, ","),
+		{
+			Name: "Namespaces",
+			Prompt: &survey.MultiSelect{
+				Message: "select the namespaces the selector applies to:",
+				Options: namespaceOptions,
+				Default: defaultNamespaces,
+				Help:    "selected namespaces will be included or excluded form security scans",
+			},
+			Validate: func(selection interface{}) error {
+				selected := selection.([]core.OptionAnswer)
+				for _, ns := range selected {
+					if ns.Value == "*" && len(selected) > 1 {
+						return errors.New("all namespaces (*) is selected; please deselect it or deselect the other namespaces")
+					}
+				}
+				return nil
+			},
 		},
-		&namespaces,
-	); err != nil {
-		return nil, errors.WrapIf(err, "failed to read namespaces")
 	}
 
-	return &webHookConfigSpec{
-		Enabled:    true,
-		Selector:   selector,
-		Namespaces: strings.Split(namespaces, ","),
-	}, nil
+	if err := survey.Ask(qs, &webhookSpecIn); err != nil {
+		return webHookConfigSpec{}, errors.WrapIf(err, "failed to read webhook configuration value")
+	}
+
+	return webhookSpecIn, nil
 }
 
 func (sa *specAssembler) securityScanSpecAsMap(spec *SecurityScanFeatureSpec) (map[string]interface{}, error) {
@@ -412,5 +481,24 @@ func (sa *specAssembler) askForWhiteListItem() (*releaseSpec, error) {
 		Name:   releaseName,
 		Reason: reason,
 		Regexp: regexp,
+	}, nil
+}
+
+func (sa specAssembler) assembleFeatureSpec(ctx context.Context, orgID int32, clusterID int32, featureSpecIn SecurityScanFeatureSpec) (SecurityScanFeatureSpec, error) {
+
+	policy, err := sa.askForPolicy(featureSpecIn.Policy)
+	if err != nil {
+		return SecurityScanFeatureSpec{}, errors.WrapIf(err, "failed to assembele policy data")
+	}
+
+	webhookConfig, err := sa.askForWebHookConfig(ctx, orgID, clusterID, featureSpecIn.WebhookConfig)
+	if err != nil {
+		return SecurityScanFeatureSpec{}, errors.WrapIf(err, "failed to assembele webhook data")
+
+	}
+
+	return SecurityScanFeatureSpec{
+		Policy:        policy,
+		WebhookConfig: webhookConfig,
 	}, nil
 }

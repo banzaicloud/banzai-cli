@@ -1,10 +1,10 @@
-# GetDomainResponse
+# NamespaceListResponse
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**DomainName** | **string** |  | [optional] 
+**Namespaces** | [**[]NamespaceItem**](NamespaceItem.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

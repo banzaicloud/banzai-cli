@@ -18,7 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"strconv"
 	"strings"
 
@@ -31,6 +30,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
+	featureutils "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/utils"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 )
 
@@ -103,21 +103,21 @@ func decorateProviderSecret(banzaiCLI cli.Cli, selectedProvider Provider) (Provi
 		return Provider{}, errors.WrapIf(err, "failed to retrieve secrets for provider")
 	}
 
-	defaultSecret := NameForID(secretsMap, selectedProvider.SecretID)
+	defaultSecret := featureutils.NameForID(secretsMap, selectedProvider.SecretID)
 	if defaultSecret == "" {
 		// if no secrets is set so far, the first secret is  the default
-		defaultSecret = Names(secretsMap)[0]
+		defaultSecret = featureutils.Names(secretsMap)[0]
 	}
 
 	secretIDQuestion := survey.Question{
 		Name: "SecretID",
 		Prompt: &survey.Select{
 			Message: "Please select the secret to access the DNS provider",
-			Options: Names(secretsMap),
+			Options: featureutils.Names(secretsMap),
 			Default: defaultSecret,
 		},
 		Validate:  survey.Required,
-		Transform: nameToIDTransformer(secretsMap),
+		Transform: featureutils.NameToIDTransformer(secretsMap),
 	}
 
 	switch selectedProvider.Name {
@@ -164,11 +164,11 @@ func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Prov
 
 	case dnsRoute53:
 		regions, r, err := banzaiCLI.CloudinfoClient().RegionsApi.GetRegions(context.Background(), "amazon", "eks")
-		if err != nil || r.StatusCode != http.StatusOK {
+		if err := featureutils.CheckCallResults(r, err); err != nil {
 			return Provider{}, errors.Wrap(err, "failed to get regions")
 		}
 
-		regOptions := make(idToNameMap, len(regions))
+		regOptions := make(featureutils.IdToNameMap, len(regions))
 		for _, reg := range regions {
 			regOptions[reg.Id] = reg.Name
 		}
@@ -177,10 +177,10 @@ func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Prov
 				Name: "Region",
 				Prompt: &survey.Select{
 					Message: "Please select the Amazon region:",
-					Options: Names(regOptions),
-					Default: NameForID(regOptions, currentProviderOpts.Region),
+					Options: featureutils.Names(regOptions),
+					Default: featureutils.NameForID(regOptions, currentProviderOpts.Region),
 				},
-				Transform: nameToIDTransformer(regOptions),
+				Transform: featureutils.NameToIDTransformer(regOptions),
 			},
 			&survey.Question{
 				Name: "BatchSize",
@@ -195,10 +195,10 @@ func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Prov
 		if err != nil {
 			return Provider{}, errors.WrapIf(err, "failed to get google projects")
 		}
-		defaultProject := NameForID(projectsMap, selectedProvider.Options["project"].(string))
+		defaultProject := featureutils.NameForID(projectsMap, selectedProvider.Options["project"].(string))
 		if defaultProject == "" {
 			// the default is the first project
-			defaultProject = Names(projectsMap)[0]
+			defaultProject = featureutils.Names(projectsMap)[0]
 		}
 
 		questions = append(questions,
@@ -206,11 +206,11 @@ func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Prov
 				Name: "",
 				Prompt: &survey.Select{
 					Message: "Please select the google project",
-					Options: Names(projectsMap),
+					Options: featureutils.Names(projectsMap),
 					Default: defaultProject,
 				},
 				Validate:  survey.Required,
-				Transform: nameToIDTransformer(projectsMap),
+				Transform: featureutils.NameToIDTransformer(projectsMap),
 			},
 		)
 
@@ -248,7 +248,7 @@ func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Prov
 }
 
 //getGoogleProjectsMap retrieves google projects
-func getGoogleProjectsMap(banzaiCLI cli.Cli, provider Provider) (idToNameMap, error) {
+func getGoogleProjectsMap(banzaiCLI cli.Cli, provider Provider) (featureutils.IdToNameMap, error) {
 
 	projects, _, err := banzaiCLI.Client().ProjectsApi.GetProjects(
 		context.Background(),
@@ -258,7 +258,7 @@ func getGoogleProjectsMap(banzaiCLI cli.Cli, provider Provider) (idToNameMap, er
 		return nil, errors.Wrap(err, "failed to retrieve google projects")
 	}
 
-	projectMap := make(idToNameMap, 0)
+	projectMap := make(featureutils.IdToNameMap, 0)
 	for _, p := range projects.Projects {
 		projectMap[p.ProjectId] = p.Name
 	}
@@ -379,8 +379,8 @@ func readExternalDNS(extDnsIn ExternalDNS, actionCtx actionContext) (ExternalDNS
 }
 
 // getSecretsForProvider retrieves the available secrets for the provider as a map (secretID -> secretName)
-func getSecretsForProvider(banzaiCLI cli.Cli, dnsProvider string) (idToNameMap, error) {
-	secretMap := make(idToNameMap, 0)
+func getSecretsForProvider(banzaiCLI cli.Cli, dnsProvider string) (featureutils.IdToNameMap, error) {
+	secretMap := make(featureutils.IdToNameMap, 0)
 
 	secrets, _, err := banzaiCLI.Client().SecretsApi.GetSecrets(
 		context.Background(),
@@ -406,7 +406,7 @@ func getFeatureSpecDefaults(banzaiCLI cli.Cli, clusterCtx clustercontext.Context
 	switch actionCtx.providerName {
 	case dnsBanzaiCloud:
 		caps, r, err := banzaiCLI.Client().PipelineApi.ListCapabilities(context.Background(), )
-		if err != nil || r.StatusCode != http.StatusOK {
+		if err := featureutils.CheckCallResults(r, err); err != nil {
 			return DNSFeatureSpec{}, errors.WrapIf(err, "failed to retrieve capabilities")
 		}
 
@@ -425,7 +425,7 @@ func getFeatureSpecDefaults(banzaiCLI cli.Cli, clusterCtx clustercontext.Context
 		}
 
 		org, r, err := banzaiCLI.Client().OrganizationsApi.GetOrg(context.Background(), banzaiCLI.Context().OrganizationID())
-		if err != nil || r.StatusCode != http.StatusOK {
+		if err := featureutils.CheckCallResults(r, err); err != nil {
 			return DNSFeatureSpec{}, errors.WrapIf(err, "failed to retrieves organizaton")
 		}
 

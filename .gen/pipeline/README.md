@@ -104,6 +104,7 @@ Class | Method | HTTP request | Description
 *ClustersApi* | [**ListClusterEndpoints**](docs/ClustersApi.md#listclusterendpoints) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/endpoints | List service public endpoints
 *ClustersApi* | [**ListClusterSecrets**](docs/ClustersApi.md#listclustersecrets) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/secrets | List secrets which belongs to cluster
 *ClustersApi* | [**ListClusters**](docs/ClustersApi.md#listclusters) | **Get** /api/v1/orgs/{orgId}/clusters | List clusters
+*ClustersApi* | [**ListNamespaces**](docs/ClustersApi.md#listnamespaces) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/namespaces | Lists namespaces for a cluster
 *ClustersApi* | [**ListNodepoolLabels**](docs/ClustersApi.md#listnodepoollabels) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodepools/labels | List cluser nodepool labels
 *ClustersApi* | [**ListNodes**](docs/ClustersApi.md#listnodes) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodes | List cluser nodes
 *ClustersApi* | [**MergeSecret**](docs/ClustersApi.md#mergesecret) | **Patch** /api/v1/orgs/{orgId}/clusters/{id}/secrets/{secretName} | Merge a particular secret with an existing one with optional remapping
@@ -122,7 +123,6 @@ Class | Method | HTTP request | Description
 *DeploymentsApi* | [**HelmDeploymentStatus**](docs/DeploymentsApi.md#helmdeploymentstatus) | **Head** /api/v1/orgs/{orgId}/clusters/{id}/deployments/{name} | Check deployment status
 *DeploymentsApi* | [**ListDeployments**](docs/DeploymentsApi.md#listdeployments) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/deployments | List deployments
 *DeploymentsApi* | [**UpdateDeployment**](docs/DeploymentsApi.md#updatedeployment) | **Put** /api/v1/orgs/{orgId}/clusters/{id}/deployments/{name} | Update deployment
-*DomainApi* | [**GetDomain**](docs/DomainApi.md#getdomain) | **Get** /api/v1/orgs/{orgId}/domain | 
 *GoogleApi* | [**ListProjects**](docs/GoogleApi.md#listprojects) | **Get** /api/v1/orgs/{orgId}/cloud/google/projects | Retrieves projects visible for the user identified by the secret id
 *HelmApi* | [**HelmChartDetails**](docs/HelmApi.md#helmchartdetails) | **Get** /api/v1/orgs/{orgId}/helm/chart/{repoName}/{chartName} | Chart details
 *HelmApi* | [**HelmChartList**](docs/HelmApi.md#helmchartlist) | **Get** /api/v1/orgs/{orgId}/helm/charts/ | Chart List
@@ -300,7 +300,6 @@ Class | Method | HTTP request | Description
  - [GetClusterBootstrapResponse](docs/GetClusterBootstrapResponse.md)
  - [GetClusterStatusResponse](docs/GetClusterStatusResponse.md)
  - [GetDeploymentResponse](docs/GetDeploymentResponse.md)
- - [GetDomainResponse](docs/GetDomainResponse.md)
  - [GetLeaderElectionResponse](docs/GetLeaderElectionResponse.md)
  - [GetPkeCommandsResponse](docs/GetPkeCommandsResponse.md)
  - [GetRestoreResponse](docs/GetRestoreResponse.md)
@@ -334,6 +333,8 @@ Class | Method | HTTP request | Description
  - [LoggingPostHook](docs/LoggingPostHook.md)
  - [LoggingPostHookInstallLogging](docs/LoggingPostHookInstallLogging.md)
  - [MappingRule](docs/MappingRule.md)
+ - [NamespaceItem](docs/NamespaceItem.md)
+ - [NamespaceListResponse](docs/NamespaceListResponse.md)
  - [NodeItem](docs/NodeItem.md)
  - [NodeItemMetadata](docs/NodeItemMetadata.md)
  - [NodeItemSpec](docs/NodeItemSpec.md)
