@@ -353,6 +353,9 @@ func (sa specAssembler) askForWebHookConfig(ctx context.Context, orgID int32, cl
 	namespaceOptions = append([]string{"*"}, namespaceOptions...)
 
 	defaultNamespaces := webhookSpecIn.Namespaces
+	// empty the namespaces field
+	webhookSpecIn.Namespaces = make([]string, 0, len(defaultNamespaces))
+	
 	if len(defaultNamespaces) == 0 {
 		defaultNamespaces = []string{"*"}
 	}
