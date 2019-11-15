@@ -20,6 +20,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 )
 
@@ -113,25 +114,26 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 		if err := options.deleteKubeconfig(); err != nil {
 			return errors.WrapIf(err, "failed to remove Kubeconfig")
 		}
-		// TODO
-	case providerCustom:
-		id, creds, err := input.GetAmazonCredentials()
-		if err != nil {
-			return errors.WrapIf(err, "failed to get AWS credentials")
-		}
 
-		if valuesConfig, ok := values["providerConfig"]; ok {
-			if valuesConfig, ok := valuesConfig.(map[string]interface{}); ok {
-				if ak := valuesConfig["accessKey"]; ak != "" {
+	case providerCustom:
+		creds := map[string]string{}
+		if pc, ok := values["providerConfig"]; ok {
+			pc := cast.ToStringMap(pc)
+			if _, ok := pc["accessKey"]; ok {
+				id, awsCreds, err := input.GetAmazonCredentials()
+				if err != nil {
+					return errors.WrapIf(err, "failed to get AWS credentials")
+				}
+				if ak := pc["accessKey"]; ak != "" {
 					if ak != id {
 						return errors.Errorf("Current AWS access key %q differs from the one used earlier: %q", ak, id)
 					}
 				}
+				creds = awsCreds
 			}
 		}
-		env = creds
 
-		if err := deleteCustomCluster(banzaiCli, options.cpContext, env); err != nil {
+		if err := deleteCustomCluster(banzaiCli, options.cpContext, creds); err != nil {
 			return errors.WrapIf(err, "Custom Kubernetes cluster destroy failed")
 		}
 

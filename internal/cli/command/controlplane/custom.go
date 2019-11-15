@@ -35,8 +35,8 @@ func ensureCustomCluster(banzaiCli cli.Cli, options *cpContext, creds map[string
 
 func deleteCustomCluster(banzaiCli cli.Cli, options *cpContext, creds map[string]string) error {
 	log.Info("Deleting Custom Kubernetes cluster...")
-	if err := runTerraform("destroy", options, banzaiCli, creds, "module.eks"); err != nil {
-		return errors.WrapIf(err, "failed to delete Amazon EKS infrastructure")
+	if err := runTerraform("destroy", options, banzaiCli, creds, "module.custom"); err != nil {
+		return errors.WrapIf(err, "failed to delete Custom Kubernetes infrastructure")
 	}
 
 	return nil
