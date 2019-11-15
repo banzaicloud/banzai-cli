@@ -39,18 +39,20 @@ const (
 	traefikAddressFilename  = "traefik-address"
 	externalAddressFilename = "external-address"
 	tfstateFilename         = "terraform.tfstate"
+	defaultImage            = "docker.io/banzaicloud/pipeline-installer"
 )
 
 type cpContext struct {
-	installerTag       string
-	installerImageRepo string
-	containerRuntime   string
-	refreshState       bool
-	pullInstaller      bool
-	autoApprove        bool
-	workspace          string
-	banzaiCli          cli.Cli
-	installerPulled    *sync.Once
+	installerTag        string
+	installerImageRepo  string
+	containerRuntime    string
+	refreshState        bool
+	pullInstaller       bool
+	autoApprove         bool
+	workspace           string
+	banzaiCli           cli.Cli
+	installerPulled     *sync.Once
+	installerPullResult error
 }
 
 func NewContext(cmd *cobra.Command, banzaiCli cli.Cli) *cpContext {
@@ -61,7 +63,7 @@ func NewContext(cmd *cobra.Command, banzaiCli cli.Cli) *cpContext {
 
 	flags := cmd.Flags()
 	flags.StringVar(&ctx.installerTag, "image-tag", "latest", "Tag of installer Docker image to use")
-	flags.StringVar(&ctx.installerImageRepo, "image", "docker.io/banzaicloud/cp-installer", "Name of Docker image repository to use")
+	flags.StringVar(&ctx.installerImageRepo, "image", defaultImage, "Name of Docker image repository to use")
 	flags.BoolVar(&ctx.pullInstaller, "image-pull", true, "Pull installer image even if it's present locally")
 	flags.BoolVar(&ctx.autoApprove, "auto-approve", true, "Automatically approve the changes to deploy")
 	flags.StringVar(&ctx.workspace, "workspace", "", "Name of directory for storing the applied configuration and deployment status")
@@ -71,7 +73,26 @@ func NewContext(cmd *cobra.Command, banzaiCli cli.Cli) *cpContext {
 	return &ctx
 }
 
+func (c *cpContext) ensureImagePulled() error {
+	c.installerPulled.Do(func() { c.installerPullResult = pullImage(c, c.banzaiCli) })
+	return c.installerPullResult
+}
+
 func (c *cpContext) installerImage() string {
+	if c.installerImageRepo == defaultImage && c.installerTag == "latest" {
+		out := make(map[interface{}]interface{})
+		err := c.readValues(out)
+		if err == nil {
+			if installer, ok := out["installer"].(map[interface{}]interface{}); ok {
+				if image, ok := installer["image"].(string); ok && image != "" {
+					return image
+				}
+			}
+		} else {
+			log.Debugf("failed to read values file: %v", err)
+		}
+	}
+
 	return fmt.Sprintf("%s:%s", c.installerImageRepo, c.installerTag)
 }
 
