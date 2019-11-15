@@ -162,8 +162,7 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 			}
 		}
 
-		targets := []string{"module.custom", "local_file.k8s_config"}
-		if err := ensureCustomCluster(banzaiCli, options.cpContext, creds, targets); err != nil {
+		if err := ensureCustomCluster(banzaiCli, options.cpContext, creds); err != nil {
 			return errors.WrapIf(err, "failed to create Custmo EKS cluster")
 		}
 
