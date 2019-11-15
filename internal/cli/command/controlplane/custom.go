@@ -20,12 +20,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func ensureCustomCluster(banzaiCli cli.Cli, options *cpContext, creds map[string]string, targets []string) error {
+func ensureCustomCluster(banzaiCli cli.Cli, options *cpContext, creds map[string]string) error {
 	if options.kubeconfigExists() {
 		return nil
 	}
 
 	log.Info("Creating Custom Kubernetes cluster...")
+	targets := []string{"module.custom", "local_file.k8s_config"}
 	if err := runTerraform("apply", options, banzaiCli, creds, targets...); err != nil {
 		return errors.WrapIf(err, "failed to create Custom Kubernetes cluster")
 	}
