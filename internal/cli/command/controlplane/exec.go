@@ -33,8 +33,7 @@ const (
 )
 
 func runTerraform(command string, options *cpContext, banzaiCli cli.Cli, env map[string]string, targets ...string) error {
-	var err error
-	options.installerPulled.Do(func() { err = pullImage(options, banzaiCli) })
+	err := options.ensureImagePulled()
 	if err != nil {
 		return errors.WrapIf(err, "failed to pull cp-installer")
 	}

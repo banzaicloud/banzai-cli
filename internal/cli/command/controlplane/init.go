@@ -17,8 +17,10 @@ package controlplane
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
@@ -244,6 +246,25 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	}
 
 	out["providerConfig"] = providerConfig
+
+	image := ""
+	if installer, ok := out["installer"].(map[interface{}]interface{}); ok {
+		if img, ok := installer["image"].(string); ok {
+			image = img
+		}
+	}
+	if image == "" && options.installerTag == "latest" && options.containerRuntime == runtimeDocker {
+		err := options.ensureImagePulled()
+		if err != nil {
+			return errors.WrapIf(err, "failed to pull installer image")
+		}
+
+		ref, err := exec.Command("docker", "inspect", "-f", "{{index .RepoDigests 0}}", options.installerImage()).Output()
+		if err != nil {
+			return errors.WrapIf(err, "failed to determine installer image hash")
+		}
+		out["installer"] = map[string]interface{}{"image": strings.TrimSpace(string(ref))}
+	}
 
 	return options.writeValues(out)
 }
