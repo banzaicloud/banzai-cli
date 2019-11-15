@@ -101,9 +101,6 @@ func askProvider(k8sContext string) (string, error) {
 		lookup = append(lookup, providerK8s)
 	}
 
-	choices = append(choices, "Create Custom Kubernetes cluster")
-	lookup = append(lookup, providerCustom)
-
 	if hasTool("docker") == nil {
 		choices = append(choices, "Create KIND (Kubernetes in Docker) cluster locally")
 		lookup = append(lookup, providerKind)
@@ -111,6 +108,9 @@ func askProvider(k8sContext string) (string, error) {
 		choices = append(choices, "Install single-node PKE cluster")
 		lookup = append(lookup, providerPke)
 	}
+
+	choices = append(choices, "Create custom infrastructure (subscription neeeded)")
+	lookup = append(lookup, providerCustom)
 
 	var provider int
 	if err := survey.AskOne(&survey.Select{Message: "Select provider:", Options: choices}, &provider); err != nil {

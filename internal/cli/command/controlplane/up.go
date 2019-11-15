@@ -163,7 +163,7 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		}
 
 		if err := ensureCustomCluster(banzaiCli, options.cpContext, creds); err != nil {
-			return errors.WrapIf(err, "failed to create Custmo EKS cluster")
+			return errors.WrapIf(err, "failed to create Custom infrastructure")
 		}
 
 	default:
