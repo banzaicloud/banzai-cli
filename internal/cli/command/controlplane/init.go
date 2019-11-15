@@ -120,9 +120,15 @@ func askProvider(k8sContext string) (string, error) {
 	return lookup[provider], nil
 }
 
-// TODO implement
 func askCredential() (string, error) {
-	return "", nil
+	choices := []string{"Use Amazon credentials", "Don't use provider credentials"}
+	lookup := []string{"aws", "none"}
+
+	var providerCreds int
+	if err := survey.AskOne(&survey.Select{Message: "Select provider:", Options: choices}, &providerCreds); err != nil {
+		return "", err
+	}
+	return lookup[providerCreds], nil
 }
 
 func runInit(options initOptions, banzaiCli cli.Cli) error {
@@ -249,12 +255,12 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		out[externalHost] = guessExternalAddr()
 
 	case providerCustom:
-		creds, err := askCredential()
+		providerCreds, err := askCredential()
 		if err != nil {
 			return err
 		}
-		// TODO implement
-		if creds == "aws" {
+
+		if providerCreds == "aws" {
 			id, region, err := getAmazonCredentialsRegion(defaultAwsRegion)
 			if err != nil {
 				return err

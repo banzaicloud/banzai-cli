@@ -22,6 +22,7 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -149,9 +150,16 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		env = creds
 
 	case providerCustom:
-		_, creds, err := input.GetAmazonCredentials()
-		if err != nil {
-			return errors.WrapIf(err, "failed to get AWS credentials")
+		creds := map[string]string{}
+		if pc, ok := values["providerConfig"]; ok {
+			pc := cast.ToStringMap(pc)
+			if _, ok := pc["accessKey"]; ok {
+				_, awsCreds, err := input.GetAmazonCredentials()
+				if err != nil {
+					return errors.WrapIf(err, "failed to get AWS credentials")
+				}
+				creds = awsCreds
+			}
 		}
 
 		targets := []string{"module.custom", "local_file.k8s_config"}
