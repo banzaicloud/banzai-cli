@@ -179,6 +179,11 @@ func dumpRepositories(banzaiCli cli.Cli, reposdir string) error {
 		return errors.WrapIf(err, "failed to get list of Helm repositories")
 	}
 
+	localdir := filepath.Join(reposdir, "local")
+	if err := os.MkdirAll(localdir, 0755); err != nil {
+		return errors.WrapIf(err, "failed to create helm local directory")
+	}
+
 	cachedir := filepath.Join(reposdir, "cache")
 	if err := os.MkdirAll(cachedir, 0755); err != nil {
 		return errors.WrapIf(err, "failed to create helm cache directory")
