@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	defaultAwsRegion = "us-west-1"
+	defaultAwsRegion = "us-west-2"
 	ec2Module        = "module.ec2"
 )
 
