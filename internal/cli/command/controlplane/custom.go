@@ -26,7 +26,7 @@ func ensureCustomCluster(banzaiCli cli.Cli, options *cpContext, creds map[string
 	}
 
 	log.Info("Creating custom infrastructure...")
-	targets := []string{"module.custom", "local_file.k8s_config"}
+	targets := []string{"module.custom"}
 	if err := runTerraform("apply", options, banzaiCli, creds, targets...); err != nil {
 		return errors.WrapIf(err, "failed to create custom infrastructure")
 	}
@@ -36,7 +36,7 @@ func ensureCustomCluster(banzaiCli cli.Cli, options *cpContext, creds map[string
 
 func deleteCustomCluster(banzaiCli cli.Cli, options *cpContext, creds map[string]string) error {
 	log.Info("Destroying custom infrastructure...")
-	if err := runTerraform("destroy", options, banzaiCli, creds, "module.custom"); err != nil {
+	if err := runTerraform("destroy", options, banzaiCli, creds); err != nil {
 		return errors.WrapIf(err, "failed to destroy custom infrastructure")
 	}
 
