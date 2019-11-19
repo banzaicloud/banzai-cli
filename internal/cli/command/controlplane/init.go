@@ -162,7 +162,7 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	// add defaults to values in case of missing values file
 	if options.file == "" {
 		out["tlsInsecure"] = true
-		out["defaultStorageBackend"] = "postgres"
+		out["defaultStorageBackend"] = "mysql"
 	}
 
 	k8sContext, k8sConfig, err := input.GetCurrentKubecontext()
