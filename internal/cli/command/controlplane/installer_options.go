@@ -40,8 +40,6 @@ const (
 	externalAddressFilename = "external-address"
 	tfstateFilename         = "terraform.tfstate"
 	defaultImage            = "docker.io/banzaicloud/pipeline-installer"
-	eksK8sConfig            = "eks_k8s_config.yaml"
-	eksAuthCM               = "eks_auth_cm.yaml"
 )
 
 type cpContext struct {
