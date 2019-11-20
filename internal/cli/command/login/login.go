@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
@@ -238,7 +239,7 @@ func deleteToken(banzaiCli cli.Cli, secret string) error {
 	claims := jwt.StandardClaims{}
 	_, _ = jwt.ParseWithClaims(secret, &claims, nil)
 
-	if err := claims.Valid(); err != nil {
+	if err := tokenNotExpired(claims); err != nil {
 		return errors.Wrap(err, "old token is invalid")
 	}
 
@@ -250,9 +251,20 @@ func isExpiringToken(secret string) (bool, error) {
 	claims := jwt.StandardClaims{}
 	_, _ = jwt.ParseWithClaims(secret, &claims, nil)
 
-	if err := claims.Valid(); err != nil {
+	if err := tokenNotExpired(claims); err != nil {
 		return false, errors.Wrap(err, "old token is invalid")
 	}
 
 	return claims.ExpiresAt != 0, nil
+}
+
+func tokenNotExpired(c jwt.StandardClaims) error {
+	now := time.Now().Unix()
+
+	if c.VerifyExpiresAt(now, false) == false {
+		delta := time.Unix(now, 0).Sub(time.Unix(c.ExpiresAt, 0))
+		return fmt.Errorf("token is expired by %v", delta)
+	}
+
+	return nil
 }
