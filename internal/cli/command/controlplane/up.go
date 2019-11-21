@@ -17,6 +17,7 @@ package controlplane
 import (
 	"fmt"
 	"net"
+	"os"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
@@ -172,6 +173,13 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
+	if !isRemoteStateInited(options) {
+		log.Info("Migrating workspace remote state...")
+		if err := initRemoteState(options.cpContext, banzaiCli); err != nil {
+			return errors.WrapIf(err, "failed to init remote state")
+		}
+	}
+
 	log.Info("Deploying Banzai Cloud Pipeline to Kubernetes cluster...")
 	if values["provider"] == providerCustom {
 		_, creds, err := input.GetAmazonCredentials()
@@ -189,6 +197,14 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 	}
 
 	return postInstall(options, banzaiCli, values)
+}
+
+func isRemoteStateInited(options *createOptions) bool {
+	_, err := os.Stat(options.workspace + "/.terraform/terraform.tfstate")
+	if err != nil && os.IsNotExist(err) {
+		return false
+	}
+	return true
 }
 
 func postInstall(options *createOptions, banzaiCli cli.Cli, values map[string]interface{}) error {

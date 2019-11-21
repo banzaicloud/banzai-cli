@@ -299,7 +299,7 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		out["installer"] = map[string]interface{}{"image": strings.TrimSpace(string(ref))}
 	}
 
-	err = initRemoteState(options, banzaiCli)
+	err = initRemoteState(options.cpContext, banzaiCli)
 	if err != nil {
 		return errors.WrapIf(err, "failed to init remote state")
 	}
@@ -307,7 +307,7 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	return options.writeValues(out)
 }
 
-func initRemoteState(options initOptions, banzaiCli cli.Cli) error {
+func initRemoteState(options *cpContext, banzaiCli cli.Cli) error {
 	stateTf := fmt.Sprintf(`terraform {
 		backend "local" {
 			path = "/workspace/%s"
@@ -330,7 +330,7 @@ func initRemoteState(options initOptions, banzaiCli cli.Cli) error {
 	}
 	_ = stateFile.Close()
 
-	if err := runTerraform("init", options.cpContext, banzaiCli, nil); err != nil {
+	if err := runTerraform("init", options, banzaiCli, nil); err != nil {
 		return errors.WrapIf(err, "failed to deploy pipeline components")
 	}
 
