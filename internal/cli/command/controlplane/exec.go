@@ -43,20 +43,23 @@ func runTerraform(command string, options *cpContext, banzaiCli cli.Cli, env map
 		cmdEnv[k] = v
 	}
 
-	cmd := []string{"terraform",
-		command,
-		"-parallelism=1", // workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/271
-		"-var", "workdir=/workspace",
-		fmt.Sprintf("-refresh=%v", options.refreshState),
-		"-state=/workspace/" + tfstateFilename,
-	}
+	cmd := []string{"terraform", command}
 
-	if options.autoApprove {
-		cmd = append(cmd, "-auto-approve")
-	}
+	if command != "init" {
 
-	for _, target := range targets {
-		cmd = append(cmd, "-target", target)
+		cmd = append(cmd, []string{
+			"-parallelism=1", // workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/271
+			"-var", "workdir=/workspace",
+			fmt.Sprintf("-refresh=%v", options.refreshState),
+		}...)
+
+		if options.autoApprove {
+			cmd = append(cmd, "-auto-approve")
+		}
+
+		for _, target := range targets {
+			cmd = append(cmd, "-target", target)
+		}
 	}
 
 	switch options.containerRuntime {
@@ -95,6 +98,8 @@ func runContainer(command []string, options *cpContext, banzaiCli cli.Cli, env m
 		"run", "--rm", "--net-host",
 		// fmt.Sprintf("--user=%d", os.Getuid()), // TODO
 		"--mount", fmt.Sprintf("type=bind,src=%s,dst=/workspace,options=rbind:rw", options.workspace),
+		"--mount", fmt.Sprintf("type=bind,src=%s,dst=/terraform/state.tf,options=rbind:rw", options.workspace+"/state.tf"),
+		"--mount", fmt.Sprintf("type=bind,src=%s,dst=/terraform/.terraform/terraform.tfstate,options=rbind:rw", options.workspace+"/.terraform/terraform.tfstate"),
 	}
 
 	if banzaiCli.Interactive() {
@@ -130,8 +135,10 @@ func runDocker(command []string, options *cpContext, banzaiCli cli.Cli, env map[
 
 	args := []string{
 		"run", "--rm", "--net=host",
-		fmt.Sprintf("--user=%d", os.Getuid()),
+		// fmt.Sprintf("--user=%d", os.Getuid()), TODO
 		"-v", fmt.Sprintf("%s:/workspace", options.workspace),
+		"-v", fmt.Sprintf("%s:/terraform/state.tf", options.workspace+"/state.tf"),
+		"-v", fmt.Sprintf("%s:/terraform/.terraform/terraform.tfstate", options.workspace+"/.terraform/terraform.tfstate"),
 	}
 
 	if banzaiCli.Interactive() {

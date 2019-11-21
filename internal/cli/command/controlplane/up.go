@@ -183,6 +183,7 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 			env[k] = v
 		}
 	}
+
 	if err := runTerraform("apply", options.cpContext, banzaiCli, env); err != nil {
 		return errors.WrapIf(err, "failed to deploy pipeline components")
 	}
