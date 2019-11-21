@@ -320,7 +320,7 @@ func initStateBackend(options *cpContext, banzaiCli cli.Cli) error {
 		return errors.WrapIf(err, "failed to create state backend configuration")
 	}
 
-	err = os.Mkdir(options.workspace+"/.terraform", 0700)
+	err = os.MkdirAll(options.workspace+"/.terraform", 0700)
 	if err != nil {
 		return errors.WrapIf(err, "failed to create state backend directory")
 	}
