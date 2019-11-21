@@ -135,7 +135,7 @@ func runDocker(command []string, options *cpContext, banzaiCli cli.Cli, env map[
 
 	args := []string{
 		"run", "--rm", "--net=host",
-		// fmt.Sprintf("--user=%d", os.Getuid()), TODO
+		fmt.Sprintf("--user=%d", os.Getuid()),
 		"-v", fmt.Sprintf("%s:/workspace", options.workspace),
 		"-v", fmt.Sprintf("%s:/terraform/state.tf", options.workspace+"/state.tf"),
 		"-v", fmt.Sprintf("%s:/terraform/.terraform/terraform.tfstate", options.workspace+"/.terraform/terraform.tfstate"),
