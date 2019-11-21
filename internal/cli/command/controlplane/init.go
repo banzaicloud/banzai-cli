@@ -16,6 +16,7 @@ package controlplane
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -298,7 +299,42 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		out["installer"] = map[string]interface{}{"image": strings.TrimSpace(string(ref))}
 	}
 
+	err = initRemoteState(options, banzaiCli)
+	if err != nil {
+		return errors.WrapIf(err, "failed to init remote state")
+	}
+
 	return options.writeValues(out)
+}
+
+func initRemoteState(options initOptions, banzaiCli cli.Cli) error {
+	stateTf := fmt.Sprintf(`terraform {
+		backend "local" {
+			path = "/workspace/%s"
+		}
+	}`, tfstateFilename)
+
+	err := ioutil.WriteFile(options.workspace+"/state.tf", []byte(stateTf), 0600)
+	if err != nil {
+		return errors.WrapIf(err, "failed to create state configuration")
+	}
+
+	err = os.Mkdir(options.workspace+"/.terraform", 0700)
+	if err != nil {
+		return errors.WrapIf(err, "failed to create state directory")
+	}
+
+	stateFile, err := os.Create(options.workspace + "/.terraform/terraform.tfstate")
+	if err != nil {
+		return errors.WrapIf(err, "failed to create state file")
+	}
+	_ = stateFile.Close()
+
+	if err := runTerraform("init", options.cpContext, banzaiCli, nil); err != nil {
+		return errors.WrapIf(err, "failed to deploy pipeline components")
+	}
+
+	return nil
 }
 
 func getAmazonCredentialsRegion(defaultAwsRegion string) (string, string, error) {
