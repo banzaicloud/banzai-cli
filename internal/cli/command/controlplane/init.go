@@ -34,14 +34,19 @@ import (
 )
 
 const (
-	providerK8s      = "k8s"
-	providerEc2      = "ec2"
-	providerKind     = "kind"
-	providerPke      = "pke"
-	providerCustom   = "custom"
-	defaultLocalhost = "default.localhost.banzaicloud.io"
-	autoHost         = "auto"
-	externalHost     = "externalHost"
+	providerK8s       = "k8s"
+	providerEc2       = "ec2"
+	providerKind      = "kind"
+	providerPke       = "pke"
+	providerCustom    = "custom"
+	defaultLocalhost  = "default.localhost.banzaicloud.io"
+	autoHost          = "auto"
+	externalHost      = "externalHost"
+	localStateBackend = `terraform {
+	backend "local" {
+		path = "/workspace/%s"
+	}
+}`
 )
 
 type initOptions struct {
@@ -299,39 +304,35 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		out["installer"] = map[string]interface{}{"image": strings.TrimSpace(string(ref))}
 	}
 
-	err = initRemoteState(options.cpContext, banzaiCli)
+	err = initStateBackend(options.cpContext, banzaiCli)
 	if err != nil {
-		return errors.WrapIf(err, "failed to init remote state")
+		return err
 	}
 
 	return options.writeValues(out)
 }
 
-func initRemoteState(options *cpContext, banzaiCli cli.Cli) error {
-	stateTf := fmt.Sprintf(`terraform {
-		backend "local" {
-			path = "/workspace/%s"
-		}
-	}`, tfstateFilename)
+func initStateBackend(options *cpContext, banzaiCli cli.Cli) error {
+	stateTf := fmt.Sprintf(localStateBackend, tfstateFilename)
 
 	err := ioutil.WriteFile(options.workspace+"/state.tf", []byte(stateTf), 0600)
 	if err != nil {
-		return errors.WrapIf(err, "failed to create state configuration")
+		return errors.WrapIf(err, "failed to create state backend configuration")
 	}
 
 	err = os.Mkdir(options.workspace+"/.terraform", 0700)
 	if err != nil {
-		return errors.WrapIf(err, "failed to create state directory")
+		return errors.WrapIf(err, "failed to create state backend directory")
 	}
 
 	stateFile, err := os.Create(options.workspace + "/.terraform/terraform.tfstate")
 	if err != nil {
-		return errors.WrapIf(err, "failed to create state file")
+		return errors.WrapIf(err, "failed to create state config file")
 	}
 	_ = stateFile.Close()
 
 	if err := runTerraform("init", options, banzaiCli, nil); err != nil {
-		return errors.WrapIf(err, "failed to deploy pipeline components")
+		return errors.WrapIf(err, "failed to init state backend")
 	}
 
 	return nil

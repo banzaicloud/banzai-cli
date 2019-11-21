@@ -173,10 +173,10 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
-	if !isRemoteStateInited(options) {
-		log.Info("Migrating workspace remote state...")
-		if err := initRemoteState(options.cpContext, banzaiCli); err != nil {
-			return errors.WrapIf(err, "failed to init remote state")
+	if !isStateBackendInited(options) {
+		log.Info("Migrating workspace to state backend...")
+		if err := initStateBackend(options.cpContext, banzaiCli); err != nil {
+			return err
 		}
 	}
 
@@ -199,7 +199,7 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 	return postInstall(options, banzaiCli, values)
 }
 
-func isRemoteStateInited(options *createOptions) bool {
+func isStateBackendInited(options *createOptions) bool {
 	_, err := os.Stat(options.workspace + "/.terraform/terraform.tfstate")
 	if err != nil && os.IsNotExist(err) {
 		return false
