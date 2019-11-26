@@ -39,11 +39,11 @@ func (UpdateManager) ValidateRequest(req interface{}) error {
 	return validateSpec(request.Spec)
 }
 
-func (UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context, ) error {
+func (UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error {
 
 	var spec featureSpec
 	if err := mapstructure.Decode(req.Spec, &spec); err != nil {
-		return errors.WrapIf(err, "feature specification does not conform to schema")
+		return errors.WrapIf(err, "service specification does not conform to schema")
 	}
 
 	grafana, err := askGrafana(banzaiCLI, spec.Grafana)

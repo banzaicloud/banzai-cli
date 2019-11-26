@@ -47,7 +47,7 @@ func ActivateCommandFactory(banzaiCli cli.Cli, manager ActivateManager, name str
 	cmd := &cobra.Command{
 		Use:           "activate",
 		Aliases:       []string{"add", "enable", "install", "on"},
-		Short:         fmt.Sprintf("Activate the %s feature of a cluster", name),
+		Short:         fmt.Sprintf("Activate the %s service of a cluster", name),
 		Args:          cobra.NoArgs,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -56,7 +56,7 @@ func ActivateCommandFactory(banzaiCli cli.Cli, manager ActivateManager, name str
 		},
 	}
 
-	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, fmt.Sprintf("activate %s cluster feature for", name))
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, fmt.Sprintf("activate %s cluster service for", name))
 
 	flags := cmd.Flags()
 	flags.StringVarP(&options.filePath, "file", "f", "", "Feature specification file")
@@ -88,7 +88,7 @@ func runActivate(
 
 	} else {
 		if err := readActivateReqFromFileOrStdin(options.filePath, request); err != nil {
-			return errors.WrapIf(err, fmt.Sprintf("failed to read %s cluster feature specification", m.GetName()))
+			return errors.WrapIf(err, fmt.Sprintf("failed to read %s cluster service specification", m.GetName()))
 		}
 	}
 
@@ -96,11 +96,11 @@ func runActivate(
 	clusterId := options.ClusterID()
 	_, err = banzaiCLI.Client().ClusterFeaturesApi.ActivateClusterFeature(context.Background(), orgId, clusterId, m.GetName(), *request)
 	if err != nil {
-		cli.LogAPIError(fmt.Sprintf("activate %s cluster feature", m.GetName()), err, request)
-		log.Fatalf("could not activate %s cluster feature: %v", m.GetName(), err)
+		cli.LogAPIError(fmt.Sprintf("activate %s cluster service", m.GetName()), err, request)
+		log.Fatalf("could not activate %s cluster service: %v", m.GetName(), err)
 	}
 
-	log.Infof("feature %q started to activate", m.GetName())
+	log.Infof("service %q started to activate", m.GetName())
 
 	return nil
 }
@@ -122,7 +122,7 @@ func showActivateEditor(m ActivateManager, req *pipeline.ActivateClusterFeatureR
 	var edit bool
 	if err := survey.AskOne(
 		&survey.Confirm{
-			Message: "Do you want to edit the cluster feature activation request in your text editor?",
+			Message: "Do you want to edit the cluster service activation request in your text editor?",
 		},
 		&edit,
 	); err != nil {

@@ -56,17 +56,17 @@ func (um updateManager) BuildRequestInteractively(banzaiCLI cli.Cli, updateClust
 
 	featureSpec := SecurityScanFeatureSpec{}
 	if err := mapstructure.Decode(updateClusterFeatureRequest.Spec, &featureSpec); err != nil {
-		return errors.WrapIf(err, "failed to decode feature specification for update")
+		return errors.WrapIf(err, "failed to decode service specification for update")
 	}
 
 	featureSpec, err := um.assembleFeatureSpec(context.Background(), banzaiCLI.Context().OrganizationID(), clusterCtx.ClusterID(), featureSpec)
 	if err != nil {
-		return errors.WrapIf(err, "failed to assemble feature specification")
+		return errors.WrapIf(err, "failed to assemble service specification")
 	}
 
 	featureSpecMap, err := um.securityScanSpecAsMap(&featureSpec)
 	if err != nil {
-		return errors.WrapIf(err, "failed to transform feature specification")
+		return errors.WrapIf(err, "failed to transform service specification")
 	}
 
 	updateClusterFeatureRequest.Spec = featureSpecMap

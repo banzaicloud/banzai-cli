@@ -54,7 +54,7 @@ func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx c
 
 	builtSpec, err := assembleFeatureRequest(banzaiCli, clusterCtx, defaultSpec, NewActionContext(actionNew))
 	if err != nil {
-		return nil, errors.WrapIf(err, "failed to build external DNS feature request")
+		return nil, errors.WrapIf(err, "failed to build external DNS service request")
 	}
 
 	return &pipeline.ActivateClusterFeatureRequest{
@@ -405,7 +405,7 @@ func getSecretsForProvider(banzaiCLI cli.Cli, dnsProvider string) (featureutils.
 func getFeatureSpecDefaults(banzaiCLI cli.Cli, clusterCtx clustercontext.Context, specIn DNSFeatureSpec, actionCtx actionContext) (DNSFeatureSpec, error) {
 	switch actionCtx.providerName {
 	case dnsBanzaiCloud:
-		caps, r, err := banzaiCLI.Client().PipelineApi.ListCapabilities(context.Background(), )
+		caps, r, err := banzaiCLI.Client().PipelineApi.ListCapabilities(context.Background())
 		if err := featureutils.CheckCallResults(r, err); err != nil {
 			return DNSFeatureSpec{}, errors.WrapIf(err, "failed to retrieve capabilities")
 		}

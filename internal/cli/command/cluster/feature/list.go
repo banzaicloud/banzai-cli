@@ -35,14 +35,14 @@ func NewListCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "list",
 		Aliases: []string{"ls"},
-		Short:   "List active (and pending) features of a cluster",
+		Short:   "List active (and pending) integrated services of a cluster",
 		Args:    cobra.MaximumNArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {
 			return runList(banzaiCli, options, args)
 		},
 	}
 
-	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "list features")
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "list services")
 
 	return cmd
 }
@@ -59,8 +59,8 @@ func runList(banzaiCli cli.Cli, options listOptions, args []string) error {
 
 	list, resp, err := pipeline.ClusterFeaturesApi.ListClusterFeatures(context.Background(), orgId, clusterId)
 	if err != nil {
-		cli.LogAPIError("list cluster features", err, resp.Request)
-		log.Fatalf("could not list cluster features: %v", err)
+		cli.LogAPIError("list cluster services", err, resp.Request)
+		log.Fatalf("could not list cluster services: %v", err)
 	}
 
 	type row struct {

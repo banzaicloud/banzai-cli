@@ -78,7 +78,7 @@ func validateSpec(specObj map[string]interface{}) error {
 	var dnsSpec DNSFeatureSpec
 
 	if err := mapstructure.Decode(specObj, &dnsSpec); err != nil {
-		return errors.WrapIf(err, "feature specification does not conform to schema")
+		return errors.WrapIf(err, "service specification does not conform to schema")
 	}
 
 	err := dnsSpec.ExternalDNS.Validate()
@@ -126,9 +126,9 @@ func assembleFeatureRequest(banzaiCli cli.Cli, clusterCtx clustercontext.Context
 	}
 
 	actionContext.SetProvider(selectedProviderInfo.Name)
-	dnsFeatureSpec, err = getFeatureSpecDefaults(banzaiCli, clusterCtx, dnsFeatureSpec, actionContext);
+	dnsFeatureSpec, err = getFeatureSpecDefaults(banzaiCli, clusterCtx, dnsFeatureSpec, actionContext)
 	if err != nil {
-		return nil, errors.WrapIf(err, "failed to get dns feature defaults")
+		return nil, errors.WrapIf(err, "failed to get dns service defaults")
 	}
 	dnsFeatureSpec.ExternalDNS.Provider = &selectedProviderInfo
 

@@ -44,13 +44,13 @@ func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateClusterF
 	if updateClusterFeatureRequest.Spec != nil {
 		// update feature case
 		if err := mapstructure.Decode(updateClusterFeatureRequest.Spec, &currentDnsFeatureSpec); err != nil {
-			return errors.WrapIf(err, "failed to decode feature DNSFeatureSpec")
+			return errors.WrapIf(err, "failed to decode service DNSFeatureSpec")
 		}
 	}
 
 	externalDNS, err := assembleFeatureRequest(banzaiCli, clusterCtx, currentDnsFeatureSpec, NewActionContext(actionUpdate))
 	if err != nil {
-		return errors.Wrap(err, "failed to build custom DNS feature request")
+		return errors.Wrap(err, "failed to build custom DNS service request")
 	}
 	// set the modified DNSFeatureSpec into the request
 	updateClusterFeatureRequest.Spec = externalDNS

@@ -47,14 +47,14 @@ func UpdateCommandFactory(banzaiCLI cli.Cli, manager UpdateManager, name string)
 	cmd := &cobra.Command{
 		Use:     "update",
 		Aliases: []string{"change", "modify", "set"},
-		Short:   fmt.Sprintf("Update the %s feature of a cluster", name),
+		Short:   fmt.Sprintf("Update the %s service of a cluster", name),
 		Args:    cobra.NoArgs,
 		RunE: func(_ *cobra.Command, args []string) error {
 			return runUpdate(banzaiCLI, manager, options, args)
 		},
 	}
 
-	options.Context = clustercontext.NewClusterContext(cmd, banzaiCLI, fmt.Sprintf("update %s cluster feature for", name))
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCLI, fmt.Sprintf("update %s cluster service for", name))
 
 	flags := cmd.Flags()
 	flags.StringVarP(&options.filePath, "file", "f", "", "Feature specification file")
@@ -82,7 +82,7 @@ func runUpdate(
 		// get feature details
 		details, _, err := banzaiCLI.Client().ClusterFeaturesApi.ClusterFeatureDetails(context.Background(), orgID, clusterID, m.GetName())
 		if err != nil {
-			return errors.WrapIf(err, "failed to get feature details")
+			return errors.WrapIf(err, "failed to get service details")
 		}
 
 		request = &pipeline.UpdateClusterFeatureRequest{
@@ -100,17 +100,17 @@ func runUpdate(
 
 	} else {
 		if err := readUpdateReqFromFileOrStdin(options.filePath, request); err != nil {
-			return errors.WrapIf(err, fmt.Sprintf("failed to read %s cluster feature specification", m.GetName()))
+			return errors.WrapIf(err, fmt.Sprintf("failed to read %s cluster service specification", m.GetName()))
 		}
 	}
 
 	resp, err := banzaiCLI.Client().ClusterFeaturesApi.UpdateClusterFeature(context.Background(), orgID, clusterID, m.GetName(), *request)
 	if err != nil {
-		cli.LogAPIError(fmt.Sprintf("update %s cluster feature", m.GetName()), err, resp.Request)
-		log.Fatalf("could not update %s cluster feature: %v", m.GetName(), err)
+		cli.LogAPIError(fmt.Sprintf("update %s cluster service", m.GetName()), err, resp.Request)
+		log.Fatalf("could not update %s cluster service: %v", m.GetName(), err)
 	}
 
-	log.Infof("feature %q started to update", m.GetName())
+	log.Infof("service %q started to update", m.GetName())
 
 	return nil
 }
@@ -132,7 +132,7 @@ func showUpdateEditor(m UpdateManager, request *pipeline.UpdateClusterFeatureReq
 	var edit bool
 	if err := survey.AskOne(
 		&survey.Confirm{
-			Message: "Do you want to edit the cluster feature update request in your text editor?",
+			Message: "Do you want to edit the cluster service update request in your text editor?",
 		},
 		&edit,
 	); err != nil {

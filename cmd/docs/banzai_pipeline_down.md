@@ -13,11 +13,13 @@ banzai pipeline down [flags]
 ### Options
 
 ```
-      --auto-approve       Automatically approve the changes to deploy (default true)
-  -h, --help               help for down
-      --image-pull         Pull cp-installer image even if it's present locally (default true)
-      --image-tag string   Tag of banzaicloud/cp-installer Docker image to use (default "latest")
-      --workspace string   Name of directory for storing the applied configuration and deployment status
+      --auto-approve               Automatically approve the changes to deploy (default true)
+      --container-runtime string   Run the terraform command with "docker", "containerd" (crictl) or "exec" (execute locally) (default "auto")
+  -h, --help                       help for down
+      --image string               Name of Docker image repository to use (default "docker.io/banzaicloud/pipeline-installer")
+      --image-pull                 Pull installer image even if it's present locally (default true)
+      --image-tag string           Tag of installer Docker image to use (default "latest")
+      --workspace string           Name of directory for storing the applied configuration and deployment status
 ```
 
 ### Options inherited from parent commands
