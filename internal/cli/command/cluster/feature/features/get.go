@@ -44,14 +44,14 @@ func GetCommandFactory(banzaiCLI cli.Cli, manager GetManager, name string) *cobr
 	cmd := &cobra.Command{
 		Use:     "get",
 		Aliases: []string{"details", "show", "query"},
-		Short:   fmt.Sprintf("Get details of the %s feature for a cluster", name),
+		Short:   fmt.Sprintf("Get details of the %s service for a cluster", name),
 		Args:    cobra.NoArgs,
 		RunE: func(_ *cobra.Command, args []string) error {
 			return runGet(banzaiCLI, manager, options, args)
 		},
 	}
 
-	options.Context = clustercontext.NewClusterContext(cmd, banzaiCLI, fmt.Sprintf("get %s cluster feature details of", name))
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCLI, fmt.Sprintf("get %s cluster service details of", name))
 
 	return cmd
 }
@@ -73,13 +73,13 @@ func runGet(
 	details, resp, err := pipelineClient.ClusterFeaturesApi.ClusterFeatureDetails(context.Background(), orgId, clusterId, m.GetName())
 
 	if resp.StatusCode == http.StatusNotFound {
-		log.Printf("cluster feature [%s] not found", m.GetName())
+		log.Printf("cluster service [%s] not found", m.GetName())
 		return nil
 	}
 
 	if err != nil {
-		cli.LogAPIError(fmt.Sprintf("get %s cluster feature details", m.GetName()), err, resp.Request)
-		log.Fatalf("could not get %s cluster feature details: %v", m.GetName(), err)
+		cli.LogAPIError(fmt.Sprintf("get %s cluster service details", m.GetName()), err, resp.Request)
+		log.Fatalf("could not get %s cluster service details: %v", m.GetName(), err)
 		return err
 	}
 

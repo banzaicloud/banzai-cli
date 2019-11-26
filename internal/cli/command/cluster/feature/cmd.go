@@ -28,16 +28,16 @@ func NewFeatureCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := listOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "feature",
-		Aliases: []string{"features", "feat", "ft"},
-		Short:   "Manage cluster features",
+		Use:     "service",
+		Aliases: []string{"services", "svc", "feature"},
+		Short:   "Manage cluster integrated services",
 		Args:    cobra.MaximumNArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {
 			return runList(banzaiCli, options, args)
 		},
 	}
 
-	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "list features")
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "list services")
 
 	cmd.AddCommand(
 		NewListCommand(banzaiCli),
@@ -69,12 +69,12 @@ func featureCommandFactory(banzaiCLI cli.Cli, use string, scm SubCommandManager)
 
 	cmd := &cobra.Command{
 		Use:   use,
-		Short: fmt.Sprintf("Manage cluster %s feature", scm.GetName()),
+		Short: fmt.Sprintf("Manage cluster %s service", scm.GetName()),
 		Args:  cobra.NoArgs,
 		RunE:  getCommand.RunE,
 	}
 
-	options.Context = clustercontext.NewClusterContext(cmd, banzaiCLI, fmt.Sprintf("manage %s cluster feature of", scm.GetName()))
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCLI, fmt.Sprintf("manage %s cluster service of", scm.GetName()))
 
 	cmd.AddCommand(
 		features.ActivateCommandFactory(banzaiCLI, scm.ActivateManager(), scm.GetName()),

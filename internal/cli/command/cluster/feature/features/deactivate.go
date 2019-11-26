@@ -39,14 +39,14 @@ func DeactivateCommandFactory(banzaiCli cli.Cli, manager DeactivateManager, name
 	cmd := &cobra.Command{
 		Use:     "deactivate",
 		Aliases: []string{"disable", "off", "remove", "rm", "uninstall"},
-		Short:   fmt.Sprintf("Deactivate the %s feature of a cluster", name),
+		Short:   fmt.Sprintf("Deactivate the %s service of a cluster", name),
 		Args:    cobra.NoArgs,
 		RunE: func(_ *cobra.Command, args []string) error {
 			return runDeactivate(banzaiCli, manager, options, args)
 		},
 	}
 
-	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, fmt.Sprintf("deactivate %s cluster feature of", name))
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, fmt.Sprintf("deactivate %s cluster service of", name))
 
 	return cmd
 }
@@ -67,11 +67,11 @@ func runDeactivate(
 
 	resp, err := pipeline.ClusterFeaturesApi.DeactivateClusterFeature(context.Background(), orgId, clusterId, m.GetName())
 	if err != nil {
-		cli.LogAPIError(fmt.Sprintf("deactivate %s cluster feature", m.GetName()), err, resp.Request)
-		log.Fatalf("could not deactivate %s cluster feature: %v", m.GetName(), err)
+		cli.LogAPIError(fmt.Sprintf("deactivate %s cluster service", m.GetName()), err, resp.Request)
+		log.Fatalf("could not deactivate %s cluster service: %v", m.GetName(), err)
 	}
 
-	log.Infof("feature %q started to deactivate", m.GetName())
+	log.Infof("service %q started to deactivate", m.GetName())
 
 	return nil
 }
