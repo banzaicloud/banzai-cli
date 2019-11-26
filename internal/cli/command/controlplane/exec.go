@@ -48,7 +48,6 @@ func runTerraform(command string, options *cpContext, banzaiCli cli.Cli, env map
 	if command != "init" {
 
 		cmd = append(cmd, []string{
-			"-parallelism=1", // workaround for https://github.com/terraform-providers/terraform-provider-helm/issues/271
 			"-var", "workdir=/workspace",
 			fmt.Sprintf("-refresh=%v", options.refreshState),
 		}...)
