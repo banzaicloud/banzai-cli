@@ -158,6 +158,9 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		err = utils.Unmarshal(raw, &out)
 		if err != nil {
 			return errors.WrapIf(err, "failed to parse descriptor")
+		} else if out == nil {
+			log.Info("no configuration provided on stdin")
+			out = make(map[string]interface{})
 		}
 
 		if provider, ok := out["provider"].(string); ok && provider != "" {
