@@ -107,6 +107,10 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 		}
 
 	case providerKind:
+		if err := runTerraform("destroy", options.cpContext, banzaiCli, env); err != nil {
+			return errors.WrapIf(err, "control plane destroy failed")
+		}
+
 		if err := deleteKINDCluster(banzaiCli); err != nil {
 			return errors.WrapIf(err, "KIND cluster destroy failed")
 		}
