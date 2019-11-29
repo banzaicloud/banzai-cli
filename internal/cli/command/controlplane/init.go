@@ -288,23 +288,24 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 
 	out["providerConfig"] = providerConfig
 
-	image := ""
-	if installer, ok := out["installer"].(map[interface{}]interface{}); ok {
-		if img, ok := installer["image"].(string); ok {
-			image = img
-		}
-	}
-	if image == "" && options.installerTag == "latest" && options.containerRuntime == runtimeDocker {
-		err := options.ensureImagePulled()
-		if err != nil {
-			return errors.WrapIf(err, "failed to pull installer image")
-		}
+	options.installerImageRepo, options.installerTag = initImageValues(options, out)
 
+	if options.installerImageRepo == defaultImage && options.provider == providerCustom {
+		return errors.New("Custom provisioning is available by specifying a custom installer image. Please refer to your deployment guide or use one of our support channels.")
+	}
+
+	err = options.ensureImagePulled()
+	if err != nil {
+		return errors.WrapIf(err, "failed to pull installer image")
+	}
+	if options.installerTag == latestTag && options.containerRuntime == runtimeDocker {
 		ref, err := exec.Command("docker", "inspect", "-f", "{{index .RepoDigests 0}}", options.installerImage()).Output()
 		if err != nil {
 			return errors.WrapIf(err, "failed to determine installer image hash")
 		}
 		out["installer"] = map[string]interface{}{"image": strings.TrimSpace(string(ref))}
+	} else {
+		out["installer"] = map[string]interface{}{"image": options.installerImage()}
 	}
 
 	err = initStateBackend(options.cpContext, banzaiCli)
@@ -313,6 +314,36 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	}
 
 	return options.writeValues(out)
+}
+
+func initImageValues(options initOptions, out map[string]interface{}) (image string, tag string) {
+	installer, ok := out["installer"].(map[interface{}]interface{})
+	image = options.installerImageRepo
+	tag = options.installerTag
+	if options.installerImageRepo != defaultImage {
+		if t := strings.Split(options.installerImageRepo, ":"); len(t) > 1 {
+			image = t[0]
+			tag = t[1]
+		} else {
+			image = options.installerImageRepo
+		}
+	} else {
+		if ok {
+			if img, ok := installer["image"].(string); ok {
+				image = img
+			}
+		}
+	}
+	if options.installerTag != latestTag {
+		tag = options.installerTag
+	} else {
+		if ok {
+			if t, ok := installer["image-tag"].(string); ok {
+				tag = t
+			}
+		}
+	}
+	return image, tag
 }
 
 func initStateBackend(options *cpContext, banzaiCli cli.Cli) error {

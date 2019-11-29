@@ -40,6 +40,7 @@ const (
 	externalAddressFilename = "external-address"
 	tfstateFilename         = "terraform.tfstate"
 	defaultImage            = "docker.io/banzaicloud/pipeline-installer"
+	latestTag               = "latest"
 )
 
 type cpContext struct {
@@ -62,7 +63,7 @@ func NewContext(cmd *cobra.Command, banzaiCli cli.Cli) *cpContext {
 	}
 
 	flags := cmd.Flags()
-	flags.StringVar(&ctx.installerTag, "image-tag", "latest", "Tag of installer Docker image to use")
+	flags.StringVar(&ctx.installerTag, "image-tag", latestTag, "Tag of installer Docker image to use")
 	flags.StringVar(&ctx.installerImageRepo, "image", defaultImage, "Name of Docker image repository to use")
 	flags.BoolVar(&ctx.pullInstaller, "image-pull", true, "Pull installer image even if it's present locally")
 	flags.BoolVar(&ctx.autoApprove, "auto-approve", true, "Automatically approve the changes to deploy")
@@ -79,7 +80,7 @@ func (c *cpContext) ensureImagePulled() error {
 }
 
 func (c *cpContext) installerImage() string {
-	if c.installerImageRepo == defaultImage && c.installerTag == "latest" {
+	if c.installerImageRepo == defaultImage && c.installerTag == latestTag {
 		out := make(map[interface{}]interface{})
 		err := c.readValues(out)
 		if err == nil {
