@@ -192,6 +192,12 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
+	// this is required for scenarios where we need precomputed
+	// variables present before apply e.g. when merging multiple values files into a single config
+	if err := runTerraform("apply", options.cpContext, banzaiCli, env, "null_resource.preapply_hook"); err != nil {
+		return errors.WrapIf(err, "failed to run null_resource.preapply_hook as a standalone target")
+	}
+
 	if err := runTerraform("apply", options.cpContext, banzaiCli, env); err != nil {
 		return errors.WrapIf(err, "failed to deploy pipeline components")
 	}
