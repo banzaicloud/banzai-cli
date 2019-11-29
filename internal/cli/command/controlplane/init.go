@@ -298,7 +298,6 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	if err != nil {
 		return errors.WrapIf(err, "failed to pull installer image")
 	}
-	var ref []byte
 	if options.installerTag == latestTag && options.containerRuntime == runtimeDocker {
 		ref, err = exec.Command("docker", "inspect", "-f", "{{index .RepoDigests 0}}", options.installerImage()).Output()
 		if err != nil {
