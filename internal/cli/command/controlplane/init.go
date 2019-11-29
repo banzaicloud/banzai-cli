@@ -299,7 +299,7 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		return errors.WrapIf(err, "failed to pull installer image")
 	}
 	if options.installerTag == latestTag && options.containerRuntime == runtimeDocker {
-		ref, err = exec.Command("docker", "inspect", "-f", "{{index .RepoDigests 0}}", options.installerImage()).Output()
+		ref, err := exec.Command("docker", "inspect", "-f", "{{index .RepoDigests 0}}", options.installerImage()).Output()
 		if err != nil {
 			return errors.WrapIf(err, "failed to determine installer image hash")
 		}
