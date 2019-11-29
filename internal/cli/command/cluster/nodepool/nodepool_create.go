@@ -59,6 +59,7 @@ func NewCreateNodePoolCommand(banzaiCli cli.Cli) *cobra.Command {
 	return cmd
 }
 
+//nolint:unparam
 func createNodePool(banzaiCli cli.Cli, options createOptions, args []string) error {
 	client := banzaiCli.Client()
 	orgID := banzaiCli.Context().OrganizationID()
