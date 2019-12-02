@@ -428,7 +428,7 @@ func getProviders() map[string]interface{} {
 						},
 					},
 					Kubernetes: pipeline.CreatePkePropertiesKubernetes{
-						Version: "v1.14.2",
+						Version: "v1.15.3",
 						Rbac: pipeline.CreatePkePropertiesKubernetesRbac{
 							Enabled: true,
 						},
@@ -454,7 +454,7 @@ func getProviders() map[string]interface{} {
 				},
 			},
 			Kubernetes: pipeline.CreatePkeClusterKubernetes{
-				Version: "1.14.2",
+				Version: "1.15.3",
 				Rbac:    true,
 			},
 		},
