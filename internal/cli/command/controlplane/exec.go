@@ -52,7 +52,7 @@ func runTerraform(command string, options *cpContext, banzaiCli cli.Cli, env map
 			fmt.Sprintf("-refresh=%v", options.refreshState),
 		}...)
 
-		if options.autoApprove {
+		if options.AutoApprove() {
 			cmd = append(cmd, "-auto-approve")
 		}
 

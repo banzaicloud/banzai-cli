@@ -209,10 +209,18 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	}
 
 	out["provider"] = options.provider
+
 	providerConfig := make(map[string]interface{})
 	if pc, ok := out["providerConfig"]; ok {
 		if pc, ok := pc.(map[string]interface{}); ok {
 			providerConfig = pc
+		}
+	}
+
+	installer := make(map[string]interface{})
+	if inst, ok := out["installer"]; ok {
+		if inst, ok := inst.(map[string]interface{}); ok {
+			installer = inst
 		}
 	}
 
@@ -224,6 +232,7 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	}
 
 	out["ingressHostPort"] = true
+	hostname, _ := os.Hostname()
 
 	switch options.provider {
 	case providerKind:
@@ -236,7 +245,6 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		}
 		providerConfig["region"] = region
 		providerConfig["accessKey"] = id
-		hostname, _ := os.Hostname()
 		providerConfig["tags"] = map[string]string{
 			"banzaicloud-pipeline-controlplane-uuid": uuID,
 			"local-id":                               fmt.Sprintf("%s@%s/%s", os.Getenv("USER"), hostname, filepath.Base(options.workspace)),
@@ -288,29 +296,43 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 			"banzaicloud-pipeline-controlplane-uuid": uuID,
 			"local-id":                               fmt.Sprintf("%s@%s/%s", os.Getenv("USER"), hostname, filepath.Base(options.workspace)),
 		}
-	}
 
-	out["providerConfig"] = providerConfig
-
-	options.installerImageRepo, options.installerTag = initImageValues(options, out)
-
-	if options.installerImageRepo == defaultImage && options.provider == providerCustom {
-		return errors.New("Custom provisioning is available by specifying a custom installer image. Please refer to your deployment guide or use one of our support channels.")
-	}
-
-	err = options.ensureImagePulled()
-	if err != nil {
-		return errors.WrapIf(err, "failed to pull installer image")
-	}
-	if options.installerTag == latestTag && options.containerRuntime == runtimeDocker {
-		ref, err := exec.Command("docker", "inspect", "-f", "{{index .RepoDigests 0}}", options.installerImage()).Output()
-		if err != nil {
-			return errors.WrapIf(err, "failed to determine installer image hash")
+		autoApprove := false
+		if err := survey.AskOne(&survey.Confirm{
+			Message: "Do you want to automatically approve changes when executing `banzai pipeline up`?",
+			Help:    "If you choose No, you will get a chance to review and approve the actual changes before executing them.",
+		}, &autoApprove); err == nil {
+			installer["autoApprove"] = autoApprove
 		}
-		out["installer"] = map[string]interface{}{"image": strings.TrimSpace(string(ref))}
-	} else {
-		out["installer"] = map[string]interface{}{"image": options.installerImage()}
+
+		if out[externalHost] == nil {
+		}
+
+		out["providerConfig"] = providerConfig
+
+		options.installerImageRepo, options.installerTag = initImageValues(options, out)
+
+		if options.installerImageRepo == defaultImage && options.provider == providerCustom {
+			return errors.New("Custom provisioning is available by specifying a custom installer image. Please refer to your deployment guide or use one of our support channels.")
+		}
+
+		err = options.ensureImagePulled()
+		if err != nil {
+			return errors.WrapIf(err, "failed to pull installer image")
+		}
+		if options.installerTag == latestTag && options.containerRuntime == runtimeDocker {
+			ref, err := exec.Command("docker", "inspect", "-f", "{{index .RepoDigests 0}}", options.installerImage()).Output()
+			if err != nil {
+				return errors.WrapIf(err, "failed to determine installer image hash")
+			}
+			installer["image"] = strings.TrimSpace(string(ref))
+
+		} else {
+			installer["image"] = options.installerImage()
+		}
 	}
+
+	out["installer"] = installer
 
 	err = initStateBackend(options.cpContext, banzaiCli)
 	if err != nil {
