@@ -284,6 +284,10 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 			}
 		}
 		out["ingressHostPort"] = false
+		providerConfig["tags"] = map[string]string{
+			"banzaicloud-pipeline-controlplane-uuid": uuID,
+			"local-id":                               fmt.Sprintf("%s@%s/%s", os.Getenv("USER"), hostname, filepath.Base(options.workspace)),
+		}
 	}
 
 	out["providerConfig"] = providerConfig
