@@ -15,6 +15,7 @@
 package controlplane
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -23,6 +24,7 @@ import (
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/banzaicloud/banzai-cli/internal/cli/utils/untar"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -61,20 +63,11 @@ func runTerraform(command string, options *cpContext, banzaiCli cli.Cli, env map
 		}
 	}
 
-	switch options.containerRuntime {
-	case runtimeExec:
-		return runLocally(cmd, cmdEnv)
-	case runtimeDocker:
-		return runDocker(cmd, options, banzaiCli, cmdEnv)
-	case runtimeContainerd:
-		return runContainer(cmd, options, banzaiCli, cmdEnv)
-	default:
-		return errors.Errorf("unknown container runtime: %q", options.containerRuntime)
-	}
+	return runContainerCommandGeneric(options, cmd, env, nil)
 }
 
 // runLocally runs the given command locally (for development)
-func runLocally(command []string, env map[string]string) error {
+func runLocally(command []string, env map[string]string, cmdOpt func(*exec.Cmd)) error {
 	log.Info(strings.Join(command, " "))
 
 	cmd := exec.Command(command[0], command[1:]...)
@@ -87,11 +80,15 @@ func runLocally(command []string, env map[string]string) error {
 		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, value))
 	}
 
+	if cmdOpt != nil {
+		cmdOpt(cmd)
+	}
+
 	return errors.WithStack(cmd.Run())
 }
 
 // runContainer runs the given installer command in the installer container with containerd (crictl)
-func runContainer(command []string, options *cpContext, banzaiCli cli.Cli, env map[string]string) error {
+func runContainer(command []string, options *cpContext, env map[string]string, cmdOpt func(*exec.Cmd)) error {
 
 	args := []string{
 		"run", "--rm", "--net-host",
@@ -101,7 +98,7 @@ func runContainer(command []string, options *cpContext, banzaiCli cli.Cli, env m
 		"--mount", fmt.Sprintf("type=bind,src=%s,dst=/terraform/.terraform/terraform.tfstate,options=rbind:rw", options.workspace+"/.terraform/terraform.tfstate"),
 	}
 
-	if banzaiCli.Interactive() {
+	if options.banzaiCli.Interactive() {
 		args = append(args, "-t")
 	}
 
@@ -126,11 +123,15 @@ func runContainer(command []string, options *cpContext, banzaiCli cli.Cli, env m
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
+	if cmdOpt != nil {
+		cmdOpt(cmd)
+	}
+
 	return errors.WithStack(cmd.Run())
 }
 
 // runDocker runs the given installer command in the installer docker container
-func runDocker(command []string, options *cpContext, banzaiCli cli.Cli, env map[string]string) error {
+func runDocker(command []string, options *cpContext, env map[string]string, cmdOpt func(*exec.Cmd)) error {
 
 	args := []string{
 		"run", "--rm", "--net=host",
@@ -140,7 +141,7 @@ func runDocker(command []string, options *cpContext, banzaiCli cli.Cli, env map[
 		"-v", fmt.Sprintf("%s:/terraform/.terraform/terraform.tfstate", options.workspace+"/.terraform/terraform.tfstate"),
 	}
 
-	if banzaiCli.Interactive() {
+	if options.banzaiCli.Interactive() {
 		args = append(args, "-ti")
 	}
 
@@ -155,11 +156,14 @@ func runDocker(command []string, options *cpContext, banzaiCli cli.Cli, env map[
 	log.Info("docker ", strings.Join(args, " "))
 
 	cmd := exec.Command("docker", args...)
-
 	cmd.Env = envs
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+
+	if cmdOpt != nil {
+		cmdOpt(cmd)
+	}
 
 	return errors.WithStack(cmd.Run())
 }
@@ -202,6 +206,44 @@ func pullImage(options *cpContext, _ cli.Cli) error {
 	cmd.Stderr = os.Stderr
 
 	return cmd.Run()
+}
+
+func exportFilesFromContainer(options *cpContext, source string, destination string) error {
+	// create gzipped archive (cz) and follow symlinks (h)
+	cmd := []string{"tar", "czh", source}
+
+	var err error
+
+	if err := os.MkdirAll(filepath.Dir(destination), 0700); err != nil {
+		return errors.Wrap(err, "failed to create destination directory")
+	}
+
+	buffer := new(bytes.Buffer)
+	cmdOpt := func(cmd *exec.Cmd) {
+		cmd.Stdout = buffer
+	}
+
+	err = runContainerCommandGeneric(options, cmd, nil, cmdOpt)
+
+	if err == nil {
+		if err := untar.Untar(buffer, destination); err != nil {
+			return errors.Wrapf(err, "failed to untar container source %s to %s", source, destination)
+		}
+	}
+	return err
+}
+
+func runContainerCommandGeneric(options *cpContext, cmd []string, env map[string]string, cmdOpt func(*exec.Cmd)) error {
+	switch options.containerRuntime {
+	case runtimeExec:
+		return runLocally(cmd, env, cmdOpt)
+	case runtimeDocker:
+		return runDocker(cmd, options, env, cmdOpt)
+	case runtimeContainerd:
+		return runContainer(cmd, options, env, cmdOpt)
+	default:
+		return errors.Errorf("unknown container runtime: %q", options.containerRuntime)
+	}
 }
 
 func lookupTool(tool string) (string, error) {
