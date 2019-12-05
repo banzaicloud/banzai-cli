@@ -17,7 +17,7 @@ read -r -d '' EXPECTED <<EOF
 EOF
 
 STATUS=0
-FILES=$(find . -name "*.go" -not -path "./vendor/*" -not -path "./.gen/*")
+FILES=$(find . -name "*.go" -not -path "./vendor/*" -not -path "./.gen/*" -not -path "./internal/cli/utils/untar/untar.go")
 
 for FILE in $FILES; do
     # Replace the actual year with DATE so we can ignore the year when
