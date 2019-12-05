@@ -39,7 +39,7 @@ import (
 )
 
 const (
-	generatedValuesFileName = "generated-values-v2.yaml"
+	generatedValuesFileName = "generated-values-cli.yaml"
 )
 
 type createOptions struct {
