@@ -334,7 +334,8 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 
 	out["installer"] = installer
 
-	err = initStateBackend(options.cpContext, banzaiCli)
+	err = initStateBackend(options.cpContext)
+
 	if err != nil {
 		return err
 	}
@@ -372,7 +373,7 @@ func initImageValues(options initOptions, out map[string]interface{}) (image str
 	return image, tag
 }
 
-func initStateBackend(options *cpContext, banzaiCli cli.Cli) error {
+func initStateBackend(options *cpContext) error {
 	stateTf := fmt.Sprintf(localStateBackend, tfstateFilename)
 
 	err := ioutil.WriteFile(options.workspace+"/state.tf", []byte(stateTf), 0600)
@@ -391,7 +392,7 @@ func initStateBackend(options *cpContext, banzaiCli cli.Cli) error {
 	}
 	_ = stateFile.Close()
 
-	if err := runTerraform("init", options, banzaiCli, nil); err != nil {
+	if err := runTerraform("init", options, nil); err != nil {
 		return errors.WrapIf(err, "failed to init state backend")
 	}
 

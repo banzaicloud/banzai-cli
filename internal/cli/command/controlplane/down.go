@@ -97,7 +97,7 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 		}
 		env = creds
 
-		err = deleteEC2Cluster(banzaiCli, options.cpContext, env)
+		err = deleteEC2Cluster(options.cpContext, env)
 		if err != nil {
 			return errors.WrapIf(err, "EC2 cluster destroy failed")
 		}
@@ -107,7 +107,7 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 		}
 
 	case providerKind:
-		if err := runTerraform("destroy", options.cpContext, banzaiCli, env); err != nil {
+		if err := runTerraform("destroy", options.cpContext, env); err != nil {
 			return errors.WrapIf(err, "control plane destroy failed")
 		}
 
@@ -137,12 +137,12 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 			}
 		}
 
-		if err := deleteCustomCluster(banzaiCli, options.cpContext, creds); err != nil {
+		if err := deleteCustomCluster(options.cpContext, creds); err != nil {
 			return errors.WrapIf(err, "Custom Kubernetes cluster destroy failed")
 		}
 
 	default:
-		err := runTerraform("destroy", options.cpContext, banzaiCli, env)
+		err := runTerraform("destroy", options.cpContext, env)
 		if err != nil {
 			return errors.WrapIf(err, "control plane destroy failed")
 		}

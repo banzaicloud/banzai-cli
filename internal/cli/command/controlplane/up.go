@@ -152,7 +152,7 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		log.Warnf("%s is not available in the image, skipping export handlers", source)
 		// this is the legacy behaviour that should be removed as soon as we can deprecate old image versions
 		// where the null_resource.preapply_hook did the merging
-		if err := runTerraform("apply", options.cpContext, banzaiCli, nil, "null_resource.preapply_hook"); err != nil {
+		if err := runTerraform("apply", options.cpContext, nil, "null_resource.preapply_hook"); err != nil {
 			return errors.WrapIf(err, "failed to run null_resource.preapply_hook as a standalone target")
 		}
 	}
@@ -184,7 +184,7 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 			}
 		}
 
-		if err := ensureEC2Cluster(banzaiCli, options.cpContext, creds, useGeneratedKey); err != nil {
+		if err := ensureEC2Cluster(options.cpContext, creds, useGeneratedKey); err != nil {
 			return errors.WrapIf(err, "failed to create EC2 cluster")
 		}
 		env = creds
@@ -202,7 +202,7 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 			}
 		}
 
-		if err := ensureCustomCluster(banzaiCli, options.cpContext, creds); err != nil {
+		if err := ensureCustomCluster(options.cpContext, creds); err != nil {
 			return errors.WrapIf(err, "failed to create Custom infrastructure")
 		}
 
@@ -214,7 +214,7 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 
 	if !isStateBackendInited(options) {
 		log.Info("Migrating workspace to state backend...")
-		if err := initStateBackend(options.cpContext, banzaiCli); err != nil {
+		if err := initStateBackend(options.cpContext); err != nil {
 			return err
 		}
 	}
@@ -231,7 +231,7 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
-	if err := runTerraform("apply", options.cpContext, banzaiCli, env); err != nil {
+	if err := runTerraform("apply", options.cpContext, env); err != nil {
 		return errors.WrapIf(err, "failed to deploy pipeline components")
 	}
 

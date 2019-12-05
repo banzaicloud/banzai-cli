@@ -20,7 +20,6 @@ import (
 	"strings"
 
 	"emperror.dev/errors"
-	"github.com/banzaicloud/banzai-cli/internal/cli"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -29,13 +28,13 @@ const (
 	ec2Module        = "module.ec2"
 )
 
-func ensureEC2Cluster(banzaiCli cli.Cli, options *cpContext, creds map[string]string, useGeneratedKey bool) error {
+func ensureEC2Cluster(options *cpContext, creds map[string]string, useGeneratedKey bool) error {
 	if options.kubeconfigExists() {
 		return nil
 	}
 
 	log.Info("Creating Kubernetes cluster on AWS...")
-	if err := runTerraform("apply", options, banzaiCli, creds, ec2Module, "local_file.ec2_private_key_pem", "local_file.ec2_host"); err != nil {
+	if err := runTerraform("apply", options, creds, ec2Module, "local_file.ec2_private_key_pem", "local_file.ec2_host"); err != nil {
 		return errors.WrapIf(err, "failed to create AWS infrastructure")
 	}
 
@@ -68,9 +67,9 @@ func ensureEC2Cluster(banzaiCli cli.Cli, options *cpContext, creds map[string]st
 	return options.writeKubeconfig(config)
 }
 
-func deleteEC2Cluster(banzaiCli cli.Cli, options *cpContext, creds map[string]string) error {
+func deleteEC2Cluster(options *cpContext, creds map[string]string) error {
 	log.Info("Deleting Kubernetes cluster on AWS...")
-	if err := runTerraform("destroy", options, banzaiCli, creds, ec2Module); err != nil {
+	if err := runTerraform("destroy", options, creds, ec2Module); err != nil {
 		return errors.WrapIf(err, "failed to delete AWS infrastructure")
 	}
 

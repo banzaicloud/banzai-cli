@@ -34,7 +34,7 @@ const (
 	runtimeExec       = "exec"
 )
 
-func runTerraform(command string, options *cpContext, banzaiCli cli.Cli, env map[string]string, targets ...string) error {
+func runTerraform(command string, options *cpContext, env map[string]string, targets ...string) error {
 	err := options.ensureImagePulled()
 	if err != nil {
 		return errors.WrapIf(err, "failed to pull cp-installer")
