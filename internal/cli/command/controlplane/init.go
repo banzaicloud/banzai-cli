@@ -332,6 +332,30 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
+	source := "/export"
+
+	// for backward compatibility
+	hasExports, err := imageFileExists(options.cpContext, source)
+	if err != nil {
+		return err
+	}
+
+	if hasExports {
+		exportHandlers := []ExportedFilesHandler{
+			func(destination string) error {
+				bytes, err := ioutil.ReadFile(filepath.Join(destination, "metadata.yaml"))
+				if err != nil {
+					return err
+				}
+				log.Infof("Image metadata: %s", string(bytes))
+				return nil
+			},
+		}
+		if err := processExports(options.cpContext, source, exportHandlers); err != nil {
+			return err
+		}
+	}
+
 	out["installer"] = installer
 
 	err = initStateBackend(options.cpContext)

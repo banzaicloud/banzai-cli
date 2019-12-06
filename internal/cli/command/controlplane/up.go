@@ -353,8 +353,9 @@ func mergeValues(mergedValues *map[string]interface{}, defaultValues, overrideVa
 
 func imageFileExists(options *cpContext, source string) (bool, error) {
 	errorMsg := &bytes.Buffer{}
-	cmdOpt := func(cmd *exec.Cmd) {
+	cmdOpt := func(cmd *exec.Cmd) error {
 		cmd.Stderr = errorMsg
+		return nil
 	}
 	if err := runContainerCommandGeneric(options, []string{"ls", source}, nil, cmdOpt); err != nil {
 		if strings.Contains(errorMsg.String(), "No such file or directory") {
