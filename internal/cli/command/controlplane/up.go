@@ -140,7 +140,7 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 	if hasExports {
 		var defaultValues map[string]interface{}
 		exportHandlers := []ExportedFilesHandler{
-			defaultValuesExporter(&defaultValues),
+			defaultValuesExporter(filepath.Join(strings.TrimPrefix(source, "/"), "values.yaml"), &defaultValues),
 		}
 		if err := processExports(options.cpContext, source, exportHandlers); err != nil {
 			return err
@@ -301,28 +301,19 @@ func postInstall(options *createOptions, banzaiCli cli.Cli, values map[string]in
 	return nil
 }
 
-type ExportedFilesHandler func(string) error
+type ExportedFilesHandler func(map[string][]byte) error
 
 func processExports(options *cpContext, source string, exportedFilesHandlers []ExportedFilesHandler) error {
-	destination, err := ioutil.TempDir(options.workspace, "export")
+	files, err := readFilesFromContainerToMemory(options, source)
 	if err != nil {
-		return errors.Wrap(err, "failed to create temp directory")
-	}
-
-	if err := exportFilesFromContainer(options, source, destination); err != nil {
 		return errors.WrapIf(err, "failed to export files from the image")
 	}
 
 	for _, h := range exportedFilesHandlers {
-		if err := h(filepath.Join(destination, source)); err != nil {
-			return errors.WrapIff(err, "failed to run handler on exported files %s", destination)
+		if err := h(files); err != nil {
+			return errors.WrapIf(err, "failed to run handler on exported files")
 		}
 	}
-
-	if err := os.RemoveAll(destination); err != nil {
-		return errors.Wrap(err, "failed to remove temporary exports directory")
-	}
-
 	return nil
 }
 
@@ -367,14 +358,12 @@ func imageFileExists(options *cpContext, source string) (bool, error) {
 	}
 }
 
-func defaultValuesExporter(defaultValues *map[string]interface{}) ExportedFilesHandler {
-	return ExportedFilesHandler(func(destination string) error {
-		destBytes, err := ioutil.ReadFile(filepath.Join(destination, "values.yaml"))
-		if err != nil {
-			return errors.Wrapf(err, "failed to read %s", destination)
-		}
-		if err := yaml.Unmarshal(destBytes, defaultValues); err != nil {
-			return errors.Wrap(err, "failed to unmarshal default values exported from the image")
+func defaultValuesExporter(source string, defaultValues *map[string]interface{}) ExportedFilesHandler {
+	return ExportedFilesHandler(func(files map[string][]byte) error {
+		if valuesFileContent, ok := files[source]; ok {
+			if err := yaml.Unmarshal(valuesFileContent, defaultValues); err != nil {
+				return errors.Wrap(err, "failed to unmarshal default values exported from the image")
+			}
 		}
 		return nil
 	})

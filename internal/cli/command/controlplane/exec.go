@@ -15,9 +15,12 @@
 package controlplane
 
 import (
+	"archive/tar"
 	"bytes"
+	"compress/gzip"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -25,7 +28,6 @@ import (
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/banzaicloud/banzai-cli/internal/cli/utils/untar"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -178,15 +180,11 @@ func pullImage(options *cpContext, _ cli.Cli) error {
 	return cmd.Run()
 }
 
-func exportFilesFromContainer(options *cpContext, source string, destination string) error {
+func readFilesFromContainerToMemory(options *cpContext, source string) (map[string][]byte, error) {
 	// create gzipped archive (cz) and follow symlinks (h)
 	cmd := []string{"sh", "-c", fmt.Sprintf("tar czh %s | base64", source)}
 
 	var err error
-
-	if err := os.MkdirAll(filepath.Dir(destination), 0700); err != nil {
-		return errors.Wrap(err, "failed to create destination directory")
-	}
 
 	buffer := new(bytes.Buffer)
 	cmdOpt := func(cmd *exec.Cmd) error {
@@ -197,11 +195,42 @@ func exportFilesFromContainer(options *cpContext, source string, destination str
 	err = runContainerCommandGeneric(options, cmd, nil, cmdOpt)
 	if err == nil {
 		decoder := base64.NewDecoder(base64.StdEncoding, buffer)
-		if err := untar.Untar(decoder, destination); err != nil {
-			return errors.Wrapf(err, "failed to untar container source %s to %s", source, destination)
+		tarContents, err := untarInMemory(decoder)
+		if err != nil {
+			return nil, errors.WrapIf(err, "failed to untar source")
+		}
+		return tarContents, nil
+	}
+	return nil, errors.WrapIf(err, "failed to run container command")
+}
+
+func untarInMemory(reader io.Reader) (map[string][]byte, error) {
+	zr, err := gzip.NewReader(reader)
+	if err != nil {
+		return nil, errors.WrapIf(err, "failed to uncompress helm archive")
+	}
+	defer zr.Close()
+
+	contents := make(map[string][]byte)
+	tr := tar.NewReader(zr)
+	for {
+		hdr, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, errors.WrapIf(err, "failed to extract next file from archive")
+		}
+		if hdr.FileInfo().Mode().IsRegular() {
+			buf := new(bytes.Buffer)
+			_, err = io.Copy(buf, tr)
+			if err != nil {
+				return nil, errors.WrapIff(err, "failed to read file contents from tar: %s", hdr.Name)
+			}
+			contents[hdr.Name] = buf.Bytes()
 		}
 	}
-	return errors.WrapIf(err, "failed to run container command")
+	return contents, nil
 }
 
 func runTerraformCommandGeneric(options *cpContext, cmd []string, cmdEnv map[string]string) error {

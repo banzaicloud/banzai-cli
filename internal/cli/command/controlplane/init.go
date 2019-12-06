@@ -341,14 +341,14 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	}
 
 	if hasExports {
+		metadataFile := filepath.Join(strings.TrimPrefix(source, "/"), "metadata.yaml")
 		exportHandlers := []ExportedFilesHandler{
-			func(destination string) error {
-				bytes, err := ioutil.ReadFile(filepath.Join(destination, "metadata.yaml"))
-				if err != nil {
-					return err
+			func(files map[string][]byte) error {
+				if metadataContent, ok := files[metadataFile]; ok {
+					log.Infof("Image metadata:\n%s", string(metadataContent))
+					return nil
 				}
-				log.Infof("Image metadata: %s", string(bytes))
-				return nil
+				return errors.Errorf("%s is not available", metadataFile)
 			},
 		}
 		if err := processExports(options.cpContext, source, exportHandlers); err != nil {
