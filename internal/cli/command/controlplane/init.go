@@ -31,6 +31,7 @@ import (
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -48,6 +49,10 @@ const (
 	}
 }`
 )
+
+type ImageMetadata struct {
+	CredentialType *string `yaml:"credentialType,omitempty"`
+}
 
 type initOptions struct {
 	file     string
@@ -272,9 +277,35 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		out[externalHost] = guessExternalAddr()
 
 	case providerCustom:
-		providerCreds, err := askCredential()
+		out["providerConfig"] = providerConfig
+		options.installerImageRepo, options.installerTag = initImageValues(options, out)
+
+		source := "/export"
+
+		hasExports, err := imageFileExists(options.cpContext, source)
 		if err != nil {
 			return err
+		}
+
+		imageMeta := &ImageMetadata{}
+		if hasExports {
+			metadataFile := filepath.Join(strings.TrimPrefix(source, "/"), "metadata.yaml")
+			exportHandlers := []ExportedFilesHandler{
+				metadataExporter(metadataFile, imageMeta),
+			}
+			if err := processExports(options.cpContext, source, exportHandlers); err != nil {
+				return err
+			}
+		}
+
+		var providerCreds string
+		if imageMeta.CredentialType == nil {
+			providerCreds, err = askCredential()
+			if err != nil {
+				return err
+			}
+		} else {
+			providerCreds = *imageMeta.CredentialType
 		}
 
 		if providerCreds == "aws" {
@@ -308,10 +339,6 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		if out[externalHost] == nil {
 		}
 
-		out["providerConfig"] = providerConfig
-
-		options.installerImageRepo, options.installerTag = initImageValues(options, out)
-
 		if options.installerImageRepo == defaultImage && options.provider == providerCustom {
 			return errors.New("Custom provisioning is available by specifying a custom installer image. Please refer to your deployment guide or use one of our support channels.")
 		}
@@ -329,30 +356,6 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 
 		} else {
 			installer["image"] = options.installerImage()
-		}
-	}
-
-	source := "/export"
-
-	// for backward compatibility
-	hasExports, err := imageFileExists(options.cpContext, source)
-	if err != nil {
-		return err
-	}
-
-	if hasExports {
-		metadataFile := filepath.Join(strings.TrimPrefix(source, "/"), "metadata.yaml")
-		exportHandlers := []ExportedFilesHandler{
-			func(files map[string][]byte) error {
-				if metadataContent, ok := files[metadataFile]; ok {
-					log.Infof("Image metadata:\n%s", string(metadataContent))
-					return nil
-				}
-				return errors.Errorf("%s is not available", metadataFile)
-			},
-		}
-		if err := processExports(options.cpContext, source, exportHandlers); err != nil {
-			return err
 		}
 	}
 
@@ -435,4 +438,15 @@ func getAmazonCredentialsRegion(defaultAwsRegion string) (string, string, error)
 		}
 	}
 	return id, region, err
+}
+
+func metadataExporter(source string, metadata *ImageMetadata) ExportedFilesHandler {
+	return ExportedFilesHandler(func(files map[string][]byte) error {
+		if valuesFileContent, ok := files[source]; ok {
+			if err := yaml.Unmarshal(valuesFileContent, metadata); err != nil {
+				return errors.Wrap(err, "failed to unmarshal metadata values exported from the image")
+			}
+		}
+		return nil
+	})
 }
