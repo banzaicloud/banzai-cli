@@ -103,11 +103,15 @@ func NewInitCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	// print this only if init is not run as part of the `banzai pipeline up` command
 	cmd.PostRun = func(*cobra.Command, []string) {
-		wsArg := ""
+		upArgs := []string{"banzai", "pipeline", "up"}
 		if options.workspace != "default" {
-			wsArg = fmt.Sprintf(" --workspace=%q", options.workspace)
+			upArgs = append(upArgs, fmt.Sprintf("--workspace=%q", options.workspace))
 		}
-		log.Infof("Successfully initialized workspace. You can now edit the values file at %q and run `banzai pipeline up%s` to deploy Pipeline.", options.valuesPath(), wsArg)
+		if !options.pullInstaller {
+			upArgs = append(upArgs, "--image-pull=false")
+		}
+		log.Infof("Successfully initialized workspace. " +
+			"You can now edit the values file at %q and run `%s` to deploy Pipeline.", options.valuesPath(), strings.Join(upArgs, " "))
 	}
 
 	return cmd
@@ -158,7 +162,15 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	}
 
 	if options.valuesExists() {
-		log.Info("You can create another workspace with --workspace, or run `banzai pipeline up` to deploy the current one.")
+		upArgs := []string{"banzai", "pipeline", "up"}
+		if options.workspace != "default" {
+			upArgs = append(upArgs, fmt.Sprintf("--workspace=%q", options.workspace))
+		}
+		if !options.pullInstaller {
+			upArgs = append(upArgs, "--image-pull=false")
+		}
+		log.Infof("You can create another workspace with --workspace, " +
+			"or run `%s` to deploy the current one.", strings.Join(upArgs, " "))
 		return errors.Errorf("workspace is already initialized in %q", options.workspace)
 	}
 
