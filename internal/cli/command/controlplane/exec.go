@@ -141,6 +141,12 @@ func pullImage(options *cpContext, _ cli.Cli) error {
 		return nil
 	}
 
+	img := options.installerImage()
+	if !strings.Contains(img, "/") {
+		log.Debugf("skip pulling local image %q", img)
+		return nil
+	}
+
 	var args []string
 
 	tool := options.containerRuntime
@@ -162,7 +168,7 @@ func pullImage(options *cpContext, _ cli.Cli) error {
 		return err
 	}
 
-	args = append(args, options.installerImage())
+	args = append(args, img)
 	log.Info("Pulling Banzai Cloud Pipeline installer image...")
 
 	log.Info(tool, " ", strings.Join(args, " "))
