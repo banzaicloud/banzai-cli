@@ -91,9 +91,6 @@ func NewInitCommand(banzaiCli cli.Cli) *cobra.Command {
 		Short: "Initialize configuration for Banzai Cloud Pipeline",
 		Long:  `Prepare a workspace for the deployment of an instance of Banzai Cloud Pipeline based on a values file or an interactive session.` + initLongDescription,
 		Args:  cobra.NoArgs,
-		PostRun: func(*cobra.Command, []string) {
-			log.Info("Successfully initialized workspace. You can run now `banzai pipeline up` to deploy Pipeline.")
-		},
 	}
 
 	options := newInitOptions(cmd, banzaiCli)
@@ -102,6 +99,15 @@ func NewInitCommand(banzaiCli cli.Cli) *cobra.Command {
 		cmd.SilenceUsage = true
 
 		return runInit(*options, banzaiCli)
+	}
+
+	// print this only if init is not run as part of the `banzai pipeline up` command
+	cmd.PostRun = func(*cobra.Command, []string) {
+		wsArg := ""
+		if options.workspace != "default" {
+			wsArg = fmt.Sprintf(" --workspace=%q", options.workspace)
+		}
+		log.Infof("Successfully initialized workspace. You can run now `banzai pipeline up%s` to deploy Pipeline.", wsArg)
 	}
 
 	return cmd
