@@ -51,7 +51,11 @@ const (
 )
 
 type ImageMetadata struct {
-	CredentialType *string `yaml:"credentialType,omitempty"`
+	Custom struct {
+		CredentialType      *string `yaml:"credentialType,omitempty"`
+		Enabled             bool    `yaml:"enabled"`
+		GenerateClusterName bool    `yaml:"generateClusterName"`
+	}
 }
 
 type initOptions struct {
@@ -299,13 +303,13 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		}
 
 		var providerCreds string
-		if imageMeta.CredentialType == nil {
+		if imageMeta.Custom.CredentialType == nil {
 			providerCreds, err = askCredential()
 			if err != nil {
 				return err
 			}
 		} else {
-			providerCreds = *imageMeta.CredentialType
+			providerCreds = *imageMeta.Custom.CredentialType
 		}
 
 		if providerCreds == "aws" {
@@ -339,8 +343,10 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		if out[externalHost] == nil {
 		}
 
-		if options.installerImageRepo == defaultImage && options.provider == providerCustom {
-			return errors.New("Custom provisioning is available by specifying a custom installer image. Please refer to your deployment guide or use one of our support channels.")
+		if options.provider == providerCustom {
+			if hasExports && !imageMeta.Custom.Enabled || !hasExports && options.installerImageRepo == defaultImage {
+				return errors.New("Custom provisioning is available by specifying a custom installer image. Please refer to your deployment guide or use one of our support channels.")
+			}
 		}
 
 		err = options.ensureImagePulled()
