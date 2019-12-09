@@ -107,7 +107,7 @@ func NewInitCommand(banzaiCli cli.Cli) *cobra.Command {
 		if options.workspace != "default" {
 			wsArg = fmt.Sprintf(" --workspace=%q", options.workspace)
 		}
-		log.Infof("Successfully initialized workspace. You can run now `banzai pipeline up%s` to deploy Pipeline.", wsArg)
+		log.Infof("Successfully initialized workspace. You can now edit the values file at %q and run `banzai pipeline up%s` to deploy Pipeline.", options.valuesPath(), wsArg)
 	}
 
 	return cmd
