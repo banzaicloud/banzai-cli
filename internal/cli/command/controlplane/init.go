@@ -338,15 +338,26 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 			"local-id":                               fmt.Sprintf("%s@%s/%s", os.Getenv("USER"), hostname, filepath.Base(options.workspace)),
 		}
 
-		autoApprove := false
-		if err := survey.AskOne(&survey.Confirm{
-			Message: "Do you want to automatically approve changes when executing `banzai pipeline up`?",
-			Help:    "If you choose No, you will get a chance to review and approve the actual changes before executing them.",
-		}, &autoApprove); err == nil {
-			installer["autoApprove"] = autoApprove
+		if banzaiCli.Interactive() {
+			autoApprove := false
+			if err := survey.AskOne(&survey.Confirm{
+				Message: "Do you want to automatically approve changes when executing `banzai pipeline up`?",
+				Help:    "If you choose No, you will get a chance to review and approve the actual changes before executing them.",
+			}, &autoApprove); err == nil {
+				installer["autoApprove"] = autoApprove
+			}
 		}
 
-		if out[externalHost] == nil {
+		if imageMeta.Custom.GenerateClusterName {
+			name := fmt.Sprintf("banzaicloud-%s-%s", hostname, filepath.Base(options.workspace))
+			if banzaiCli.Interactive() {
+				if err := survey.AskOne(&survey.Input{
+					Message: "Name of cluster to create:",
+					Default: name,
+				}, &name); err == nil {
+					providerConfig["cluster_name"] = name
+				}
+			}
 		}
 
 		if options.provider == providerCustom {
