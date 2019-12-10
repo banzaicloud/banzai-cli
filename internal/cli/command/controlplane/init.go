@@ -41,6 +41,7 @@ const (
 	providerPke       = "pke"
 	providerCustom    = "custom"
 	defaultLocalhost  = "default.localhost.banzaicloud.io"
+	defaultWorkspace  = "default"
 	autoHost          = "auto"
 	externalHost      = "externalHost"
 	localStateBackend = `terraform {
@@ -104,7 +105,7 @@ func NewInitCommand(banzaiCli cli.Cli) *cobra.Command {
 	// print this only if init is not run as part of the `banzai pipeline up` command
 	cmd.PostRun = func(*cobra.Command, []string) {
 		upArgs := []string{"banzai", "pipeline", "up"}
-		if options.workspace != "default" {
+		if options.workspace != defaultWorkspace {
 			upArgs = append(upArgs, fmt.Sprintf("--workspace=%q", options.workspace))
 		}
 		if !options.pullInstaller {
@@ -163,7 +164,7 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 
 	if options.valuesExists() {
 		upArgs := []string{"banzai", "pipeline", "up"}
-		if options.workspace != "default" {
+		if options.workspace != defaultWorkspace {
 			upArgs = append(upArgs, fmt.Sprintf("--workspace=%q", options.workspace))
 		}
 		if !options.pullInstaller {

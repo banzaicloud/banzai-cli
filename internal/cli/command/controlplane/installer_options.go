@@ -224,7 +224,7 @@ func (c *cpContext) Init() error {
 	}
 
 	if c.workspace == "" {
-		c.workspace = "default"
+		c.workspace = defaultWorkspace
 	}
 
 	if !strings.Contains(c.workspace, string(os.PathSeparator)) && c.workspace != "." && c.workspace != ".." {
