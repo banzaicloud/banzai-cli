@@ -26,6 +26,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 )
@@ -54,6 +55,7 @@ type cpContext struct {
 	banzaiCli           cli.Cli
 	installerPulled     *sync.Once
 	installerPullResult error
+	flags               *pflag.FlagSet
 }
 
 func NewContext(cmd *cobra.Command, banzaiCli cli.Cli) *cpContext {
@@ -62,21 +64,39 @@ func NewContext(cmd *cobra.Command, banzaiCli cli.Cli) *cpContext {
 		installerPulled: new(sync.Once),
 	}
 
-	flags := cmd.Flags()
-	flags.StringVar(&ctx.installerTag, "image-tag", latestTag, "Tag of installer Docker image to use")
-	flags.StringVar(&ctx.installerImageRepo, "image", defaultImage, "Name of Docker image repository to use")
-	flags.BoolVar(&ctx.pullInstaller, "image-pull", true, "Pull installer image even if it's present locally")
-	flags.BoolVar(&ctx.autoApprove, "auto-approve", true, "Automatically approve the changes to deploy")
-	flags.StringVar(&ctx.workspace, "workspace", "", "Name of directory for storing the applied configuration and deployment status")
-	flags.StringVar(&ctx.containerRuntime, "container-runtime", "auto", `Run the terraform command with "docker", "containerd" (crictl) or "exec" (execute locally)`)
-	flags.BoolVar(&ctx.refreshState, "refresh-state", true, "Refresh terraform state for each run (turn off to save time during development)")
-	flags.MarkHidden("refresh-state")
+	ctx.flags = cmd.Flags()
+	ctx.flags.StringVar(&ctx.installerTag, "image-tag", latestTag, "Tag of installer Docker image to use")
+	ctx.flags.StringVar(&ctx.installerImageRepo, "image", defaultImage, "Name of Docker image repository to use")
+	ctx.flags.BoolVar(&ctx.pullInstaller, "image-pull", true, "Pull installer image even if it's present locally")
+	ctx.flags.BoolVar(&ctx.autoApprove, "auto-approve", true, "Automatically approve the changes to deploy")
+	ctx.flags.StringVar(&ctx.workspace, "workspace", "", "Name of directory for storing the applied configuration and deployment status")
+	ctx.flags.StringVar(&ctx.containerRuntime, "container-runtime", "auto", `Run the terraform command with "docker", "containerd" (crictl) or "exec" (execute locally)`)
+	ctx.flags.BoolVar(&ctx.refreshState, "refresh-state", true, "Refresh terraform state for each run (turn off to save time during development)")
+	ctx.flags.MarkHidden("refresh-state")
 	return &ctx
 }
 
 func (c *cpContext) ensureImagePulled() error {
 	c.installerPulled.Do(func() { c.installerPullResult = pullImage(c, c.banzaiCli) })
 	return c.installerPullResult
+}
+
+func (c *cpContext) AutoApprove() bool {
+	if !c.flags.Changed("auto-approve") {
+		out := make(map[interface{}]interface{})
+		err := c.readValues(out)
+		if err == nil {
+			if installer, ok := out["installer"].(map[interface{}]interface{}); ok {
+				if auto, ok := installer["autoApprove"].(bool); ok {
+					return auto
+				}
+			}
+		} else {
+			log.Debugf("failed to read values file: %v", err)
+		}
+	}
+
+	return c.autoApprove
 }
 
 func (c *cpContext) installerImage() string {
@@ -204,7 +224,7 @@ func (c *cpContext) Init() error {
 	}
 
 	if c.workspace == "" {
-		c.workspace = "default"
+		c.workspace = defaultWorkspace
 	}
 
 	if !strings.Contains(c.workspace, string(os.PathSeparator)) && c.workspace != "." && c.workspace != ".." {

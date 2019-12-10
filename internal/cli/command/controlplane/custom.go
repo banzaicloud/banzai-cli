@@ -16,27 +16,26 @@ package controlplane
 
 import (
 	"emperror.dev/errors"
-	"github.com/banzaicloud/banzai-cli/internal/cli"
 	log "github.com/sirupsen/logrus"
 )
 
-func ensureCustomCluster(banzaiCli cli.Cli, options *cpContext, creds map[string]string) error {
+func ensureCustomCluster(options *cpContext, creds map[string]string) error {
 	if options.kubeconfigExists() {
 		return nil
 	}
 
 	log.Info("Creating custom infrastructure...")
 	targets := []string{"module.custom"}
-	if err := runTerraform("apply", options, banzaiCli, creds, targets...); err != nil {
+	if err := runTerraform("apply", options, creds, targets...); err != nil {
 		return errors.WrapIf(err, "failed to create custom infrastructure")
 	}
 
 	return nil
 }
 
-func deleteCustomCluster(banzaiCli cli.Cli, options *cpContext, creds map[string]string) error {
+func deleteCustomCluster(options *cpContext, creds map[string]string) error {
 	log.Info("Destroying custom infrastructure...")
-	if err := runTerraform("destroy", options, banzaiCli, creds); err != nil {
+	if err := runTerraform("destroy", options, creds); err != nil {
 		return errors.WrapIf(err, "failed to destroy custom infrastructure")
 	}
 

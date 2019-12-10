@@ -68,6 +68,14 @@ ifneq (${IGNORE_GOLANG_VERSION_REQ}, 1)
 endif
 	go build ${GOARGS} -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/${BINARY_NAME} ${BUILD_PACKAGE}
 
+.PHONY: build-debug
+build-debug: ## Build a binary with remote debugging capabilities
+	@${MAKE} GOARGS="${GOARGS} -gcflags \"all=-N -l\"" BUILD_DIR="${BUILD_DIR}/debug" build
+
+.PHONY: debug
+debug: build-debug
+	dlv --listen=:40000 --log --headless=true --api-version=2 exec "${BUILD_DIR}/debug/${BINARY_NAME}" -- ${ARGS}
+
 .PHONY: build-release
 build-release: LDFLAGS += -w
 build-release: pre-build build ## Build a binary without debug information

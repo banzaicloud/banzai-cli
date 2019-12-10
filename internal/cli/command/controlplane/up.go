@@ -15,24 +15,36 @@
 package controlplane
 
 import (
+	"bytes"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/google/uuid"
+	"github.com/imdario/mergo"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/login"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 )
 
+const (
+	generatedValuesFileName = "generated-values-cli.yaml"
+)
+
 type createOptions struct {
-	init bool
+	init          bool
+	terraformInit bool
 	*initOptions
 }
 
@@ -58,6 +70,7 @@ func NewUpCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&options.init, "init", "i", false, "Initialize workspace")
+	flags.BoolVar(&options.terraformInit, "terraform-init", true, "Run terraform init before apply")
 
 	return cmd
 }
@@ -118,6 +131,45 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		return errors.New("workspace is already initialized but a different --provider is specified")
 	}
 
+	source := "/export"
+
+	// for backward compatibility
+	hasExports, err := imageFileExists(options.cpContext, source)
+	if err != nil {
+		return err
+	}
+
+	if hasExports {
+		var defaultValues map[string]interface{}
+		exportHandlers := []ExportedFilesHandler{
+			defaultValuesExporter(filepath.Join(strings.TrimPrefix(source, "/"), "values.yaml"), &defaultValues),
+		}
+		if err := processExports(options.cpContext, source, exportHandlers); err != nil {
+			return err
+		}
+		if err := writeMergedValues(options.cpContext, defaultValues, values); err != nil {
+			return err
+		}
+	} else {
+		log.Warnf("%s is not available in the image, skipping export handlers", source)
+		// this is the legacy behaviour that should be removed as soon as we can deprecate old image versions
+		// where the null_resource.preapply_hook did the merging
+		if err := runTerraform("apply", options.cpContext, nil, "null_resource.preapply_hook"); err != nil {
+			return errors.WrapIf(err, "failed to run null_resource.preapply_hook as a standalone target")
+		}
+	}
+
+	if !isStateBackendInited(options) {
+		log.Info("Migrating workspace to state backend...")
+		if err := initStateBackend(options.cpContext); err != nil {
+			return err
+		}
+	} else {
+		if err := runTerraform("init", options.cpContext, nil); err != nil {
+			return errors.WrapIf(err, "failed to run terraform init")
+		}
+	}
+
 	var env map[string]string
 	switch values["provider"] {
 	case providerPke:
@@ -145,7 +197,7 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 			}
 		}
 
-		if err := ensureEC2Cluster(banzaiCli, options.cpContext, creds, useGeneratedKey); err != nil {
+		if err := ensureEC2Cluster(options.cpContext, creds, useGeneratedKey); err != nil {
 			return errors.WrapIf(err, "failed to create EC2 cluster")
 		}
 		env = creds
@@ -163,20 +215,13 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 			}
 		}
 
-		if err := ensureCustomCluster(banzaiCli, options.cpContext, creds); err != nil {
+		if err := ensureCustomCluster(options.cpContext, creds); err != nil {
 			return errors.WrapIf(err, "failed to create Custom infrastructure")
 		}
 
 	default:
 		if !options.kubeconfigExists() {
 			return errors.New("could not find Kubeconfig in workspace")
-		}
-	}
-
-	if !isStateBackendInited(options) {
-		log.Info("Migrating workspace to state backend...")
-		if err := initStateBackend(options.cpContext, banzaiCli); err != nil {
-			return err
 		}
 	}
 
@@ -192,13 +237,7 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
-	// this is required for scenarios where we need precomputed
-	// variables present before apply e.g. when merging multiple values files into a single config
-	if err := runTerraform("apply", options.cpContext, banzaiCli, env, "null_resource.preapply_hook"); err != nil {
-		return errors.WrapIf(err, "failed to run null_resource.preapply_hook as a standalone target")
-	}
-
-	if err := runTerraform("apply", options.cpContext, banzaiCli, env); err != nil {
+	if err := runTerraform("apply", options.cpContext, env); err != nil {
 		return errors.WrapIf(err, "failed to deploy pipeline components")
 	}
 
@@ -266,4 +305,72 @@ func postInstall(options *createOptions, banzaiCli cli.Cli, values map[string]in
 		log.Infof("Pipeline is ready, now you can login with: \x1b[1mbanzai login --endpoint=%q\x1b[0m", url)
 	}
 	return nil
+}
+
+type ExportedFilesHandler func(map[string][]byte) error
+
+func processExports(options *cpContext, source string, exportedFilesHandlers []ExportedFilesHandler) error {
+	files, err := readFilesFromContainerToMemory(options, source)
+	if err != nil {
+		return errors.WrapIf(err, "failed to export files from the image")
+	}
+
+	for _, h := range exportedFilesHandlers {
+		if err := h(files); err != nil {
+			return errors.WrapIf(err, "failed to run handler on exported files")
+		}
+	}
+	return nil
+}
+
+func writeMergedValues(options *cpContext, defaultValues, overrideValues map[string]interface{}) error {
+	var mergedValues map[string]interface{}
+	if err := mergeValues(&mergedValues, defaultValues, overrideValues); err != nil {
+		return err
+	}
+	bytes, err := yaml.Marshal(&mergedValues)
+	if err != nil {
+		return errors.Wrap(err, "failed to marshal merged values")
+	}
+	if err := ioutil.WriteFile(filepath.Join(options.workspace, generatedValuesFileName), bytes, 0600); err != nil {
+		return errors.Wrap(err, "failed to write out generated values file")
+	}
+	return nil
+}
+
+func mergeValues(mergedValues *map[string]interface{}, defaultValues, overrideValues map[string]interface{}) error {
+	if err := mergo.Merge(mergedValues, &defaultValues, mergo.WithOverride); err != nil {
+		return errors.Wrap(err, "failed to process default values in the image")
+	}
+	if err := mergo.Merge(mergedValues, &overrideValues, mergo.WithOverride); err != nil {
+		return errors.Wrap(err, "failed to merge override values from the workspace on top of default values in the image")
+	}
+	return nil
+}
+
+func imageFileExists(options *cpContext, source string) (bool, error) {
+	errorMsg := &bytes.Buffer{}
+	cmdOpt := func(cmd *exec.Cmd) error {
+		cmd.Stderr = errorMsg
+		return nil
+	}
+	if err := runContainerCommandGeneric(options, []string{"ls", source}, nil, cmdOpt); err != nil {
+		if strings.Contains(errorMsg.String(), "No such file or directory") {
+			return false, nil
+		}
+		return false, err
+	} else {
+		return true, nil
+	}
+}
+
+func defaultValuesExporter(source string, defaultValues *map[string]interface{}) ExportedFilesHandler {
+	return ExportedFilesHandler(func(files map[string][]byte) error {
+		if valuesFileContent, ok := files[source]; ok {
+			if err := yaml.Unmarshal(valuesFileContent, defaultValues); err != nil {
+				return errors.Wrap(err, "failed to unmarshal default values exported from the image")
+			}
+		}
+		return nil
+	})
 }

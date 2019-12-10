@@ -31,6 +31,7 @@ import (
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -40,6 +41,7 @@ const (
 	providerPke       = "pke"
 	providerCustom    = "custom"
 	defaultLocalhost  = "default.localhost.banzaicloud.io"
+	defaultWorkspace  = "default"
 	autoHost          = "auto"
 	externalHost      = "externalHost"
 	localStateBackend = `terraform {
@@ -48,6 +50,14 @@ const (
 	}
 }`
 )
+
+type ImageMetadata struct {
+	Custom struct {
+		CredentialType      *string `yaml:"credentialType,omitempty"`
+		Enabled             bool    `yaml:"enabled"`
+		GenerateClusterName bool    `yaml:"generateClusterName"`
+	}
+}
 
 type initOptions struct {
 	file     string
@@ -82,9 +92,6 @@ func NewInitCommand(banzaiCli cli.Cli) *cobra.Command {
 		Short: "Initialize configuration for Banzai Cloud Pipeline",
 		Long:  `Prepare a workspace for the deployment of an instance of Banzai Cloud Pipeline based on a values file or an interactive session.` + initLongDescription,
 		Args:  cobra.NoArgs,
-		PostRun: func(*cobra.Command, []string) {
-			log.Info("Successfully initialized workspace. You can run now `banzai pipeline up` to deploy Pipeline.")
-		},
 	}
 
 	options := newInitOptions(cmd, banzaiCli)
@@ -93,6 +100,19 @@ func NewInitCommand(banzaiCli cli.Cli) *cobra.Command {
 		cmd.SilenceUsage = true
 
 		return runInit(*options, banzaiCli)
+	}
+
+	// print this only if init is not run as part of the `banzai pipeline up` command
+	cmd.PostRun = func(*cobra.Command, []string) {
+		upArgs := []string{"banzai", "pipeline", "up"}
+		if options.workspace != defaultWorkspace {
+			upArgs = append(upArgs, fmt.Sprintf("--workspace=%q", options.workspace))
+		}
+		if !options.pullInstaller {
+			upArgs = append(upArgs, "--image-pull=false")
+		}
+		log.Infof("Successfully initialized workspace. " +
+			"You can now edit the values file at %q and run `%s` to deploy Pipeline.", options.valuesPath(), strings.Join(upArgs, " "))
 	}
 
 	return cmd
@@ -143,7 +163,15 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	}
 
 	if options.valuesExists() {
-		log.Info("You can create another workspace with --workspace, or run `banzai pipeline up` to deploy the current one.")
+		upArgs := []string{"banzai", "pipeline", "up"}
+		if options.workspace != defaultWorkspace {
+			upArgs = append(upArgs, fmt.Sprintf("--workspace=%q", options.workspace))
+		}
+		if !options.pullInstaller {
+			upArgs = append(upArgs, "--image-pull=false")
+		}
+		log.Infof("You can create another workspace with --workspace, " +
+			"or run `%s` to deploy the current one.", strings.Join(upArgs, " "))
 		return errors.Errorf("workspace is already initialized in %q", options.workspace)
 	}
 
@@ -209,10 +237,18 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	}
 
 	out["provider"] = options.provider
+
 	providerConfig := make(map[string]interface{})
 	if pc, ok := out["providerConfig"]; ok {
 		if pc, ok := pc.(map[string]interface{}); ok {
 			providerConfig = pc
+		}
+	}
+
+	installer := make(map[string]interface{})
+	if inst, ok := out["installer"]; ok {
+		if inst, ok := inst.(map[string]interface{}); ok {
+			installer = inst
 		}
 	}
 
@@ -224,6 +260,7 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	}
 
 	out["ingressHostPort"] = true
+	hostname, _ := os.Hostname()
 
 	switch options.provider {
 	case providerKind:
@@ -236,7 +273,6 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		}
 		providerConfig["region"] = region
 		providerConfig["accessKey"] = id
-		hostname, _ := os.Hostname()
 		providerConfig["tags"] = map[string]string{
 			"banzaicloud-pipeline-controlplane-uuid": uuID,
 			"local-id":                               fmt.Sprintf("%s@%s/%s", os.Getenv("USER"), hostname, filepath.Base(options.workspace)),
@@ -264,9 +300,35 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		out[externalHost] = guessExternalAddr()
 
 	case providerCustom:
-		providerCreds, err := askCredential()
+		out["providerConfig"] = providerConfig
+		options.installerImageRepo, options.installerTag = initImageValues(options, out)
+
+		source := "/export"
+
+		hasExports, err := imageFileExists(options.cpContext, source)
 		if err != nil {
 			return err
+		}
+
+		imageMeta := &ImageMetadata{}
+		if hasExports {
+			metadataFile := filepath.Join(strings.TrimPrefix(source, "/"), "metadata.yaml")
+			exportHandlers := []ExportedFilesHandler{
+				metadataExporter(metadataFile, imageMeta),
+			}
+			if err := processExports(options.cpContext, source, exportHandlers); err != nil {
+				return err
+			}
+		}
+
+		var providerCreds string
+		if imageMeta.Custom.CredentialType == nil {
+			providerCreds, err = askCredential()
+			if err != nil {
+				return err
+			}
+		} else {
+			providerCreds = *imageMeta.Custom.CredentialType
 		}
 
 		if providerCreds == "aws" {
@@ -284,31 +346,59 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 			}
 		}
 		out["ingressHostPort"] = false
-	}
-
-	out["providerConfig"] = providerConfig
-
-	options.installerImageRepo, options.installerTag = initImageValues(options, out)
-
-	if options.installerImageRepo == defaultImage && options.provider == providerCustom {
-		return errors.New("Custom provisioning is available by specifying a custom installer image. Please refer to your deployment guide or use one of our support channels.")
-	}
-
-	err = options.ensureImagePulled()
-	if err != nil {
-		return errors.WrapIf(err, "failed to pull installer image")
-	}
-	if options.installerTag == latestTag && options.containerRuntime == runtimeDocker {
-		ref, err := exec.Command("docker", "inspect", "-f", "{{index .RepoDigests 0}}", options.installerImage()).Output()
-		if err != nil {
-			return errors.WrapIf(err, "failed to determine installer image hash")
+		providerConfig["tags"] = map[string]string{
+			"banzaicloud-pipeline-controlplane-uuid": uuID,
+			"local-id":                               fmt.Sprintf("%s@%s/%s", os.Getenv("USER"), hostname, filepath.Base(options.workspace)),
 		}
-		out["installer"] = map[string]interface{}{"image": strings.TrimSpace(string(ref))}
-	} else {
-		out["installer"] = map[string]interface{}{"image": options.installerImage()}
+
+		if banzaiCli.Interactive() {
+			autoApprove := false
+			if err := survey.AskOne(&survey.Confirm{
+				Message: "Do you want to automatically approve changes when executing `banzai pipeline up`?",
+				Help:    "If you choose No, you will get a chance to review and approve the actual changes before executing them.",
+			}, &autoApprove); err == nil {
+				installer["autoApprove"] = autoApprove
+			}
+		}
+
+		if imageMeta.Custom.GenerateClusterName {
+			name := fmt.Sprintf("banzaicloud-%s-%s", hostname, filepath.Base(options.workspace))
+			if banzaiCli.Interactive() {
+				if err := survey.AskOne(&survey.Input{
+					Message: "Name of cluster to create:",
+					Default: name,
+				}, &name); err == nil {
+					providerConfig["cluster_name"] = name
+				}
+			}
+		}
+
+		if options.provider == providerCustom {
+			if hasExports && !imageMeta.Custom.Enabled || !hasExports && options.installerImageRepo == defaultImage {
+				return errors.New("Custom provisioning is available by specifying a custom installer image. Please refer to your deployment guide or use one of our support channels.")
+			}
+		}
+
+		err = options.ensureImagePulled()
+		if err != nil {
+			return errors.WrapIf(err, "failed to pull installer image")
+		}
+		if options.installerTag == latestTag && options.containerRuntime == runtimeDocker {
+			ref, err := exec.Command("docker", "inspect", "-f", "{{index .RepoDigests 0}}", options.installerImage()).Output()
+			if err != nil {
+				return errors.WrapIf(err, "failed to determine installer image hash")
+			}
+			installer["image"] = strings.TrimSpace(string(ref))
+
+		} else {
+			installer["image"] = options.installerImage()
+		}
 	}
 
-	err = initStateBackend(options.cpContext, banzaiCli)
+	out["installer"] = installer
+
+	err = initStateBackend(options.cpContext)
+
 	if err != nil {
 		return err
 	}
@@ -346,7 +436,7 @@ func initImageValues(options initOptions, out map[string]interface{}) (image str
 	return image, tag
 }
 
-func initStateBackend(options *cpContext, banzaiCli cli.Cli) error {
+func initStateBackend(options *cpContext) error {
 	stateTf := fmt.Sprintf(localStateBackend, tfstateFilename)
 
 	err := ioutil.WriteFile(options.workspace+"/state.tf", []byte(stateTf), 0600)
@@ -365,7 +455,7 @@ func initStateBackend(options *cpContext, banzaiCli cli.Cli) error {
 	}
 	_ = stateFile.Close()
 
-	if err := runTerraform("init", options, banzaiCli, nil); err != nil {
+	if err := runTerraform("init", options, nil); err != nil {
 		return errors.WrapIf(err, "failed to init state backend")
 	}
 
@@ -384,4 +474,15 @@ func getAmazonCredentialsRegion(defaultAwsRegion string) (string, string, error)
 		}
 	}
 	return id, region, err
+}
+
+func metadataExporter(source string, metadata *ImageMetadata) ExportedFilesHandler {
+	return ExportedFilesHandler(func(files map[string][]byte) error {
+		if valuesFileContent, ok := files[source]; ok {
+			if err := yaml.Unmarshal(valuesFileContent, metadata); err != nil {
+				return errors.Wrap(err, "failed to unmarshal metadata values exported from the image")
+			}
+		}
+		return nil
+	})
 }

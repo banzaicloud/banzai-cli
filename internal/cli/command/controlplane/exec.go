@@ -15,7 +15,12 @@
 package controlplane
 
 import (
+	"archive/tar"
+	"bytes"
+	"compress/gzip"
+	"encoding/base64"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -32,7 +37,7 @@ const (
 	runtimeExec       = "exec"
 )
 
-func runTerraform(command string, options *cpContext, banzaiCli cli.Cli, env map[string]string, targets ...string) error {
+func runTerraform(command string, options *cpContext, env map[string]string, targets ...string) error {
 	err := options.ensureImagePulled()
 	if err != nil {
 		return errors.WrapIf(err, "failed to pull cp-installer")
@@ -46,13 +51,12 @@ func runTerraform(command string, options *cpContext, banzaiCli cli.Cli, env map
 	cmd := []string{"terraform", command}
 
 	if command != "init" {
-
 		cmd = append(cmd, []string{
 			"-var", "workdir=/workspace",
 			fmt.Sprintf("-refresh=%v", options.refreshState),
 		}...)
 
-		if options.autoApprove {
+		if options.AutoApprove() {
 			cmd = append(cmd, "-auto-approve")
 		}
 
@@ -61,53 +65,31 @@ func runTerraform(command string, options *cpContext, banzaiCli cli.Cli, env map
 		}
 	}
 
-	switch options.containerRuntime {
-	case runtimeExec:
-		return runLocally(cmd, cmdEnv)
-	case runtimeDocker:
-		return runDocker(cmd, options, banzaiCli, cmdEnv)
-	case runtimeContainerd:
-		return runContainer(cmd, options, banzaiCli, cmdEnv)
-	default:
-		return errors.Errorf("unknown container runtime: %q", options.containerRuntime)
-	}
+	return runTerraformCommandGeneric(options, cmd, cmdEnv)
 }
 
 // runLocally runs the given command locally (for development)
-func runLocally(command []string, env map[string]string) error {
+func runLocally(command []string, cmdOpt func(*exec.Cmd) error) error {
 	log.Info(strings.Join(command, " "))
 
 	cmd := exec.Command(command[0], command[1:]...)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	cmd.Env = os.Environ()
-	for key, value := range env {
-		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, value))
+	if cmdOpt != nil {
+		if err := cmdOpt(cmd); err != nil {
+			return errors.WrapIf(err, "failed to add optional command options")
+		}
 	}
 
 	return errors.WithStack(cmd.Run())
 }
 
-// runContainer runs the given installer command in the installer container with containerd (crictl)
-func runContainer(command []string, options *cpContext, banzaiCli cli.Cli, env map[string]string) error {
-
+func runContainer(command []string, options *cpContext, extraArgs []string, cmdOpt func(*exec.Cmd) error) error {
 	args := []string{
 		"run", "--rm", "--net-host",
 		// fmt.Sprintf("--user=%d", os.Getuid()), // TODO
-		"--mount", fmt.Sprintf("type=bind,src=%s,dst=/workspace,options=rbind:rw", options.workspace),
-		"--mount", fmt.Sprintf("type=bind,src=%s,dst=/terraform/state.tf,options=rbind:rw", options.workspace+"/state.tf"),
-		"--mount", fmt.Sprintf("type=bind,src=%s,dst=/terraform/.terraform/terraform.tfstate,options=rbind:rw", options.workspace+"/.terraform/terraform.tfstate"),
 	}
 
-	if banzaiCli.Interactive() {
-		args = append(args, "-t")
-	}
-
-	envs := os.Environ()
-	for key, value := range env {
-		args = append(args, "--env", fmt.Sprintf("%s=%s", key, value)) // env propagation does not work with ctr
+	if len(extraArgs) > 0 {
+		args = append(args, extraArgs...)
 	}
 
 	args = append(append(args, options.installerImage(), "banzai-cp-installer"), command...)
@@ -121,33 +103,23 @@ func runContainer(command []string, options *cpContext, banzaiCli cli.Cli, env m
 
 	cmd := exec.Command(ctrCmd, args...)
 
-	cmd.Env = envs
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	if cmdOpt != nil {
+		if err := cmdOpt(cmd); err != nil {
+			return errors.WrapIf(err, "failed to add optional command options")
+		}
+	}
 
 	return errors.WithStack(cmd.Run())
 }
 
-// runDocker runs the given installer command in the installer docker container
-func runDocker(command []string, options *cpContext, banzaiCli cli.Cli, env map[string]string) error {
-
+func runDocker(command []string, options *cpContext, extraArgs []string, cmdOpt func(*exec.Cmd) error) error {
 	args := []string{
 		"run", "--rm", "--net=host",
 		fmt.Sprintf("--user=%d", os.Getuid()),
-		"-v", fmt.Sprintf("%s:/workspace", options.workspace),
-		"-v", fmt.Sprintf("%s:/terraform/state.tf", options.workspace+"/state.tf"),
-		"-v", fmt.Sprintf("%s:/terraform/.terraform/terraform.tfstate", options.workspace+"/.terraform/terraform.tfstate"),
 	}
 
-	if banzaiCli.Interactive() {
-		args = append(args, "-ti")
-	}
-
-	envs := os.Environ()
-	for key, value := range env {
-		args = append(args, "-e", key)
-		envs = append(envs, fmt.Sprintf("%s=%s", key, value))
+	if len(extraArgs) > 0 {
+		args = append(args, extraArgs...)
 	}
 
 	args = append(append(args, options.installerImage()), command...)
@@ -155,17 +127,23 @@ func runDocker(command []string, options *cpContext, banzaiCli cli.Cli, env map[
 	log.Info("docker ", strings.Join(args, " "))
 
 	cmd := exec.Command("docker", args...)
-
-	cmd.Env = envs
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	if cmdOpt != nil {
+		if err := cmdOpt(cmd); err != nil {
+			return errors.WrapIf(err, "failed to add optional command options")
+		}
+	}
 
 	return errors.WithStack(cmd.Run())
 }
 
 func pullImage(options *cpContext, _ cli.Cli) error {
 	if !options.pullInstaller {
+		return nil
+	}
+
+	img := options.installerImage()
+	if !strings.Contains(img, "/") {
+		log.Debugf("skip pulling local image %q", img)
 		return nil
 	}
 
@@ -190,7 +168,7 @@ func pullImage(options *cpContext, _ cli.Cli) error {
 		return err
 	}
 
-	args = append(args, options.installerImage())
+	args = append(args, img)
 	log.Info("Pulling Banzai Cloud Pipeline installer image...")
 
 	log.Info(tool, " ", strings.Join(args, " "))
@@ -202,6 +180,118 @@ func pullImage(options *cpContext, _ cli.Cli) error {
 	cmd.Stderr = os.Stderr
 
 	return cmd.Run()
+}
+
+func readFilesFromContainerToMemory(options *cpContext, source string) (map[string][]byte, error) {
+	// create gzipped archive (cz) and follow symlinks (h)
+	cmd := []string{"sh", "-c", fmt.Sprintf("tar czh %s | base64", source)}
+
+	var err error
+
+	buffer := new(bytes.Buffer)
+	cmdOpt := func(cmd *exec.Cmd) error {
+		cmd.Stdout = buffer
+		return nil
+	}
+
+	err = runContainerCommandGeneric(options, cmd, nil, cmdOpt)
+	if err == nil {
+		decoder := base64.NewDecoder(base64.StdEncoding, buffer)
+		tarContents, err := untarInMemory(decoder)
+		if err != nil {
+			return nil, errors.WrapIf(err, "failed to untar source")
+		}
+		return tarContents, nil
+	}
+	return nil, errors.WrapIf(err, "failed to run container command")
+}
+
+func untarInMemory(reader io.Reader) (map[string][]byte, error) {
+	zr, err := gzip.NewReader(reader)
+	if err != nil {
+		return nil, errors.WrapIf(err, "failed to uncompress helm archive")
+	}
+	defer zr.Close()
+
+	contents := make(map[string][]byte)
+	tr := tar.NewReader(zr)
+	for {
+		hdr, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, errors.WrapIf(err, "failed to extract next file from archive")
+		}
+		if hdr.FileInfo().Mode().IsRegular() {
+			buf := new(bytes.Buffer)
+			_, err = io.Copy(buf, tr)
+			if err != nil {
+				return nil, errors.WrapIff(err, "failed to read file contents from tar: %s", hdr.Name)
+			}
+			contents[hdr.Name] = buf.Bytes()
+		}
+	}
+	return contents, nil
+}
+
+func runTerraformCommandGeneric(options *cpContext, cmd []string, cmdEnv map[string]string) error {
+	cmdOpt := func(cmd *exec.Cmd) error {
+		cmd.Env = os.Environ()
+		for key, value := range cmdEnv {
+			cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, value))
+		}
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		return nil
+	}
+
+	switch options.containerRuntime {
+	case runtimeExec:
+		return runLocally(cmd, cmdOpt)
+	case runtimeDocker:
+		args := []string{
+			"-v", fmt.Sprintf("%s:/workspace", options.workspace),
+			"-v", fmt.Sprintf("%s:/terraform/state.tf", options.workspace+"/state.tf"),
+			"-v", fmt.Sprintf("%s:/terraform/.terraform/terraform.tfstate", options.workspace+"/.terraform/terraform.tfstate"),
+		}
+		if options.banzaiCli.Interactive() {
+			args = append(args, "-ti")
+		}
+		for key, _ := range cmdEnv {
+			args = append(args, "-e", key)
+		}
+		return runDocker(cmd, options, args, cmdOpt)
+	case runtimeContainerd:
+		args := []string{
+			"--mount", fmt.Sprintf("type=bind,src=%s,dst=/workspace,options=rbind:rw", options.workspace),
+			"--mount", fmt.Sprintf("type=bind,src=%s,dst=/terraform/state.tf,options=rbind:rw", options.workspace+"/state.tf"),
+			"--mount", fmt.Sprintf("type=bind,src=%s,dst=/terraform/.terraform/terraform.tfstate,options=rbind:rw", options.workspace+"/.terraform/terraform.tfstate"),
+		}
+		if options.banzaiCli.Interactive() {
+			args = append(args, "-t")
+		}
+		for key, value := range cmdEnv {
+			args = append(args, "--env", fmt.Sprintf("%s=%s", key, value)) // env propagation does not work with ctr
+		}
+		return runContainer(cmd, options, args, cmdOpt)
+	default:
+		return errors.Errorf("unknown container runtime: %q", options.containerRuntime)
+	}
+}
+
+func runContainerCommandGeneric(options *cpContext, cmd []string, args []string, cmdOpt func(*exec.Cmd) error) error {
+	switch options.containerRuntime {
+	case runtimeExec:
+		return runLocally(cmd, cmdOpt)
+	case runtimeDocker:
+		return runDocker(cmd, options, args, cmdOpt)
+	case runtimeContainerd:
+		return runContainer(cmd, options, args, cmdOpt)
+	default:
+		return errors.Errorf("unknown container runtime: %q", options.containerRuntime)
+	}
 }
 
 func lookupTool(tool string) (string, error) {
