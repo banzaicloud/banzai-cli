@@ -43,7 +43,8 @@ const (
 )
 
 type createOptions struct {
-	init bool
+	init          bool
+	terraformInit bool
 	*initOptions
 }
 
@@ -69,6 +70,7 @@ func NewUpCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&options.init, "init", "i", false, "Initialize workspace")
+	flags.BoolVar(&options.terraformInit, "terraform-init", true, "Run terraform init before apply")
 
 	return cmd
 }
@@ -157,6 +159,17 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
+	if !isStateBackendInited(options) {
+		log.Info("Migrating workspace to state backend...")
+		if err := initStateBackend(options.cpContext); err != nil {
+			return err
+		}
+	} else {
+		if err := runTerraform("init", options.cpContext, nil); err != nil {
+			return errors.WrapIf(err, "failed to run terraform init")
+		}
+	}
+
 	var env map[string]string
 	switch values["provider"] {
 	case providerPke:
@@ -209,13 +222,6 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 	default:
 		if !options.kubeconfigExists() {
 			return errors.New("could not find Kubeconfig in workspace")
-		}
-	}
-
-	if !isStateBackendInited(options) {
-		log.Info("Migrating workspace to state backend...")
-		if err := initStateBackend(options.cpContext); err != nil {
-			return err
 		}
 	}
 
@@ -326,7 +332,7 @@ func writeMergedValues(options *cpContext, defaultValues, overrideValues map[str
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal merged values")
 	}
-	if err := ioutil.WriteFile(filepath.Join(options.workspace, generatedValuesFileName ), bytes, 0600); err != nil {
+	if err := ioutil.WriteFile(filepath.Join(options.workspace, generatedValuesFileName), bytes, 0600); err != nil {
 		return errors.Wrap(err, "failed to write out generated values file")
 	}
 	return nil
@@ -368,4 +374,3 @@ func defaultValuesExporter(source string, defaultValues *map[string]interface{})
 		return nil
 	})
 }
-
