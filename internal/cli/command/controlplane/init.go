@@ -111,7 +111,7 @@ func NewInitCommand(banzaiCli cli.Cli) *cobra.Command {
 		if !options.pullInstaller {
 			upArgs = append(upArgs, "--image-pull=false")
 		}
-		log.Infof("Successfully initialized workspace. " +
+		log.Infof("Successfully initialized workspace. "+
 			"You can now edit the values file at %q and run `%s` to deploy Pipeline.", options.valuesPath(), strings.Join(upArgs, " "))
 	}
 
@@ -170,7 +170,7 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		if !options.pullInstaller {
 			upArgs = append(upArgs, "--image-pull=false")
 		}
-		log.Infof("You can create another workspace with --workspace, " +
+		log.Infof("You can create another workspace with --workspace, "+
 			"or run `%s` to deploy the current one.", strings.Join(upArgs, " "))
 		return errors.Errorf("workspace is already initialized in %q", options.workspace)
 	}
@@ -362,7 +362,11 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		}
 
 		if imageMeta.Custom.GenerateClusterName {
-			name := fmt.Sprintf("banzaicloud-%s-%s", hostname, filepath.Base(options.workspace))
+			replacer := strings.NewReplacer(
+				".", "_",
+				"@", "_",
+			)
+			name := fmt.Sprintf("banzaicloud-%s-%s", replacer.Replace(hostname), replacer.Replace(filepath.Base(options.workspace)))
 			if banzaiCli.Interactive() {
 				if err := survey.AskOne(&survey.Input{
 					Message: "Name of cluster to create:",
