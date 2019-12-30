@@ -29,6 +29,7 @@ func NewNodePoolCommand(banzaiCli cli.Cli) *cobra.Command {
 		Use:     "nodepool",
 		Aliases: []string{"nodepools", "np"},
 		Short:   "Work with cluster nodepools",
+		Hidden:  true,
 	}
 
 	cmd.AddCommand(

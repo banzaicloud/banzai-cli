@@ -42,6 +42,7 @@ func NewDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 
 			return deleteNodePool(banzaiCli, options, args)
 		},
+		Hidden: true,
 	}
 
 	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "delete")
