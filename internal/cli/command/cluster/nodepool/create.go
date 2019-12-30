@@ -34,7 +34,7 @@ type createOptions struct {
 	interval int
 }
 
-func NewCreateNodePoolCommand(banzaiCli cli.Cli) *cobra.Command {
+func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := createOptions{}
 
 	cmd := &cobra.Command{

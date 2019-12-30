@@ -30,7 +30,7 @@ type deleteOptions struct {
 	nodePoolName string
 }
 
-func NewDeleteNodePoolCommand(banzaiCli cli.Cli) *cobra.Command {
+func NewDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 	o := deleteOptions{}
 
 	cmd := &cobra.Command{

@@ -41,7 +41,7 @@ func NewClusterCommand(banzaiCli cli.Cli) *cobra.Command {
 		NewShellCommand(banzaiCli),
 		feature.NewFeatureCommand(banzaiCli),
 		node.NewNodeCommand(banzaiCli),
-		nodepool.NewNodepoolCommand(banzaiCli),
+		nodepool.NewNodePoolCommand(banzaiCli),
 	)
 
 	return cmd

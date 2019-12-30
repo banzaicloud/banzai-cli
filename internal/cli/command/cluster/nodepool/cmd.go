@@ -21,10 +21,10 @@ import (
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 )
 
-var NodepoolClusterContext clustercontext.Context
+var NodePoolClusterContext clustercontext.Context
 
-// NewNodepoolCommand returns a cobra command for `node` subcommands.
-func NewNodepoolCommand(banzaiCli cli.Cli) *cobra.Command {
+// NewNodePoolCommand returns a cobra command for `node` subcommands.
+func NewNodePoolCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "nodepool",
 		Aliases: []string{"nodepools", "np"},
@@ -32,11 +32,11 @@ func NewNodepoolCommand(banzaiCli cli.Cli) *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		NewCreateNodePoolCommand(banzaiCli),
-		NewDeleteNodePoolCommand(banzaiCli),
+		NewCreateCommand(banzaiCli),
+		NewDeleteCommand(banzaiCli),
 	)
 
-	NodepoolClusterContext = clustercontext.NewClusterContext(cmd, banzaiCli, "nodepool")
+	NodePoolClusterContext = clustercontext.NewClusterContext(cmd, banzaiCli, "nodepool")
 
 	return cmd
 }
