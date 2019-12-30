@@ -34,7 +34,6 @@ Manage clusters
 * [banzai cluster import](banzai_cluster_import.md)	 - Import an existing cluster (EXPERIMENTAL)
 * [banzai cluster list](banzai_cluster_list.md)	 - List clusters
 * [banzai cluster node](banzai_cluster_node.md)	 - Work with cluster nodes
-* [banzai cluster nodepool](banzai_cluster_nodepool.md)	 - Work with cluster nodepools
 * [banzai cluster service](banzai_cluster_service.md)	 - Manage cluster integrated services
 * [banzai cluster shell](banzai_cluster_shell.md)	 - Start a shell or run a command with the cluster configured as kubectl context
 
