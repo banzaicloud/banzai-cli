@@ -36,6 +36,7 @@ banzai cluster service [flags]
 * [banzai cluster](banzai_cluster.md)	 - Manage clusters
 * [banzai cluster service dns](banzai_cluster_service_dns.md)	 - Manage cluster DNS service
 * [banzai cluster service list](banzai_cluster_service_list.md)	 - List active (and pending) integrated services of a cluster
+* [banzai cluster service logging](banzai_cluster_service_logging.md)	 - Manage cluster Logging service
 * [banzai cluster service monitoring](banzai_cluster_service_monitoring.md)	 - Manage cluster Monitoring service
 * [banzai cluster service securityscan](banzai_cluster_service_securityscan.md)	 - Manage cluster securityscan service
 * [banzai cluster service vault](banzai_cluster_service_vault.md)	 - Manage cluster Vault service
