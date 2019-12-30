@@ -14,6 +14,7 @@ Method | HTTP request | Description
 ## GetSpotguideDetail
 
 > SpotguideDetailsResponse GetSpotguideDetail(ctx, orgId, name)
+
 Get spotguide details
 
 Get details about specific spotguide
@@ -48,6 +49,7 @@ Name | Type | Description  | Notes
 ## LaunchSpotguide
 
 > LaunchSpotguide(ctx, orgId, launchSpotguidesRequest)
+
 Launch spotguide
 
 Launch a spotguide
@@ -82,6 +84,7 @@ Name | Type | Description  | Notes
 ## ListSpotguides
 
 > []SpotguideDetailsResponse ListSpotguides(ctx, orgId)
+
 List spotguides
 
 List all available spotguides
@@ -115,6 +118,7 @@ Name | Type | Description  | Notes
 ## UpdateSpotguides
 
 > UpdateSpotguides(ctx, orgId)
+
 Update spotguide repositories
 
 ### Required Parameters

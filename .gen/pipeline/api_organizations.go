@@ -101,7 +101,6 @@ func (a *OrganizationsApiService) GetOrg(ctx _context.Context, orgId int32) (Org
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -109,8 +108,6 @@ func (a *OrganizationsApiService) GetOrg(ctx _context.Context, orgId int32) (Org
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -197,7 +194,6 @@ func (a *OrganizationsApiService) ListOrgs(ctx _context.Context) ([]Organization
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -205,8 +201,6 @@ func (a *OrganizationsApiService) ListOrgs(ctx _context.Context) ([]Organization
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -280,7 +274,6 @@ func (a *OrganizationsApiService) SyncOrgs(ctx _context.Context) (*_nethttp.Resp
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -288,8 +281,6 @@ func (a *OrganizationsApiService) SyncOrgs(ctx _context.Context) (*_nethttp.Resp
 				return localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarHTTPResponse, newErr
-		}
 		return localVarHTTPResponse, newErr
 	}
 

@@ -12,6 +12,7 @@ Method | HTTP request | Description
 ## CreateResourceGroup
 
 > ResourceGroupCreated CreateResourceGroup(ctx, orgId, createResourceGroup)
+
 Create resource groups
 
 Create resource groups
@@ -46,6 +47,7 @@ Name | Type | Description  | Notes
 ## GetResourceGroups
 
 > []string GetResourceGroups(ctx, orgId, secretId)
+
 Get all resource groups
 
 Get all resource groups

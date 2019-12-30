@@ -13,6 +13,7 @@ Method | HTTP request | Description
 ## CreateToken
 
 > TokenCreateResponse CreateToken(ctx, tokenCreateRequest)
+
 Create token
 
 Create token
@@ -46,6 +47,7 @@ Name | Type | Description  | Notes
 ## DeleteToken
 
 > DeleteToken(ctx, tokenId)
+
 Delete an API token
 
 Delete an API token
@@ -79,6 +81,7 @@ Name | Type | Description  | Notes
 ## ListTokens
 
 > []TokenListResponseItem ListTokens(ctx, )
+
 List all API tokens
 
 List all API tokens

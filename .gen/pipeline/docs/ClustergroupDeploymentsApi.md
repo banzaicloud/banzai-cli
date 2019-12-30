@@ -16,6 +16,7 @@ Method | HTTP request | Description
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNameDelete
 
 > DeploymentTargetClusterStatus ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNameDelete(ctx, orgId, clusterGroupId, deploymentName, optional)
+
 Delete Cluster Group Deployment
 
 deletes a cluster group deployment, also deleting deployments from member clusters
@@ -64,6 +65,7 @@ Name | Type | Description  | Notes
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNameGet
 
 > DeploymentDeploymentInfo ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNameGet(ctx, orgId, clusterGroupId, deploymentName)
+
 Get Cluster Group Deployment
 
 retrieve info about a cluster group deployment and it's status on each member cluster
@@ -99,6 +101,7 @@ Name | Type | Description  | Notes
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNamePut
 
 > DeploymentCreateUpdateDeploymentResponse ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNamePut(ctx, orgId, clusterGroupId, deploymentName, deploymentClusterGroupDeployment)
+
 Update Cluster Group Deployment
 
 updates a cluster group deployment, installs or upgrades deployment on each member cluster accordingly
@@ -135,6 +138,7 @@ Name | Type | Description  | Notes
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNameSyncPut
 
 > DeploymentTargetClusterStatus ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNameSyncPut(ctx, orgId, clusterGroupId, deploymentName)
+
 Synchronize Cluster Group Deployment
 
 install / upgrade deployment to target clusters where deployment is not found or has wrong
@@ -170,6 +174,7 @@ Name | Type | Description  | Notes
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsGet
 
 > []DeploymentListDeploymentResponse ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsGet(ctx, orgId, clusterGroupId)
+
 Get All Deployments of a Cluster Group
 
 retrieve all deployments from a cluster group
@@ -204,6 +209,7 @@ Name | Type | Description  | Notes
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsPost
 
 > DeploymentCreateUpdateDeploymentResponse ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsPost(ctx, orgId, clusterGroupId, deploymentClusterGroupDeployment)
+
 Create Cluster Group Deployment
 
 creates a new cluster group deployment, installs or upgrades deployment on each member cluster accordingly

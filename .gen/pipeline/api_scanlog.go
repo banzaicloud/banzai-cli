@@ -101,7 +101,6 @@ func (a *ScanlogApiService) ListScans(ctx _context.Context, orgId int32, id int3
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -193,7 +192,6 @@ func (a *ScanlogApiService) ListScansByRelease(ctx _context.Context, orgId int32
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}

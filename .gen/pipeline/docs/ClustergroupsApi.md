@@ -15,6 +15,7 @@ Method | HTTP request | Description
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdDelete
 
 > string ApiV1OrgsOrgidClustergroupsClusterGroupIdDelete(ctx, orgId, clusterGroupId)
+
 Delete Cluster Group
 
 delete a cluster group, disable all enabled features, delete related deployments
@@ -49,6 +50,7 @@ Name | Type | Description  | Notes
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdGet
 
 > ApiClusterGroup ApiV1OrgsOrgidClustergroupsClusterGroupIdGet(ctx, orgId, clusterGroupId)
+
 Get Cluster Group
 
 retrieve info about a cluster group, members, status of member clusters, features
@@ -83,6 +85,7 @@ Name | Type | Description  | Notes
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdPut
 
 > ApiUpdateResponse ApiV1OrgsOrgidClustergroupsClusterGroupIdPut(ctx, orgId, clusterGroupId, apiUpdateRequest)
+
 Update Cluster Group
 
 update name & member clusters for a cluster group
@@ -118,6 +121,7 @@ Name | Type | Description  | Notes
 ## ApiV1OrgsOrgidClustergroupsGet
 
 > []ApiClusterGroup ApiV1OrgsOrgidClustergroupsGet(ctx, orgId)
+
 List Cluster Groups of an Organization
 
 retrieve list of cluster groups of an organization
@@ -151,6 +155,7 @@ Name | Type | Description  | Notes
 ## ApiV1OrgsOrgidClustergroupsPost
 
 > ApiCreateResponse ApiV1OrgsOrgidClustergroupsPost(ctx, orgId, apiCreateRequest)
+
 Create Cluster Group
 
 create a group of clusters, joining clusters together with a name

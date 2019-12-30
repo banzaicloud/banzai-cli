@@ -103,7 +103,6 @@ func (a *ClustergroupsApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdDelet
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -111,8 +110,6 @@ func (a *ClustergroupsApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdDelet
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -203,7 +200,6 @@ func (a *ClustergroupsApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdGet(c
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -211,8 +207,6 @@ func (a *ClustergroupsApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdGet(c
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -306,7 +300,6 @@ func (a *ClustergroupsApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdPut(c
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -314,8 +307,6 @@ func (a *ClustergroupsApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdPut(c
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -404,7 +395,6 @@ func (a *ClustergroupsApiService) ApiV1OrgsOrgidClustergroupsGet(ctx _context.Co
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -412,8 +402,6 @@ func (a *ClustergroupsApiService) ApiV1OrgsOrgidClustergroupsGet(ctx _context.Co
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -505,7 +493,6 @@ func (a *ClustergroupsApiService) ApiV1OrgsOrgidClustergroupsPost(ctx _context.C
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -513,8 +500,6 @@ func (a *ClustergroupsApiService) ApiV1OrgsOrgidClustergroupsPost(ctx _context.C
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 

@@ -15,6 +15,7 @@ Method | HTTP request | Description
 ## CreateObjectStoreBucket
 
 > CreateObjectStoreBucketResponse CreateObjectStoreBucket(ctx, orgId, createObjectStoreBucketRequest)
+
 Creates a new object store bucket with the given params
 
 Creates a new object store bucket on the Cloud provider referenced by the given secret. The credentials for creating the bucket is taken from the provided secret.
@@ -49,6 +50,7 @@ Name | Type | Description  | Notes
 ## DeleteObjectStoreBucket
 
 > DeleteObjectStoreBucket(ctx, orgId, name, secretId, cloudType, optional)
+
 Deletes the object store bucket with the given name
 
 Deletes the object store bucket identified by the given name. The credentials for deleting the bucket is taken from the provided secret.
@@ -102,6 +104,7 @@ Name | Type | Description  | Notes
 ## GetBucket
 
 > BucketInfo GetBucket(ctx, orgId, name, cloudType, optional)
+
 Get object store bucket details
 
 Retrieves the details of the object store bucket given its name
@@ -154,6 +157,7 @@ Name | Type | Description  | Notes
 ## GetObjectStoreBucketStatus
 
 > GetObjectStoreBucketStatus(ctx, orgId, name, cloudType, optional)
+
 Get object store bucket status
 
 Retrieves the status of the object store bucket given its name
@@ -206,6 +210,7 @@ Name | Type | Description  | Notes
 ## ListObjectStoreBuckets
 
 > []BucketInfo ListObjectStoreBuckets(ctx, orgId, optional)
+
 List object storage buckets
 
 List object store buckets accessible by the credentials referenced by the given secret. If no credentials provided all managed buckets are returned for all cloud types.

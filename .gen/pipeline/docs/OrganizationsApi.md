@@ -13,6 +13,7 @@ Method | HTTP request | Description
 ## GetOrg
 
 > OrganizationListItemResponse GetOrg(ctx, orgId)
+
 Get organization
 
 Getting organization
@@ -46,6 +47,7 @@ Name | Type | Description  | Notes
 ## ListOrgs
 
 > []OrganizationListItemResponse ListOrgs(ctx, )
+
 List organizations
 
 Listing organizations
@@ -75,6 +77,7 @@ This endpoint does not need any parameter.
 ## SyncOrgs
 
 > SyncOrgs(ctx, )
+
 Synchronize Github organizations
 
 ### Required Parameters

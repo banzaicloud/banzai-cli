@@ -12,6 +12,7 @@ Method | HTTP request | Description
 ## ListDeploymentsByImage
 
 > []ListDeploymentsResponseItem ListDeploymentsByImage(ctx, orgId, id, imageDigest)
+
 List Deployments by Image
 
 List Deployments by Image
@@ -47,6 +48,7 @@ Name | Type | Description  | Notes
 ## ListImages
 
 > []ClusterImage ListImages(ctx, orgId, id)
+
 List Images used in cluster
 
 List Images used in cluster

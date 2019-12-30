@@ -99,7 +99,6 @@ func (a *UsersApiService) GetCurrentUser(ctx _context.Context) (User, *_nethttp.
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -107,8 +106,6 @@ func (a *UsersApiService) GetCurrentUser(ctx _context.Context) (User, *_nethttp.
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -197,7 +194,6 @@ func (a *UsersApiService) GetUsers(ctx _context.Context, orgId int32, userId int
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -285,7 +281,6 @@ func (a *UsersApiService) ListUsers(ctx _context.Context, orgId int32) ([]User, 
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -364,7 +359,6 @@ func (a *UsersApiService) UpdateCurrentUser(ctx _context.Context, updateUserRequ
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -372,8 +366,6 @@ func (a *UsersApiService) UpdateCurrentUser(ctx _context.Context, updateUserRequ
 				return localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarHTTPResponse, newErr
-		}
 		return localVarHTTPResponse, newErr
 	}
 

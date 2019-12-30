@@ -13,6 +13,7 @@ Method | HTTP request | Description
 ## ListRouteTables
 
 > []RouteTableInfo ListRouteTables(ctx, orgId, networkId, secretId, cloudType, optional)
+
 List VPC route tables
 
 List route tables of the given VPC network
@@ -64,6 +65,7 @@ Name | Type | Description  | Notes
 ## ListVPCNetworks
 
 > []VpcNetworkInfo ListVPCNetworks(ctx, orgId, secretId, cloudType, optional)
+
 List VPC networks
 
 List VPC networks accessible by the organization.
@@ -113,6 +115,7 @@ Name | Type | Description  | Notes
 ## ListVPCSubnets
 
 > []SubnetInfo ListVPCSubnets(ctx, orgId, networkId, secretId, cloudType, optional)
+
 List VPC subnetworks
 
 List subnetworks of the given VPC network

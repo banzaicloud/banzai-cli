@@ -14,6 +14,7 @@ Method | HTTP request | Description
 ## CreateARKSchedule
 
 > CreateScheduleResponse CreateARKSchedule(ctx, orgId, id, createScheduleRequest)
+
 Create ARK schedule
 
 Create ARK schedule
@@ -49,6 +50,7 @@ Name | Type | Description  | Notes
 ## DeleteARKSchedule
 
 > DeleteScheduleResponse DeleteARKSchedule(ctx, orgId, id, scheduleName)
+
 Delete ARK schedule
 
 Delete ARK schedule
@@ -84,6 +86,7 @@ Name | Type | Description  | Notes
 ## GetARKSchedule
 
 > ScheduleResponse GetARKSchedule(ctx, orgId, id, scheduleName)
+
 Get ARK schedule
 
 Get ARK schedule
@@ -119,6 +122,7 @@ Name | Type | Description  | Notes
 ## ListARKSchedules
 
 > []ScheduleResponse ListARKSchedules(ctx, orgId, id)
+
 List ARK schedules
 
 List ARK schedules

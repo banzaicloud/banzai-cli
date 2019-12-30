@@ -12,6 +12,7 @@ Method | HTTP request | Description
 ## ListScans
 
 > []ScanLogItem ListScans(ctx, orgId, id)
+
 List scans
 
 List scans
@@ -46,6 +47,7 @@ Name | Type | Description  | Notes
 ## ListScansByRelease
 
 > []ScanLogItem ListScansByRelease(ctx, orgId, id, releaseName)
+
 List scans by release
 
 List scans by release

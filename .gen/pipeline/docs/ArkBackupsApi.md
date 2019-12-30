@@ -19,6 +19,7 @@ Method | HTTP request | Description
 ## CreateARKBackupOfACluster
 
 > CreateBackupResponse CreateARKBackupOfACluster(ctx, orgId, id, createBackupRequest)
+
 Create ARK backup
 
 Create ARK backup of a cluster
@@ -54,6 +55,7 @@ Name | Type | Description  | Notes
 ## DeleteARKBackup
 
 > DeleteBackupResponse DeleteARKBackup(ctx, orgId, id, backupId)
+
 Delete ARK backup
 
 Delete ARK backup
@@ -89,6 +91,7 @@ Name | Type | Description  | Notes
 ## DownloadARKBackupContents
 
 > *os.File DownloadARKBackupContents(ctx, orgId, id, backupId)
+
 Download ARK backup contents
 
 Download ARK backup contents
@@ -124,6 +127,7 @@ Name | Type | Description  | Notes
 ## GetARKBackup
 
 > BackupResponse GetARKBackup(ctx, orgId, id, backupId)
+
 Get ARK backup
 
 Get ARK backup
@@ -159,6 +163,7 @@ Name | Type | Description  | Notes
 ## GetARKBackupLogs
 
 > string GetARKBackupLogs(ctx, orgId, id, backupId)
+
 Get ARK backup logs
 
 Get ARK backup logs
@@ -194,6 +199,7 @@ Name | Type | Description  | Notes
 ## ListARKBackupsForOrganization
 
 > []BackupResponse ListARKBackupsForOrganization(ctx, orgId)
+
 List ARK backups of an Organization
 
 List ARK backups of an Organization
@@ -227,6 +233,7 @@ Name | Type | Description  | Notes
 ## ListARKBackupsOfACluster
 
 > []BackupResponse ListARKBackupsOfACluster(ctx, orgId, id)
+
 List ARK backups of a cluster
 
 List ARK backups of a cluster
@@ -261,6 +268,7 @@ Name | Type | Description  | Notes
 ## SyncARKBackupsOfACluster
 
 > SyncARKBackupsOfACluster(ctx, orgId, id)
+
 Sync ARK backups of a cluster
 
 Sync ARK backups of a cluster
@@ -295,6 +303,7 @@ Name | Type | Description  | Notes
 ## SyncOrgBackups
 
 > SyncOrgBackups(ctx, orgId)
+
 Sync ARK backups of an Organization
 
 Sync ARK backups of an Organization

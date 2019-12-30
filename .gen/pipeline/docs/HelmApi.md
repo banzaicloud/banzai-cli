@@ -17,6 +17,7 @@ Method | HTTP request | Description
 ## HelmChartDetails
 
 > HelmChartDetailsResponse HelmChartDetails(ctx, orgId, repoName, chartName, optional)
+
 Chart details
 
 Get helm chart details
@@ -65,6 +66,7 @@ Name | Type | Description  | Notes
 ## HelmChartList
 
 > []map[string]interface{} HelmChartList(ctx, orgId, optional)
+
 Chart List
 
 Get available Helm chart's list
@@ -111,6 +113,7 @@ Name | Type | Description  | Notes
 ## HelmListRepos
 
 > []HelmRepoListItem HelmListRepos(ctx, orgId)
+
 List repositories
 
 Listing Helm repositories in the cluster
@@ -144,6 +147,7 @@ Name | Type | Description  | Notes
 ## HelmReposAdd
 
 > HelmRepoListItem HelmReposAdd(ctx, orgId, helmReposAddRequest)
+
 Add Repo
 
 Add new Helm repository
@@ -178,6 +182,7 @@ Name | Type | Description  | Notes
 ## HelmReposDelete
 
 > HelmReposDeleteResponse HelmReposDelete(ctx, orgId, repoName)
+
 Delete Repo
 
 Delete  Helm repository
@@ -212,6 +217,7 @@ Name | Type | Description  | Notes
 ## HelmReposModify
 
 > HelmReposUpdateResponse HelmReposModify(ctx, orgId, repoName, helmReposModifyRequest)
+
 Modify Repo
 
 Modify Helm repository
@@ -247,6 +253,7 @@ Name | Type | Description  | Notes
 ## HelmReposUpdate
 
 > HelmReposUpdateResponse HelmReposUpdate(ctx, orgId, repoName)
+
 Update Repo
 
 Modify Helm repository

@@ -23,6 +23,7 @@ Method | HTTP request | Description
 ## AddSecretTag
 
 > []string AddSecretTag(ctx, orgId, secretId, tag)
+
 Add a tag to a secret
 
 Add a tag to a secret
@@ -58,6 +59,7 @@ Name | Type | Description  | Notes
 ## AddSecrets
 
 > CreateSecretResponse AddSecrets(ctx, orgId, createSecretRequest, optional)
+
 Add secrets
 
 Adding secrets
@@ -104,6 +106,7 @@ Name | Type | Description  | Notes
 ## AllowedSecretsTypes
 
 > map[string]AllowedSecretTypeResponse AllowedSecretsTypes(ctx, )
+
 List allowed secret types
 
 List allowed secret types and their required keys
@@ -133,6 +136,7 @@ This endpoint does not need any parameter.
 ## AllowedSecretsTypesKeys
 
 > AllowedSecretTypeResponse AllowedSecretsTypesKeys(ctx, type_)
+
 List required keys
 
 List required keys in the given secret type
@@ -166,6 +170,7 @@ Name | Type | Description  | Notes
 ## DeleteSecretTag
 
 > DeleteSecretTag(ctx, orgId, secretId, tag)
+
 Delete a tag from a secret
 
 Delete a tag from a secret
@@ -201,6 +206,7 @@ Name | Type | Description  | Notes
 ## DeleteSecrets
 
 > DeleteSecrets(ctx, orgId, secretId)
+
 Delete secrets
 
 Deleting secrets
@@ -235,6 +241,7 @@ Name | Type | Description  | Notes
 ## GetSecret
 
 > SecretItem GetSecret(ctx, orgId, secretId)
+
 Get secret
 
 Get secret
@@ -269,6 +276,7 @@ Name | Type | Description  | Notes
 ## GetSecretTags
 
 > []string GetSecretTags(ctx, orgId, secretId)
+
 Get the tags of a secret
 
 Get the tags of a secret
@@ -303,6 +311,7 @@ Name | Type | Description  | Notes
 ## GetSecretType
 
 > SecretTypeResponse GetSecretType(ctx, type_)
+
 Get a specific secret type
 
 Get a specific secret type and describe it's fields
@@ -336,6 +345,7 @@ Name | Type | Description  | Notes
 ## GetSecrets
 
 > []SecretItem GetSecrets(ctx, orgId, optional)
+
 List secrets
 
 Listing secrets
@@ -382,6 +392,7 @@ Name | Type | Description  | Notes
 ## ListSecretTypes
 
 > map[string]SecretTypeResponse ListSecretTypes(ctx, )
+
 List secret types
 
 List secret types definitions
@@ -411,6 +422,7 @@ This endpoint does not need any parameter.
 ## UpdateSecrets
 
 > CreateSecretResponse UpdateSecrets(ctx, orgId, secretId, createSecretRequest, optional)
+
 Update secrets
 
 Update secrets
@@ -459,6 +471,7 @@ Name | Type | Description  | Notes
 ## ValidateSecret
 
 > ValidateSecret(ctx, orgId, secretId)
+
 Validate secret
 
 Validate secret

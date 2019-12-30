@@ -14,6 +14,7 @@ Method | HTTP request | Description
 ## CheckARKStatus
 
 > CheckARKStatus(ctx, orgId, id)
+
 Check ARK service status
 
 Check ARK service status
@@ -48,6 +49,7 @@ Name | Type | Description  | Notes
 ## CheckARKStatusGET
 
 > BackupServiceResponse CheckARKStatusGET(ctx, orgId, id)
+
 Check ARK service status
 
 Check ARK service status
@@ -82,6 +84,7 @@ Name | Type | Description  | Notes
 ## DisableARK
 
 > DisableArkResponse DisableARK(ctx, orgId, id)
+
 Disable ARK service
 
 Disable ARK service
@@ -116,6 +119,7 @@ Name | Type | Description  | Notes
 ## EnableARK
 
 > EnableArkResponse EnableARK(ctx, orgId, id, enableArkRequest)
+
 Enable ARK service
 
 Enable ARK service

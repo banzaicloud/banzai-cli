@@ -11,6 +11,7 @@ Method | HTTP request | Description
 ## ListCapabilities
 
 > map[string]map[string]interface{} ListCapabilities(ctx, )
+
 Lists configured Pipeline capabilities
 
 Retrieve Pipeline capabilities

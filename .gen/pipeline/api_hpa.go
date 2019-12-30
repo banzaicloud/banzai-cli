@@ -93,7 +93,6 @@ func (a *HpaApiService) DeleteDeploymentAutoscaling(ctx _context.Context, orgId 
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -101,8 +100,6 @@ func (a *HpaApiService) DeleteDeploymentAutoscaling(ctx _context.Context, orgId 
 				return localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarHTTPResponse, newErr
-		}
 		return localVarHTTPResponse, newErr
 	}
 
@@ -186,7 +183,6 @@ func (a *HpaApiService) GetDeploymentAutoscaling(ctx _context.Context, orgId int
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -194,8 +190,6 @@ func (a *HpaApiService) GetDeploymentAutoscaling(ctx _context.Context, orgId int
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -277,7 +271,6 @@ func (a *HpaApiService) UpdateDeploymentAutoscaling(ctx _context.Context, orgId 
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -285,8 +278,6 @@ func (a *HpaApiService) UpdateDeploymentAutoscaling(ctx _context.Context, orgId 
 				return localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarHTTPResponse, newErr
-		}
 		return localVarHTTPResponse, newErr
 	}
 

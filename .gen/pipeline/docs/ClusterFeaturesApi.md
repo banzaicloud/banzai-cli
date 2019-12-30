@@ -15,6 +15,7 @@ Method | HTTP request | Description
 ## ActivateClusterFeature
 
 > ActivateClusterFeature(ctx, orgId, id, featureName, activateClusterFeatureRequest)
+
 Activate a cluster feature
 
 ### Required Parameters
@@ -49,6 +50,7 @@ Name | Type | Description  | Notes
 ## ClusterFeatureDetails
 
 > ClusterFeatureDetails ClusterFeatureDetails(ctx, orgId, id, featureName)
+
 Get details of a cluster feature
 
 ### Required Parameters
@@ -82,6 +84,7 @@ Name | Type | Description  | Notes
 ## DeactivateClusterFeature
 
 > DeactivateClusterFeature(ctx, orgId, id, featureName)
+
 Deactivate a cluster feature
 
 ### Required Parameters
@@ -115,6 +118,7 @@ Name | Type | Description  | Notes
 ## ListClusterFeatures
 
 > map[string]ClusterFeatureDetails ListClusterFeatures(ctx, orgId, id)
+
 List enabled features of a cluster
 
 ### Required Parameters
@@ -147,6 +151,7 @@ Name | Type | Description  | Notes
 ## UpdateClusterFeature
 
 > UpdateClusterFeature(ctx, orgId, id, featureName, updateClusterFeatureRequest)
+
 Update a cluster feature
 
 ### Required Parameters

@@ -19,6 +19,7 @@ Method | HTTP request | Description
 ## CreateDeployment
 
 > CreateUpdateDeploymentResponse CreateDeployment(ctx, orgId, id, createUpdateDeploymentRequest)
+
 Create a Helm deployment
 
 Creating a Helm deployment
@@ -54,6 +55,7 @@ Name | Type | Description  | Notes
 ## DeleteDeployment
 
 > DeleteDeploymentResponse DeleteDeployment(ctx, orgId, id, name)
+
 Delete deployment
 
 Deleting a Helm deployment
@@ -89,6 +91,7 @@ Name | Type | Description  | Notes
 ## GetDeployment
 
 > GetDeploymentResponse GetDeployment(ctx, orgId, id, name, optional)
+
 Get deployment details
 
 Retrieves the details of a deployment
@@ -137,6 +140,7 @@ Name | Type | Description  | Notes
 ## GetDeploymentImages
 
 > []ClusterImage GetDeploymentImages(ctx, orgId, id, name)
+
 Get deployment K8s images
 
 Retrieves the K8s images of a deployment
@@ -172,6 +176,7 @@ Name | Type | Description  | Notes
 ## GetDeploymentResource
 
 > []map[string]interface{} GetDeploymentResource(ctx, orgId, id, name, optional)
+
 Get deployment K8s resources
 
 Retrieves the K8s resources of a deployment
@@ -220,6 +225,7 @@ Name | Type | Description  | Notes
 ## GetTillerStatus
 
 > GetTillerStatus(ctx, orgId, id)
+
 Get tiller status
 
 Checking if tiller ready to accept deployments
@@ -254,6 +260,7 @@ Name | Type | Description  | Notes
 ## HelmDeploymentStatus
 
 > HelmDeploymentStatus(ctx, orgId, id, name)
+
 Check deployment status
 
 Checking the status of a deployment through the Helm client API
@@ -289,6 +296,7 @@ Name | Type | Description  | Notes
 ## ListDeployments
 
 > []ListDeploymentsResponseItem ListDeployments(ctx, orgId, id, optional)
+
 List deployments
 
 Listing Helm deployments
@@ -335,6 +343,7 @@ Name | Type | Description  | Notes
 ## UpdateDeployment
 
 > CreateUpdateDeploymentResponse UpdateDeployment(ctx, orgId, id, name, createUpdateDeploymentRequest)
+
 Update deployment
 
 Updating a Helm deployment

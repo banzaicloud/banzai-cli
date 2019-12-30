@@ -244,7 +244,6 @@ func (a *WhitelistApiService) ListWhitelists(ctx _context.Context, orgId int32, 
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}

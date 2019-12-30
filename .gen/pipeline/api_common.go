@@ -95,7 +95,6 @@ func (a *CommonApiService) ApiVersionGet(ctx _context.Context) (VersionResponse,
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -181,7 +180,6 @@ func (a *CommonApiService) ListEndpoints(ctx _context.Context) ([]string, *_neth
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}

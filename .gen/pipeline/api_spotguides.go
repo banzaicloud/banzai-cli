@@ -103,7 +103,6 @@ func (a *SpotguidesApiService) GetSpotguideDetail(ctx _context.Context, orgId in
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -111,8 +110,6 @@ func (a *SpotguidesApiService) GetSpotguideDetail(ctx _context.Context, orgId in
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -269,7 +266,6 @@ func (a *SpotguidesApiService) ListSpotguides(ctx _context.Context, orgId int32)
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}

@@ -13,6 +13,7 @@ Method | HTTP request | Description
 ## CreateWhitelists
 
 > CreateWhitelists(ctx, orgId, id, releaseWhiteListItem)
+
 Create Whitelisted deployment
 
 Create Whitelisted deployment
@@ -48,6 +49,7 @@ Name | Type | Description  | Notes
 ## DeleteWhitelist
 
 > DeleteWhitelist(ctx, orgId, id, name)
+
 Delete Whitelisted deployment
 
 Delete Whitelisted deployment
@@ -83,6 +85,7 @@ Name | Type | Description  | Notes
 ## ListWhitelists
 
 > []ReleaseWhiteListItem ListWhitelists(ctx, orgId, id)
+
 List Whitelisted deployments
 
 List Whitelisted deployments

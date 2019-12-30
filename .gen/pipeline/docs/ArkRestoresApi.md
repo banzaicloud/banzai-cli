@@ -16,6 +16,7 @@ Method | HTTP request | Description
 ## CreateARKRestore
 
 > CreateRestoreResponse CreateARKRestore(ctx, orgId, id, createRestoreRequest)
+
 Create ARK restore
 
 Create ARK restore
@@ -51,6 +52,7 @@ Name | Type | Description  | Notes
 ## DeleteARKRestore
 
 > DeleteRestoreResponse DeleteARKRestore(ctx, orgId, id, restoreId)
+
 Delete ARK restore
 
 Delete ARK restore
@@ -86,6 +88,7 @@ Name | Type | Description  | Notes
 ## GetARKRestore
 
 > RestoreResponse GetARKRestore(ctx, orgId, id, restoreId)
+
 Get ARK restore
 
 Get ARK restore
@@ -121,6 +124,7 @@ Name | Type | Description  | Notes
 ## GetARKRestoreResuts
 
 > RestoreResultsResponse GetARKRestoreResuts(ctx, orgId, id, restoreId)
+
 Get ARK restore results
 
 Get ARK restore results
@@ -156,6 +160,7 @@ Name | Type | Description  | Notes
 ## ListARKRestores
 
 > []RestoreResponse ListARKRestores(ctx, orgId, id)
+
 List ARK restores
 
 List ARK restores
@@ -190,6 +195,7 @@ Name | Type | Description  | Notes
 ## SyncARKRestoresOfACluster
 
 > SyncARKRestoresOfACluster(ctx, orgId, id)
+
 Sync ARK restores of a cluster
 
 Sync ARK restores of a cluster

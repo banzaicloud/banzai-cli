@@ -126,7 +126,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -134,8 +133,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -228,7 +225,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -236,8 +232,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -343,7 +337,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -351,8 +344,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -455,7 +446,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -463,8 +453,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -555,7 +543,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -563,8 +550,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -668,7 +653,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -676,8 +660,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 

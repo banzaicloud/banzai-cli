@@ -15,6 +15,7 @@ Method | HTTP request | Description
 ## CreateBackupBucket
 
 > BackupBucketResponse CreateBackupBucket(ctx, orgId, createBackupBucketRequest)
+
 Create backup bucket
 
 Create backup bucket
@@ -49,6 +50,7 @@ Name | Type | Description  | Notes
 ## DeleteBackupBucket
 
 > DeleteBackupBucketResponse DeleteBackupBucket(ctx, orgId, bucketId)
+
 Delete backup bucket by ID
 
 Delete backup bucket by ID
@@ -83,6 +85,7 @@ Name | Type | Description  | Notes
 ## GetBackupBucket
 
 > DeployedBackupBucketResponse GetBackupBucket(ctx, orgId, bucketId)
+
 Get backup bucket by ID
 
 Get backup bucket by ID
@@ -117,6 +120,7 @@ Name | Type | Description  | Notes
 ## ListBackupBuckets
 
 > []BackupBucketResponse ListBackupBuckets(ctx, orgId)
+
 List backup buckets
 
 List backup buckets
@@ -150,6 +154,7 @@ Name | Type | Description  | Notes
 ## SyncBackupBucket
 
 > SyncBackupBucket(ctx, orgId)
+
 Sync backup buckets
 
 Sync backup buckets

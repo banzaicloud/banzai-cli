@@ -40,6 +40,7 @@ Method | HTTP request | Description
 ## ClusterPostHooks
 
 > ClusterPostHooks(ctx, orgId, id, body)
+
 Run posthook functions
 
 Run posthook functions
@@ -75,6 +76,7 @@ Name | Type | Description  | Notes
 ## CreateCluster
 
 > CreateClusterResponse202 CreateCluster(ctx, orgId, body)
+
 Create cluster
 
 Create a new K8S cluster in the cloud
@@ -109,6 +111,7 @@ Name | Type | Description  | Notes
 ## CreateNodePool
 
 > CreateNodePool(ctx, orgId, id, nodePool)
+
 Create new node pool
 
 Add new node pool to a cluster
@@ -144,6 +147,7 @@ Name | Type | Description  | Notes
 ## DeleteCluster
 
 > ClusterDelete200 DeleteCluster(ctx, orgId, id, optional)
+
 Delete cluster
 
 Deleting a K8S cluster
@@ -190,6 +194,7 @@ Name | Type | Description  | Notes
 ## DeleteLeaderElection
 
 > DeleteLeaderElection(ctx, orgId, id)
+
 Delete cluster leader
 
 ### Required Parameters
@@ -222,6 +227,7 @@ Name | Type | Description  | Notes
 ## DeleteNamespace
 
 > DeleteNamespace(ctx, orgId, id, namespace)
+
 Delete namespace from a cluster
 
 Delete namespace from a cluster
@@ -257,6 +263,7 @@ Name | Type | Description  | Notes
 ## DeleteNodePool
 
 > DeleteNodePool(ctx, orgId, id, name)
+
 Delete a node pool
 
 Delete a node pool from a cluster.
@@ -292,6 +299,7 @@ Name | Type | Description  | Notes
 ## GetAPIEndpoint
 
 > string GetAPIEndpoint(ctx, orgId, id)
+
 Get API endpoint
 
 Get API endpoint
@@ -326,6 +334,7 @@ Name | Type | Description  | Notes
 ## GetCluster
 
 > GetClusterStatusResponse GetCluster(ctx, orgId, id)
+
 Get cluster status
 
 Getting cluster status
@@ -360,6 +369,7 @@ Name | Type | Description  | Notes
 ## GetClusterBootstrap
 
 > GetClusterBootstrapResponse GetClusterBootstrap(ctx, orgId, id)
+
 Get cluster bootstrap info
 
 Get cluster bootstrap info
@@ -394,6 +404,7 @@ Name | Type | Description  | Notes
 ## GetClusterConfig
 
 > ClusterConfig GetClusterConfig(ctx, orgId, id)
+
 Get a cluster config
 
 Getting a K8S cluster config file
@@ -428,6 +439,7 @@ Name | Type | Description  | Notes
 ## GetClusterStatus
 
 > GetClusterStatus(ctx, orgId, id)
+
 Get cluster status
 
 Getting the K8S cluster status
@@ -462,6 +474,7 @@ Name | Type | Description  | Notes
 ## GetLeaderElection
 
 > GetLeaderElectionResponse GetLeaderElection(ctx, orgId, id)
+
 Query cluster leader
 
 ### Required Parameters
@@ -494,6 +507,7 @@ Name | Type | Description  | Notes
 ## GetOIDCClusterConfig
 
 > ClusterConfig GetOIDCClusterConfig(ctx, orgId, id)
+
 Get a cluster config with OIDC login
 
 Getting a K8S cluster config file with OIDC credentials
@@ -528,6 +542,7 @@ Name | Type | Description  | Notes
 ## GetPKECommands
 
 > GetPkeCommandsResponse GetPKECommands(ctx, orgId, id)
+
 List bootstrap commands for namespaces
 
 Get the commands to use for bootstrapping nodes of a PKE cluster in each nodepool
@@ -562,6 +577,7 @@ Name | Type | Description  | Notes
 ## GetPodDetails
 
 > []PodItem GetPodDetails(ctx, orgId, id)
+
 Get pod details
 
 Getting pod details
@@ -596,6 +612,7 @@ Name | Type | Description  | Notes
 ## GetReadyPKENode
 
 > PkeClusterReadinessResponse GetReadyPKENode(ctx, orgId, id)
+
 Query reported node readiness information
 
 ### Required Parameters
@@ -628,6 +645,7 @@ Name | Type | Description  | Notes
 ## InstallSecret
 
 > InstallSecretResponse InstallSecret(ctx, orgId, id, secretName, installSecretRequest)
+
 Install a particular secret into a cluster with optional remapping
 
 Install a particular secret into a cluster
@@ -664,6 +682,7 @@ Name | Type | Description  | Notes
 ## InstallSecrets
 
 > []InstallSecretResponse InstallSecrets(ctx, orgId, id, installSecretsRequest)
+
 Install secrets into cluster
 
 Install secrets into cluster
@@ -699,6 +718,7 @@ Name | Type | Description  | Notes
 ## ListClusterEndpoints
 
 > ListEndpointsResponse ListClusterEndpoints(ctx, orgId, id, optional)
+
 List service public endpoints
 
 List service public endpoints
@@ -745,6 +765,7 @@ Name | Type | Description  | Notes
 ## ListClusterSecrets
 
 > []SecretItem ListClusterSecrets(ctx, orgId, id, optional)
+
 List secrets which belongs to cluster
 
 List secrets which belongs to cluster
@@ -791,6 +812,7 @@ Name | Type | Description  | Notes
 ## ListClusters
 
 > []GetClusterStatusResponse ListClusters(ctx, orgId)
+
 List clusters
 
 Listing all the K8S clusters from the cloud
@@ -824,6 +846,7 @@ Name | Type | Description  | Notes
 ## ListNamespaces
 
 > NamespaceListResponse ListNamespaces(ctx, orgId, id)
+
 Lists namespaces for a cluster
 
 Lists namespaces for a cluster
@@ -858,6 +881,7 @@ Name | Type | Description  | Notes
 ## ListNodepoolLabels
 
 > map[string][]NodepoolLabels ListNodepoolLabels(ctx, orgId, id)
+
 List cluser nodepool labels
 
 List cluster nodepool labels
@@ -892,6 +916,7 @@ Name | Type | Description  | Notes
 ## ListNodes
 
 > ListNodesResponse ListNodes(ctx, orgId, id)
+
 List cluser nodes
 
 List cluser nodes
@@ -926,6 +951,7 @@ Name | Type | Description  | Notes
 ## MergeSecret
 
 > InstallSecretResponse MergeSecret(ctx, orgId, id, secretName, installSecretRequest)
+
 Merge a particular secret with an existing one with optional remapping
 
 Merge a particular secret with an existing one
@@ -962,6 +988,7 @@ Name | Type | Description  | Notes
 ## PostLeaderElection
 
 > PostLeaderElectionResponse PostLeaderElection(ctx, orgId, id, postLeaderElectionRequest)
+
 Apply as new cluster leader
 
 ### Required Parameters
@@ -995,6 +1022,7 @@ Name | Type | Description  | Notes
 ## PostReadyPKENode
 
 > map[string]interface{} PostReadyPKENode(ctx, orgId, id, postReadyPkeNodeRequest)
+
 Report to Pipeline that a new node is ready (to be called by PKE installer)
 
 ### Required Parameters
@@ -1028,6 +1056,7 @@ Name | Type | Description  | Notes
 ## UpdateCluster
 
 > UpdateCluster(ctx, orgId, id, body)
+
 Update cluster
 
 Updating an existing K8S cluster
@@ -1063,6 +1092,7 @@ Name | Type | Description  | Notes
 ## UpdateMonitoring
 
 > string UpdateMonitoring(ctx, orgId, id)
+
 Update monitoring
 
 Update monitoring

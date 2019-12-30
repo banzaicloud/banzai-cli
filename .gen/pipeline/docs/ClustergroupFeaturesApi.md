@@ -15,6 +15,7 @@ Method | HTTP request | Description
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNameDelete
 
 > string ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNameDelete(ctx, orgId, clusterGroupId, featureName)
+
 Disable Feature of Cluster Group
 
 disable feature on all members of a cluster group
@@ -50,6 +51,7 @@ Name | Type | Description  | Notes
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNameGet
 
 > ApiFeatureResponse ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNameGet(ctx, orgId, clusterGroupId, featureName)
+
 Get Feature of Cluster Group
 
 retrieve info about a cluster group feature and it's status on each member cluster
@@ -85,6 +87,7 @@ Name | Type | Description  | Notes
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNamePost
 
 > string ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNamePost(ctx, orgId, clusterGroupId, featureName, body)
+
 Enable Feature of Cluster Group
 
 enable feature on all members of a cluster group
@@ -121,6 +124,7 @@ Name | Type | Description  | Notes
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNamePut
 
 > string ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNamePut(ctx, orgId, clusterGroupId, featureName, body)
+
 Update Feature of Cluster Group
 
 update properties of a feature
@@ -157,6 +161,7 @@ Name | Type | Description  | Notes
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesGet
 
 > []ApiFeatureResponse ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesGet(ctx, orgId, clusterGroupId)
+
 Get All Features of Cluster Group
 
 retrieve info about a cluster group feature and it's status on each member cluster

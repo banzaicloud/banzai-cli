@@ -13,6 +13,7 @@ Method | HTTP request | Description
 ## DeleteDeploymentAutoscaling
 
 > DeleteDeploymentAutoscaling(ctx, orgId, id, scaleTarget)
+
 Delete Deployment Scaling
 
 Delete scaling info for a Helm deployment
@@ -48,6 +49,7 @@ Name | Type | Description  | Notes
 ## GetDeploymentAutoscaling
 
 > []map[string]interface{} GetDeploymentAutoscaling(ctx, orgId, id, scaleTarget)
+
 Get Deployment Scaling Info
 
 Get scaling info for a Helm deployment
@@ -83,6 +85,7 @@ Name | Type | Description  | Notes
 ## UpdateDeploymentAutoscaling
 
 > UpdateDeploymentAutoscaling(ctx, orgId, id, deploymentScalingRequest)
+
 Create / Update Deployment Scaling
 
 Create / update scaling info for a Helm deployment
