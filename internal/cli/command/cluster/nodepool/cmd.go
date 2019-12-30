@@ -23,12 +23,12 @@ import (
 
 var NodePoolClusterContext clustercontext.Context
 
-// NewNodePoolCommand returns a cobra command for `node` subcommands.
+// NewNodePoolCommand returns a cobra command for `nodepool` subcommands.
 func NewNodePoolCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "nodepool",
 		Aliases: []string{"nodepools", "np"},
-		Short:   "Work with cluster nodepools",
+		Short:   "Manage node pools",
 		Hidden:  true,
 	}
 
