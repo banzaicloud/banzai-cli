@@ -43,10 +43,11 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 		Short:   "Create a node pool for a given cluster",
 		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
+			cmd.SilenceErrors = true
+
 			return createNodePool(banzaiCli, options, args)
 		},
-		SilenceUsage:  true,
-		SilenceErrors: true,
 	}
 
 	flags := cmd.Flags()

@@ -39,10 +39,11 @@ func NewDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 		Short:   "Delete a node pool for a given cluster",
 		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
+			cmd.SilenceErrors = true
+
 			return deleteNodePool(banzaiCli, o, args)
 		},
-		SilenceUsage:  true,
-		SilenceErrors: true,
 	}
 
 	flags := cmd.Flags()
