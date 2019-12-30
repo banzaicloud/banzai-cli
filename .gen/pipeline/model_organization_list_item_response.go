@@ -16,4 +16,5 @@ type OrganizationListItemResponse struct {
 	CreatedAt string `json:"createdAt,omitempty"`
 	UpdatedAt string `json:"updatedAt,omitempty"`
 	Name string `json:"name,omitempty"`
+	NormalizedName string `json:"normalizedName,omitempty"`
 }

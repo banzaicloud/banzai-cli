@@ -13,7 +13,6 @@ package pipeline
 // CreateClusterRequestV2 struct for CreateClusterRequestV2
 type CreateClusterRequestV2 struct {
 	Name string `json:"name"`
-	Features []Feature `json:"features,omitempty"`
 	SecretId string `json:"secretId,omitempty"`
 	SecretName string `json:"secretName,omitempty"`
 	SshSecretId string `json:"sshSecretId,omitempty"`

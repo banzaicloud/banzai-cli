@@ -33,8 +33,8 @@ type DeploymentsApiService service
 CreateDeployment Create a Helm deployment
 Creating a Helm deployment
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
  * @param createUpdateDeploymentRequest
 @return CreateUpdateDeploymentResponse
 */
@@ -67,7 +67,7 @@ func (a *DeploymentsApiService) CreateDeployment(ctx _context.Context, orgId int
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -107,28 +107,8 @@ func (a *DeploymentsApiService) CreateDeployment(ctx _context.Context, orgId int
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 401 {
+		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v ClientError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 404 {
-			var v ClusterNotFound
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -156,8 +136,8 @@ func (a *DeploymentsApiService) CreateDeployment(ctx _context.Context, orgId int
 DeleteDeployment Delete deployment
 Deleting a Helm deployment
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
  * @param name Deployment name
 @return DeleteDeploymentResponse
 */
@@ -191,7 +171,7 @@ func (a *DeploymentsApiService) DeleteDeployment(ctx _context.Context, orgId int
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -229,28 +209,8 @@ func (a *DeploymentsApiService) DeleteDeployment(ctx _context.Context, orgId int
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v ClientError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 401 {
+		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 404 {
-			var v ClusterNotFound
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -283,8 +243,8 @@ type GetDeploymentOpts struct {
 GetDeployment Get deployment details
 Retrieves the details of a deployment
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
  * @param name Deployment name
  * @param optional nil or *GetDeploymentOpts - Optional Parameters:
  * @param "Tag" (optional.String) -  Deployment tag
@@ -323,7 +283,7 @@ func (a *DeploymentsApiService) GetDeployment(ctx _context.Context, orgId int32,
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -361,27 +321,7 @@ func (a *DeploymentsApiService) GetDeployment(ctx _context.Context, orgId int32,
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v ClientError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 401 {
-			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 500 {
+		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -410,8 +350,8 @@ func (a *DeploymentsApiService) GetDeployment(ctx _context.Context, orgId int32,
 GetDeploymentImages Get deployment K8s images
 Retrieves the K8s images of a deployment
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
  * @param name Deployment name
 @return []ClusterImage
 */
@@ -445,7 +385,7 @@ func (a *DeploymentsApiService) GetDeploymentImages(ctx _context.Context, orgId 
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -483,27 +423,7 @@ func (a *DeploymentsApiService) GetDeploymentImages(ctx _context.Context, orgId 
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v ClientError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 401 {
-			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 500 {
+		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -537,8 +457,8 @@ type GetDeploymentResourceOpts struct {
 GetDeploymentResource Get deployment K8s resources
 Retrieves the K8s resources of a deployment
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
  * @param name Deployment name
  * @param optional nil or *GetDeploymentResourceOpts - Optional Parameters:
  * @param "ResourceTypes" (optional.String) -  K8s reource type
@@ -577,7 +497,7 @@ func (a *DeploymentsApiService) GetDeploymentResource(ctx _context.Context, orgI
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -615,27 +535,7 @@ func (a *DeploymentsApiService) GetDeploymentResource(ctx _context.Context, orgI
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v ClientError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 401 {
-			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 500 {
+		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -664,8 +564,8 @@ func (a *DeploymentsApiService) GetDeploymentResource(ctx _context.Context, orgI
 GetTillerStatus Get tiller status
 Checking if tiller ready to accept deployments
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
 */
 func (a *DeploymentsApiService) GetTillerStatus(ctx _context.Context, orgId int32, id int32) (*_nethttp.Response, error) {
 	var (
@@ -695,7 +595,7 @@ func (a *DeploymentsApiService) GetTillerStatus(ctx _context.Context, orgId int3
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -723,6 +623,16 @@ func (a *DeploymentsApiService) GetTillerStatus(ctx _context.Context, orgId int3
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
+		if localVarHTTPResponse.StatusCode == 0 {
+			var v CommonError
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
 		return localVarHTTPResponse, newErr
 	}
 
@@ -733,8 +643,8 @@ func (a *DeploymentsApiService) GetTillerStatus(ctx _context.Context, orgId int3
 HelmDeploymentStatus Check deployment status
 Checking the status of a deployment through the Helm client API
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
  * @param name Deployment name
 */
 func (a *DeploymentsApiService) HelmDeploymentStatus(ctx _context.Context, orgId int32, id int32, name string) (*_nethttp.Response, error) {
@@ -809,8 +719,8 @@ type ListDeploymentsOpts struct {
 ListDeployments List deployments
 Listing Helm deployments
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
  * @param optional nil or *ListDeploymentsOpts - Optional Parameters:
  * @param "Tag" (optional.String) -  Deployment tag to filter for
 @return []ListDeploymentsResponseItem
@@ -847,7 +757,7 @@ func (a *DeploymentsApiService) ListDeployments(ctx _context.Context, orgId int3
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -885,28 +795,8 @@ func (a *DeploymentsApiService) ListDeployments(ctx _context.Context, orgId int3
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v ClientError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 401 {
+		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 404 {
-			var v ClusterNotFound
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -934,8 +824,8 @@ func (a *DeploymentsApiService) ListDeployments(ctx _context.Context, orgId int3
 UpdateDeployment Update deployment
 Updating a Helm deployment
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
  * @param name Deployment name
  * @param createUpdateDeploymentRequest
 @return CreateUpdateDeploymentResponse
@@ -970,7 +860,7 @@ func (a *DeploymentsApiService) UpdateDeployment(ctx _context.Context, orgId int
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -1010,28 +900,8 @@ func (a *DeploymentsApiService) UpdateDeployment(ctx _context.Context, orgId int
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 401 {
+		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v ClientError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 404 {
-			var v ClusterNotFound
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()

@@ -14,7 +14,7 @@ Method | HTTP request | Description
 
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdDelete
 
-> string ApiV1OrgsOrgidClustergroupsClusterGroupIdDelete(ctx, orgid, clusterGroupId)
+> string ApiV1OrgsOrgidClustergroupsClusterGroupIdDelete(ctx, orgId, clusterGroupId)
 Delete Cluster Group
 
 delete a cluster group, disable all enabled features, delete related deployments
@@ -25,7 +25,7 @@ delete a cluster group, disable all enabled features, delete related deployments
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgid** | **int32**| Organization ID | 
+**orgId** | **int32**| Organization identifier | 
 **clusterGroupId** | **int32**| Cluster Group ID | 
 
 ### Return type
@@ -39,7 +39,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -48,7 +48,7 @@ Name | Type | Description  | Notes
 
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdGet
 
-> ApiClusterGroup ApiV1OrgsOrgidClustergroupsClusterGroupIdGet(ctx, orgid, clusterGroupId)
+> ApiClusterGroup ApiV1OrgsOrgidClustergroupsClusterGroupIdGet(ctx, orgId, clusterGroupId)
 Get Cluster Group
 
 retrieve info about a cluster group, members, status of member clusters, features
@@ -59,7 +59,7 @@ retrieve info about a cluster group, members, status of member clusters, feature
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgid** | **int32**| Organization ID | 
+**orgId** | **int32**| Organization identifier | 
 **clusterGroupId** | **int32**| Cluster Group ID | 
 
 ### Return type
@@ -73,7 +73,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -82,7 +82,7 @@ Name | Type | Description  | Notes
 
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdPut
 
-> ApiUpdateResponse ApiV1OrgsOrgidClustergroupsClusterGroupIdPut(ctx, orgid, clusterGroupId, apiUpdateRequest)
+> ApiUpdateResponse ApiV1OrgsOrgidClustergroupsClusterGroupIdPut(ctx, orgId, clusterGroupId, apiUpdateRequest)
 Update Cluster Group
 
 update name & member clusters for a cluster group
@@ -93,7 +93,7 @@ update name & member clusters for a cluster group
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgid** | **int32**| Organization ID | 
+**orgId** | **int32**| Organization identifier | 
 **clusterGroupId** | **int32**| Cluster Group ID | 
 **apiUpdateRequest** | [**ApiUpdateRequest**](ApiUpdateRequest.md)| Update Cluster Group Request | 
 
@@ -108,7 +108,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -117,7 +117,7 @@ Name | Type | Description  | Notes
 
 ## ApiV1OrgsOrgidClustergroupsGet
 
-> []ApiClusterGroup ApiV1OrgsOrgidClustergroupsGet(ctx, orgid)
+> []ApiClusterGroup ApiV1OrgsOrgidClustergroupsGet(ctx, orgId)
 List Cluster Groups of an Organization
 
 retrieve list of cluster groups of an organization
@@ -128,7 +128,7 @@ retrieve list of cluster groups of an organization
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgid** | **int32**| Organization ID | 
+**orgId** | **int32**| Organization identifier | 
 
 ### Return type
 
@@ -141,7 +141,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -150,7 +150,7 @@ Name | Type | Description  | Notes
 
 ## ApiV1OrgsOrgidClustergroupsPost
 
-> ApiCreateResponse ApiV1OrgsOrgidClustergroupsPost(ctx, orgid, apiCreateRequest)
+> ApiCreateResponse ApiV1OrgsOrgidClustergroupsPost(ctx, orgId, apiCreateRequest)
 Create Cluster Group
 
 create a group of clusters, joining clusters together with a name
@@ -161,7 +161,7 @@ create a group of clusters, joining clusters together with a name
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgid** | **int32**| Organization ID | 
+**orgId** | **int32**| Organization identifier | 
 **apiCreateRequest** | [**ApiCreateRequest**](ApiCreateRequest.md)| Create Cluster Group Request | 
 
 ### Return type
@@ -175,7 +175,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

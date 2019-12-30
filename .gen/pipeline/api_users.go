@@ -61,7 +61,7 @@ func (a *UsersApiService) GetCurrentUser(ctx _context.Context) (User, *_nethttp.
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -99,7 +99,7 @@ func (a *UsersApiService) GetCurrentUser(ctx _context.Context) (User, *_nethttp.
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 401 {
+		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -128,7 +128,7 @@ func (a *UsersApiService) GetCurrentUser(ctx _context.Context) (User, *_nethttp.
 GetUsers Get user
 Getting user
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
+ * @param orgId Organization identifier
  * @param userId User identification
 @return User
 */
@@ -218,7 +218,7 @@ func (a *UsersApiService) GetUsers(ctx _context.Context, orgId int32, userId int
 ListUsers List users
 Listing users
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
+ * @param orgId Organization identifier
 @return []User
 */
 func (a *UsersApiService) ListUsers(ctx _context.Context, orgId int32) ([]User, *_nethttp.Response, error) {
@@ -334,7 +334,7 @@ func (a *UsersApiService) UpdateCurrentUser(ctx _context.Context, updateUserRequ
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -364,7 +364,7 @@ func (a *UsersApiService) UpdateCurrentUser(ctx _context.Context, updateUserRequ
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		if localVarHTTPResponse.StatusCode == 401 {
+		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

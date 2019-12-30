@@ -81,8 +81,6 @@ type APIClient struct {
 
 	ImagesApi *ImagesApiService
 
-	ImagescanApi *ImagescanApiService
-
 	InfoApi *InfoApiService
 
 	NetworkApi *NetworkApiService
@@ -90,8 +88,6 @@ type APIClient struct {
 	OrganizationsApi *OrganizationsApiService
 
 	PipelineApi *PipelineApiService
-
-	PoliciesApi *PoliciesApiService
 
 	ProjectsApi *ProjectsApiService
 
@@ -141,12 +137,10 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.HelmApi = (*HelmApiService)(&c.common)
 	c.HpaApi = (*HpaApiService)(&c.common)
 	c.ImagesApi = (*ImagesApiService)(&c.common)
-	c.ImagescanApi = (*ImagescanApiService)(&c.common)
 	c.InfoApi = (*InfoApiService)(&c.common)
 	c.NetworkApi = (*NetworkApiService)(&c.common)
 	c.OrganizationsApi = (*OrganizationsApiService)(&c.common)
 	c.PipelineApi = (*PipelineApiService)(&c.common)
-	c.PoliciesApi = (*PoliciesApiService)(&c.common)
 	c.ProjectsApi = (*ProjectsApiService)(&c.common)
 	c.ScanlogApi = (*ScanlogApiService)(&c.common)
 	c.SecretsApi = (*SecretsApiService)(&c.common)

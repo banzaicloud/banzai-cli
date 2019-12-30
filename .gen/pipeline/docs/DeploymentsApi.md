@@ -29,8 +29,8 @@ Creating a Helm deployment
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **createUpdateDeploymentRequest** | [**CreateUpdateDeploymentRequest**](CreateUpdateDeploymentRequest.md)|  | 
 
 ### Return type
@@ -44,7 +44,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -64,8 +64,8 @@ Deleting a Helm deployment
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **name** | **string**| Deployment name | 
 
 ### Return type
@@ -79,7 +79,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -99,8 +99,8 @@ Retrieves the details of a deployment
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **name** | **string**| Deployment name | 
  **optional** | ***GetDeploymentOpts** | optional parameters | nil if no parameters
 
@@ -127,7 +127,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -147,8 +147,8 @@ Retrieves the K8s images of a deployment
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **name** | **string**| Deployment name | 
 
 ### Return type
@@ -162,7 +162,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -182,8 +182,8 @@ Retrieves the K8s resources of a deployment
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **name** | **string**| Deployment name | 
  **optional** | ***GetDeploymentResourceOpts** | optional parameters | nil if no parameters
 
@@ -210,7 +210,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -230,8 +230,8 @@ Checking if tiller ready to accept deployments
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 
@@ -244,7 +244,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: Not defined
+- **Accept**: application/json, application/problem+json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -264,8 +264,8 @@ Checking the status of a deployment through the Helm client API
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **name** | **string**| Deployment name | 
 
 ### Return type
@@ -299,8 +299,8 @@ Listing Helm deployments
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
  **optional** | ***ListDeploymentsOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
@@ -325,7 +325,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -345,8 +345,8 @@ Updating a Helm deployment
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **name** | **string**| Deployment name | 
 **createUpdateDeploymentRequest** | [**CreateUpdateDeploymentRequest**](CreateUpdateDeploymentRequest.md)|  | 
 
@@ -361,7 +361,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

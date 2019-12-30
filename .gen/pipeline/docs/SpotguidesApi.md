@@ -24,7 +24,7 @@ Get details about specific spotguide
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **name** | **string**| Spotguide name | 
 
 ### Return type
@@ -38,7 +38,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -58,7 +58,7 @@ Launch a spotguide
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **launchSpotguidesRequest** | [**LaunchSpotguidesRequest**](LaunchSpotguidesRequest.md)|  | 
 
 ### Return type
@@ -92,7 +92,7 @@ List all available spotguides
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 
 ### Return type
 
@@ -123,7 +123,7 @@ Update spotguide repositories
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 
 ### Return type
 

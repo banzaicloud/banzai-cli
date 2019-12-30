@@ -6,9 +6,11 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**ClusterPostHooks**](ClustersApi.md#ClusterPostHooks) | **Put** /api/v1/orgs/{orgId}/clusters/{id}/posthooks | Run posthook functions
 [**CreateCluster**](ClustersApi.md#CreateCluster) | **Post** /api/v1/orgs/{orgId}/clusters | Create cluster
+[**CreateNodePool**](ClustersApi.md#CreateNodePool) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/nodepools | Create new node pool
 [**DeleteCluster**](ClustersApi.md#DeleteCluster) | **Delete** /api/v1/orgs/{orgId}/clusters/{id} | Delete cluster
 [**DeleteLeaderElection**](ClustersApi.md#DeleteLeaderElection) | **Delete** /api/v1/orgs/{orgId}/clusters/{id}/pke/leader | Delete cluster leader
 [**DeleteNamespace**](ClustersApi.md#DeleteNamespace) | **Delete** /api/v1/orgs/{orgId}/clusters/{id}/namespaces/{namespace} | Delete namespace from a cluster
+[**DeleteNodePool**](ClustersApi.md#DeleteNodePool) | **Delete** /api/v1/orgs/{orgId}/clusters/{id}/nodepools/{name} | Delete a node pool
 [**GetAPIEndpoint**](ClustersApi.md#GetAPIEndpoint) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/apiendpoint | Get API endpoint
 [**GetCluster**](ClustersApi.md#GetCluster) | **Get** /api/v1/orgs/{orgId}/clusters/{id} | Get cluster status
 [**GetClusterBootstrap**](ClustersApi.md#GetClusterBootstrap) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/bootstrap | Get cluster bootstrap info
@@ -25,7 +27,7 @@ Method | HTTP request | Description
 [**ListClusterSecrets**](ClustersApi.md#ListClusterSecrets) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/secrets | List secrets which belongs to cluster
 [**ListClusters**](ClustersApi.md#ListClusters) | **Get** /api/v1/orgs/{orgId}/clusters | List clusters
 [**ListNamespaces**](ClustersApi.md#ListNamespaces) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/namespaces | Lists namespaces for a cluster
-[**ListNodepoolLabels**](ClustersApi.md#ListNodepoolLabels) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodepools/labels | List cluser nodepool labels
+[**ListNodepoolLabels**](ClustersApi.md#ListNodepoolLabels) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodepool-labels | List cluser nodepool labels
 [**ListNodes**](ClustersApi.md#ListNodes) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodes | List cluser nodes
 [**MergeSecret**](ClustersApi.md#MergeSecret) | **Patch** /api/v1/orgs/{orgId}/clusters/{id}/secrets/{secretName} | Merge a particular secret with an existing one with optional remapping
 [**PostLeaderElection**](ClustersApi.md#PostLeaderElection) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/pke/leader | Apply as new cluster leader
@@ -48,8 +50,8 @@ Run posthook functions
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **body** | **map[string]interface{}**|  | 
 
 ### Return type
@@ -83,7 +85,7 @@ Create a new K8S cluster in the cloud
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **body** | **map[string]interface{}**|  | 
 
 ### Return type
@@ -97,7 +99,42 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## CreateNodePool
+
+> CreateNodePool(ctx, orgId, id, nodePool)
+Create new node pool
+
+Add new node pool to a cluster
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
+**nodePool** | [**NodePool**](NodePool.md)|  | 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json, application/problem+json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -117,8 +154,8 @@ Deleting a K8S cluster
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
  **optional** | ***DeleteClusterOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
@@ -143,7 +180,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -161,8 +198,8 @@ Delete cluster leader
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 
@@ -175,7 +212,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -195,8 +232,8 @@ Delete namespace from a cluster
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **namespace** | **string**| Kubernetes namespace | 
 
 ### Return type
@@ -210,7 +247,42 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## DeleteNodePool
+
+> DeleteNodePool(ctx, orgId, id, name)
+Delete a node pool
+
+Delete a node pool from a cluster.
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
+**name** | **string**| Node pool name | 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json, application/problem+json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -230,8 +302,8 @@ Get API endpoint
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 
@@ -244,7 +316,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: text/plain, application/json
+- **Accept**: text/plain, application/json, application/problem+json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -264,8 +336,8 @@ Getting cluster status
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 
@@ -278,7 +350,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -298,8 +370,8 @@ Get cluster bootstrap info
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 
@@ -312,7 +384,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -332,8 +404,8 @@ Getting a K8S cluster config file
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 
@@ -346,7 +418,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -366,8 +438,8 @@ Getting the K8S cluster status
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 
@@ -380,7 +452,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: Not defined
+- **Accept**: application/json, application/problem+json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -398,8 +470,8 @@ Query cluster leader
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 
@@ -412,7 +484,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -432,8 +504,8 @@ Getting a K8S cluster config file with OIDC credentials
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 
@@ -446,7 +518,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -466,8 +538,8 @@ Get the commands to use for bootstrapping nodes of a PKE cluster in each nodepoo
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 
@@ -480,7 +552,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -500,8 +572,8 @@ Getting pod details
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 
@@ -514,7 +586,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -532,8 +604,8 @@ Query reported node readiness information
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 
@@ -546,7 +618,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -566,8 +638,8 @@ Install a particular secret into a cluster
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **secretName** | **string**| Secret name as it will be seen in the cluster | 
 **installSecretRequest** | [**InstallSecretRequest**](InstallSecretRequest.md)|  | 
 
@@ -582,7 +654,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -602,8 +674,8 @@ Install secrets into cluster
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **installSecretsRequest** | [**InstallSecretsRequest**](InstallSecretsRequest.md)|  | 
 
 ### Return type
@@ -617,7 +689,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -637,8 +709,8 @@ List service public endpoints
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
  **optional** | ***ListClusterEndpointsOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
@@ -663,7 +735,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -683,8 +755,8 @@ List secrets which belongs to cluster
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
  **optional** | ***ListClusterSecretsOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
@@ -709,7 +781,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -729,7 +801,7 @@ Listing all the K8S clusters from the cloud
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 
 ### Return type
 
@@ -742,7 +814,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -762,8 +834,8 @@ Lists namespaces for a cluster
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 
@@ -776,7 +848,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -796,8 +868,8 @@ List cluster nodepool labels
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 
@@ -810,7 +882,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -830,8 +902,8 @@ List cluser nodes
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 
@@ -844,7 +916,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -864,8 +936,8 @@ Merge a particular secret with an existing one
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **secretName** | **string**| Secret name as it will be seen in the cluster | 
 **installSecretRequest** | [**InstallSecretRequest**](InstallSecretRequest.md)|  | 
 
@@ -880,7 +952,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -898,8 +970,8 @@ Apply as new cluster leader
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **postLeaderElectionRequest** | [**PostLeaderElectionRequest**](PostLeaderElectionRequest.md)|  | 
 
 ### Return type
@@ -913,7 +985,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -931,8 +1003,8 @@ Report to Pipeline that a new node is ready (to be called by PKE installer)
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **postReadyPkeNodeRequest** | [**PostReadyPkeNodeRequest**](PostReadyPkeNodeRequest.md)|  | 
 
 ### Return type
@@ -946,7 +1018,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -966,8 +1038,8 @@ Updating an existing K8S cluster
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **body** | **map[string]interface{}**|  | 
 
 ### Return type
@@ -981,7 +1053,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -1001,8 +1073,8 @@ Update monitoring
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 

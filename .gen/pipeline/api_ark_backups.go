@@ -33,8 +33,8 @@ type ArkBackupsApiService service
 CreateARKBackupOfACluster Create ARK backup
 Create ARK backup of a cluster
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
  * @param createBackupRequest
 @return CreateBackupResponse
 */
@@ -67,7 +67,7 @@ func (a *ArkBackupsApiService) CreateARKBackupOfACluster(ctx _context.Context, o
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -107,28 +107,8 @@ func (a *ArkBackupsApiService) CreateARKBackupOfACluster(ctx _context.Context, o
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v ClientError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 401 {
+		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 404 {
-			var v RecordNotFound
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -156,8 +136,8 @@ func (a *ArkBackupsApiService) CreateARKBackupOfACluster(ctx _context.Context, o
 DeleteARKBackup Delete ARK backup
 Delete ARK backup
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
  * @param backupId ID of the backup
 @return DeleteBackupResponse
 */
@@ -191,7 +171,7 @@ func (a *ArkBackupsApiService) DeleteARKBackup(ctx _context.Context, orgId int32
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -229,28 +209,8 @@ func (a *ArkBackupsApiService) DeleteARKBackup(ctx _context.Context, orgId int32
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v ClientError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 401 {
+		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 404 {
-			var v RecordNotFound
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -278,8 +238,8 @@ func (a *ArkBackupsApiService) DeleteARKBackup(ctx _context.Context, orgId int32
 DownloadARKBackupContents Download ARK backup contents
 Download ARK backup contents
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
  * @param backupId ID of the backup
 @return *os.File
 */
@@ -313,7 +273,7 @@ func (a *ArkBackupsApiService) DownloadARKBackupContents(ctx _context.Context, o
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/x-gzip", "application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/x-gzip", "application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -351,28 +311,8 @@ func (a *ArkBackupsApiService) DownloadARKBackupContents(ctx _context.Context, o
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v ClientError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 401 {
+		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 404 {
-			var v RecordNotFound
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -400,8 +340,8 @@ func (a *ArkBackupsApiService) DownloadARKBackupContents(ctx _context.Context, o
 GetARKBackup Get ARK backup
 Get ARK backup
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
  * @param backupId ID of the backup
 @return BackupResponse
 */
@@ -435,7 +375,7 @@ func (a *ArkBackupsApiService) GetARKBackup(ctx _context.Context, orgId int32, i
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -473,28 +413,8 @@ func (a *ArkBackupsApiService) GetARKBackup(ctx _context.Context, orgId int32, i
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v ClientError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 401 {
+		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 404 {
-			var v RecordNotFound
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -522,8 +442,8 @@ func (a *ArkBackupsApiService) GetARKBackup(ctx _context.Context, orgId int32, i
 GetARKBackupLogs Get ARK backup logs
 Get ARK backup logs
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
  * @param backupId ID of the backup
 @return string
 */
@@ -557,7 +477,7 @@ func (a *ArkBackupsApiService) GetARKBackupLogs(ctx _context.Context, orgId int3
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"text/plain", "application/json"}
+	localVarHTTPHeaderAccepts := []string{"text/plain", "application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -595,28 +515,8 @@ func (a *ArkBackupsApiService) GetARKBackupLogs(ctx _context.Context, orgId int3
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v ClientError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 401 {
+		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 404 {
-			var v RecordNotFound
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -644,7 +544,7 @@ func (a *ArkBackupsApiService) GetARKBackupLogs(ctx _context.Context, orgId int3
 ListARKBackupsForOrganization List ARK backups of an Organization
 List ARK backups of an Organization
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
+ * @param orgId Organization identifier
 @return []BackupResponse
 */
 func (a *ArkBackupsApiService) ListARKBackupsForOrganization(ctx _context.Context, orgId int32) ([]BackupResponse, *_nethttp.Response, error) {
@@ -675,7 +575,7 @@ func (a *ArkBackupsApiService) ListARKBackupsForOrganization(ctx _context.Contex
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -713,28 +613,8 @@ func (a *ArkBackupsApiService) ListARKBackupsForOrganization(ctx _context.Contex
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v ClientError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 401 {
+		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 404 {
-			var v RecordNotFound
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -762,8 +642,8 @@ func (a *ArkBackupsApiService) ListARKBackupsForOrganization(ctx _context.Contex
 ListARKBackupsOfACluster List ARK backups of a cluster
 List ARK backups of a cluster
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
 @return []BackupResponse
 */
 func (a *ArkBackupsApiService) ListARKBackupsOfACluster(ctx _context.Context, orgId int32, id int32) ([]BackupResponse, *_nethttp.Response, error) {
@@ -795,7 +675,7 @@ func (a *ArkBackupsApiService) ListARKBackupsOfACluster(ctx _context.Context, or
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -833,28 +713,8 @@ func (a *ArkBackupsApiService) ListARKBackupsOfACluster(ctx _context.Context, or
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v ClientError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 401 {
+		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 404 {
-			var v RecordNotFound
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -882,8 +742,8 @@ func (a *ArkBackupsApiService) ListARKBackupsOfACluster(ctx _context.Context, or
 SyncARKBackupsOfACluster Sync ARK backups of a cluster
 Sync ARK backups of a cluster
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
 */
 func (a *ArkBackupsApiService) SyncARKBackupsOfACluster(ctx _context.Context, orgId int32, id int32) (*_nethttp.Response, error) {
 	var (
@@ -913,7 +773,7 @@ func (a *ArkBackupsApiService) SyncARKBackupsOfACluster(ctx _context.Context, or
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -941,28 +801,8 @@ func (a *ArkBackupsApiService) SyncARKBackupsOfACluster(ctx _context.Context, or
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v ClientError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 401 {
+		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 404 {
-			var v RecordNotFound
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -981,7 +821,7 @@ func (a *ArkBackupsApiService) SyncARKBackupsOfACluster(ctx _context.Context, or
 SyncOrgBackups Sync ARK backups of an Organization
 Sync ARK backups of an Organization
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
+ * @param orgId Organization identifier
 */
 func (a *ArkBackupsApiService) SyncOrgBackups(ctx _context.Context, orgId int32) (*_nethttp.Response, error) {
 	var (
@@ -1010,7 +850,7 @@ func (a *ArkBackupsApiService) SyncOrgBackups(ctx _context.Context, orgId int32)
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -1038,17 +878,7 @@ func (a *ArkBackupsApiService) SyncOrgBackups(ctx _context.Context, orgId int32)
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v ClientError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 401 {
+		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

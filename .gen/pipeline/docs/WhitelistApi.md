@@ -23,8 +23,8 @@ Create Whitelisted deployment
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **releaseWhiteListItem** | [**ReleaseWhiteListItem**](ReleaseWhiteListItem.md)|  | 
 
 ### Return type
@@ -58,8 +58,8 @@ Delete Whitelisted deployment
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **name** | **string**| Selected whitelist identification | 
 
 ### Return type
@@ -93,8 +93,8 @@ List Whitelisted deployments
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 

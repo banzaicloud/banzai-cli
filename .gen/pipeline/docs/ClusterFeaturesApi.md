@@ -23,8 +23,8 @@ Activate a cluster feature
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization ID | 
-**id** | **int32**| Cluster ID | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **featureName** | **string**| Feature name | 
 **activateClusterFeatureRequest** | [**ActivateClusterFeatureRequest**](ActivateClusterFeatureRequest.md)|  | 
 
@@ -39,7 +39,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -57,8 +57,8 @@ Get details of a cluster feature
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization ID | 
-**id** | **int32**| Cluster ID | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **featureName** | **string**| Feature name | 
 
 ### Return type
@@ -72,7 +72,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -90,8 +90,8 @@ Deactivate a cluster feature
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization ID | 
-**id** | **int32**| Cluster ID | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **featureName** | **string**| Feature name | 
 
 ### Return type
@@ -105,7 +105,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -123,8 +123,8 @@ List enabled features of a cluster
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization ID | 
-**id** | **int32**| Cluster ID | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 
@@ -137,7 +137,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -155,8 +155,8 @@ Update a cluster feature
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization ID | 
-**id** | **int32**| Cluster ID | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **featureName** | **string**| Feature name | 
 **updateClusterFeatureRequest** | [**UpdateClusterFeatureRequest**](UpdateClusterFeatureRequest.md)|  | 
 
@@ -171,7 +171,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

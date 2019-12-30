@@ -23,7 +23,7 @@ List route tables of the given VPC network
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **networkId** | **string**| VPC network identification | 
 **secretId** | **string**| Secret identification | 
 **cloudType** | **string**| Identifies the cloud provider | 
@@ -54,7 +54,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -74,7 +74,7 @@ List VPC networks accessible by the organization.
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **secretId** | **string**| Secret identification | 
 **cloudType** | **string**| Identifies the cloud provider | 
  **optional** | ***ListVPCNetworksOpts** | optional parameters | nil if no parameters
@@ -103,7 +103,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -123,7 +123,7 @@ List subnetworks of the given VPC network
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **networkId** | **string**| VPC network identification | 
 **secretId** | **string**| Secret identification | 
 **cloudType** | **string**| Identifies the cloud provider | 
@@ -154,7 +154,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

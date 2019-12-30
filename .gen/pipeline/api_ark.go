@@ -32,8 +32,8 @@ type ArkApiService service
 CheckARKStatus Check ARK service status
 Check ARK service status
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
 */
 func (a *ArkApiService) CheckARKStatus(ctx _context.Context, orgId int32, id int32) (*_nethttp.Response, error) {
 	var (
@@ -63,7 +63,7 @@ func (a *ArkApiService) CheckARKStatus(ctx _context.Context, orgId int32, id int
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -91,6 +91,16 @@ func (a *ArkApiService) CheckARKStatus(ctx _context.Context, orgId int32, id int
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
+		if localVarHTTPResponse.StatusCode == 0 {
+			var v CommonError
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
 		return localVarHTTPResponse, newErr
 	}
 
@@ -101,8 +111,8 @@ func (a *ArkApiService) CheckARKStatus(ctx _context.Context, orgId int32, id int
 CheckARKStatusGET Check ARK service status
 Check ARK service status
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
 @return BackupServiceResponse
 */
 func (a *ArkApiService) CheckARKStatusGET(ctx _context.Context, orgId int32, id int32) (BackupServiceResponse, *_nethttp.Response, error) {
@@ -134,7 +144,7 @@ func (a *ArkApiService) CheckARKStatusGET(ctx _context.Context, orgId int32, id 
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -172,6 +182,16 @@ func (a *ArkApiService) CheckARKStatusGET(ctx _context.Context, orgId int32, id 
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
+		if localVarHTTPResponse.StatusCode == 0 {
+			var v CommonError
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -191,8 +211,8 @@ func (a *ArkApiService) CheckARKStatusGET(ctx _context.Context, orgId int32, id 
 DisableARK Disable ARK service
 Disable ARK service
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
 @return DisableArkResponse
 */
 func (a *ArkApiService) DisableARK(ctx _context.Context, orgId int32, id int32) (DisableArkResponse, *_nethttp.Response, error) {
@@ -224,7 +244,7 @@ func (a *ArkApiService) DisableARK(ctx _context.Context, orgId int32, id int32) 
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -262,28 +282,8 @@ func (a *ArkApiService) DisableARK(ctx _context.Context, orgId int32, id int32) 
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v ClientError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 401 {
+		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 404 {
-			var v RecordNotFound
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -311,8 +311,8 @@ func (a *ArkApiService) DisableARK(ctx _context.Context, orgId int32, id int32) 
 EnableARK Enable ARK service
 Enable ARK service
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
  * @param enableArkRequest
 @return EnableArkResponse
 */
@@ -345,7 +345,7 @@ func (a *ArkApiService) EnableARK(ctx _context.Context, orgId int32, id int32, e
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -385,28 +385,8 @@ func (a *ArkApiService) EnableARK(ctx _context.Context, orgId int32, id int32, e
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v ClientError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 401 {
+		if localVarHTTPResponse.StatusCode == 0 {
 			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 404 {
-			var v RecordNotFound
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()

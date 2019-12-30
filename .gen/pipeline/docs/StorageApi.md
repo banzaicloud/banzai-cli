@@ -25,7 +25,7 @@ Creates a new object store bucket on the Cloud provider referenced by the given 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **createObjectStoreBucketRequest** | [**CreateObjectStoreBucketRequest**](CreateObjectStoreBucketRequest.md)|  | 
 
 ### Return type
@@ -39,7 +39,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -59,7 +59,7 @@ Deletes the object store bucket identified by the given name. The credentials fo
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **name** | **string**| Bucket identification | 
 **secretId** | **string**| Secret identification | 
 **cloudType** | **string**| Identifies the cloud provider | 
@@ -92,7 +92,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -112,7 +112,7 @@ Retrieves the details of the object store bucket given its name
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **name** | **string**| Bucket identification | 
 **cloudType** | **string**| Identifies the cloud provider | 
  **optional** | ***GetBucketOpts** | optional parameters | nil if no parameters
@@ -144,7 +144,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -164,7 +164,7 @@ Retrieves the status of the object store bucket given its name
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **name** | **string**| Bucket identification | 
 **cloudType** | **string**| Identifies the cloud provider | 
  **optional** | ***GetObjectStoreBucketStatusOpts** | optional parameters | nil if no parameters
@@ -196,7 +196,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: Not defined
+- **Accept**: application/json, application/problem+json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -216,7 +216,7 @@ List object store buckets accessible by the credentials referenced by the given 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
  **optional** | ***ListObjectStoreBucketsOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
@@ -242,7 +242,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

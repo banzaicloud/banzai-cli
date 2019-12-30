@@ -6,7 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Http** | [**PkeClusterHttpProxyOptions**](PKEClusterHTTPProxyOptions.md) |  | [optional] 
 **Https** | [**PkeClusterHttpProxyOptions**](PKEClusterHTTPProxyOptions.md) |  | [optional] 
-**Exceptions** | **[]string** | list of URLs excluded from proxying | [optional] 
+**Exceptions** | **[]string** |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

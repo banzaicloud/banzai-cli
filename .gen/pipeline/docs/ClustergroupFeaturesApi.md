@@ -14,7 +14,7 @@ Method | HTTP request | Description
 
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNameDelete
 
-> string ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNameDelete(ctx, orgid, clusterGroupId, featureName)
+> string ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNameDelete(ctx, orgId, clusterGroupId, featureName)
 Disable Feature of Cluster Group
 
 disable feature on all members of a cluster group
@@ -25,7 +25,7 @@ disable feature on all members of a cluster group
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgid** | **int32**| Organization ID | 
+**orgId** | **int32**| Organization identifier | 
 **clusterGroupId** | **int32**| Cluster Group ID | 
 **featureName** | **string**| Name of the feature | 
 
@@ -40,7 +40,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -49,7 +49,7 @@ Name | Type | Description  | Notes
 
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNameGet
 
-> ApiFeatureResponse ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNameGet(ctx, orgid, clusterGroupId, featureName)
+> ApiFeatureResponse ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNameGet(ctx, orgId, clusterGroupId, featureName)
 Get Feature of Cluster Group
 
 retrieve info about a cluster group feature and it's status on each member cluster
@@ -60,7 +60,7 @@ retrieve info about a cluster group feature and it's status on each member clust
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgid** | **int32**| Organization ID | 
+**orgId** | **int32**| Organization identifier | 
 **clusterGroupId** | **int32**| Cluster Group ID | 
 **featureName** | **string**| Name of the feature | 
 
@@ -75,7 +75,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -84,7 +84,7 @@ Name | Type | Description  | Notes
 
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNamePost
 
-> string ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNamePost(ctx, orgid, clusterGroupId, featureName, body)
+> string ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNamePost(ctx, orgId, clusterGroupId, featureName, body)
 Enable Feature of Cluster Group
 
 enable feature on all members of a cluster group
@@ -95,7 +95,7 @@ enable feature on all members of a cluster group
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgid** | **int32**| Organization ID | 
+**orgId** | **int32**| Organization identifier | 
 **clusterGroupId** | **int32**| Cluster Group ID | 
 **featureName** | **string**| Name of the feature | 
 **body** | **map[string]interface{}**| Feature properties | 
@@ -111,7 +111,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -120,7 +120,7 @@ Name | Type | Description  | Notes
 
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNamePut
 
-> string ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNamePut(ctx, orgid, clusterGroupId, featureName, body)
+> string ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNamePut(ctx, orgId, clusterGroupId, featureName, body)
 Update Feature of Cluster Group
 
 update properties of a feature
@@ -131,7 +131,7 @@ update properties of a feature
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgid** | **int32**| Organization ID | 
+**orgId** | **int32**| Organization identifier | 
 **clusterGroupId** | **int32**| Cluster Group ID | 
 **featureName** | **string**| Name of the feature | 
 **body** | **map[string]interface{}**| Feature properties | 
@@ -147,7 +147,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -156,7 +156,7 @@ Name | Type | Description  | Notes
 
 ## ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesGet
 
-> []ApiFeatureResponse ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesGet(ctx, orgid, clusterGroupId, featureName)
+> []ApiFeatureResponse ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesGet(ctx, orgId, clusterGroupId)
 Get All Features of Cluster Group
 
 retrieve info about a cluster group feature and it's status on each member cluster
@@ -167,9 +167,8 @@ retrieve info about a cluster group feature and it's status on each member clust
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgid** | **int32**| Organization ID | 
+**orgId** | **int32**| Organization identifier | 
 **clusterGroupId** | **int32**| Cluster Group ID | 
-**featureName** | **string**| Name of the future | 
 
 ### Return type
 
@@ -182,7 +181,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

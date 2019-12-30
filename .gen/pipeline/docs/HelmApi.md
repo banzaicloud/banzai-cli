@@ -5,7 +5,7 @@ All URIs are relative to *http://localhost:9090*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**HelmChartDetails**](HelmApi.md#HelmChartDetails) | **Get** /api/v1/orgs/{orgId}/helm/chart/{repoName}/{chartName} | Chart details
-[**HelmChartList**](HelmApi.md#HelmChartList) | **Get** /api/v1/orgs/{orgId}/helm/charts/ | Chart List
+[**HelmChartList**](HelmApi.md#HelmChartList) | **Get** /api/v1/orgs/{orgId}/helm/charts | Chart List
 [**HelmListRepos**](HelmApi.md#HelmListRepos) | **Get** /api/v1/orgs/{orgId}/helm/repos | List repositories
 [**HelmReposAdd**](HelmApi.md#HelmReposAdd) | **Post** /api/v1/orgs/{orgId}/helm/repos | Add Repo
 [**HelmReposDelete**](HelmApi.md#HelmReposDelete) | **Delete** /api/v1/orgs/{orgId}/helm/repos/{repoName} | Delete Repo
@@ -27,7 +27,7 @@ Get helm chart details
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **repoName** | **string**| Chart repository name | 
 **chartName** | **string**| Chart Name | 
  **optional** | ***HelmChartDetailsOpts** | optional parameters | nil if no parameters
@@ -55,7 +55,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -75,7 +75,7 @@ Get available Helm chart's list
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
  **optional** | ***HelmChartListOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
@@ -101,7 +101,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -121,7 +121,7 @@ Listing Helm repositories in the cluster
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 
 ### Return type
 
@@ -134,7 +134,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -154,7 +154,7 @@ Add new Helm repository
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **helmReposAddRequest** | [**HelmReposAddRequest**](HelmReposAddRequest.md)|  | 
 
 ### Return type
@@ -168,7 +168,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -188,7 +188,7 @@ Delete  Helm repository
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **repoName** | **string**| Helm repo name | 
 
 ### Return type
@@ -202,7 +202,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -222,7 +222,7 @@ Modify Helm repository
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **repoName** | **string**| Helm repo name | 
 **helmReposModifyRequest** | [**HelmReposModifyRequest**](HelmReposModifyRequest.md)|  | 
 
@@ -237,7 +237,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -257,7 +257,7 @@ Modify Helm repository
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **repoName** | **string**| Helm repo name | 
 
 ### Return type
@@ -271,7 +271,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

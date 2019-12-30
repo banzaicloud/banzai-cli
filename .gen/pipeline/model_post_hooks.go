@@ -12,6 +12,5 @@
 package pipeline
 // PostHooks struct for PostHooks
 type PostHooks struct {
-	InstallLogging LoggingPostHookInstallLogging `json:"InstallLogging,omitempty"`
 	PostHookFunctionName map[string]interface{} `json:"PostHookFunctionName,omitempty"`
 }
