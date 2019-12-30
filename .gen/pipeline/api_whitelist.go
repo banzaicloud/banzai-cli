@@ -32,8 +32,8 @@ type WhitelistApiService service
 CreateWhitelists Create Whitelisted deployment
 Create Whitelisted deployment
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
  * @param releaseWhiteListItem
 */
 func (a *WhitelistApiService) CreateWhitelists(ctx _context.Context, orgId int32, id int32, releaseWhiteListItem ReleaseWhiteListItem) (*_nethttp.Response, error) {
@@ -104,8 +104,8 @@ func (a *WhitelistApiService) CreateWhitelists(ctx _context.Context, orgId int32
 DeleteWhitelist Delete Whitelisted deployment
 Delete Whitelisted deployment
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
  * @param name Selected whitelist identification
 */
 func (a *WhitelistApiService) DeleteWhitelist(ctx _context.Context, orgId int32, id int32, name string) (*_nethttp.Response, error) {
@@ -175,8 +175,8 @@ func (a *WhitelistApiService) DeleteWhitelist(ctx _context.Context, orgId int32,
 ListWhitelists List Whitelisted deployments
 List Whitelisted deployments
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
- * @param id Selected cluster identification (number)
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
 @return []ReleaseWhiteListItem
 */
 func (a *WhitelistApiService) ListWhitelists(ctx _context.Context, orgId int32, id int32) ([]ReleaseWhiteListItem, *_nethttp.Response, error) {
@@ -244,7 +244,6 @@ func (a *WhitelistApiService) ListWhitelists(ctx _context.Context, orgId int32, 
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}

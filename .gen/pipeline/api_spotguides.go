@@ -32,7 +32,7 @@ type SpotguidesApiService service
 GetSpotguideDetail Get spotguide details
 Get details about specific spotguide
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
+ * @param orgId Organization identifier
  * @param name Spotguide name
 @return SpotguideDetailsResponse
 */
@@ -65,7 +65,7 @@ func (a *SpotguidesApiService) GetSpotguideDetail(ctx _context.Context, orgId in
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -103,16 +103,13 @@ func (a *SpotguidesApiService) GetSpotguideDetail(ctx _context.Context, orgId in
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 404 {
-			var v SpotguideNotFound
+			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -132,7 +129,7 @@ func (a *SpotguidesApiService) GetSpotguideDetail(ctx _context.Context, orgId in
 LaunchSpotguide Launch spotguide
 Launch a spotguide
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
+ * @param orgId Organization identifier
  * @param launchSpotguidesRequest
 */
 func (a *SpotguidesApiService) LaunchSpotguide(ctx _context.Context, orgId int32, launchSpotguidesRequest LaunchSpotguidesRequest) (*_nethttp.Response, error) {
@@ -202,7 +199,7 @@ func (a *SpotguidesApiService) LaunchSpotguide(ctx _context.Context, orgId int32
 ListSpotguides List spotguides
 List all available spotguides
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
+ * @param orgId Organization identifier
 @return []SpotguideDetailsResponse
 */
 func (a *SpotguidesApiService) ListSpotguides(ctx _context.Context, orgId int32) ([]SpotguideDetailsResponse, *_nethttp.Response, error) {
@@ -269,7 +266,6 @@ func (a *SpotguidesApiService) ListSpotguides(ctx _context.Context, orgId int32)
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -289,7 +285,7 @@ func (a *SpotguidesApiService) ListSpotguides(ctx _context.Context, orgId int32)
 /*
 UpdateSpotguides Update spotguide repositories
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identification
+ * @param orgId Organization identifier
 */
 func (a *SpotguidesApiService) UpdateSpotguides(ctx _context.Context, orgId int32) (*_nethttp.Response, error) {
 	var (

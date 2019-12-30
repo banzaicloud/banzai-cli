@@ -14,6 +14,7 @@ Method | HTTP request | Description
 > VersionResponse ApiVersionGet(ctx, )
 
 
+
 Return Pipeline build and deployment info
 
 ### Required Parameters
@@ -41,6 +42,7 @@ No authorization required
 ## ListEndpoints
 
 > []string ListEndpoints(ctx, )
+
 List Pipeline API endpoints
 
 Listing Pipeline API endpoint

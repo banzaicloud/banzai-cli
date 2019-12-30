@@ -32,11 +32,11 @@ type ScanlogApiService service
 ListScans List scans
 List scans
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param id Selected cluster identification (number)
- * @param orgId Organization identification
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
 @return []ScanLogItem
 */
-func (a *ScanlogApiService) ListScans(ctx _context.Context, id int32, orgId int32) ([]ScanLogItem, *_nethttp.Response, error) {
+func (a *ScanlogApiService) ListScans(ctx _context.Context, orgId int32, id int32) ([]ScanLogItem, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
@@ -48,8 +48,8 @@ func (a *ScanlogApiService) ListScans(ctx _context.Context, id int32, orgId int3
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/scanlog"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -101,7 +101,6 @@ func (a *ScanlogApiService) ListScans(ctx _context.Context, id int32, orgId int3
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -122,12 +121,12 @@ func (a *ScanlogApiService) ListScans(ctx _context.Context, id int32, orgId int3
 ListScansByRelease List scans by release
 List scans by release
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param id Selected cluster identification (number)
- * @param orgId Organization identification
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
  * @param releaseName release name identification
 @return []ScanLogItem
 */
-func (a *ScanlogApiService) ListScansByRelease(ctx _context.Context, id int32, orgId int32, releaseName string) ([]ScanLogItem, *_nethttp.Response, error) {
+func (a *ScanlogApiService) ListScansByRelease(ctx _context.Context, orgId int32, id int32, releaseName string) ([]ScanLogItem, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
@@ -139,8 +138,8 @@ func (a *ScanlogApiService) ListScansByRelease(ctx _context.Context, id int32, o
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/scanlog/{releaseName}"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"releaseName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", releaseName)), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -193,7 +192,6 @@ func (a *ScanlogApiService) ListScansByRelease(ctx _context.Context, id int32, o
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}

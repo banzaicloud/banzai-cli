@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 **MaxCount** | **int32** |  | 
 **Labels** | **map[string]string** |  | [optional] 
 **Image** | **string** |  | [optional] 
-**Subnet** | [**EksSubnet**](.md) |  | [optional] 
+**Subnet** | [**EksSubnet**](EKSSubnet.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

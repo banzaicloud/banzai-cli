@@ -13,6 +13,7 @@ Method | HTTP request | Description
 ## CreateToken
 
 > TokenCreateResponse CreateToken(ctx, tokenCreateRequest)
+
 Create token
 
 Create token
@@ -36,7 +37,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -46,6 +47,7 @@ Name | Type | Description  | Notes
 ## DeleteToken
 
 > DeleteToken(ctx, tokenId)
+
 Delete an API token
 
 Delete an API token
@@ -69,7 +71,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -79,6 +81,7 @@ Name | Type | Description  | Notes
 ## ListTokens
 
 > []TokenListResponseItem ListTokens(ctx, )
+
 List all API tokens
 
 List all API tokens
@@ -98,7 +101,7 @@ This endpoint does not need any parameter.
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

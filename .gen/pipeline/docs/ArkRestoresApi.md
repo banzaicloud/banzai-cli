@@ -16,6 +16,7 @@ Method | HTTP request | Description
 ## CreateARKRestore
 
 > CreateRestoreResponse CreateARKRestore(ctx, orgId, id, createRestoreRequest)
+
 Create ARK restore
 
 Create ARK restore
@@ -26,8 +27,8 @@ Create ARK restore
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **createRestoreRequest** | [**CreateRestoreRequest**](CreateRestoreRequest.md)|  | 
 
 ### Return type
@@ -41,7 +42,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -51,6 +52,7 @@ Name | Type | Description  | Notes
 ## DeleteARKRestore
 
 > DeleteRestoreResponse DeleteARKRestore(ctx, orgId, id, restoreId)
+
 Delete ARK restore
 
 Delete ARK restore
@@ -61,8 +63,8 @@ Delete ARK restore
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **restoreId** | **int32**| ID of the restore | 
 
 ### Return type
@@ -76,7 +78,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -86,6 +88,7 @@ Name | Type | Description  | Notes
 ## GetARKRestore
 
 > RestoreResponse GetARKRestore(ctx, orgId, id, restoreId)
+
 Get ARK restore
 
 Get ARK restore
@@ -96,8 +99,8 @@ Get ARK restore
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **restoreId** | **int32**| ID of the restore | 
 
 ### Return type
@@ -111,7 +114,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -121,6 +124,7 @@ Name | Type | Description  | Notes
 ## GetARKRestoreResuts
 
 > RestoreResultsResponse GetARKRestoreResuts(ctx, orgId, id, restoreId)
+
 Get ARK restore results
 
 Get ARK restore results
@@ -131,8 +135,8 @@ Get ARK restore results
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **restoreId** | **int32**| ID of the restore | 
 
 ### Return type
@@ -146,7 +150,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -156,6 +160,7 @@ Name | Type | Description  | Notes
 ## ListARKRestores
 
 > []RestoreResponse ListARKRestores(ctx, orgId, id)
+
 List ARK restores
 
 List ARK restores
@@ -166,8 +171,8 @@ List ARK restores
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 
@@ -180,7 +185,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -190,6 +195,7 @@ Name | Type | Description  | Notes
 ## SyncARKRestoresOfACluster
 
 > SyncARKRestoresOfACluster(ctx, orgId, id)
+
 Sync ARK restores of a cluster
 
 Sync ARK restores of a cluster
@@ -200,8 +206,8 @@ Sync ARK restores of a cluster
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 
@@ -214,7 +220,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

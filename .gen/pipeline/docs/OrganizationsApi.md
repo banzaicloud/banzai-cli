@@ -13,6 +13,7 @@ Method | HTTP request | Description
 ## GetOrg
 
 > OrganizationListItemResponse GetOrg(ctx, orgId)
+
 Get organization
 
 Getting organization
@@ -23,7 +24,7 @@ Getting organization
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 
 ### Return type
 
@@ -36,7 +37,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -46,6 +47,7 @@ Name | Type | Description  | Notes
 ## ListOrgs
 
 > []OrganizationListItemResponse ListOrgs(ctx, )
+
 List organizations
 
 Listing organizations
@@ -65,7 +67,7 @@ This endpoint does not need any parameter.
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -75,6 +77,7 @@ This endpoint does not need any parameter.
 ## SyncOrgs
 
 > SyncOrgs(ctx, )
+
 Synchronize Github organizations
 
 ### Required Parameters
@@ -92,7 +95,7 @@ This endpoint does not need any parameter.
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

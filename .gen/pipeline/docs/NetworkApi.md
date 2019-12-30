@@ -13,6 +13,7 @@ Method | HTTP request | Description
 ## ListRouteTables
 
 > []RouteTableInfo ListRouteTables(ctx, orgId, networkId, secretId, cloudType, optional)
+
 List VPC route tables
 
 List route tables of the given VPC network
@@ -23,7 +24,7 @@ List route tables of the given VPC network
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **networkId** | **string**| VPC network identification | 
 **secretId** | **string**| Secret identification | 
 **cloudType** | **string**| Identifies the cloud provider | 
@@ -54,7 +55,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -64,6 +65,7 @@ Name | Type | Description  | Notes
 ## ListVPCNetworks
 
 > []VpcNetworkInfo ListVPCNetworks(ctx, orgId, secretId, cloudType, optional)
+
 List VPC networks
 
 List VPC networks accessible by the organization.
@@ -74,7 +76,7 @@ List VPC networks accessible by the organization.
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **secretId** | **string**| Secret identification | 
 **cloudType** | **string**| Identifies the cloud provider | 
  **optional** | ***ListVPCNetworksOpts** | optional parameters | nil if no parameters
@@ -103,7 +105,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -113,6 +115,7 @@ Name | Type | Description  | Notes
 ## ListVPCSubnets
 
 > []SubnetInfo ListVPCSubnets(ctx, orgId, networkId, secretId, cloudType, optional)
+
 List VPC subnetworks
 
 List subnetworks of the given VPC network
@@ -123,7 +126,7 @@ List subnetworks of the given VPC network
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **networkId** | **string**| VPC network identification | 
 **secretId** | **string**| Secret identification | 
 **cloudType** | **string**| Identifies the cloud provider | 
@@ -154,7 +157,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

@@ -12,6 +12,7 @@ Method | HTTP request | Description
 ## ListDeploymentsByImage
 
 > []ListDeploymentsResponseItem ListDeploymentsByImage(ctx, orgId, id, imageDigest)
+
 List Deployments by Image
 
 List Deployments by Image
@@ -22,8 +23,8 @@ List Deployments by Image
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **imageDigest** | **string**| Image digest | 
 
 ### Return type
@@ -37,7 +38,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -47,6 +48,7 @@ Name | Type | Description  | Notes
 ## ListImages
 
 > []ClusterImage ListImages(ctx, orgId, id)
+
 List Images used in cluster
 
 List Images used in cluster
@@ -57,8 +59,8 @@ List Images used in cluster
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 
@@ -71,7 +73,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

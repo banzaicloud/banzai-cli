@@ -13,6 +13,7 @@ Method | HTTP request | Description
 ## CreateWhitelists
 
 > CreateWhitelists(ctx, orgId, id, releaseWhiteListItem)
+
 Create Whitelisted deployment
 
 Create Whitelisted deployment
@@ -23,8 +24,8 @@ Create Whitelisted deployment
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **releaseWhiteListItem** | [**ReleaseWhiteListItem**](ReleaseWhiteListItem.md)|  | 
 
 ### Return type
@@ -48,6 +49,7 @@ Name | Type | Description  | Notes
 ## DeleteWhitelist
 
 > DeleteWhitelist(ctx, orgId, id, name)
+
 Delete Whitelisted deployment
 
 Delete Whitelisted deployment
@@ -58,8 +60,8 @@ Delete Whitelisted deployment
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **name** | **string**| Selected whitelist identification | 
 
 ### Return type
@@ -83,6 +85,7 @@ Name | Type | Description  | Notes
 ## ListWhitelists
 
 > []ReleaseWhiteListItem ListWhitelists(ctx, orgId, id)
+
 List Whitelisted deployments
 
 List Whitelisted deployments
@@ -93,8 +96,8 @@ List Whitelisted deployments
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 

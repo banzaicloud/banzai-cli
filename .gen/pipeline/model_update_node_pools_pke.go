@@ -26,4 +26,6 @@ type UpdateNodePoolsPke struct {
 	Count int32 `json:"count,omitempty"`
 	// The subnet to create the node pool into. If this field is omitted than the subnet from the cluster level network configuration is used.
 	Subnets []string `json:"subnets,omitempty"`
+	// user provided custom node labels to be placed onto the nodes of the node pool
+	Labels map[string]string `json:"labels,omitempty"`
 }

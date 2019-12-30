@@ -13,7 +13,6 @@ package pipeline
 // CreatePkeOnAzureClusterRequest struct for CreatePkeOnAzureClusterRequest
 type CreatePkeOnAzureClusterRequest struct {
 	Name string `json:"name"`
-	Features []Feature `json:"features,omitempty"`
 	SecretId string `json:"secretId,omitempty"`
 	SecretName string `json:"secretName,omitempty"`
 	SshSecretId string `json:"sshSecretId,omitempty"`

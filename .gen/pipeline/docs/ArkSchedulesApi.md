@@ -14,6 +14,7 @@ Method | HTTP request | Description
 ## CreateARKSchedule
 
 > CreateScheduleResponse CreateARKSchedule(ctx, orgId, id, createScheduleRequest)
+
 Create ARK schedule
 
 Create ARK schedule
@@ -24,8 +25,8 @@ Create ARK schedule
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **createScheduleRequest** | [**CreateScheduleRequest**](CreateScheduleRequest.md)|  | 
 
 ### Return type
@@ -39,7 +40,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -49,6 +50,7 @@ Name | Type | Description  | Notes
 ## DeleteARKSchedule
 
 > DeleteScheduleResponse DeleteARKSchedule(ctx, orgId, id, scheduleName)
+
 Delete ARK schedule
 
 Delete ARK schedule
@@ -59,8 +61,8 @@ Delete ARK schedule
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **scheduleName** | **string**| Name of the schedule | 
 
 ### Return type
@@ -74,7 +76,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -84,6 +86,7 @@ Name | Type | Description  | Notes
 ## GetARKSchedule
 
 > ScheduleResponse GetARKSchedule(ctx, orgId, id, scheduleName)
+
 Get ARK schedule
 
 Get ARK schedule
@@ -94,8 +97,8 @@ Get ARK schedule
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **scheduleName** | **string**| Name of the schedule | 
 
 ### Return type
@@ -109,7 +112,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -119,6 +122,7 @@ Name | Type | Description  | Notes
 ## ListARKSchedules
 
 > []ScheduleResponse ListARKSchedules(ctx, orgId, id)
+
 List ARK schedules
 
 List ARK schedules
@@ -129,8 +133,8 @@ List ARK schedules
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
-**id** | **int32**| Selected cluster identification (number) | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 
@@ -143,7 +147,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

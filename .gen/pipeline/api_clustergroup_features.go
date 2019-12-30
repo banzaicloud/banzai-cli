@@ -32,12 +32,12 @@ type ClustergroupFeaturesApiService service
 ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNameDelete Disable Feature of Cluster Group
 disable feature on all members of a cluster group
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgid Organization ID
+ * @param orgId Organization identifier
  * @param clusterGroupId Cluster Group ID
  * @param featureName Name of the feature
 @return string
 */
-func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNameDelete(ctx _context.Context, orgid int32, clusterGroupId int32, featureName string) (string, *_nethttp.Response, error) {
+func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNameDelete(ctx _context.Context, orgId int32, clusterGroupId int32, featureName string) (string, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodDelete
 		localVarPostBody     interface{}
@@ -49,7 +49,7 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgid}/clustergroups/{clusterGroupId}/features/{featureName}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgid"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgid)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"clusterGroupId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", clusterGroupId)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"featureName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", featureName)), -1)
 
@@ -67,7 +67,7 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -105,7 +105,6 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -113,8 +112,6 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -134,12 +131,12 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNameGet Get Feature of Cluster Group
 retrieve info about a cluster group feature and it&#39;s status on each member cluster
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgid Organization ID
+ * @param orgId Organization identifier
  * @param clusterGroupId Cluster Group ID
  * @param featureName Name of the feature
 @return ApiFeatureResponse
 */
-func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNameGet(ctx _context.Context, orgid int32, clusterGroupId int32, featureName string) (ApiFeatureResponse, *_nethttp.Response, error) {
+func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNameGet(ctx _context.Context, orgId int32, clusterGroupId int32, featureName string) (ApiFeatureResponse, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
@@ -151,7 +148,7 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgid}/clustergroups/{clusterGroupId}/features/{featureName}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgid"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgid)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"clusterGroupId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", clusterGroupId)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"featureName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", featureName)), -1)
 
@@ -169,7 +166,7 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -207,7 +204,6 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -215,8 +211,6 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -236,13 +230,13 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNamePost Enable Feature of Cluster Group
 enable feature on all members of a cluster group
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgid Organization ID
+ * @param orgId Organization identifier
  * @param clusterGroupId Cluster Group ID
  * @param featureName Name of the feature
  * @param body Feature properties
 @return string
 */
-func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNamePost(ctx _context.Context, orgid int32, clusterGroupId int32, featureName string, body map[string]interface{}) (string, *_nethttp.Response, error) {
+func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNamePost(ctx _context.Context, orgId int32, clusterGroupId int32, featureName string, body map[string]interface{}) (string, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPost
 		localVarPostBody     interface{}
@@ -254,7 +248,7 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgid}/clustergroups/{clusterGroupId}/features/{featureName}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgid"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgid)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"clusterGroupId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", clusterGroupId)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"featureName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", featureName)), -1)
 
@@ -272,7 +266,7 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -312,7 +306,6 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -320,18 +313,6 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 404 {
-			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -351,13 +332,13 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNamePut Update Feature of Cluster Group
 update properties of a feature
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgid Organization ID
+ * @param orgId Organization identifier
  * @param clusterGroupId Cluster Group ID
  * @param featureName Name of the feature
  * @param body Feature properties
 @return string
 */
-func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNamePut(ctx _context.Context, orgid int32, clusterGroupId int32, featureName string, body map[string]interface{}) (string, *_nethttp.Response, error) {
+func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesFeatureNamePut(ctx _context.Context, orgId int32, clusterGroupId int32, featureName string, body map[string]interface{}) (string, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPut
 		localVarPostBody     interface{}
@@ -369,7 +350,7 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgid}/clustergroups/{clusterGroupId}/features/{featureName}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgid"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgid)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"clusterGroupId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", clusterGroupId)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"featureName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", featureName)), -1)
 
@@ -387,7 +368,7 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -427,7 +408,6 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -435,18 +415,6 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 404 {
-			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -466,12 +434,11 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesGet Get All Features of Cluster Group
 retrieve info about a cluster group feature and it&#39;s status on each member cluster
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgid Organization ID
+ * @param orgId Organization identifier
  * @param clusterGroupId Cluster Group ID
- * @param featureName Name of the future
 @return []ApiFeatureResponse
 */
-func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesGet(ctx _context.Context, orgid int32, clusterGroupId int32, featureName string) ([]ApiFeatureResponse, *_nethttp.Response, error) {
+func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdFeaturesGet(ctx _context.Context, orgId int32, clusterGroupId int32) ([]ApiFeatureResponse, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
@@ -483,9 +450,8 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgid}/clustergroups/{clusterGroupId}/features"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgid"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgid)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"clusterGroupId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", clusterGroupId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"featureName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", featureName)), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -501,7 +467,7 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -539,7 +505,6 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -547,8 +512,6 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 

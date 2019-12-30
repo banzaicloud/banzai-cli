@@ -15,6 +15,7 @@ Method | HTTP request | Description
 ## CreateBackupBucket
 
 > BackupBucketResponse CreateBackupBucket(ctx, orgId, createBackupBucketRequest)
+
 Create backup bucket
 
 Create backup bucket
@@ -25,7 +26,7 @@ Create backup bucket
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **createBackupBucketRequest** | [**CreateBackupBucketRequest**](CreateBackupBucketRequest.md)|  | 
 
 ### Return type
@@ -39,7 +40,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -49,6 +50,7 @@ Name | Type | Description  | Notes
 ## DeleteBackupBucket
 
 > DeleteBackupBucketResponse DeleteBackupBucket(ctx, orgId, bucketId)
+
 Delete backup bucket by ID
 
 Delete backup bucket by ID
@@ -59,7 +61,7 @@ Delete backup bucket by ID
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **bucketId** | **int32**| ID of the bucket | 
 
 ### Return type
@@ -73,7 +75,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -83,6 +85,7 @@ Name | Type | Description  | Notes
 ## GetBackupBucket
 
 > DeployedBackupBucketResponse GetBackupBucket(ctx, orgId, bucketId)
+
 Get backup bucket by ID
 
 Get backup bucket by ID
@@ -93,7 +96,7 @@ Get backup bucket by ID
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **bucketId** | **int32**| ID of the bucket | 
 
 ### Return type
@@ -107,7 +110,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -117,6 +120,7 @@ Name | Type | Description  | Notes
 ## ListBackupBuckets
 
 > []BackupBucketResponse ListBackupBuckets(ctx, orgId)
+
 List backup buckets
 
 List backup buckets
@@ -127,7 +131,7 @@ List backup buckets
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 
 ### Return type
 
@@ -140,7 +144,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -150,6 +154,7 @@ Name | Type | Description  | Notes
 ## SyncBackupBucket
 
 > SyncBackupBucket(ctx, orgId)
+
 Sync backup buckets
 
 Sync backup buckets
@@ -160,7 +165,7 @@ Sync backup buckets
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 
 ### Return type
 
@@ -173,7 +178,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

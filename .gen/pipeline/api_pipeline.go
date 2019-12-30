@@ -95,7 +95,6 @@ func (a *PipelineApiService) ListCapabilities(ctx _context.Context) (map[string]
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}

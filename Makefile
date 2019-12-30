@@ -21,7 +21,7 @@ endif
 TEST_FORMAT = short-verbose
 endif
 
-PIPELINE_VERSION = 0.33.0
+PIPELINE_VERSION = 0.35.0
 CLOUDINFO_VERSION = 0.7.8
 TELESCOPES_VERSION = 0.5.2
 
@@ -31,7 +31,7 @@ GOLANGCI_VERSION = 1.18.0
 LICENSEI_VERSION = 0.1.0
 GORELEASER_VERSION = 0.112.2
 PACKR_VERSION = 2.6.0
-OPENAPI_GENERATOR_VERSION = v4.1.3
+OPENAPI_GENERATOR_VERSION = v4.2.2
 
 GOLANG_VERSION = 1.12
 
@@ -142,6 +142,8 @@ generate-pipeline-client: ## Generate client from Pipeline OpenAPI spec
 	-g go \
 	-o /local/.gen/pipeline
 	echo "package pipeline\n\nconst PipelineVersion = \"${PIPELINE_VERSION}\"" > .gen/pipeline/version.go
+	sed 's#jsonCheck = .*#jsonCheck = regexp.MustCompile(`(?i:(?:application|text)/(?:(?:vnd\\.[^;]+\\+)|(?:problem\\+))?json)`)#' .gen/pipeline/client.go > .gen/pipeline/client.go.new
+	mv .gen/pipeline/client.go.new .gen/pipeline/client.go
 	rm .gen/pipeline/{.travis.yml,git_push.sh,go.*}
 
 .PHONY: generate-cloudinfo-client

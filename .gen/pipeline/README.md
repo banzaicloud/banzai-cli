@@ -86,9 +86,11 @@ Class | Method | HTTP request | Description
 *ClustergroupsApi* | [**ApiV1OrgsOrgidClustergroupsPost**](docs/ClustergroupsApi.md#apiv1orgsorgidclustergroupspost) | **Post** /api/v1/orgs/{orgid}/clustergroups | Create Cluster Group
 *ClustersApi* | [**ClusterPostHooks**](docs/ClustersApi.md#clusterposthooks) | **Put** /api/v1/orgs/{orgId}/clusters/{id}/posthooks | Run posthook functions
 *ClustersApi* | [**CreateCluster**](docs/ClustersApi.md#createcluster) | **Post** /api/v1/orgs/{orgId}/clusters | Create cluster
+*ClustersApi* | [**CreateNodePool**](docs/ClustersApi.md#createnodepool) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/nodepools | Create new node pool
 *ClustersApi* | [**DeleteCluster**](docs/ClustersApi.md#deletecluster) | **Delete** /api/v1/orgs/{orgId}/clusters/{id} | Delete cluster
 *ClustersApi* | [**DeleteLeaderElection**](docs/ClustersApi.md#deleteleaderelection) | **Delete** /api/v1/orgs/{orgId}/clusters/{id}/pke/leader | Delete cluster leader
 *ClustersApi* | [**DeleteNamespace**](docs/ClustersApi.md#deletenamespace) | **Delete** /api/v1/orgs/{orgId}/clusters/{id}/namespaces/{namespace} | Delete namespace from a cluster
+*ClustersApi* | [**DeleteNodePool**](docs/ClustersApi.md#deletenodepool) | **Delete** /api/v1/orgs/{orgId}/clusters/{id}/nodepools/{name} | Delete a node pool
 *ClustersApi* | [**GetAPIEndpoint**](docs/ClustersApi.md#getapiendpoint) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/apiendpoint | Get API endpoint
 *ClustersApi* | [**GetCluster**](docs/ClustersApi.md#getcluster) | **Get** /api/v1/orgs/{orgId}/clusters/{id} | Get cluster status
 *ClustersApi* | [**GetClusterBootstrap**](docs/ClustersApi.md#getclusterbootstrap) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/bootstrap | Get cluster bootstrap info
@@ -105,7 +107,7 @@ Class | Method | HTTP request | Description
 *ClustersApi* | [**ListClusterSecrets**](docs/ClustersApi.md#listclustersecrets) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/secrets | List secrets which belongs to cluster
 *ClustersApi* | [**ListClusters**](docs/ClustersApi.md#listclusters) | **Get** /api/v1/orgs/{orgId}/clusters | List clusters
 *ClustersApi* | [**ListNamespaces**](docs/ClustersApi.md#listnamespaces) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/namespaces | Lists namespaces for a cluster
-*ClustersApi* | [**ListNodepoolLabels**](docs/ClustersApi.md#listnodepoollabels) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodepools/labels | List cluser nodepool labels
+*ClustersApi* | [**ListNodepoolLabels**](docs/ClustersApi.md#listnodepoollabels) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodepool-labels | List cluser nodepool labels
 *ClustersApi* | [**ListNodes**](docs/ClustersApi.md#listnodes) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodes | List cluser nodes
 *ClustersApi* | [**MergeSecret**](docs/ClustersApi.md#mergesecret) | **Patch** /api/v1/orgs/{orgId}/clusters/{id}/secrets/{secretName} | Merge a particular secret with an existing one with optional remapping
 *ClustersApi* | [**PostLeaderElection**](docs/ClustersApi.md#postleaderelection) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/pke/leader | Apply as new cluster leader
@@ -125,7 +127,7 @@ Class | Method | HTTP request | Description
 *DeploymentsApi* | [**UpdateDeployment**](docs/DeploymentsApi.md#updatedeployment) | **Put** /api/v1/orgs/{orgId}/clusters/{id}/deployments/{name} | Update deployment
 *GoogleApi* | [**ListProjects**](docs/GoogleApi.md#listprojects) | **Get** /api/v1/orgs/{orgId}/cloud/google/projects | Retrieves projects visible for the user identified by the secret id
 *HelmApi* | [**HelmChartDetails**](docs/HelmApi.md#helmchartdetails) | **Get** /api/v1/orgs/{orgId}/helm/chart/{repoName}/{chartName} | Chart details
-*HelmApi* | [**HelmChartList**](docs/HelmApi.md#helmchartlist) | **Get** /api/v1/orgs/{orgId}/helm/charts/ | Chart List
+*HelmApi* | [**HelmChartList**](docs/HelmApi.md#helmchartlist) | **Get** /api/v1/orgs/{orgId}/helm/charts | Chart List
 *HelmApi* | [**HelmListRepos**](docs/HelmApi.md#helmlistrepos) | **Get** /api/v1/orgs/{orgId}/helm/repos | List repositories
 *HelmApi* | [**HelmReposAdd**](docs/HelmApi.md#helmreposadd) | **Post** /api/v1/orgs/{orgId}/helm/repos | Add Repo
 *HelmApi* | [**HelmReposDelete**](docs/HelmApi.md#helmreposdelete) | **Delete** /api/v1/orgs/{orgId}/helm/repos/{repoName} | Delete Repo
@@ -136,9 +138,6 @@ Class | Method | HTTP request | Description
 *HpaApi* | [**UpdateDeploymentAutoscaling**](docs/HpaApi.md#updatedeploymentautoscaling) | **Put** /api/v1/orgs/{orgId}/clusters/{id}/hpa | Create / Update Deployment Scaling
 *ImagesApi* | [**ListDeploymentsByImage**](docs/ImagesApi.md#listdeploymentsbyimage) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/images/{imageDigest}/deployments | List Deployments by Image
 *ImagesApi* | [**ListImages**](docs/ImagesApi.md#listimages) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/images | List Images used in cluster
-*ImagescanApi* | [**GetImageVulnerabilities**](docs/ImagescanApi.md#getimagevulnerabilities) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/imagescan/{imageDigest}/vuln | Get vulnerabilities
-*ImagescanApi* | [**GetScanResult**](docs/ImagescanApi.md#getscanresult) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/imagescan/{imageDigest} | Get Image scan results
-*ImagescanApi* | [**ScanImages**](docs/ImagescanApi.md#scanimages) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/imagescan | Scan Images used in cluster
 *InfoApi* | [**CreateResourceGroup**](docs/InfoApi.md#createresourcegroup) | **Post** /api/v1/orgs/{orgId}/azure/resourcegroups | Create resource groups
 *InfoApi* | [**GetResourceGroups**](docs/InfoApi.md#getresourcegroups) | **Get** /api/v1/orgs/{orgId}/azure/resourcegroups | Get all resource groups
 *NetworkApi* | [**ListRouteTables**](docs/NetworkApi.md#listroutetables) | **Get** /api/v1/orgs/{orgId}/networks/{networkId}/routeTables | List VPC route tables
@@ -148,11 +147,6 @@ Class | Method | HTTP request | Description
 *OrganizationsApi* | [**ListOrgs**](docs/OrganizationsApi.md#listorgs) | **Get** /api/v1/orgs | List organizations
 *OrganizationsApi* | [**SyncOrgs**](docs/OrganizationsApi.md#syncorgs) | **Put** /api/v1/orgs | Synchronize Github organizations
 *PipelineApi* | [**ListCapabilities**](docs/PipelineApi.md#listcapabilities) | **Get** /api/v1/capabilities | Lists configured Pipeline capabilities
-*PoliciesApi* | [**AddPolicy**](docs/PoliciesApi.md#addpolicy) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/policies | Add a new policy
-*PoliciesApi* | [**DeletePolicy**](docs/PoliciesApi.md#deletepolicy) | **Delete** /api/v1/orgs/{orgId}/clusters/{id}/policies/{policyId} | Delete policy
-*PoliciesApi* | [**GetPolicy**](docs/PoliciesApi.md#getpolicy) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/policies/{policyId} | Get specific policy
-*PoliciesApi* | [**ListPolicies**](docs/PoliciesApi.md#listpolicies) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/policies | List policies
-*PoliciesApi* | [**UpdatePolicy**](docs/PoliciesApi.md#updatepolicy) | **Put** /api/v1/orgs/{orgId}/clusters/{id}/policies/{policyId} | Update policy
 *ProjectsApi* | [**GetProjects**](docs/ProjectsApi.md#getprojects) | **Get** /api/v1/orgs/{orgId}/google/projects | Retrieves projects visible for the user identified by the secret id
 *ScanlogApi* | [**ListScans**](docs/ScanlogApi.md#listscans) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/scanlog | List scans
 *ScanlogApi* | [**ListScansByRelease**](docs/ScanlogApi.md#listscansbyrelease) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/scanlog/{releaseName} | List scans by release
@@ -194,7 +188,6 @@ Class | Method | HTTP request | Description
  - [AmazonAutoScalingGroup](docs/AmazonAutoScalingGroup.md)
  - [AmazonAutoScalingGroupSize](docs/AmazonAutoScalingGroupSize.md)
  - [AmazonPoviderConfig](docs/AmazonPoviderConfig.md)
- - [AnchoreImage](docs/AnchoreImage.md)
  - [ApiClusterGroup](docs/ApiClusterGroup.md)
  - [ApiCreateRequest](docs/ApiCreateRequest.md)
  - [ApiCreateResponse](docs/ApiCreateResponse.md)
@@ -211,14 +204,10 @@ Class | Method | HTTP request | Description
  - [BasePostHook](docs/BasePostHook.md)
  - [BucketInfo](docs/BucketInfo.md)
  - [BucketInfoSecret](docs/BucketInfoSecret.md)
- - [ChartNotFound](docs/ChartNotFound.md)
- - [ClientError](docs/ClientError.md)
  - [ClusterConfig](docs/ClusterConfig.md)
  - [ClusterDelete200](docs/ClusterDelete200.md)
  - [ClusterFeatureDetails](docs/ClusterFeatureDetails.md)
- - [ClusterFeatureNotFound](docs/ClusterFeatureNotFound.md)
  - [ClusterImage](docs/ClusterImage.md)
- - [ClusterNotFound](docs/ClusterNotFound.md)
  - [CommonError](docs/CommonError.md)
  - [CreateAckProperties](docs/CreateAckProperties.md)
  - [CreateAckPropertiesAck](docs/CreateAckPropertiesAck.md)
@@ -235,7 +224,6 @@ Class | Method | HTTP request | Description
  - [CreateClusterRequestBase](docs/CreateClusterRequestBase.md)
  - [CreateClusterRequestV2](docs/CreateClusterRequestV2.md)
  - [CreateClusterResponse202](docs/CreateClusterResponse202.md)
- - [CreateClusterResponse400](docs/CreateClusterResponse400.md)
  - [CreateEksProperties](docs/CreateEksProperties.md)
  - [CreateEksPropertiesEks](docs/CreateEksPropertiesEks.md)
  - [CreateGkeProperties](docs/CreateGkeProperties.md)
@@ -288,13 +276,14 @@ Class | Method | HTTP request | Description
  - [DisableArkResponse](docs/DisableArkResponse.md)
  - [EksIam](docs/EksIam.md)
  - [EksNodePool](docs/EksNodePool.md)
+ - [EksNodePoolAllOf](docs/EksNodePoolAllOf.md)
  - [EksSubnet](docs/EksSubnet.md)
  - [EksVpc](docs/EksVpc.md)
  - [EnableArkRequest](docs/EnableArkRequest.md)
  - [EnableArkResponse](docs/EnableArkResponse.md)
  - [EndpointItem](docs/EndpointItem.md)
- - [Feature](docs/Feature.md)
- - [GenTlsForLogging](docs/GenTlsForLogging.md)
+ - [Error](docs/Error.md)
+ - [GenericNodePool](docs/GenericNodePool.md)
  - [GetBackupBucketResponse](docs/GetBackupBucketResponse.md)
  - [GetBackupResponse](docs/GetBackupResponse.md)
  - [GetClusterBootstrapResponse](docs/GetClusterBootstrapResponse.md)
@@ -308,16 +297,11 @@ Class | Method | HTTP request | Description
  - [HelmChartDetailsResponseChart](docs/HelmChartDetailsResponseChart.md)
  - [HelmChartDetailsResponseChartMaintainers](docs/HelmChartDetailsResponseChartMaintainers.md)
  - [HelmChartDetailsResponseVersions](docs/HelmChartDetailsResponseVersions.md)
- - [HelmNotFound](docs/HelmNotFound.md)
  - [HelmRepoListItem](docs/HelmRepoListItem.md)
  - [HelmReposAddRequest](docs/HelmReposAddRequest.md)
  - [HelmReposDeleteResponse](docs/HelmReposDeleteResponse.md)
  - [HelmReposModifyRequest](docs/HelmReposModifyRequest.md)
  - [HelmReposUpdateResponse](docs/HelmReposUpdateResponse.md)
- - [ImageDetail](docs/ImageDetail.md)
- - [ImageRef](docs/ImageRef.md)
- - [ImageScanData](docs/ImageScanData.md)
- - [ImageSelectionRule](docs/ImageSelectionRule.md)
  - [InstallSecretRequest](docs/InstallSecretRequest.md)
  - [InstallSecretRequestSpecItem](docs/InstallSecretRequestSpecItem.md)
  - [InstallSecretResponse](docs/InstallSecretResponse.md)
@@ -330,9 +314,6 @@ Class | Method | HTTP request | Description
  - [ListNodesResponse](docs/ListNodesResponse.md)
  - [ListNodesResponseMetadata](docs/ListNodesResponseMetadata.md)
  - [ListProjectsResponse](docs/ListProjectsResponse.md)
- - [LoggingPostHook](docs/LoggingPostHook.md)
- - [LoggingPostHookInstallLogging](docs/LoggingPostHookInstallLogging.md)
- - [MappingRule](docs/MappingRule.md)
  - [NamespaceItem](docs/NamespaceItem.md)
  - [NamespaceListResponse](docs/NamespaceListResponse.md)
  - [NodeItem](docs/NodeItem.md)
@@ -346,6 +327,8 @@ Class | Method | HTTP request | Description
  - [NodeItemStatusDaemonEndpoints](docs/NodeItemStatusDaemonEndpoints.md)
  - [NodeItemStatusImages](docs/NodeItemStatusImages.md)
  - [NodeItemStatusNodeInfo](docs/NodeItemStatusNodeInfo.md)
+ - [NodePool](docs/NodePool.md)
+ - [NodePoolAutoScaling](docs/NodePoolAutoScaling.md)
  - [NodePoolStatus](docs/NodePoolStatus.md)
  - [NodePoolStatusAmazon](docs/NodePoolStatusAmazon.md)
  - [NodePoolStatusAzure](docs/NodePoolStatusAzure.md)
@@ -359,7 +342,6 @@ Class | Method | HTTP request | Description
  - [NodepoolLabels](docs/NodepoolLabels.md)
  - [OracleStorageProps](docs/OracleStorageProps.md)
  - [OrganizationListItemResponse](docs/OrganizationListItemResponse.md)
- - [OrganizationNotFound](docs/OrganizationNotFound.md)
  - [PkeClusterHttpProxy](docs/PkeClusterHttpProxy.md)
  - [PkeClusterHttpProxyOptions](docs/PkeClusterHttpProxyOptions.md)
  - [PkeClusterReadinessResponse](docs/PkeClusterReadinessResponse.md)
@@ -371,21 +353,12 @@ Class | Method | HTTP request | Description
  - [PodCondition](docs/PodCondition.md)
  - [PodItem](docs/PodItem.md)
  - [PodItemLabels](docs/PodItemLabels.md)
- - [Policy](docs/Policy.md)
- - [PolicyBundle](docs/PolicyBundle.md)
- - [PolicyBundleActivate](docs/PolicyBundleActivate.md)
- - [PolicyBundleActivateParams](docs/PolicyBundleActivateParams.md)
- - [PolicyBundleRecord](docs/PolicyBundleRecord.md)
- - [PolicyRule](docs/PolicyRule.md)
- - [PolicyRuleParams](docs/PolicyRuleParams.md)
  - [PostHooks](docs/PostHooks.md)
  - [PostLeaderElectionRequest](docs/PostLeaderElectionRequest.md)
  - [PostLeaderElectionResponse](docs/PostLeaderElectionResponse.md)
  - [PostReadyPkeNodeRequest](docs/PostReadyPkeNodeRequest.md)
  - [ProjectDetails](docs/ProjectDetails.md)
- - [RecordNotFound](docs/RecordNotFound.md)
  - [ReleaseWhiteListItem](docs/ReleaseWhiteListItem.md)
- - [RepoNotFound](docs/RepoNotFound.md)
  - [RequestedResources](docs/RequestedResources.md)
  - [Resource](docs/Resource.md)
  - [ResourceGroupCreated](docs/ResourceGroupCreated.md)
@@ -411,9 +384,7 @@ Class | Method | HTTP request | Description
  - [SecretKeyValueTls](docs/SecretKeyValueTls.md)
  - [SecretTypeResponse](docs/SecretTypeResponse.md)
  - [SecretTypeResponseFields](docs/SecretTypeResponseFields.md)
- - [SecretsNotFound](docs/SecretsNotFound.md)
  - [SpotguideDetailsResponse](docs/SpotguideDetailsResponse.md)
- - [SpotguideNotFound](docs/SpotguideNotFound.md)
  - [SpotguideOption](docs/SpotguideOption.md)
  - [SubnetInfo](docs/SubnetInfo.md)
  - [TokenCreateRequest](docs/TokenCreateRequest.md)
@@ -441,10 +412,6 @@ Class | Method | HTTP request | Description
  - [User](docs/User.md)
  - [VersionResponse](docs/VersionResponse.md)
  - [VpcNetworkInfo](docs/VpcNetworkInfo.md)
- - [Vulnerability](docs/Vulnerability.md)
- - [VulnerabilityResponse](docs/VulnerabilityResponse.md)
- - [Whitelist](docs/Whitelist.md)
- - [WhitelistItem](docs/WhitelistItem.md)
 
 
 ## Documentation For Authorization

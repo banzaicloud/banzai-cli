@@ -38,14 +38,14 @@ type ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNameDeleteOpt
 ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNameDelete Delete Cluster Group Deployment
 deletes a cluster group deployment, also deleting deployments from member clusters
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgid Organization ID
+ * @param orgId Organization identifier
  * @param clusterGroupId Cluster Group ID
  * @param deploymentName release name of a cluster group deployment
  * @param optional nil or *ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNameDeleteOpts - Optional Parameters:
  * @param "Force" (optional.Bool) -  if true cluster group deployment gets deleted even if some deployments can not be deleted from each target cluster
 @return DeploymentTargetClusterStatus
 */
-func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNameDelete(ctx _context.Context, orgid int32, clusterGroupId int32, deploymentName string, localVarOptionals *ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNameDeleteOpts) (DeploymentTargetClusterStatus, *_nethttp.Response, error) {
+func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNameDelete(ctx _context.Context, orgId int32, clusterGroupId int32, deploymentName string, localVarOptionals *ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNameDeleteOpts) (DeploymentTargetClusterStatus, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodDelete
 		localVarPostBody     interface{}
@@ -57,7 +57,7 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgid}/clustergroups/{clusterGroupId}/deployments/{deploymentName}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgid"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgid)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"clusterGroupId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", clusterGroupId)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"deploymentName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", deploymentName)), -1)
 
@@ -78,7 +78,7 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -126,7 +126,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -134,8 +133,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -155,12 +152,12 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNameGet Get Cluster Group Deployment
 retrieve info about a cluster group deployment and it&#39;s status on each member cluster
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgid Organization ID
+ * @param orgId Organization identifier
  * @param clusterGroupId Cluster Group ID
  * @param deploymentName release name of a cluster group deployment
 @return DeploymentDeploymentInfo
 */
-func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNameGet(ctx _context.Context, orgid int32, clusterGroupId int32, deploymentName string) (DeploymentDeploymentInfo, *_nethttp.Response, error) {
+func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNameGet(ctx _context.Context, orgId int32, clusterGroupId int32, deploymentName string) (DeploymentDeploymentInfo, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
@@ -172,7 +169,7 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgid}/clustergroups/{clusterGroupId}/deployments/{deploymentName}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgid"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgid)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"clusterGroupId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", clusterGroupId)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"deploymentName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", deploymentName)), -1)
 
@@ -190,7 +187,7 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -228,7 +225,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -236,8 +232,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -257,13 +251,13 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNamePut Update Cluster Group Deployment
 updates a cluster group deployment, installs or upgrades deployment on each member cluster accordingly
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgid Organization ID
+ * @param orgId Organization identifier
  * @param clusterGroupId Cluster Group ID
  * @param deploymentName release name of a cluster group deployment
  * @param deploymentClusterGroupDeployment Deployment Update Request
 @return DeploymentCreateUpdateDeploymentResponse
 */
-func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNamePut(ctx _context.Context, orgid int32, clusterGroupId int32, deploymentName string, deploymentClusterGroupDeployment DeploymentClusterGroupDeployment) (DeploymentCreateUpdateDeploymentResponse, *_nethttp.Response, error) {
+func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNamePut(ctx _context.Context, orgId int32, clusterGroupId int32, deploymentName string, deploymentClusterGroupDeployment DeploymentClusterGroupDeployment) (DeploymentCreateUpdateDeploymentResponse, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPut
 		localVarPostBody     interface{}
@@ -275,7 +269,7 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgid}/clustergroups/{clusterGroupId}/deployments/{deploymentName}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgid"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgid)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"clusterGroupId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", clusterGroupId)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"deploymentName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", deploymentName)), -1)
 
@@ -293,7 +287,7 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -343,7 +337,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -351,18 +344,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 404 {
-			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -382,12 +363,12 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNameSyncPut Synchronize Cluster Group Deployment
 install / upgrade deployment to target clusters where deployment is not found or has wrong
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgid Organization ID
+ * @param orgId Organization identifier
  * @param clusterGroupId Cluster Group ID
  * @param deploymentName release name of a cluster group deployment
 @return DeploymentTargetClusterStatus
 */
-func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNameSyncPut(ctx _context.Context, orgid int32, clusterGroupId int32, deploymentName string) (DeploymentTargetClusterStatus, *_nethttp.Response, error) {
+func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNameSyncPut(ctx _context.Context, orgId int32, clusterGroupId int32, deploymentName string) (DeploymentTargetClusterStatus, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPut
 		localVarPostBody     interface{}
@@ -399,7 +380,7 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgid}/clustergroups/{clusterGroupId}/deployments/{deploymentName}/sync"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgid"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgid)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"clusterGroupId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", clusterGroupId)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"deploymentName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", deploymentName)), -1)
 
@@ -417,7 +398,7 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -465,7 +446,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -473,8 +453,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -494,11 +472,11 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsGet Get All Deployments of a Cluster Group
 retrieve all deployments from a cluster group
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgid Organization ID
+ * @param orgId Organization identifier
  * @param clusterGroupId Cluster Group ID
 @return []DeploymentListDeploymentResponse
 */
-func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsGet(ctx _context.Context, orgid int32, clusterGroupId int32) ([]DeploymentListDeploymentResponse, *_nethttp.Response, error) {
+func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsGet(ctx _context.Context, orgId int32, clusterGroupId int32) ([]DeploymentListDeploymentResponse, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
@@ -510,7 +488,7 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgid}/clustergroups/{clusterGroupId}/deployments"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgid"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgid)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"clusterGroupId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", clusterGroupId)), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -527,7 +505,7 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -565,7 +543,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -573,8 +550,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -594,12 +569,12 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsPost Create Cluster Group Deployment
 creates a new cluster group deployment, installs or upgrades deployment on each member cluster accordingly
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgid Organization ID
+ * @param orgId Organization identifier
  * @param clusterGroupId Cluster Group ID
  * @param deploymentClusterGroupDeployment Deployment Create Request
 @return DeploymentCreateUpdateDeploymentResponse
 */
-func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsPost(ctx _context.Context, orgid int32, clusterGroupId int32, deploymentClusterGroupDeployment DeploymentClusterGroupDeployment) (DeploymentCreateUpdateDeploymentResponse, *_nethttp.Response, error) {
+func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsPost(ctx _context.Context, orgId int32, clusterGroupId int32, deploymentClusterGroupDeployment DeploymentClusterGroupDeployment) (DeploymentCreateUpdateDeploymentResponse, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPost
 		localVarPostBody     interface{}
@@ -611,7 +586,7 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgid}/clustergroups/{clusterGroupId}/deployments"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgid"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgid)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"clusterGroupId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", clusterGroupId)), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -628,7 +603,7 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -678,7 +653,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -686,18 +660,6 @@ func (a *ClustergroupDeploymentsApiService) ApiV1OrgsOrgidClustergroupsClusterGr
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 404 {
-			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 

@@ -14,6 +14,5 @@ package pipeline
 type PkeClusterHttpProxy struct {
 	Http PkeClusterHttpProxyOptions `json:"http,omitempty"`
 	Https PkeClusterHttpProxyOptions `json:"https,omitempty"`
-	// list of URLs excluded from proxying
 	Exceptions []string `json:"exceptions,omitempty"`
 }

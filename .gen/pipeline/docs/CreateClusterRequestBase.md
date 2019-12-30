@@ -5,7 +5,6 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Name** | **string** |  | 
-**Features** | [**[]Feature**](Feature.md) |  | [optional] 
 **SecretId** | **string** |  | [optional] 
 **SecretName** | **string** |  | [optional] 
 **SshSecretId** | **string** |  | [optional] 

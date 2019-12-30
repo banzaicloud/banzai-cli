@@ -15,6 +15,7 @@ Method | HTTP request | Description
 ## CreateObjectStoreBucket
 
 > CreateObjectStoreBucketResponse CreateObjectStoreBucket(ctx, orgId, createObjectStoreBucketRequest)
+
 Creates a new object store bucket with the given params
 
 Creates a new object store bucket on the Cloud provider referenced by the given secret. The credentials for creating the bucket is taken from the provided secret.
@@ -25,7 +26,7 @@ Creates a new object store bucket on the Cloud provider referenced by the given 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **createObjectStoreBucketRequest** | [**CreateObjectStoreBucketRequest**](CreateObjectStoreBucketRequest.md)|  | 
 
 ### Return type
@@ -39,7 +40,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -49,6 +50,7 @@ Name | Type | Description  | Notes
 ## DeleteObjectStoreBucket
 
 > DeleteObjectStoreBucket(ctx, orgId, name, secretId, cloudType, optional)
+
 Deletes the object store bucket with the given name
 
 Deletes the object store bucket identified by the given name. The credentials for deleting the bucket is taken from the provided secret.
@@ -59,7 +61,7 @@ Deletes the object store bucket identified by the given name. The credentials fo
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **name** | **string**| Bucket identification | 
 **secretId** | **string**| Secret identification | 
 **cloudType** | **string**| Identifies the cloud provider | 
@@ -92,7 +94,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -102,6 +104,7 @@ Name | Type | Description  | Notes
 ## GetBucket
 
 > BucketInfo GetBucket(ctx, orgId, name, cloudType, optional)
+
 Get object store bucket details
 
 Retrieves the details of the object store bucket given its name
@@ -112,7 +115,7 @@ Retrieves the details of the object store bucket given its name
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **name** | **string**| Bucket identification | 
 **cloudType** | **string**| Identifies the cloud provider | 
  **optional** | ***GetBucketOpts** | optional parameters | nil if no parameters
@@ -144,7 +147,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -154,6 +157,7 @@ Name | Type | Description  | Notes
 ## GetObjectStoreBucketStatus
 
 > GetObjectStoreBucketStatus(ctx, orgId, name, cloudType, optional)
+
 Get object store bucket status
 
 Retrieves the status of the object store bucket given its name
@@ -164,7 +168,7 @@ Retrieves the status of the object store bucket given its name
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **name** | **string**| Bucket identification | 
 **cloudType** | **string**| Identifies the cloud provider | 
  **optional** | ***GetObjectStoreBucketStatusOpts** | optional parameters | nil if no parameters
@@ -196,7 +200,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: Not defined
+- **Accept**: application/json, application/problem+json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -206,6 +210,7 @@ Name | Type | Description  | Notes
 ## ListObjectStoreBuckets
 
 > []BucketInfo ListObjectStoreBuckets(ctx, orgId, optional)
+
 List object storage buckets
 
 List object store buckets accessible by the credentials referenced by the given secret. If no credentials provided all managed buckets are returned for all cloud types.
@@ -216,7 +221,7 @@ List object store buckets accessible by the credentials referenced by the given 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
  **optional** | ***ListObjectStoreBucketsOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
@@ -242,7 +247,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

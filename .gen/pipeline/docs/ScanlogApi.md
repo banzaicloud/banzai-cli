@@ -11,7 +11,8 @@ Method | HTTP request | Description
 
 ## ListScans
 
-> []ScanLogItem ListScans(ctx, id, orgId)
+> []ScanLogItem ListScans(ctx, orgId, id)
+
 List scans
 
 List scans
@@ -22,8 +23,8 @@ List scans
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**id** | **int32**| Selected cluster identification (number) | 
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 
 ### Return type
 
@@ -45,7 +46,8 @@ Name | Type | Description  | Notes
 
 ## ListScansByRelease
 
-> []ScanLogItem ListScansByRelease(ctx, id, orgId, releaseName)
+> []ScanLogItem ListScansByRelease(ctx, orgId, id, releaseName)
+
 List scans by release
 
 List scans by release
@@ -56,8 +58,8 @@ List scans by release
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**id** | **int32**| Selected cluster identification (number) | 
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
 **releaseName** | **string**| release name identification | 
 
 ### Return type

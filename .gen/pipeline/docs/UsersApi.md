@@ -14,6 +14,7 @@ Method | HTTP request | Description
 ## GetCurrentUser
 
 > User GetCurrentUser(ctx, )
+
 Get current user
 
 Get current user
@@ -33,7 +34,7 @@ This endpoint does not need any parameter.
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -43,6 +44,7 @@ This endpoint does not need any parameter.
 ## GetUsers
 
 > User GetUsers(ctx, orgId, userId)
+
 Get user
 
 Getting user
@@ -53,7 +55,7 @@ Getting user
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 **userId** | **int32**| User identification | 
 
 ### Return type
@@ -77,6 +79,7 @@ Name | Type | Description  | Notes
 ## ListUsers
 
 > []User ListUsers(ctx, orgId)
+
 List users
 
 Listing users
@@ -87,7 +90,7 @@ Listing users
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identification | 
+**orgId** | **int32**| Organization identifier | 
 
 ### Return type
 
@@ -110,6 +113,7 @@ Name | Type | Description  | Notes
 ## UpdateCurrentUser
 
 > UpdateCurrentUser(ctx, updateUserRequest)
+
 Update current user's settings
 
 Update current user
@@ -133,7 +137,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/json
+- **Accept**: application/json, application/problem+json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
