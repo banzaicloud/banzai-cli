@@ -30,6 +30,7 @@ banzai pipeline up [flags]
       --image-tag string           Tag of installer Docker image to use (default "latest")
   -i, --init                       Initialize workspace
       --provider string            Provider of the infrastructure for the deployment (k8s|kind|ec2|pke)
+      --terraform-init             Run terraform init before apply (default true)
       --workspace string           Name of directory for storing the applied configuration and deployment status
 ```
 
