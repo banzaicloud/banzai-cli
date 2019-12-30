@@ -29,9 +29,9 @@ import (
 type createOptions struct {
 	clustercontext.Context
 
-	file     string
-	wait     bool
-	interval int
+	file string
+
+	name string
 }
 
 func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -40,32 +40,29 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "create",
 		Aliases: []string{"c"},
-		Short:   "Create a node pool for a given cluster",
-		Args:    cobra.MaximumNArgs(1),
+		Short:   "Create a new node pool",
+		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
 			cmd.SilenceErrors = true
 
-			return createNodePool(banzaiCli, options, args)
+			return createNodePool(banzaiCli, options)
 		},
 	}
 
 	flags := cmd.Flags()
+
 	flags.StringVarP(&options.file, "file", "f", "", "Node pool descriptor file")
-	flags.BoolVarP(&options.wait, "wait", "w", false, "Wait for cluster creation")
-	flags.IntVarP(&options.interval, "interval", "i", 10, "Interval in seconds for polling cluster status")
+	flags.StringVarP(&options.name, "name", "n", "", "Node pool name")
 
 	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "create")
 
 	return cmd
 }
 
-//nolint:unparam
-func createNodePool(banzaiCli cli.Cli, options createOptions, args []string) error {
+func createNodePool(banzaiCli cli.Cli, options createOptions) error {
 	client := banzaiCli.Client()
 	orgID := banzaiCli.Context().OrganizationID()
-
-	var out pipeline.NodePool
 
 	err := options.Init()
 	if err != nil {
@@ -84,29 +81,35 @@ func createNodePool(banzaiCli cli.Cli, options createOptions, args []string) err
 
 	log.Debugf("%d bytes read", len(raw))
 
-	if err := validateNodePoolCreateRequest(raw); err != nil {
-		return errors.WrapIf(err, "failed to parse create node pool request")
-	}
+	var request pipeline.NodePool
 
-	if err := utils.Unmarshal(raw, &out); err != nil {
+	if err := utils.Unmarshal(raw, &request); err != nil {
 		return errors.WrapIf(err, "failed to unmarshal create node pool request")
 	}
 
-	log.Debugf("create request: %#v", out)
-	resp, err := client.ClustersApi.CreateNodePool(context.Background(), orgID, clusterID, out)
-	if err != nil {
-		cli.LogAPIError("create node pool", err, out)
-		return errors.WrapIf(err, "failed to create nodepool")
+	if options.name != "" {
+		request.Name = options.name
 	}
-	if resp.StatusCode/100 != 2 {
-		err := errors.NewWithDetails("Create nodepool failed with http status code", "status_code", resp.StatusCode)
-		cli.LogAPIError("create node pool", err, out)
+
+	// TODO: validate request
+
+	log.Debugf("create request: %#v", request)
+
+	resp, err := client.ClustersApi.CreateNodePool(context.Background(), orgID, clusterID, request)
+	if err != nil {
+		cli.LogAPIError("create node pool", err, request)
+
 		return errors.WrapIf(err, "failed to create node pool")
 	}
+	defer resp.Body.Close()
 
-	return nil
-}
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		err := errors.NewWithDetails("node pool creation failed with http status code", "status_code", resp.StatusCode)
 
-func validateNodePoolCreateRequest(val interface{}) error {
+		cli.LogAPIError("create node pool", err, request)
+
+		return err
+	}
+
 	return nil
 }
