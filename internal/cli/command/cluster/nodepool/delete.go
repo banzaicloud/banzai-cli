@@ -26,30 +26,25 @@ import (
 
 type deleteOptions struct {
 	clustercontext.Context
-
-	nodePoolName string
 }
 
 func NewDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
-	o := deleteOptions{}
+	options := deleteOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "delete [NODE_POOL_NAME]",
+		Use:     "delete [NAME]",
 		Aliases: []string{"del", "rm"},
-		Short:   "Delete a node pool for a given cluster",
-		Args:    cobra.MaximumNArgs(1),
+		Short:   "Delete a node pool",
+		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
 			cmd.SilenceErrors = true
 
-			return deleteNodePool(banzaiCli, o, args)
+			return deleteNodePool(banzaiCli, options, args)
 		},
 	}
 
-	flags := cmd.Flags()
-	flags.StringVar(&o.nodePoolName, "node-pool-name", o.nodePoolName, "Node pool name")
-
-	o.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "delete")
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "delete")
 
 	return cmd
 }
@@ -68,28 +63,23 @@ func deleteNodePool(banzaiCli cli.Cli, options deleteOptions, args []string) err
 		return errors.New("no clusters found")
 	}
 
-	var nodePoolName string
-	if len(args) > 0 {
-		nodePoolName = args[0]
-	}
-	if nodePoolName == "" && options.nodePoolName != "" {
-		nodePoolName = options.nodePoolName
-	}
-
-	if nodePoolName == "" && !banzaiCli.Interactive() {
-		return errors.New("no node pool is selected; use the --node-pool-name option or add node pool name as an argument")
-	}
+	nodePoolName := args[0]
 
 	log.Debugf("delete request: %s", nodePoolName)
 	resp, err := client.ClustersApi.DeleteNodePool(context.Background(), orgID, clusterID, nodePoolName)
 	if err != nil {
 		cli.LogAPIError("delete node pool", err, nodePoolName)
+
 		return errors.WrapIf(err, "failed to delete node pool")
 	}
-	if resp.StatusCode/100 != 2 {
-		err := errors.NewWithDetails("Delete node pool failed with http status code", "status_code", resp.StatusCode, "nodepool", nodePoolName)
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		err := errors.NewWithDetails("node pool deletion failed with http status code", "status_code", resp.StatusCode, "nodePool", nodePoolName)
+
 		cli.LogAPIError("delete node pool", err, nodePoolName)
-		return errors.WrapIf(err, "failed to delete node pool")
+
+		return err
 	}
 
 	return nil
