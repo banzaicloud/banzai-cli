@@ -12,36 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cluster
+package nodepool
 
 import (
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/nodepool"
 	"github.com/spf13/cobra"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/node"
 )
 
-// NewClusterCommand returns a cobra command for `cluster` subcommands.
-func NewClusterCommand(banzaiCli cli.Cli) *cobra.Command {
+// NewNodePoolCommand returns a cobra command for `nodepool` subcommands.
+func NewNodePoolCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "cluster",
-		Aliases: []string{"clusters", "c", "cl"},
-		Short:   "Manage clusters",
+		Use:     "nodepool",
+		Aliases: []string{"nodepools", "np"},
+		Short:   "Manage node pools",
+		Hidden:  true,
 	}
 
 	cmd.AddCommand(
 		NewCreateCommand(banzaiCli),
 		NewDeleteCommand(banzaiCli),
-		NewGetCommand(banzaiCli),
-		NewHelmCommand(banzaiCli),
-		NewImportCommand(banzaiCli),
-		NewListCommand(banzaiCli),
-		NewShellCommand(banzaiCli),
-		feature.NewFeatureCommand(banzaiCli),
-		node.NewNodeCommand(banzaiCli),
-		nodepool.NewNodePoolCommand(banzaiCli),
 	)
 
 	return cmd
