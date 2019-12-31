@@ -18,10 +18,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 )
-
-var NodePoolClusterContext clustercontext.Context
 
 // NewNodePoolCommand returns a cobra command for `nodepool` subcommands.
 func NewNodePoolCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -36,8 +33,6 @@ func NewNodePoolCommand(banzaiCli cli.Cli) *cobra.Command {
 		NewCreateCommand(banzaiCli),
 		NewDeleteCommand(banzaiCli),
 	)
-
-	NodePoolClusterContext = clustercontext.NewClusterContext(cmd, banzaiCli, "nodepool")
 
 	return cmd
 }
