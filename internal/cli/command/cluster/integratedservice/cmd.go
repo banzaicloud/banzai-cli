@@ -24,7 +24,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewFeatureCommand(banzaiCli cli.Cli) *cobra.Command {
+func NewIntegratedServiceCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := listOptions{}
 
 	cmd := &cobra.Command{
@@ -41,12 +41,12 @@ func NewFeatureCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	cmd.AddCommand(
 		NewListCommand(banzaiCli),
-		// NOTE: add feature commands here
-		featureCommandFactory(banzaiCli, "dns", services.NewDNSSubCommandManager()),
-		featureCommandFactory(banzaiCli, "vault", services.NewVaultSubCommandManager()),
-		featureCommandFactory(banzaiCli, "securityscan", securityscan.NewSecurityScanSubCommandManager()),
-		featureCommandFactory(banzaiCli, "monitoring", services.NewMonitoringSubCommandManager()),
-		featureCommandFactory(banzaiCli, "logging", services.NewLoggingSubCommandManager()),
+		// NOTE: add integratedservice commands here
+		serviceCommandFactory(banzaiCli, "dns", services.NewDNSSubCommandManager()),
+		serviceCommandFactory(banzaiCli, "vault", services.NewVaultSubCommandManager()),
+		serviceCommandFactory(banzaiCli, "securityscan", securityscan.NewSecurityScanSubCommandManager()),
+		serviceCommandFactory(banzaiCli, "monitoring", services.NewMonitoringSubCommandManager()),
+		serviceCommandFactory(banzaiCli, "logging", services.NewLoggingSubCommandManager()),
 	)
 
 	return cmd
@@ -64,7 +64,7 @@ type SubCommandManager interface {
 	UpdateManager() services.UpdateManager
 }
 
-func featureCommandFactory(banzaiCLI cli.Cli, use string, scm SubCommandManager) *cobra.Command {
+func serviceCommandFactory(banzaiCLI cli.Cli, use string, scm SubCommandManager) *cobra.Command {
 	options := getOptions{}
 	getCommand := services.GetCommandFactory(banzaiCLI, scm.GetManager(), scm.GetName())
 
