@@ -76,7 +76,7 @@ func runList(banzaiCli cli.Cli, options listOptions, args []string) error {
 		})
 	}
 
-	format.ClustersFeatureWrite(banzaiCli, table)
+	format.IntegratedServiceWrite(banzaiCli, table)
 
 	return nil
 }

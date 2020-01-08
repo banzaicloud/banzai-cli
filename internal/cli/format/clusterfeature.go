@@ -19,8 +19,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// ClusterFeatureWrite writes a cluster feature to the output.
-func ClustersFeatureWrite(context formatContext, data interface{}) {
+// IntegratedServiceWrite writes an integratedservice to the output.
+func IntegratedServiceWrite(context formatContext, data interface{}) {
 	ctx := &output.Context{
 		Out:    context.Out(),
 		Color:  context.Color(),
