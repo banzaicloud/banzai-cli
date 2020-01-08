@@ -15,7 +15,7 @@
 package securityscan
 
 import (
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/features"
 )
 
 type subCommandManager struct {

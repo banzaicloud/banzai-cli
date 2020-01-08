@@ -15,7 +15,7 @@
 package features
 
 import (
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features/dns"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/features/dns"
 )
 
 type DnsSubCommandManager struct{}

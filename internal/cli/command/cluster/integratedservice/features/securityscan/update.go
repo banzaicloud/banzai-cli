@@ -24,7 +24,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/features"
 )
 
 type updateManager struct {

@@ -15,7 +15,7 @@
 package features
 
 import (
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features/vault"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/features/vault"
 )
 
 type VaultSubCommandManager struct{}
