@@ -15,7 +15,7 @@ banzai cluster service vault activate [flags]
 ```
       --cluster int32         ID of cluster to activate Vault cluster service for
       --cluster-name string   Name of cluster to activate Vault cluster service for
-  -f, --file string           Feature specification file
+  -f, --file string           Service specification file
   -h, --help                  help for activate
 ```
 
