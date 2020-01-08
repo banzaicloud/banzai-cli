@@ -44,7 +44,7 @@ var (
 	}
 )
 
-//SecurityScanFeatureSpec security scan cluster feature specific specification
+//SecurityScanFeatureSpec security scan cluster integratedservice specific specification
 type SecurityScanFeatureSpec struct {
 	CustomAnchore    anchoreSpec       `json:"customAnchore" mapstructure:"customAnchore"`
 	Policy           policySpec        `json:"policy" mapstructure:"policy"`

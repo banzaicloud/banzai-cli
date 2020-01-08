@@ -34,7 +34,7 @@ type ActivateManager struct {
 func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error) {
 	// get logging, tls and monitoring
 	logging, err := askLogging(loggingSpec{
-		Metrics: true, // TODO (colin): add monitoring feature dependecy in v2
+		Metrics: true, // TODO (colin): add monitoring integratedservice dependecy in v2
 		TLS:     true,
 	})
 	if err != nil {

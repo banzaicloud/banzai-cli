@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package features
+package services
 
 import (
 	"context"
@@ -79,7 +79,7 @@ func runUpdate(
 	var request *pipeline.UpdateClusterFeatureRequest
 	if options.filePath == "" && banzaiCLI.Interactive() {
 
-		// get feature details
+		// get integratedservice details
 		details, _, err := banzaiCLI.Client().ClusterFeaturesApi.ClusterFeatureDetails(context.Background(), orgID, clusterID, m.GetName())
 		if err != nil {
 			return errors.WrapIf(err, "failed to get service details")

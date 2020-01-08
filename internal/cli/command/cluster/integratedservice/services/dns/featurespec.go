@@ -21,7 +21,7 @@ import (
 	"github.com/AlecAivazis/survey/v2/core"
 )
 
-// ExternalDNS  part of the DNS feature spec representation (used for validation, user input handling)
+// ExternalDNS  part of the DNS integratedservice spec representation (used for validation, user input handling)
 type ExternalDNS struct {
 	DomainFilters []string  `json:"domainFilters" mapstructure:"domainFilters"`
 	Policy        string    `json:"policy" mapstructure:"policy"` // sync | upsert-only
@@ -37,13 +37,13 @@ type Provider struct {
 	Options  map[string]interface{} `json:"options,omitempty" mapstructure:"options"`
 }
 
-// DNSFeatureSpec DNS feature specification
+// DNSFeatureSpec DNS integratedservice specification
 type DNSFeatureSpec struct {
 	ExternalDNS   ExternalDNS `mapstructure:"externalDns"`
 	ClusterDomain string      `mapstructure:"clusterDomain"`
 }
 
-// DNSFeatureOutput used to parse / display feature output
+// DNSFeatureOutput used to parse / display integratedservice output
 type DNSFeatureOutput struct {
 	ExternalDns struct {
 		Version string `json:"version" mapstructure:"version"`

@@ -115,7 +115,7 @@ func (ac actionContext) IsUpdate() bool {
 	return ac.action == actionUpdate
 }
 
-// assembleFeatureRequest assembles the request for activate and update the ExternalDNS feature
+// assembleFeatureRequest assembles the request for activate and update the ExternalDNS integratedservice
 // if the input rawSpec is nil -> activate flow, otherwise update flow
 func assembleFeatureRequest(banzaiCli cli.Cli, clusterCtx clustercontext.Context, dnsFeatureSpec DNSFeatureSpec, actionContext actionContext) (map[string]interface{}, error) {
 

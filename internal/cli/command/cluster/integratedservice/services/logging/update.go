@@ -40,7 +40,7 @@ func (UpdateManager) ValidateRequest(req interface{}) error {
 func (UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error {
 	var spec featureSpec
 	if err := mapstructure.Decode(req.Spec, &spec); err != nil {
-		return errors.WrapIf(err, "feature specification does not conform to schema")
+		return errors.WrapIf(err, "integratedservice specification does not conform to schema")
 	}
 
 	// get logging, tls and monitoring

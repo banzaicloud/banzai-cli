@@ -43,7 +43,7 @@ func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx c
 	case vaultCustom:
 		customSpec, err := buildCustomVaultFeatureRequest(banzaiCli, defaults{})
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to build custom Vault feature request")
+			return nil, errors.Wrap(err, "failed to build custom Vault integratedservice request")
 		}
 		request.Spec = customSpec
 	case vaultCP:
@@ -58,7 +58,7 @@ func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx c
 		},
 	)
 	if err != nil {
-		return nil, errors.WrapIf(err, "failed to build settings to feature activate request")
+		return nil, errors.WrapIf(err, "failed to build settings to integratedservice activate request")
 	}
 
 	if request.Spec == nil {

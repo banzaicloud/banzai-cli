@@ -19,8 +19,8 @@ import (
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/features"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/features/securityscan"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/services"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/services/securityscan"
 	"github.com/spf13/cobra"
 )
 
@@ -42,11 +42,11 @@ func NewFeatureCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd.AddCommand(
 		NewListCommand(banzaiCli),
 		// NOTE: add feature commands here
-		featureCommandFactory(banzaiCli, "dns", features.NewDNSSubCommandManager()),
-		featureCommandFactory(banzaiCli, "vault", features.NewVaultSubCommandManager()),
+		featureCommandFactory(banzaiCli, "dns", services.NewDNSSubCommandManager()),
+		featureCommandFactory(banzaiCli, "vault", services.NewVaultSubCommandManager()),
 		featureCommandFactory(banzaiCli, "securityscan", securityscan.NewSecurityScanSubCommandManager()),
-		featureCommandFactory(banzaiCli, "monitoring", features.NewMonitoringSubCommandManager()),
-		featureCommandFactory(banzaiCli, "logging", features.NewLoggingSubCommandManager()),
+		featureCommandFactory(banzaiCli, "monitoring", services.NewMonitoringSubCommandManager()),
+		featureCommandFactory(banzaiCli, "logging", services.NewLoggingSubCommandManager()),
 	)
 
 	return cmd
@@ -58,15 +58,15 @@ type getOptions struct {
 
 type SubCommandManager interface {
 	GetName() string
-	ActivateManager() features.ActivateManager
-	DeactivateManager() features.DeactivateManager
-	GetManager() features.GetManager
-	UpdateManager() features.UpdateManager
+	ActivateManager() services.ActivateManager
+	DeactivateManager() services.DeactivateManager
+	GetManager() services.GetManager
+	UpdateManager() services.UpdateManager
 }
 
 func featureCommandFactory(banzaiCLI cli.Cli, use string, scm SubCommandManager) *cobra.Command {
 	options := getOptions{}
-	getCommand := features.GetCommandFactory(banzaiCLI, scm.GetManager(), scm.GetName())
+	getCommand := services.GetCommandFactory(banzaiCLI, scm.GetManager(), scm.GetName())
 
 	cmd := &cobra.Command{
 		Use:   use,
@@ -78,10 +78,10 @@ func featureCommandFactory(banzaiCLI cli.Cli, use string, scm SubCommandManager)
 	options.Context = clustercontext.NewClusterContext(cmd, banzaiCLI, fmt.Sprintf("manage %s cluster service of", scm.GetName()))
 
 	cmd.AddCommand(
-		features.ActivateCommandFactory(banzaiCLI, scm.ActivateManager(), scm.GetName()),
-		features.DeactivateCommandFactory(banzaiCLI, scm.DeactivateManager(), scm.GetName()),
+		services.ActivateCommandFactory(banzaiCLI, scm.ActivateManager(), scm.GetName()),
+		services.DeactivateCommandFactory(banzaiCLI, scm.DeactivateManager(), scm.GetName()),
 		getCommand,
-		features.UpdateCommandFactory(banzaiCLI, scm.UpdateManager(), scm.GetName()),
+		services.UpdateCommandFactory(banzaiCLI, scm.UpdateManager(), scm.GetName()),
 	)
 
 	return cmd
