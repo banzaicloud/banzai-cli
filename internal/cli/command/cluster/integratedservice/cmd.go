@@ -29,7 +29,7 @@ func NewIntegratedServiceCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "service",
-		Aliases: []string{"services", "svc", "feature"},
+		Aliases: []string{"services", "svc", "integratedservice", "is"},
 		Short:   "Manage cluster integrated services",
 		Args:    cobra.MaximumNArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {
