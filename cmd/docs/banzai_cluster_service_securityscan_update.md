@@ -15,7 +15,7 @@ banzai cluster service securityscan update [flags]
 ```
       --cluster int32         ID of cluster to update securityscan cluster service for
       --cluster-name string   Name of cluster to update securityscan cluster service for
-  -f, --file string           Feature specification file
+  -f, --file string           Service specification file
   -h, --help                  help for update
 ```
 

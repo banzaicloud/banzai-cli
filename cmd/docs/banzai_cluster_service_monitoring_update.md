@@ -15,7 +15,7 @@ banzai cluster service monitoring update [flags]
 ```
       --cluster int32         ID of cluster to update Monitoring cluster service for
       --cluster-name string   Name of cluster to update Monitoring cluster service for
-  -f, --file string           Feature specification file
+  -f, --file string           Service specification file
   -h, --help                  help for update
 ```
 
