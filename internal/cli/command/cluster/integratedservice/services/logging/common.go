@@ -50,7 +50,7 @@ func NewDeactivateManager() *baseManager {
 func validateSpec(specObj map[string]interface{}) error {
 	var spec featureSpec
 	if err := mapstructure.Decode(specObj, &spec); err != nil {
-		return errors.WrapIf(err, "feature specification does not conform to schema")
+		return errors.WrapIf(err, "integratedservice specification does not conform to schema")
 	}
 
 	return spec.Validate()

@@ -24,7 +24,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/features"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/services"
 )
 
 type updateManager struct {
@@ -32,7 +32,7 @@ type updateManager struct {
 	specAssembler
 }
 
-func NewUpdateManager() features.UpdateManager {
+func NewUpdateManager() services.UpdateManager {
 	return updateManager{}
 }
 

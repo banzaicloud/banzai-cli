@@ -42,7 +42,7 @@ func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateClusterF
 	}
 
 	if updateClusterFeatureRequest.Spec != nil {
-		// update feature case
+		// update integratedservice case
 		if err := mapstructure.Decode(updateClusterFeatureRequest.Spec, &currentDnsFeatureSpec); err != nil {
 			return errors.WrapIf(err, "failed to decode service DNSFeatureSpec")
 		}

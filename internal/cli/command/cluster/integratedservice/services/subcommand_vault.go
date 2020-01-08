@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package features
+package services
 
 import (
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/features/vault"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/services/vault"
 )
 
 type VaultSubCommandManager struct{}

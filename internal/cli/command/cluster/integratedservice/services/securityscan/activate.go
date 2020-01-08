@@ -24,7 +24,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/features"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/services"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 )
 
@@ -33,7 +33,7 @@ type activateManager struct {
 	specAssembler
 }
 
-func NewActivateManager() features.ActivateManager {
+func NewActivateManager() services.ActivateManager {
 	return &activateManager{}
 }
 
@@ -48,12 +48,12 @@ func (am activateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCt
 
 	featureSpec, err := am.assembleFeatureSpec(context.Background(), banzaiCLI.Context().OrganizationID(), clusterCtx.ClusterID(), SecurityScanFeatureSpec{})
 	if err != nil {
-		return nil, errors.WrapIf(err, "failed to assemble feature specification")
+		return nil, errors.WrapIf(err, "failed to assemble integratedservice specification")
 	}
 
 	featureSpecMap, err := am.securityScanSpecAsMap(&featureSpec)
 	if err != nil {
-		return nil, errors.WrapIf(err, "failed to transform feature specification")
+		return nil, errors.WrapIf(err, "failed to transform integratedservice specification")
 	}
 
 	return &pipeline.ActivateClusterFeatureRequest{Spec: featureSpecMap}, nil

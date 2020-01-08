@@ -42,7 +42,7 @@ func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateClusterF
 
 	var spec specResponse
 	if err := mapstructure.Decode(updateClusterFeatureRequest.Spec, &spec); err != nil {
-		return errors.WrapIf(err, "feature specification does not conform to schema")
+		return errors.WrapIf(err, "integratedservice specification does not conform to schema")
 	}
 
 	currentVaultType := vaultCP
@@ -64,7 +64,7 @@ func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateClusterF
 			policy:   spec.CustomVault.Policy,
 		})
 		if err != nil {
-			return errors.Wrap(err, "failed to build custom Vault feature request")
+			return errors.Wrap(err, "failed to build custom Vault integratedservice request")
 		}
 		updateClusterFeatureRequest.Spec = customSpec
 	case vaultCP:
@@ -79,7 +79,7 @@ func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateClusterF
 		},
 	)
 	if err != nil {
-		return errors.WrapIf(err, "failed to build settings to feature update request")
+		return errors.WrapIf(err, "failed to build settings to integratedservice update request")
 	}
 
 	updateClusterFeatureRequest.Spec["settings"] = settings

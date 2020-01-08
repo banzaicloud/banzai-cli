@@ -141,7 +141,7 @@ func decorateProviderSecret(banzaiCLI cli.Cli, selectedProvider Provider) (Provi
 
 func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Provider, error) {
 
-	// helper struct for requesting provider specific feature-options
+	// helper struct for requesting provider specific integratedservice-options
 	type providerOptions struct {
 		Project       string `json:"project,omitempty" mapstructure:"project"`
 		ResourceGroup string `json:"resourceGroup,omitempty" mapstructure:"resourceGroup"`

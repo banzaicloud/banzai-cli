@@ -15,7 +15,7 @@
 package securityscan
 
 import (
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/features"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/services"
 )
 
 type subCommandManager struct {
@@ -25,19 +25,19 @@ func (scm *subCommandManager) GetName() string {
 	return "securityscan"
 }
 
-func (scm *subCommandManager) ActivateManager() features.ActivateManager {
+func (scm *subCommandManager) ActivateManager() services.ActivateManager {
 	return NewActivateManager()
 }
 
-func (scm *subCommandManager) DeactivateManager() features.DeactivateManager {
+func (scm *subCommandManager) DeactivateManager() services.DeactivateManager {
 	return NewDeactivateManager()
 }
 
-func (scm *subCommandManager) GetManager() features.GetManager {
+func (scm *subCommandManager) GetManager() services.GetManager {
 	return NewGetManager()
 }
 
-func (scm *subCommandManager) UpdateManager() features.UpdateManager {
+func (scm *subCommandManager) UpdateManager() services.UpdateManager {
 	return NewUpdateManager()
 }
 
