@@ -30,7 +30,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
-	featureutils "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/utils"
+	featureutils "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/utils"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 )
 

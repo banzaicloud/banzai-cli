@@ -15,7 +15,7 @@
 package features
 
 import (
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features/monitoring"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/features/monitoring"
 )
 
 type MonitoringSubCommandManager struct{}

@@ -19,7 +19,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/node"
 )
 
@@ -39,7 +39,7 @@ func NewClusterCommand(banzaiCli cli.Cli) *cobra.Command {
 		NewImportCommand(banzaiCli),
 		NewListCommand(banzaiCli),
 		NewShellCommand(banzaiCli),
-		feature.NewFeatureCommand(banzaiCli),
+		integratedservice.NewFeatureCommand(banzaiCli),
 		node.NewNodeCommand(banzaiCli),
 		nodepool.NewNodePoolCommand(banzaiCli),
 	)

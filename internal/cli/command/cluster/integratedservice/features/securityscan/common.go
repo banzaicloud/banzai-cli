@@ -26,7 +26,7 @@ import (
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/utils"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/utils"
 )
 
 const (

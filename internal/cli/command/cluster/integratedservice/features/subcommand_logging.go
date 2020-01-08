@@ -15,7 +15,7 @@
 package features
 
 import (
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features/logging"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/features/logging"
 )
 
 type LoggingSubCommandManager struct{}

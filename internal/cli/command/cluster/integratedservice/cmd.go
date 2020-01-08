@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package feature
+package integratedservice
 
 import (
 	"fmt"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/feature/features/securityscan"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/features"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/features/securityscan"
 	"github.com/spf13/cobra"
 )
 
