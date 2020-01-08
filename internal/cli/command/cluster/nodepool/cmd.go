@@ -26,7 +26,6 @@ func NewNodePoolCommand(banzaiCli cli.Cli) *cobra.Command {
 		Use:     "nodepool",
 		Aliases: []string{"nodepools", "np"},
 		Short:   "Manage node pools",
-		Hidden:  true,
 	}
 
 	cmd.AddCommand(

@@ -48,7 +48,6 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 
 			return createNodePool(banzaiCli, options)
 		},
-		Hidden: true,
 	}
 
 	flags := cmd.Flags()
