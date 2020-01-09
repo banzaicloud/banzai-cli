@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	featureName = "dns"
+	serviceName = "dns"
 
 	dnsRoute53     = "route53"
 	dnsAzure       = "azure"
@@ -67,7 +67,7 @@ var (
 type baseManager struct{}
 
 func (baseManager) GetName() string {
-	return featureName
+	return serviceName
 }
 
 func NewDeactivateManager() *baseManager {
@@ -75,7 +75,7 @@ func NewDeactivateManager() *baseManager {
 }
 
 func validateSpec(specObj map[string]interface{}) error {
-	var dnsSpec DNSFeatureSpec
+	var dnsSpec ServiceSpec
 
 	if err := mapstructure.Decode(specObj, &dnsSpec); err != nil {
 		return errors.WrapIf(err, "service specification does not conform to schema")
@@ -115,22 +115,22 @@ func (ac actionContext) IsUpdate() bool {
 	return ac.action == actionUpdate
 }
 
-// assembleFeatureRequest assembles the request for activate and update the ExternalDNS integratedservice
+// assembleServiceRequest assembles the request for activate and update the ExternalDNS integrated service
 // if the input rawSpec is nil -> activate flow, otherwise update flow
-func assembleFeatureRequest(banzaiCli cli.Cli, clusterCtx clustercontext.Context, dnsFeatureSpec DNSFeatureSpec, actionContext actionContext) (map[string]interface{}, error) {
+func assembleServiceRequest(banzaiCli cli.Cli, clusterCtx clustercontext.Context, spec ServiceSpec, actionContext actionContext) (map[string]interface{}, error) {
 
 	// select the provider
-	selectedProviderInfo, err := selectProvider(*dnsFeatureSpec.ExternalDNS.Provider)
+	selectedProviderInfo, err := selectProvider(*spec.ExternalDNS.Provider)
 	if err != nil {
 		return nil, errors.WrapIf(err, "failed to read provider data")
 	}
 
 	actionContext.SetProvider(selectedProviderInfo.Name)
-	dnsFeatureSpec, err = getFeatureSpecDefaults(banzaiCli, clusterCtx, dnsFeatureSpec, actionContext)
+	spec, err = getServiceSpecDefaults(banzaiCli, clusterCtx, spec, actionContext)
 	if err != nil {
 		return nil, errors.WrapIf(err, "failed to get dns service defaults")
 	}
-	dnsFeatureSpec.ExternalDNS.Provider = &selectedProviderInfo
+	spec.ExternalDNS.Provider = &selectedProviderInfo
 
 	// read secret
 	selectedProviderInfo, err = decorateProviderSecret(banzaiCli, selectedProviderInfo)
@@ -144,25 +144,25 @@ func assembleFeatureRequest(banzaiCli cli.Cli, clusterCtx clustercontext.Context
 		return nil, errors.WrapIf(err, "failed to read provider options")
 	}
 
-	dnsFeatureSpec.ExternalDNS.Provider = &selectedProviderInfo
+	spec.ExternalDNS.Provider = &selectedProviderInfo
 
-	dnsFeatureSpec.ExternalDNS, err = readExternalDNS(dnsFeatureSpec.ExternalDNS, actionContext)
+	spec.ExternalDNS, err = readExternalDNS(spec.ExternalDNS, actionContext)
 	if err != nil {
 		return nil, errors.WrapIf(err, "failed to read external dns data")
 	}
 
 	if selectedProviderInfo.Name != dnsBanzaiCloud {
 		// in case of Banzai Cloud  DNS this value gets generated / it's read only
-		clusterDomain, err := readClusterDomain(dnsFeatureSpec.ClusterDomain)
+		clusterDomain, err := readClusterDomain(spec.ClusterDomain)
 		if err != nil {
 			return nil, errors.WrapIf(err, "failed to read cluster domain")
 		}
-		dnsFeatureSpec.ClusterDomain = clusterDomain
+		spec.ClusterDomain = clusterDomain
 	}
 
 	var jsonSpec map[string]interface{}
-	if err := mapstructure.Decode(dnsFeatureSpec, &jsonSpec); err != nil {
-		return nil, errors.WrapIf(err, "failed to assemble DNSFeatureSpec")
+	if err := mapstructure.Decode(spec, &jsonSpec); err != nil {
+		return nil, errors.WrapIf(err, "failed to assemble DNSServiceSpec")
 	}
 
 	return jsonSpec, nil

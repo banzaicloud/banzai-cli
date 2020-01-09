@@ -41,7 +41,7 @@ func (UpdateManager) ValidateRequest(req interface{}) error {
 
 func (UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error {
 
-	var spec featureSpec
+	var spec serviceSpec
 	if err := mapstructure.Decode(req.Spec, &spec); err != nil {
 		return errors.WrapIf(err, "service specification does not conform to schema")
 	}

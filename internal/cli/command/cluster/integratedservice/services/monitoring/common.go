@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	featureName = "monitoring"
+	serviceName = "monitoring"
 
 	ingressTypeGrafana      = "Grafana"
 	ingressTypePrometheus   = "Prometheus"
@@ -49,7 +49,7 @@ const (
 type baseManager struct{}
 
 func (baseManager) GetName() string {
-	return featureName
+	return serviceName
 }
 
 func NewDeactivateManager() *baseManager {
@@ -58,7 +58,7 @@ func NewDeactivateManager() *baseManager {
 
 func validateSpec(specObj map[string]interface{}) error {
 
-	var spec featureSpec
+	var spec serviceSpec
 
 	if err := mapstructure.Decode(specObj, &spec); err != nil {
 		return errors.WrapIf(err, "service specification does not conform to schema")

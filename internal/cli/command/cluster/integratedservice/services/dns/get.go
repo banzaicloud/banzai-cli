@@ -25,19 +25,19 @@ import (
 type GetManager struct{}
 
 func (GetManager) GetName() string {
-	return featureName
+	return serviceName
 }
 
 func (GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]map[string]interface{} {
 	// helper for response processing
-	type featureDetails struct {
-		Spec   DNSFeatureSpec   `json:"spec" mapstructure:"spec"`
-		Output DNSFeatureOutput `json:"output" mapstructure:"output"`
+	type serviceDetails struct {
+		Spec   ServiceSpec   `json:"spec" mapstructure:"spec"`
+		Output ServiceOutput `json:"output" mapstructure:"output"`
 	}
 
 	tableData := map[string]interface{}{}
 
-	boundResponse := featureDetails{}
+	boundResponse := serviceDetails{}
 	if err := mapstructure.Decode(details, &boundResponse); err != nil {
 		tableData["error"] = fmt.Sprintf("failed to decode spec %q", err)
 		return map[string]map[string]interface{}{

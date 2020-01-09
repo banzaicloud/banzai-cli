@@ -33,27 +33,27 @@ func NewUpdateManager() *UpdateManager {
 	return &UpdateManager{}
 }
 
-func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateClusterFeatureRequest *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error {
+func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error {
 
-	currentDnsFeatureSpec := DNSFeatureSpec{
+	currentSpec := ServiceSpec{
 		ExternalDNS: ExternalDNS{
 			Provider: &Provider{},
 		},
 	}
 
-	if updateClusterFeatureRequest.Spec != nil {
+	if updateServiceRequest.Spec != nil {
 		// update integratedservice case
-		if err := mapstructure.Decode(updateClusterFeatureRequest.Spec, &currentDnsFeatureSpec); err != nil {
-			return errors.WrapIf(err, "failed to decode service DNSFeatureSpec")
+		if err := mapstructure.Decode(updateServiceRequest.Spec, &currentSpec); err != nil {
+			return errors.WrapIf(err, "failed to decode service DNSServiceSpec")
 		}
 	}
 
-	externalDNS, err := assembleFeatureRequest(banzaiCli, clusterCtx, currentDnsFeatureSpec, NewActionContext(actionUpdate))
+	externalDNS, err := assembleServiceRequest(banzaiCli, clusterCtx, currentSpec, NewActionContext(actionUpdate))
 	if err != nil {
 		return errors.Wrap(err, "failed to build custom DNS service request")
 	}
-	// set the modified DNSFeatureSpec into the request
-	updateClusterFeatureRequest.Spec = externalDNS
+	// set the modified DNSServiceSpec into the request
+	updateServiceRequest.Spec = externalDNS
 
 	return nil
 }

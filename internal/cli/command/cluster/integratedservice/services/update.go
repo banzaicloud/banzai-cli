@@ -38,7 +38,7 @@ type updateOptions struct {
 type UpdateManager interface {
 	GetName() string
 	ValidateRequest(interface{}) error
-	BuildRequestInteractively(banzaiCli cli.Cli, updateClusterFeatureRequest *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error
+	BuildRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error
 }
 
 func UpdateCommandFactory(banzaiCLI cli.Cli, manager UpdateManager, name string) *cobra.Command {
@@ -57,7 +57,7 @@ func UpdateCommandFactory(banzaiCLI cli.Cli, manager UpdateManager, name string)
 	options.Context = clustercontext.NewClusterContext(cmd, banzaiCLI, fmt.Sprintf("update %s cluster service for", name))
 
 	flags := cmd.Flags()
-	flags.StringVarP(&options.filePath, "file", "f", "", "Feature specification file")
+	flags.StringVarP(&options.filePath, "file", "f", "", "Service specification file")
 
 	return cmd
 }

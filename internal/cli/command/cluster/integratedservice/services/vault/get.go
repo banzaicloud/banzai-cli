@@ -26,7 +26,7 @@ import (
 type GetManager struct{}
 
 func (GetManager) GetName() string {
-	return featureName
+	return serviceName
 }
 
 type outputResponse struct {

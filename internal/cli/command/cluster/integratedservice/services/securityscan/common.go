@@ -30,7 +30,7 @@ import (
 )
 
 const (
-	featureName = "securityscan"
+	serviceName = "securityscan"
 )
 
 var (
@@ -44,8 +44,8 @@ var (
 	}
 )
 
-//SecurityScanFeatureSpec security scan cluster integratedservice specific specification
-type SecurityScanFeatureSpec struct {
+//ServiceSpec security scan cluster integratedservice specific specification
+type ServiceSpec struct {
 	CustomAnchore    anchoreSpec       `json:"customAnchore" mapstructure:"customAnchore"`
 	Policy           policySpec        `json:"policy" mapstructure:"policy"`
 	ReleaseWhiteList []releaseSpec     `json:"releaseWhiteList,omitempty" mapstructure:"releaseWhiteList"`
@@ -55,7 +55,7 @@ type SecurityScanFeatureSpec struct {
 type baseManager struct{}
 
 func (baseManager) GetName() string {
-	return featureName
+	return serviceName
 }
 
 func NewDeactivateManager() *baseManager {
@@ -63,7 +63,7 @@ func NewDeactivateManager() *baseManager {
 }
 
 // Validate validates the input security scan specification.
-func (s SecurityScanFeatureSpec) Validate() error {
+func (s ServiceSpec) Validate() error {
 
 	var validationErrors error
 
@@ -147,7 +147,7 @@ type specAssembler struct {
 	banzaiCLI cli.Cli
 }
 
-func (sa specAssembler) isFeatureEnabled(ctx context.Context) error {
+func (sa specAssembler) isServiceEnabled(ctx context.Context) error {
 	capabilities, r, err := sa.banzaiCLI.Client().PipelineApi.ListCapabilities(ctx)
 	if err := utils.CheckCallResults(r, err); err != nil {
 		return errors.WrapIf(err, "failed to retrieve capabilities")
@@ -397,10 +397,10 @@ func (sa specAssembler) askForWebHookConfig(ctx context.Context, orgID int32, cl
 	return webhookSpecIn, nil
 }
 
-func (sa *specAssembler) securityScanSpecAsMap(spec *SecurityScanFeatureSpec) (map[string]interface{}, error) {
+func (sa *specAssembler) securityScanSpecAsMap(spec *ServiceSpec) (map[string]interface{}, error) {
 	// fill the structure of the config - make filling up the values easier
 	if spec == nil {
-		spec = &SecurityScanFeatureSpec{
+		spec = &ServiceSpec{
 			CustomAnchore:    anchoreSpec{},
 			Policy:           policySpec{},
 			ReleaseWhiteList: nil,
@@ -484,20 +484,20 @@ func (sa *specAssembler) askForWhiteListItem() (*releaseSpec, error) {
 	}, nil
 }
 
-func (sa specAssembler) assembleFeatureSpec(ctx context.Context, orgID int32, clusterID int32, featureSpecIn SecurityScanFeatureSpec) (SecurityScanFeatureSpec, error) {
+func (sa specAssembler) assembleServiceSpec(ctx context.Context, orgID int32, clusterID int32, serviceSpecIn ServiceSpec) (ServiceSpec, error) {
 
-	policy, err := sa.askForPolicy(featureSpecIn.Policy)
+	policy, err := sa.askForPolicy(serviceSpecIn.Policy)
 	if err != nil {
-		return SecurityScanFeatureSpec{}, errors.WrapIf(err, "failed to assembele policy data")
+		return ServiceSpec{}, errors.WrapIf(err, "failed to assembele policy data")
 	}
 
-	webhookConfig, err := sa.askForWebHookConfig(ctx, orgID, clusterID, featureSpecIn.WebhookConfig)
+	webhookConfig, err := sa.askForWebHookConfig(ctx, orgID, clusterID, serviceSpecIn.WebhookConfig)
 	if err != nil {
-		return SecurityScanFeatureSpec{}, errors.WrapIf(err, "failed to assembele webhook data")
+		return ServiceSpec{}, errors.WrapIf(err, "failed to assembele webhook data")
 
 	}
 
-	return SecurityScanFeatureSpec{
+	return ServiceSpec{
 		Policy:        policy,
 		WebhookConfig: webhookConfig,
 	}, nil

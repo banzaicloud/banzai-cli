@@ -23,7 +23,7 @@ import (
 type GetManager struct{}
 
 func (GetManager) GetName() string {
-	return featureName
+	return serviceName
 }
 
 type outputResponse struct {
@@ -55,7 +55,7 @@ func (GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[
 		}
 	}
 
-	var spec featureSpec
+	var spec spec
 	if err := mapstructure.Decode(details.Spec, &spec); err != nil {
 		log.Errorf("failed to unmarshal output: %s", err.Error())
 		return map[string]map[string]interface{}{
