@@ -362,7 +362,11 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		}
 
 		if imageMeta.Custom.GenerateClusterName {
-			name := fmt.Sprintf("banzaicloud-%s-%s", strings.Split(hostname, ".")[0], filepath.Base(options.workspace))
+			user := os.Getenv("USER")
+			if user == "" {
+				user = strings.Split(hostname, ".")[0]
+			}
+			name := fmt.Sprintf("banzai-%s-%s", strings.ToLower(user), filepath.Base(options.workspace))
 			if banzaiCli.Interactive() {
 				if err := survey.AskOne(&survey.Input{
 					Message: "Name of cluster to create:",
