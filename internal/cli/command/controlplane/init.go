@@ -262,6 +262,7 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 	out["ingressHostPort"] = true
 	hostname, _ := os.Hostname()
 
+	options.installerImageRepo, options.installerTag = initImageValues(options, out)
 	switch options.provider {
 	case providerKind:
 		out[externalHost] = defaultLocalhost
@@ -301,7 +302,6 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 
 	case providerCustom:
 		out["providerConfig"] = providerConfig
-		options.installerImageRepo, options.installerTag = initImageValues(options, out)
 
 		source := "/export"
 
@@ -379,20 +379,21 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 			}
 		}
 
-		err = options.ensureImagePulled()
-		if err != nil {
-			return errors.WrapIf(err, "failed to pull installer image")
-		}
-		if options.installerTag == latestTag && options.containerRuntime == runtimeDocker {
-			ref, err := exec.Command("docker", "inspect", "-f", "{{index .RepoDigests 0}}", options.installerImage()).Output()
-			if err != nil {
-				return errors.WrapIf(err, "failed to determine installer image hash")
-			}
-			installer["image"] = strings.TrimSpace(string(ref))
+	}
 
-		} else {
-			installer["image"] = options.installerImage()
+	err = options.ensureImagePulled()
+	if err != nil {
+		return errors.WrapIf(err, "failed to pull installer image")
+	}
+	if options.installerTag == latestTag && options.containerRuntime == runtimeDocker {
+		ref, err := exec.Command("docker", "inspect", "-f", "{{index .RepoDigests 0}}", options.installerImage()).Output()
+		if err != nil {
+			return errors.WrapIf(err, "failed to determine installer image hash")
 		}
+		installer["image"] = strings.TrimSpace(string(ref))
+
+	} else {
+		installer["image"] = options.installerImage()
 	}
 
 	out["installer"] = installer
