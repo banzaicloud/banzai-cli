@@ -18,7 +18,7 @@ import (
 	"emperror.dev/errors"
 )
 
-type featureSpec struct {
+type spec struct {
 	Loki          lokiSpec          `json:"loki" mapstructure:"loki"`
 	Logging       loggingSpec       `json:"logging" mapstructure:"logging"`
 	ClusterOutput clusterOutputSpec `json:"clusterOutput" mapstructure:"clusterOutput"`
@@ -58,7 +58,7 @@ type bucketSpec struct {
 	StorageAccount string `json:"storageAccount" mapstructure:"storageAccount"`
 }
 
-func (s featureSpec) Validate() error {
+func (s spec) Validate() error {
 	if err := s.Loki.Validate(); err != nil {
 		return err
 	}

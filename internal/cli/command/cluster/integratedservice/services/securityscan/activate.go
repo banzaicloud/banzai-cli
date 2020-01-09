@@ -42,21 +42,21 @@ func (am activateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCt
 	// todo infer the cli directly to the manager instead
 	am.specAssembler = specAssembler{banzaiCLI}
 
-	if err := am.isFeatureEnabled(context.Background()); err != nil {
+	if err := am.isServiceEnabled(context.Background()); err != nil {
 		return nil, errors.WrapIf(err, "securityscan is not enabled")
 	}
 
-	featureSpec, err := am.assembleFeatureSpec(context.Background(), banzaiCLI.Context().OrganizationID(), clusterCtx.ClusterID(), SecurityScanFeatureSpec{})
+	serviceSpec, err := am.assembleServiceSpec(context.Background(), banzaiCLI.Context().OrganizationID(), clusterCtx.ClusterID(), ServiceSpec{})
 	if err != nil {
 		return nil, errors.WrapIf(err, "failed to assemble integratedservice specification")
 	}
 
-	featureSpecMap, err := am.securityScanSpecAsMap(&featureSpec)
+	serviceSpecMap, err := am.securityScanSpecAsMap(&serviceSpec)
 	if err != nil {
 		return nil, errors.WrapIf(err, "failed to transform integratedservice specification")
 	}
 
-	return &pipeline.ActivateClusterFeatureRequest{Spec: featureSpecMap}, nil
+	return &pipeline.ActivateClusterFeatureRequest{Spec: serviceSpecMap}, nil
 }
 
 func (am activateManager) ValidateRequest(req interface{}) error {
@@ -81,10 +81,10 @@ func (am activateManager) readActivateReqFromFileOrStdin(filePath string, req *p
 	return nil
 }
 
-func (am activateManager) securityScanSpecAsMap(spec *SecurityScanFeatureSpec) (map[string]interface{}, error) {
+func (am activateManager) securityScanSpecAsMap(spec *ServiceSpec) (map[string]interface{}, error) {
 	// fill the structure of the config - make filling up the values easier
 	if spec == nil {
-		spec = &SecurityScanFeatureSpec{
+		spec = &ServiceSpec{
 			CustomAnchore:    anchoreSpec{},
 			Policy:           policySpec{},
 			ReleaseWhiteList: nil,

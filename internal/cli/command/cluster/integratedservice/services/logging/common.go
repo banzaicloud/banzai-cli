@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	featureName          = "logging"
+	serviceName          = "logging"
 	htpasswordSecretType = "htpasswd"
 	amazonType           = "amazon"
 	azureType            = "azure"
@@ -40,7 +40,7 @@ const (
 type baseManager struct{}
 
 func (baseManager) GetName() string {
-	return featureName
+	return serviceName
 }
 
 func NewDeactivateManager() *baseManager {
@@ -48,7 +48,7 @@ func NewDeactivateManager() *baseManager {
 }
 
 func validateSpec(specObj map[string]interface{}) error {
-	var spec featureSpec
+	var spec spec
 	if err := mapstructure.Decode(specObj, &spec); err != nil {
 		return errors.WrapIf(err, "integratedservice specification does not conform to schema")
 	}

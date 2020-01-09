@@ -22,7 +22,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-type featureSpec struct {
+type serviceSpec struct {
 	Prometheus   prometheusSpec   `json:"prometheus" mapstructure:"prometheus"`
 	Grafana      grafanaSpec      `json:"grafana" mapstructure:"grafana"`
 	Exporters    exportersSpec    `json:"exporters" mapstructure:"exporters"`
@@ -96,7 +96,7 @@ type slackSpec struct {
 	SendResolved bool   `json:"sendResolved" mapstructure:"sendResolved"`
 }
 
-func (s featureSpec) Validate() error {
+func (s serviceSpec) Validate() error {
 	// Prometheus validation
 	if err := s.Prometheus.Validate(); err != nil {
 		return err

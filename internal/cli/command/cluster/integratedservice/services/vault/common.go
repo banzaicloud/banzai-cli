@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	featureName = "vault"
+	serviceName = "vault"
 
 	vaultCustom = "Custom vault"
 	vaultCP     = "Pipeline's Vault"
@@ -41,7 +41,7 @@ type defaults struct {
 type baseManager struct{}
 
 func (baseManager) GetName() string {
-	return featureName
+	return serviceName
 }
 
 func NewDeactivateManager() *baseManager {

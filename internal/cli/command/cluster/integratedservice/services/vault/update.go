@@ -38,11 +38,11 @@ func (UpdateManager) ValidateRequest(req interface{}) error {
 	return validateSpec(request.Spec)
 }
 
-func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateClusterFeatureRequest *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error {
+func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error {
 
 	var spec specResponse
-	if err := mapstructure.Decode(updateClusterFeatureRequest.Spec, &spec); err != nil {
-		return errors.WrapIf(err, "integratedservice specification does not conform to schema")
+	if err := mapstructure.Decode(updateServiceRequest.Spec, &spec); err != nil {
+		return errors.WrapIf(err, "service specification does not conform to schema")
 	}
 
 	currentVaultType := vaultCP
@@ -58,7 +58,7 @@ func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateClusterF
 
 	switch vaultType {
 	case vaultCustom:
-		customSpec, err := buildCustomVaultFeatureRequest(banzaiCli, defaults{
+		customSpec, err := buildCustomVaultServiceRequest(banzaiCli, defaults{
 			address:  spec.CustomVault.Address,
 			secretID: spec.CustomVault.SecretID,
 			policy:   spec.CustomVault.Policy,
@@ -66,13 +66,13 @@ func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateClusterF
 		if err != nil {
 			return errors.Wrap(err, "failed to build custom Vault integratedservice request")
 		}
-		updateClusterFeatureRequest.Spec = customSpec
+		updateServiceRequest.Spec = customSpec
 	case vaultCP:
 	default:
 		return errors.New("not supported type of Vault component")
 	}
 
-	settings, err := buildSettingsFeatureRequest(
+	settings, err := buildSettingsServiceRequest(
 		defaults{
 			namespaces:      spec.Settings.Namespaces,
 			serviceAccounts: spec.Settings.ServiceAccounts,
@@ -82,7 +82,7 @@ func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateClusterF
 		return errors.WrapIf(err, "failed to build settings to integratedservice update request")
 	}
 
-	updateClusterFeatureRequest.Spec["settings"] = settings
+	updateServiceRequest.Spec["settings"] = settings
 
 	return nil
 }

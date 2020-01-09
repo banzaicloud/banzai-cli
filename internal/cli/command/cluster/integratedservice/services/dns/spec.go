@@ -37,14 +37,14 @@ type Provider struct {
 	Options  map[string]interface{} `json:"options,omitempty" mapstructure:"options"`
 }
 
-// DNSFeatureSpec DNS integratedservice specification
-type DNSFeatureSpec struct {
+// ServiceSpec DNS integrated service specification
+type ServiceSpec struct {
 	ExternalDNS   ExternalDNS `mapstructure:"externalDns"`
 	ClusterDomain string      `mapstructure:"clusterDomain"`
 }
 
-// DNSFeatureOutput used to parse / display integratedservice output
-type DNSFeatureOutput struct {
+// ServiceOutput used to parse / display integrated service output
+type ServiceOutput struct {
 	ExternalDns struct {
 		Version string `json:"version" mapstructure:"version"`
 	} `json:"externalDns" mapstructure:"externalDns"`

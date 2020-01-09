@@ -45,31 +45,31 @@ func (um updateManager) ValidateRequest(req interface{}) error {
 	return nil
 }
 
-func (um updateManager) BuildRequestInteractively(banzaiCLI cli.Cli, updateClusterFeatureRequest *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error {
+func (um updateManager) BuildRequestInteractively(banzaiCLI cli.Cli, updateServiceRequest *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error {
 
 	// todo infer the cli directly to the manager instead
 	um.specAssembler = specAssembler{banzaiCLI}
 
-	if err := um.isFeatureEnabled(context.Background()); err != nil {
+	if err := um.isServiceEnabled(context.Background()); err != nil {
 		return errors.WrapIf(err, "securityscan is not enabled")
 	}
 
-	featureSpec := SecurityScanFeatureSpec{}
-	if err := mapstructure.Decode(updateClusterFeatureRequest.Spec, &featureSpec); err != nil {
+	serviceSpec := ServiceSpec{}
+	if err := mapstructure.Decode(updateServiceRequest.Spec, &serviceSpec); err != nil {
 		return errors.WrapIf(err, "failed to decode service specification for update")
 	}
 
-	featureSpec, err := um.assembleFeatureSpec(context.Background(), banzaiCLI.Context().OrganizationID(), clusterCtx.ClusterID(), featureSpec)
+	serviceSpec, err := um.assembleServiceSpec(context.Background(), banzaiCLI.Context().OrganizationID(), clusterCtx.ClusterID(), serviceSpec)
 	if err != nil {
 		return errors.WrapIf(err, "failed to assemble service specification")
 	}
 
-	featureSpecMap, err := um.securityScanSpecAsMap(&featureSpec)
+	serviceSpecMap, err := um.securityScanSpecAsMap(&serviceSpec)
 	if err != nil {
 		return errors.WrapIf(err, "failed to transform service specification")
 	}
 
-	updateClusterFeatureRequest.Spec = featureSpecMap
+	updateServiceRequest.Spec = serviceSpecMap
 
 	return nil
 }

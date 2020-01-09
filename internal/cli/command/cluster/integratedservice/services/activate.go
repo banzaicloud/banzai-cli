@@ -59,7 +59,7 @@ func ActivateCommandFactory(banzaiCli cli.Cli, manager ActivateManager, name str
 	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, fmt.Sprintf("activate %s cluster service for", name))
 
 	flags := cmd.Flags()
-	flags.StringVarP(&options.filePath, "file", "f", "", "Feature specification file")
+	flags.StringVarP(&options.filePath, "file", "f", "", "Service specification file")
 
 	return cmd
 }

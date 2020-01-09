@@ -41,7 +41,7 @@ func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx c
 
 	switch vaultType {
 	case vaultCustom:
-		customSpec, err := buildCustomVaultFeatureRequest(banzaiCli, defaults{})
+		customSpec, err := buildCustomVaultServiceRequest(banzaiCli, defaults{})
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to build custom Vault integratedservice request")
 		}
@@ -51,7 +51,7 @@ func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx c
 		return nil, errors.New("not supported type of Vault component")
 	}
 
-	settings, err := buildSettingsFeatureRequest(
+	settings, err := buildSettingsServiceRequest(
 		defaults{
 			namespaces:      []string{"*"},
 			serviceAccounts: []string{"*"},
@@ -83,7 +83,7 @@ func NewActivateManager() *ActivateManager {
 	return &ActivateManager{}
 }
 
-func buildCustomVaultFeatureRequest(banzaiCLI cli.Cli, defaults defaults) (map[string]interface{}, error) {
+func buildCustomVaultServiceRequest(banzaiCLI cli.Cli, defaults defaults) (map[string]interface{}, error) {
 	address, err := askVaultAddress(defaults.address)
 	if err != nil {
 		return nil, err
@@ -109,7 +109,7 @@ func buildCustomVaultFeatureRequest(banzaiCLI cli.Cli, defaults defaults) (map[s
 	}, nil
 }
 
-func buildSettingsFeatureRequest(defaults defaults) (map[string]interface{}, error) {
+func buildSettingsServiceRequest(defaults defaults) (map[string]interface{}, error) {
 	namespaces, err := askNamespaces(defaults.namespaces)
 	if err != nil {
 		return nil, errors.WrapIf(err, "failed to get namespaces")
