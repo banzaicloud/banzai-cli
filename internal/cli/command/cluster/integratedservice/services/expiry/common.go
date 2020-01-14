@@ -31,6 +31,10 @@ func (baseManager) GetName() string {
 	return serviceName
 }
 
+func NewDeactivateManager() *baseManager {
+	return &baseManager{}
+}
+
 func validateSpec(specObj map[string]interface{}) error {
 
 	var spec serviceSpec
