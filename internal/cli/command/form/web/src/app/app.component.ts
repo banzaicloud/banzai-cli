@@ -28,7 +28,7 @@ export class AppComponent implements OnInit {
   initialValue: any;
   error: string;
 
-  @ViewChild('downloadLink')
+  @ViewChild('downloadLink', { static: true })
   downloadLink: ElementRef;
 
   constructor(private http: HttpClient, private snackBar: MatSnackBar) {}
