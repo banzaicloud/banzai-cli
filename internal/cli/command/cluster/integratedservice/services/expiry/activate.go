@@ -74,7 +74,9 @@ func askForDate(defaultValue string) (string, error) {
 				return "", errors.WrapIf(err, "error during getting secret")
 			}
 
-			if isDateValid(date) {
+			if err := validateDate(date); err != nil {
+				log.Error("error during validation date: ", err.Error())
+			} else {
 				break
 			}
 		}
@@ -99,19 +101,4 @@ func askForDate(defaultValue string) (string, error) {
 	}
 
 	return date, nil
-}
-
-func isDateValid(date string) bool {
-	d, err := time.Parse(time.RFC3339, date)
-	if err != nil {
-		log.Error("wrong date format")
-		return false
-	}
-
-	if !d.After(time.Now().UTC()) {
-		log.Error("the provided date cannot be before the current date")
-		return false
-	}
-
-	return true
 }
