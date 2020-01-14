@@ -14,6 +14,30 @@
 
 package expiry
 
+import (
+	"emperror.dev/errors"
+	"github.com/mitchellh/mapstructure"
+)
+
 const (
 	serviceName = "expiry"
+
+	layoutISO8601 = "2006-01-02T15:04Z"
 )
+
+type baseManager struct{}
+
+func (baseManager) GetName() string {
+	return serviceName
+}
+
+func validateSpec(specObj map[string]interface{}) error {
+
+	var spec serviceSpec
+
+	if err := mapstructure.Decode(specObj, &spec); err != nil {
+		return errors.WrapIf(err, "service specification does not conform to schema")
+	}
+
+	return spec.Validate()
+}
