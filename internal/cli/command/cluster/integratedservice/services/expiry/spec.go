@@ -19,5 +19,5 @@ type serviceSpec struct {
 }
 
 func (s serviceSpec) Validate() error {
-	return nil
+	return validateDate(s.Date)
 }
