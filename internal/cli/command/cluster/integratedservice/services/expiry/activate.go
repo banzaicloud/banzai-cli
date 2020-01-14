@@ -66,7 +66,7 @@ func askForDate(defaultValue string) (string, error) {
 				input.QuestionInput{
 					QuestionBase: input.QuestionBase{
 						Message: "Provide expiration date in UTC:",
-						Help:    fmt.Sprintf("Date format should be: %s", time.Now().UTC().Format(layoutISO8601)),
+						Help:    fmt.Sprintf("Date format should be: %s", time.Now().UTC().Format(time.RFC3339)),
 					},
 					DefaultValue: defaultValue,
 					Output:       &date,
@@ -102,7 +102,7 @@ func askForDate(defaultValue string) (string, error) {
 }
 
 func isDateValid(date string) bool {
-	d, err := time.Parse(layoutISO8601, date)
+	d, err := time.Parse(time.RFC3339, date)
 	if err != nil {
 		log.Error("wrong date format")
 		return false
