@@ -21,8 +21,6 @@ import (
 
 const (
 	serviceName = "expiry"
-
-	layoutISO8601 = "2006-01-02T15:04Z"
 )
 
 type baseManager struct{}
