@@ -47,6 +47,7 @@ func NewIntegratedServiceCommand(banzaiCli cli.Cli) *cobra.Command {
 		serviceCommandFactory(banzaiCli, "securityscan", securityscan.NewSecurityScanSubCommandManager()),
 		serviceCommandFactory(banzaiCli, "monitoring", services.NewMonitoringSubCommandManager()),
 		serviceCommandFactory(banzaiCli, "logging", services.NewLoggingSubCommandManager()),
+		serviceCommandFactory(banzaiCli, "expiry", services.NewExpirySubCommandManager()),
 	)
 
 	return cmd
