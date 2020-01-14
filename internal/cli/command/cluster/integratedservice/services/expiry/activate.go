@@ -86,7 +86,7 @@ func askForDate(defaultValue string) (string, error) {
 		if err := input.DoQuestions([]input.QuestionMaker{
 			input.QuestionConfirm{
 				QuestionBase: input.QuestionBase{
-					Message: fmt.Sprintf("Are you sure you want to deleting this cluster at %s ", date),
+					Message: fmt.Sprintf("Are you sure you want this cluster to be deleted at %s?", date),
 				},
 				DefaultValue: true,
 				Output:       &isConfirmed,
