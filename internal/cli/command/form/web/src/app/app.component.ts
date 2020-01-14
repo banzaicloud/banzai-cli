@@ -1,5 +1,5 @@
 import { Component, ElementRef, ViewChild, OnInit } from '@angular/core';
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { UniformService, CONTROL_TYPES, CONTROL_GROUP_TYPES, IFormFieldGroup, IFormField } from '@banzaicloud/uniform';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { map, catchError } from 'rxjs/operators';
