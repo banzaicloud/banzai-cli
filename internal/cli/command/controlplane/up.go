@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -131,6 +130,10 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		return errors.New("workspace is already initialized but a different --provider is specified")
 	}
 
+	if err := initStateBackend(options.cpContext, values); err != nil {
+		return err
+	}
+
 	source := "/export"
 
 	// for backward compatibility
@@ -156,17 +159,6 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		// where the null_resource.preapply_hook did the merging
 		if err := runTerraform("apply", options.cpContext, nil, "null_resource.preapply_hook"); err != nil {
 			return errors.WrapIf(err, "failed to run null_resource.preapply_hook as a standalone target")
-		}
-	}
-
-	if !isStateBackendInited(options) {
-		log.Info("Migrating workspace to state backend...")
-		if err := initStateBackend(options.cpContext); err != nil {
-			return err
-		}
-	} else {
-		if err := runTerraform("init", options.cpContext, nil); err != nil {
-			return errors.WrapIf(err, "failed to run terraform init")
 		}
 	}
 
@@ -242,14 +234,6 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 	}
 
 	return postInstall(options, banzaiCli, values)
-}
-
-func isStateBackendInited(options *createOptions) bool {
-	_, err := os.Stat(options.workspace + "/.terraform/terraform.tfstate")
-	if err != nil && os.IsNotExist(err) {
-		return false
-	}
-	return true
 }
 
 func postInstall(options *createOptions, banzaiCli cli.Cli, values map[string]interface{}) error {

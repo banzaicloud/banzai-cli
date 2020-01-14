@@ -253,7 +253,7 @@ func runTerraformCommandGeneric(options *cpContext, cmd []string, cmdEnv map[str
 	case runtimeDocker:
 		args := []string{
 			"-v", fmt.Sprintf("%s:/workspace", options.workspace),
-			"-v", fmt.Sprintf("%s:/terraform/state.tf", options.workspace+"/state.tf"),
+			"-v", fmt.Sprintf("%s:/terraform/state.tf.json", options.workspace+"/state.tf.json"),
 			"-v", fmt.Sprintf("%s:/terraform/.terraform/terraform.tfstate", options.workspace+"/.terraform/terraform.tfstate"),
 		}
 		if options.banzaiCli.Interactive() {
@@ -266,7 +266,7 @@ func runTerraformCommandGeneric(options *cpContext, cmd []string, cmdEnv map[str
 	case runtimeContainerd:
 		args := []string{
 			"--mount", fmt.Sprintf("type=bind,src=%s,dst=/workspace,options=rbind:rw", options.workspace),
-			"--mount", fmt.Sprintf("type=bind,src=%s,dst=/terraform/state.tf,options=rbind:rw", options.workspace+"/state.tf"),
+			"--mount", fmt.Sprintf("type=bind,src=%s,dst=/terraform/state.tf.json,options=rbind:rw", options.workspace+"/state.tf.json"),
 			"--mount", fmt.Sprintf("type=bind,src=%s,dst=/terraform/.terraform/terraform.tfstate,options=rbind:rw", options.workspace+"/.terraform/terraform.tfstate"),
 		}
 		if options.banzaiCli.Interactive() {
