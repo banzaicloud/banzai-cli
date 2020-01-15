@@ -148,10 +148,15 @@ func validateClusterCreateRequest(val interface{}) error {
 	decoder = json.NewDecoder(strings.NewReader(str))
 	decoder.DisallowUnknownFields()
 
-	if typer.Type == "" {
+	switch typer.Type {
+	case "pke-on-azure":
+		err = decoder.Decode(&pipeline.CreatePkeOnAzureClusterRequest{})
+	case "pke-on-vsphere":
+		err = decoder.Decode(&pipeline.CreatePkeOnVsphereClusterRequest{})
+	case "":
 		err = decoder.Decode(&pipeline.CreateClusterRequest{})
-	} else {
-		err = decoder.Decode(&pipeline.CreateClusterRequestV2{})
+	default:
+		err = fmt.Errorf("unknown cluster type: %q", typer.Type)
 	}
 	return errors.WrapIf(err, "invalid request")
 }
@@ -325,6 +330,8 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 		switch Type {
 		case "pke-on-azure":
 			cloud = "azure"
+		case "pke-on-vsphere":
+			cloud = "vsphere"
 		default:
 			return errors.New("couldn't determine cloud provider from request")
 		}
@@ -437,6 +444,27 @@ func getProviders() map[string]interface{} {
 						Runtime: "containerd",
 					},
 				},
+			},
+		},
+		"pke-on-vsphere": pipeline.CreatePkeOnVsphereClusterRequest{
+			Type: "pke-on-vsphere",
+			Nodepools: []pipeline.PkeOnVsphereNodePool{
+				{
+					Name:          "master",
+					Roles:         []string{"master", "worker"},
+					Count:         1,
+					Vcpu:          2,
+					RamMB:         1024,
+					AdminUsername: "root",
+					Template:      "pke-template",
+				},
+			},
+			Folder:       "folder",
+			Datastore:    "DatastoreCluster",
+			ResourcePool: "resource-pool",
+			Kubernetes: pipeline.CreatePkeClusterKubernetes{
+				Version: "1.15.3",
+				Rbac:    true,
 			},
 		},
 		"pke-on-azure": pipeline.CreatePkeOnAzureClusterRequest{
