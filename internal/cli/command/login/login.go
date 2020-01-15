@@ -138,7 +138,7 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 					&survey.Input{
 						Message: "Pipeline token:",
 						Default: defaultLoginFlow,
-						Help:    fmt.Sprintf("Copy your Pipeline access token from the token field of %s/api/v1/token", endpoint),
+						Help:    "Create a token on the Settings page of the web UI (https://banzaicloud.com/docs/pipeline/security/authentication/personal-access-tokens/).",
 					},
 					&token, survey.WithValidator(survey.Required))
 				if err != nil {
