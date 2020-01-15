@@ -161,6 +161,10 @@ func (c *cpContext) tfstatePath() string {
 }
 
 func (c *cpContext) deleteTfstate() error {
+	_, err := os.Stat(c.tfstatePath())
+	if os.IsNotExist(err) {
+		return nil
+	}
 	return os.Remove(c.tfstatePath())
 }
 
