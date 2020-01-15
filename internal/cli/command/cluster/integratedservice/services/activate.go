@@ -71,7 +71,6 @@ func runActivate(
 	args []string,
 	use string,
 ) error {
-
 	if err := isServiceEnabled(context.Background(), banzaiCLI, use); err != nil {
 		return errors.WrapIf(err, "failed to check service")
 	}
