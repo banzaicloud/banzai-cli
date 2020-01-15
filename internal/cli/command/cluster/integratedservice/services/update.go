@@ -41,7 +41,7 @@ type UpdateManager interface {
 	BuildRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error
 }
 
-func UpdateCommandFactory(banzaiCLI cli.Cli, manager UpdateManager, name string) *cobra.Command {
+func UpdateCommandFactory(banzaiCLI cli.Cli, use string, manager UpdateManager, name string) *cobra.Command {
 	options := updateOptions{}
 
 	cmd := &cobra.Command{
@@ -50,7 +50,7 @@ func UpdateCommandFactory(banzaiCLI cli.Cli, manager UpdateManager, name string)
 		Short:   fmt.Sprintf("Update the %s service of a cluster", name),
 		Args:    cobra.NoArgs,
 		RunE: func(_ *cobra.Command, args []string) error {
-			return runUpdate(banzaiCLI, manager, options, args)
+			return runUpdate(banzaiCLI, manager, options, args, use)
 		},
 	}
 
@@ -67,7 +67,12 @@ func runUpdate(
 	m UpdateManager,
 	options updateOptions,
 	args []string,
+	use string,
 ) error {
+	if err := isServiceEnabled(context.Background(), banzaiCLI, use); err != nil {
+		return errors.WrapIf(err, "failed to check service")
+	}
+
 	if err := options.Init(args...); err != nil {
 		return errors.Wrap(err, "failed to initialize options")
 	}

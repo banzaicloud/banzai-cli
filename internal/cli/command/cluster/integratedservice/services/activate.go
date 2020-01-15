@@ -41,7 +41,7 @@ type ActivateManager interface {
 	ValidateRequest(interface{}) error
 }
 
-func ActivateCommandFactory(banzaiCli cli.Cli, manager ActivateManager, name string) *cobra.Command {
+func ActivateCommandFactory(banzaiCli cli.Cli, use string, manager ActivateManager, name string) *cobra.Command {
 	options := activateOptions{}
 
 	cmd := &cobra.Command{
@@ -52,7 +52,7 @@ func ActivateCommandFactory(banzaiCli cli.Cli, manager ActivateManager, name str
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
-			return runActivate(banzaiCli, manager, options, args)
+			return runActivate(banzaiCli, manager, options, args, use)
 		},
 	}
 
@@ -69,7 +69,13 @@ func runActivate(
 	m ActivateManager,
 	options activateOptions,
 	args []string,
+	use string,
 ) error {
+
+	if err := isServiceEnabled(context.Background(), banzaiCLI, use); err != nil {
+		return errors.WrapIf(err, "failed to check service")
+	}
+
 	if err := options.Init(args...); err != nil {
 		return errors.Wrap(err, "failed to initialize options")
 	}

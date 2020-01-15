@@ -38,7 +38,7 @@ type GetManager interface {
 	WriteDetailsTable(pipeline.ClusterFeatureDetails) map[string]map[string]interface{}
 }
 
-func GetCommandFactory(banzaiCLI cli.Cli, manager GetManager, name string) *cobra.Command {
+func GetCommandFactory(banzaiCLI cli.Cli, use string, manager GetManager, name string) *cobra.Command {
 	options := getOptions{}
 
 	cmd := &cobra.Command{
@@ -47,7 +47,7 @@ func GetCommandFactory(banzaiCLI cli.Cli, manager GetManager, name string) *cobr
 		Short:   fmt.Sprintf("Get details of the %s service for a cluster", name),
 		Args:    cobra.NoArgs,
 		RunE: func(_ *cobra.Command, args []string) error {
-			return runGet(banzaiCLI, manager, options, args)
+			return runGet(banzaiCLI, manager, options, args, use)
 		},
 	}
 
@@ -61,7 +61,12 @@ func runGet(
 	m GetManager,
 	options getOptions,
 	args []string,
+	use string,
 ) error {
+	if err := isServiceEnabled(context.Background(), banzaiCLI, use); err != nil {
+		return errors.WrapIf(err, "failed to check service")
+	}
+
 	if err := options.Init(args...); err != nil {
 		return errors.WrapIf(err, "failed to initialize options")
 	}
