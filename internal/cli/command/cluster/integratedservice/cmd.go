@@ -58,7 +58,7 @@ type getOptions struct {
 
 type SubCommandManager interface {
 	GetName() string
-	ActivateManager() services.ActivateManager
+	ActivateManager(cap map[string]interface{}) services.ActivateManager
 	DeactivateManager() services.DeactivateManager
 	GetManager() services.GetManager
 	UpdateManager() services.UpdateManager

@@ -15,12 +15,9 @@
 package services
 
 import (
-	"context"
 	"fmt"
 
 	"emperror.dev/errors"
-	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/utils"
 )
 
 const (
@@ -28,11 +25,13 @@ const (
 	enabledKeyOnCap = "enabled"
 )
 
-func isServiceEnabled(ctx context.Context, banzaiCLI cli.Cli, serviceName string) error {
-	capabilities, r, err := banzaiCLI.Client().PipelineApi.ListCapabilities(ctx)
-	if err := utils.CheckCallResults(r, err); err != nil {
-		return errors.WrapIf(err, "failed to retrieve capabilities")
-	}
+type Cap map[string]map[string]interface{}
+
+func (capabilities Cap) isServiceEnabled(serviceName string) error {
+	//capabilities, r, err := banzaiCLI.Client().PipelineApi.ListCapabilities(ctx)
+	//if err := utils.CheckCallResults(r, err); err != nil {
+	//	return errors.WrapIf(err, "failed to retrieve capabilities")
+	//}
 
 	if services, ok := capabilities[serviceKeyOnCap]; ok {
 		if s, ok := services[serviceName]; ok {

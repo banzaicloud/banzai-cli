@@ -64,7 +64,11 @@ var (
 	}
 )
 
-type baseManager struct{}
+type Cap map[string]interface{}
+
+type baseManager struct {
+	cap map[string]interface{}
+}
 
 func (baseManager) GetName() string {
 	return serviceName

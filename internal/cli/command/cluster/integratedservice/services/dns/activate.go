@@ -38,8 +38,12 @@ type ActivateManager struct {
 	baseManager
 }
 
-func NewActivateManager() *ActivateManager {
-	return &ActivateManager{}
+func NewActivateManager(cap map[string]interface{}) *ActivateManager {
+	return &ActivateManager{
+		baseManager: baseManager{
+			cap: cap,
+		},
+	}
 }
 
 func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error) {
