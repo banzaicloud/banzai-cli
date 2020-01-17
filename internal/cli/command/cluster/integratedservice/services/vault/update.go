@@ -38,7 +38,12 @@ func (UpdateManager) ValidateRequest(req interface{}) error {
 	return validateSpec(request.Spec)
 }
 
-func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error {
+func (UpdateManager) BuildRequestInteractively(
+	banzaiCli cli.Cli,
+	updateServiceRequest *pipeline.UpdateClusterFeatureRequest,
+	_ clustercontext.Context,
+	cap map[string]interface{},
+) error {
 
 	var spec specResponse
 	if err := mapstructure.Decode(updateServiceRequest.Spec, &spec); err != nil {

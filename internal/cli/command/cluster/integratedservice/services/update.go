@@ -38,7 +38,12 @@ type updateOptions struct {
 type UpdateManager interface {
 	GetName() string
 	ValidateRequest(interface{}) error
-	BuildRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error
+	BuildRequestInteractively(
+		banzaiCli cli.Cli,
+		updateServiceRequest *pipeline.UpdateClusterFeatureRequest,
+		clusterCtx clustercontext.Context,
+		cap map[string]interface{},
+	) error
 }
 
 func UpdateCommandFactory(banzaiCLI cli.Cli, use string, manager UpdateManager, name string) *cobra.Command {
@@ -69,7 +74,13 @@ func runUpdate(
 	args []string,
 	use string,
 ) error {
-	if err := isServiceEnabled(context.Background(), banzaiCLI, use); err != nil {
+	var cl = capLoader{cli: banzaiCLI}
+	capabilities, err := cl.loadCapabilities(context.Background(), use)
+	if err != nil {
+		return errors.WrapIf(err, "error during loading capabilities")
+	}
+
+	if err := capabilities.isServiceEnabled(); err != nil {
 		return errors.WrapIf(err, "failed to check service")
 	}
 
@@ -80,7 +91,6 @@ func runUpdate(
 	orgID := banzaiCLI.Context().OrganizationID()
 	clusterID := options.ClusterID()
 
-	var err error
 	var request *pipeline.UpdateClusterFeatureRequest
 	if options.filePath == "" && banzaiCLI.Interactive() {
 
@@ -94,7 +104,7 @@ func runUpdate(
 			Spec: details.Spec,
 		}
 
-		if err := m.BuildRequestInteractively(banzaiCLI, request, options.Context); err != nil {
+		if err := m.BuildRequestInteractively(banzaiCLI, request, options.Context, capabilities); err != nil {
 			return errors.WrapIf(err, "failed to build update request interactively")
 		}
 

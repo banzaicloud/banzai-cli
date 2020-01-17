@@ -31,7 +31,11 @@ type ActivateManager struct {
 	baseManager
 }
 
-func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error) {
+func (ActivateManager) BuildRequestInteractively(
+	banzaiCLI cli.Cli,
+	_ clustercontext.Context,
+	cap map[string]interface{},
+) (*pipeline.ActivateClusterFeatureRequest, error) {
 	// get logging, tls and monitoring
 	logging, err := askLogging(loggingSpec{
 		Metrics: true, // TODO (colin): add monitoring integratedservice dependecy in v2

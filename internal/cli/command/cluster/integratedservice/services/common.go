@@ -15,9 +15,12 @@
 package services
 
 import (
+	"context"
 	"fmt"
 
 	"emperror.dev/errors"
+	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/utils"
 )
 
 const (
@@ -25,27 +28,37 @@ const (
 	enabledKeyOnCap = "enabled"
 )
 
-type Cap map[string]map[string]interface{}
+type Cap map[string]interface{}
 
-func (capabilities Cap) isServiceEnabled(serviceName string) error {
-	//capabilities, r, err := banzaiCLI.Client().PipelineApi.ListCapabilities(ctx)
-	//if err := utils.CheckCallResults(r, err); err != nil {
-	//	return errors.WrapIf(err, "failed to retrieve capabilities")
-	//}
+type capLoader struct {
+	cli cli.Cli
+}
 
-	if services, ok := capabilities[serviceKeyOnCap]; ok {
-		if s, ok := services[serviceName]; ok {
-			if svc, ok := s.(map[string]interface{}); ok {
-				if en, ok := svc[enabledKeyOnCap]; ok {
-					if enabled, ok := en.(bool); ok {
-						if enabled {
-							return nil
-						}
-					}
-				}
+func (capabilities Cap) isServiceEnabled() error {
+	if en, ok := capabilities[enabledKeyOnCap]; ok {
+		if enabled, ok := en.(bool); ok {
+			if enabled {
+				return nil
 			}
 		}
 	}
 
-	return errors.New(fmt.Sprintf("%s service disabled", serviceName))
+	return errors.New("service disabled")
+}
+
+func (cl capLoader) loadCapabilities(ctx context.Context, serviceName string) (Cap, error) {
+	capabilities, r, err := cl.cli.Client().PipelineApi.ListCapabilities(ctx)
+	if err := utils.CheckCallResults(r, err); err != nil {
+		return nil, errors.WrapIf(err, "failed to retrieve capabilities")
+	}
+
+	if c, ok := capabilities[serviceKeyOnCap]; ok {
+		if s, ok := c[serviceName]; ok {
+			if svc, ok := s.(map[string]interface{}); ok {
+				return svc, nil
+			}
+		}
+	}
+
+	return nil, errors.New(fmt.Sprintf("service %q disabled", serviceName))
 }

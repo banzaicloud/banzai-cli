@@ -63,7 +63,13 @@ func runGet(
 	args []string,
 	use string,
 ) error {
-	if err := isServiceEnabled(context.Background(), banzaiCLI, use); err != nil {
+	var cl = capLoader{cli: banzaiCLI}
+	capabilities, err := cl.loadCapabilities(context.Background(), use)
+	if err != nil {
+		return errors.WrapIf(err, "error during loading capabilities")
+	}
+
+	if err := capabilities.isServiceEnabled(); err != nil {
 		return errors.WrapIf(err, "failed to check service")
 	}
 

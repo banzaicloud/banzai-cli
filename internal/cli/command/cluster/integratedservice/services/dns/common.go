@@ -64,17 +64,21 @@ var (
 	}
 )
 
-type Cap map[string]interface{}
-
-type baseManager struct {
-	cap map[string]interface{}
-}
+type baseManager struct{}
 
 func (baseManager) GetName() string {
 	return serviceName
 }
 
+func (baseManager) CheckCapabilities(cap map[string]interface{}) {
+
+}
+
 func NewDeactivateManager() *baseManager {
+	return &baseManager{}
+}
+
+func NewCapabilitiesManager() *baseManager {
 	return &baseManager{}
 }
 

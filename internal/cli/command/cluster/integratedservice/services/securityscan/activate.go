@@ -37,7 +37,11 @@ func NewActivateManager() services.ActivateManager {
 	return &activateManager{}
 }
 
-func (am activateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error) {
+func (am activateManager) BuildRequestInteractively(
+	banzaiCLI cli.Cli,
+	clusterCtx clustercontext.Context,
+	cap map[string]interface{},
+) (*pipeline.ActivateClusterFeatureRequest, error) {
 
 	// todo infer the cli directly to the manager instead
 	am.specAssembler = specAssembler{banzaiCLI}
@@ -99,5 +103,3 @@ func (am activateManager) securityScanSpecAsMap(spec *ServiceSpec) (map[string]i
 
 	return specMap, nil
 }
-
-

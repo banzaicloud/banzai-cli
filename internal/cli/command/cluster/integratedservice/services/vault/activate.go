@@ -31,7 +31,11 @@ type ActivateManager struct{
 	baseManager
 }
 
-func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error) {
+func (ActivateManager) BuildRequestInteractively(
+	banzaiCli cli.Cli,
+	_ clustercontext.Context,
+	cap map[string]interface{},
+) (*pipeline.ActivateClusterFeatureRequest, error) {
 	var request pipeline.ActivateClusterFeatureRequest
 
 	vaultType, err := askVaultComponent(vaultCustom)

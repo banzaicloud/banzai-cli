@@ -38,15 +38,15 @@ type ActivateManager struct {
 	baseManager
 }
 
-func NewActivateManager(cap map[string]interface{}) *ActivateManager {
-	return &ActivateManager{
-		baseManager: baseManager{
-			cap: cap,
-		},
-	}
+func NewActivateManager() *ActivateManager {
+	return &ActivateManager{}
 }
 
-func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error) {
+func (ActivateManager) BuildRequestInteractively(
+	banzaiCli cli.Cli,
+	clusterCtx clustercontext.Context,
+	cap map[string]interface{},
+) (*pipeline.ActivateClusterFeatureRequest, error) {
 
 	defaultSpec := ServiceSpec{
 		ExternalDNS: ExternalDNS{

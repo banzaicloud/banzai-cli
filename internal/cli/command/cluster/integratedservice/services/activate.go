@@ -37,7 +37,11 @@ type activateOptions struct {
 
 type ActivateManager interface {
 	GetName() string
-	BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error)
+	BuildRequestInteractively(
+		banzaiCli cli.Cli,
+		clusterCtx clustercontext.Context,
+		cap map[string]interface{},
+	) (*pipeline.ActivateClusterFeatureRequest, error)
 	ValidateRequest(interface{}) error
 }
 
@@ -71,7 +75,13 @@ func runActivate(
 	args []string,
 	use string,
 ) error {
-	if err := isServiceEnabled(context.Background(), banzaiCLI, use); err != nil {
+	var cl = capLoader{cli: banzaiCLI}
+	capabilities, err := cl.loadCapabilities(context.Background(), use)
+	if err != nil {
+		return errors.WrapIf(err, "error during loading capabilities")
+	}
+
+	if err := capabilities.isServiceEnabled(); err != nil {
 		return errors.WrapIf(err, "failed to check service")
 	}
 
@@ -79,10 +89,9 @@ func runActivate(
 		return errors.Wrap(err, "failed to initialize options")
 	}
 
-	var err error
 	var request *pipeline.ActivateClusterFeatureRequest
 	if options.filePath == "" && banzaiCLI.Interactive() {
-		request, err = m.BuildRequestInteractively(banzaiCLI, options.Context)
+		request, err = m.BuildRequestInteractively(banzaiCLI, options.Context, capabilities)
 		if err != nil {
 			return errors.WrapIf(err, "failed to build activate request interactively")
 		}

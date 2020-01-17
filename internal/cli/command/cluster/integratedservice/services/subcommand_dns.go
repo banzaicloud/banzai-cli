@@ -24,8 +24,8 @@ func (DnsSubCommandManager) GetName() string {
 	return "DNS"
 }
 
-func (DnsSubCommandManager) ActivateManager(cap map[string]interface{}) ActivateManager {
-	return dns.NewActivateManager(cap)
+func (DnsSubCommandManager) ActivateManager() ActivateManager {
+	return dns.NewActivateManager()
 }
 
 func (DnsSubCommandManager) DeactivateManager() DeactivateManager {

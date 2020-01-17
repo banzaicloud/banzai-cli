@@ -35,7 +35,11 @@ type ActivateManager struct {
 	baseManager
 }
 
-func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error) {
+func (ActivateManager) BuildRequestInteractively(
+	banzaiCLI cli.Cli,
+	_ clustercontext.Context,
+	cap map[string]interface{},
+) (*pipeline.ActivateClusterFeatureRequest, error) {
 
 	grafana, err := askGrafana(banzaiCLI, grafanaSpec{
 		Enabled:    true,
