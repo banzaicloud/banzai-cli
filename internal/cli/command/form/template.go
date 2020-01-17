@@ -38,10 +38,11 @@ func NewTemplateCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := templateOptions{}
 
 	cmd := &cobra.Command{
-		Use:   "template FORM_CONFIG [-n TEMPLATE_NAME] [--force]",
-		Short: "Execute form template(s)",
-		Long:  "Execute form template(s) using values from the provided values in the config file",
-		Args:  cobra.ExactArgs(1),
+		Use:        "template FORM_CONFIG [-n TEMPLATE_NAME] [--force]",
+		Short:      "Execute form template(s)",
+		Long:       "Execute form template(s) using values from the provided values in the config file",
+		Deprecated: "This command will be removed later.",
+		Args:       cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			options.configFile = args[0]
 			runExecuteTemplate(banzaiCli, options)

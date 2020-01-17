@@ -30,9 +30,10 @@ func NewMigrateCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := migrateOptions{}
 
 	cmd := &cobra.Command{
-		Use:   "migrate SOURCE_FORM_CONFIG TARGET_FORM_CONFIG",
-		Short: "Migrate form values from source config to target config",
-		Args:  cobra.ExactArgs(2),
+		Use:        "migrate SOURCE_FORM_CONFIG TARGET_FORM_CONFIG",
+		Short:      "Migrate form values from source config to target config",
+		Deprecated: "This command will be removed later.",
+		Args:       cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			options.sourceConfigFile = args[0]
 			options.targetConfigFile = args[1]

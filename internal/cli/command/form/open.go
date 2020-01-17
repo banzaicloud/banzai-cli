@@ -38,9 +38,10 @@ func NewOpenCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := openOptions{}
 
 	cmd := &cobra.Command{
-		Use:   "open FORM_CONFIG [--port 0] [--browser]",
-		Short: "Open form defined in the form config file",
-		Args:  cobra.ExactArgs(1),
+		Use:        "open FORM_CONFIG [--port 0] [--browser]",
+		Short:      "Open form defined in the form config file",
+		Deprecated: "This command be removed later.",
+		Args:       cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			options.configFile = args[0]
 			runOpen(banzaiCli, options)

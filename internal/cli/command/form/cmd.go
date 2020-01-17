@@ -22,8 +22,9 @@ import (
 // NewFormCommand returns a cobra command for `form` subcommands.
 func NewFormCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "form",
-		Short: "Open forms from config, persist provided values and generate templates",
+		Use:        "form",
+		Short:      "Open forms from config, persist provided values and generate templates",
+		Deprecated: "This command and subcommands will be removed later.",
 	}
 
 	cmd.AddCommand(NewOpenCommand(banzaiCli))
