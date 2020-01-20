@@ -66,7 +66,7 @@ type SubCommandManager interface {
 
 func serviceCommandFactory(banzaiCLI cli.Cli, use string, scm SubCommandManager) *cobra.Command {
 	options := getOptions{}
-	getCommand := services.GetCommandFactory(banzaiCLI, scm.GetManager(), scm.GetName())
+	getCommand := services.GetCommandFactory(banzaiCLI, use, scm.GetManager(), scm.GetName())
 
 	cmd := &cobra.Command{
 		Use:   use,
@@ -78,10 +78,10 @@ func serviceCommandFactory(banzaiCLI cli.Cli, use string, scm SubCommandManager)
 	options.Context = clustercontext.NewClusterContext(cmd, banzaiCLI, fmt.Sprintf("manage %s cluster service of", scm.GetName()))
 
 	cmd.AddCommand(
-		services.ActivateCommandFactory(banzaiCLI, scm.ActivateManager(), scm.GetName()),
-		services.DeactivateCommandFactory(banzaiCLI, scm.DeactivateManager(), scm.GetName()),
+		services.ActivateCommandFactory(banzaiCLI, use, scm.ActivateManager(), scm.GetName()),
+		services.DeactivateCommandFactory(banzaiCLI, use, scm.DeactivateManager(), scm.GetName()),
 		getCommand,
-		services.UpdateCommandFactory(banzaiCLI, scm.UpdateManager(), scm.GetName()),
+		services.UpdateCommandFactory(banzaiCLI, use, scm.UpdateManager(), scm.GetName()),
 	)
 
 	return cmd
