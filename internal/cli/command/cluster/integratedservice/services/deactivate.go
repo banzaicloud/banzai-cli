@@ -33,7 +33,7 @@ type DeactivateManager interface {
 	GetName() string
 }
 
-func DeactivateCommandFactory(banzaiCli cli.Cli, manager DeactivateManager, name string) *cobra.Command {
+func DeactivateCommandFactory(banzaiCli cli.Cli, use string, manager DeactivateManager, name string) *cobra.Command {
 	options := deactivateOptions{}
 
 	cmd := &cobra.Command{
@@ -42,7 +42,7 @@ func DeactivateCommandFactory(banzaiCli cli.Cli, manager DeactivateManager, name
 		Short:   fmt.Sprintf("Deactivate the %s service of a cluster", name),
 		Args:    cobra.NoArgs,
 		RunE: func(_ *cobra.Command, args []string) error {
-			return runDeactivate(banzaiCli, manager, options, args)
+			return runDeactivate(banzaiCli, manager, options, args, use)
 		},
 	}
 
@@ -56,7 +56,12 @@ func runDeactivate(
 	m DeactivateManager,
 	options deactivateOptions,
 	args []string,
+	use string,
 ) error {
+	if err := isServiceEnabled(context.Background(), banzaiCLI, use); err != nil {
+		return errors.WrapIf(err, "failed to check service")
+	}
+
 	if err := options.Init(args...); err != nil {
 		return errors.WrapIf(err, "failed to initialize options")
 	}
