@@ -62,11 +62,12 @@ func askForDate(defaultValue string) (string, error) {
 
 	for {
 		for {
+			var formattedNow = time.Now().UTC().Format(time.RFC3339)
 			if err := input.DoQuestions([]input.QuestionMaker{
 				input.QuestionInput{
 					QuestionBase: input.QuestionBase{
-						Message: "Provide expiration date in UTC:",
-						Help:    fmt.Sprintf("Date format should be: %s", time.Now().UTC().Format(time.RFC3339)),
+						Message: fmt.Sprintf("Provide expiration date in UTC ( your local time in UTC is %s ):", formattedNow),
+						Help:    fmt.Sprintf("Date format should be: %s", formattedNow),
 					},
 					DefaultValue: defaultValue,
 					Output:       &date,
