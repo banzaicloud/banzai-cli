@@ -17,11 +17,12 @@ package integratedservice
 import (
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/services"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/services/securityscan"
-	"github.com/spf13/cobra"
 )
 
 func NewIntegratedServiceCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -66,22 +67,23 @@ type SubCommandManager interface {
 }
 
 func serviceCommandFactory(banzaiCLI cli.Cli, use string, scm SubCommandManager) *cobra.Command {
-	options := getOptions{}
-	getCommand := services.GetCommandFactory(banzaiCLI, use, scm.GetManager(), scm.GetName())
+	options := services.GetOptions{}
 
 	cmd := &cobra.Command{
 		Use:   use,
 		Short: fmt.Sprintf("Manage cluster %s service", scm.GetName()),
 		Args:  cobra.NoArgs,
-		RunE:  getCommand.RunE,
+		RunE: func(c *cobra.Command, args []string) error {
+			return services.RunGet(banzaiCLI, scm.GetManager(), options, args, use)
+		},
 	}
 
 	options.Context = clustercontext.NewClusterContext(cmd, banzaiCLI, fmt.Sprintf("manage %s cluster service of", scm.GetName()))
 
 	cmd.AddCommand(
+		services.GetCommandFactory(banzaiCLI, use, scm.GetManager(), scm.GetName()),
 		services.ActivateCommandFactory(banzaiCLI, use, scm.ActivateManager(), scm.GetName()),
 		services.DeactivateCommandFactory(banzaiCLI, use, scm.DeactivateManager(), scm.GetName()),
-		getCommand,
 		services.UpdateCommandFactory(banzaiCLI, use, scm.UpdateManager(), scm.GetName()),
 	)
 
