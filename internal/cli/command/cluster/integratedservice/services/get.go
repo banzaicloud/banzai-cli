@@ -22,14 +22,15 @@ import (
 	"sort"
 
 	"emperror.dev/errors"
+	"github.com/spf13/cobra"
+
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/output"
-	"github.com/spf13/cobra"
 )
 
-type getOptions struct {
+type GetOptions struct {
 	clustercontext.Context
 }
 
@@ -39,7 +40,7 @@ type GetManager interface {
 }
 
 func GetCommandFactory(banzaiCLI cli.Cli, use string, manager GetManager, name string) *cobra.Command {
-	options := getOptions{}
+	options := GetOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "get",
@@ -47,7 +48,7 @@ func GetCommandFactory(banzaiCLI cli.Cli, use string, manager GetManager, name s
 		Short:   fmt.Sprintf("Get details of the %s service for a cluster", name),
 		Args:    cobra.NoArgs,
 		RunE: func(_ *cobra.Command, args []string) error {
-			return runGet(banzaiCLI, manager, options, args, use)
+			return RunGet(banzaiCLI, manager, options, args, use)
 		},
 	}
 
@@ -56,10 +57,10 @@ func GetCommandFactory(banzaiCLI cli.Cli, use string, manager GetManager, name s
 	return cmd
 }
 
-func runGet(
+func RunGet(
 	banzaiCLI cli.Cli,
 	m GetManager,
-	options getOptions,
+	options GetOptions,
 	args []string,
 	use string,
 ) error {
