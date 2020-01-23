@@ -64,14 +64,7 @@ func ActivateCommandFactory(banzaiCli cli.Cli, use string, manager ActivateManag
 	return cmd
 }
 
-func runActivate(
-	banzaiCLI cli.Cli,
-	m ActivateManager,
-	options activateOptions,
-	args []string,
-	use string,
-) error {
-
+func runActivate(banzaiCLI cli.Cli, m ActivateManager, options activateOptions, args []string, use string) error {
 	if err := isServiceEnabled(context.Background(), banzaiCLI, use); err != nil {
 		return errors.WrapIf(err, "failed to check service")
 	}
@@ -80,22 +73,25 @@ func runActivate(
 		return errors.Wrap(err, "failed to initialize options")
 	}
 
-	var err error
-	var request *pipeline.ActivateClusterFeatureRequest
+	var (
+		request *pipeline.ActivateClusterFeatureRequest
+		err     error
+	)
+
 	if options.filePath == "" && banzaiCLI.Interactive() {
-		request, err = m.BuildRequestInteractively(banzaiCLI, options.Context)
-		if err != nil {
+		if request, err = m.BuildRequestInteractively(banzaiCLI, options.Context); err != nil {
 			return errors.WrapIf(err, "failed to build activate request interactively")
 		}
 
-		if err := showActivateEditor(m, request); err != nil {
+		if err = showActivateEditor(m, request); err != nil {
 			return errors.WrapIf(err, "failed during showing editor")
 		}
-
 	} else {
-		if err := readActivateReqFromFileOrStdin(options.filePath, request); err != nil {
+		var reqFromFile pipeline.ActivateClusterFeatureRequest
+		if err = readActivateReqFromFileOrStdin(options.filePath, &reqFromFile); err != nil {
 			return errors.WrapIf(err, fmt.Sprintf("failed to read %s cluster service specification", m.GetName()))
 		}
+		request = &reqFromFile
 	}
 
 	orgId := banzaiCLI.Context().OrganizationID()
