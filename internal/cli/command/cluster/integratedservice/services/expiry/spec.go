@@ -15,7 +15,7 @@
 package expiry
 
 type serviceSpec struct {
-	Date string `json:"date"`
+	Date string `json:"date" mapstructure:"date"`
 }
 
 func (s serviceSpec) Validate() error {

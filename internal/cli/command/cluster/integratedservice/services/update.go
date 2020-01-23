@@ -80,8 +80,10 @@ func runUpdate(
 	orgID := banzaiCLI.Context().OrganizationID()
 	clusterID := options.ClusterID()
 
-	var err error
-	var request *pipeline.UpdateClusterFeatureRequest
+	var (
+		err     error
+		request *pipeline.UpdateClusterFeatureRequest
+	)
 	if options.filePath == "" && banzaiCLI.Interactive() {
 
 		// get integratedservice details
@@ -104,6 +106,7 @@ func runUpdate(
 		}
 
 	} else {
+		request = new(pipeline.UpdateClusterFeatureRequest)
 		if err := readUpdateReqFromFileOrStdin(options.filePath, request); err != nil {
 			return errors.WrapIf(err, fmt.Sprintf("failed to read %s cluster service specification", m.GetName()))
 		}
