@@ -87,11 +87,10 @@ func runActivate(banzaiCLI cli.Cli, m ActivateManager, options activateOptions, 
 			return errors.WrapIf(err, "failed during showing editor")
 		}
 	} else {
-		var reqFromFile pipeline.ActivateClusterFeatureRequest
-		if err = readActivateReqFromFileOrStdin(options.filePath, &reqFromFile); err != nil {
+		request = new(pipeline.ActivateClusterFeatureRequest)
+		if err = readActivateReqFromFileOrStdin(options.filePath, request); err != nil {
 			return errors.WrapIf(err, fmt.Sprintf("failed to read %s cluster service specification", m.GetName()))
 		}
-		request = &reqFromFile
 	}
 
 	orgId := banzaiCLI.Context().OrganizationID()

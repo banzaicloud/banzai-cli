@@ -49,7 +49,10 @@ func (UpdateManager) BuildRequestInteractively(_ cli.Cli, req *pipeline.UpdateCl
 		return errors.WrapIf(err, "error during getting date")
 	}
 
-	req.Spec["date"] = date
+	spec.Date = date
+	if err := mapstructure.Decode(spec, &req.Spec); err != nil {
+		return errors.WrapIf(err, "service specification does not conform to schema")
+	}
 
 	return nil
 }
