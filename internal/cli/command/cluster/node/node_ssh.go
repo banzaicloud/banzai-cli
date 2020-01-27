@@ -89,8 +89,8 @@ func NewSSHToNodeCommand(banzaiCli cli.Cli) *cobra.Command {
 	flags.BoolVar(&o.podConnect, "pod-connect", o.podConnect, "Create a pod on one of the nodes and connect to a node through that pod")
 	flags.StringVar(&o.namespace, "namespace", o.namespace, "Namespace for the pod when using --pod-connect")
 	flags.BoolVar(&o.useNodeAffinity, "use-node-affinity", o.useNodeAffinity, "Whether to use node affinity for pod scheduling when using --pod-connect")
-	flags.BoolVar(&o.useInternalIP, "use-internal-ip", o.useInternalIP, "Use external IP of the node to connect (default)")
-	flags.BoolVar(&o.useExternalIP, "use-external-ip", o.useExternalIP, "Use internal IP of the node to connect")
+	flags.BoolVar(&o.useInternalIP, "use-internal-ip", o.useInternalIP, "Use internal IP of the node to connect")
+	flags.BoolVar(&o.useExternalIP, "use-external-ip", o.useExternalIP, "Use external IP of the node to connect (default)")
 	flags.IntVar(&o.sshPort, "ssh-port", o.sshPort, "SSH port of the node to connect")
 
 	o.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "get")
