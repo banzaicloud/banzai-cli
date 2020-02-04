@@ -34,16 +34,16 @@ Retrieves projects visible by the user represented by the secretid header from t
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param orgId Organization identifier
  * @param secretId Secret identification.
-@return ListProjectsResponse
+@return GoogleProjects
 */
-func (a *GoogleApiService) ListProjects(ctx _context.Context, orgId int32, secretId string) (ListProjectsResponse, *_nethttp.Response, error) {
+func (a *GoogleApiService) ListProjects(ctx _context.Context, orgId int32, secretId string) (GoogleProjects, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  ListProjectsResponse
+		localVarReturnValue  GoogleProjects
 	)
 
 	// create path and map variables
@@ -94,7 +94,7 @@ func (a *GoogleApiService) ListProjects(ctx _context.Context, orgId int32, secre
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 200 {
-			var v ListProjectsResponse
+			var v GoogleProjects
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()

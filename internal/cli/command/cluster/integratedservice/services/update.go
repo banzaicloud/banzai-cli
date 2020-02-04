@@ -38,7 +38,7 @@ type updateOptions struct {
 type UpdateManager interface {
 	GetName() string
 	ValidateRequest(interface{}) error
-	BuildRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error
+	BuildRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error
 }
 
 func UpdateCommandFactory(banzaiCLI cli.Cli, use string, manager UpdateManager, name string) *cobra.Command {
@@ -82,17 +82,17 @@ func runUpdate(
 
 	var (
 		err     error
-		request *pipeline.UpdateClusterFeatureRequest
+		request *pipeline.UpdateIntegratedServiceRequest
 	)
 	if options.filePath == "" && banzaiCLI.Interactive() {
 
 		// get integratedservice details
-		details, _, err := banzaiCLI.Client().ClusterFeaturesApi.ClusterFeatureDetails(context.Background(), orgID, clusterID, m.GetName())
+		details, _, err := banzaiCLI.Client().IntegratedServicesApi.IntegratedServiceDetails(context.Background(), orgID, clusterID, m.GetName())
 		if err != nil {
 			return errors.WrapIf(err, "failed to get service details")
 		}
 
-		request = &pipeline.UpdateClusterFeatureRequest{
+		request = &pipeline.UpdateIntegratedServiceRequest{
 			Spec: details.Spec,
 		}
 
@@ -106,13 +106,13 @@ func runUpdate(
 		}
 
 	} else {
-		request = new(pipeline.UpdateClusterFeatureRequest)
+		request = new(pipeline.UpdateIntegratedServiceRequest)
 		if err := readUpdateReqFromFileOrStdin(options.filePath, request); err != nil {
 			return errors.WrapIf(err, fmt.Sprintf("failed to read %s cluster service specification", m.GetName()))
 		}
 	}
 
-	resp, err := banzaiCLI.Client().ClusterFeaturesApi.UpdateClusterFeature(context.Background(), orgID, clusterID, m.GetName(), *request)
+	resp, err := banzaiCLI.Client().IntegratedServicesApi.UpdateIntegratedService(context.Background(), orgID, clusterID, m.GetName(), *request)
 	if err != nil {
 		cli.LogAPIError(fmt.Sprintf("update %s cluster service", m.GetName()), err, resp.Request)
 		log.Fatalf("could not update %s cluster service: %v", m.GetName(), err)
@@ -123,7 +123,7 @@ func runUpdate(
 	return nil
 }
 
-func readUpdateReqFromFileOrStdin(filePath string, req *pipeline.UpdateClusterFeatureRequest) error {
+func readUpdateReqFromFileOrStdin(filePath string, req *pipeline.UpdateIntegratedServiceRequest) error {
 	filename, raw, err := utils.ReadFileOrStdin(filePath)
 	if err != nil {
 		return errors.WrapIfWithDetails(err, "failed to read", "filename", filename)
@@ -136,7 +136,7 @@ func readUpdateReqFromFileOrStdin(filePath string, req *pipeline.UpdateClusterFe
 	return nil
 }
 
-func showUpdateEditor(m UpdateManager, request *pipeline.UpdateClusterFeatureRequest) error {
+func showUpdateEditor(m UpdateManager, request *pipeline.UpdateIntegratedServiceRequest) error {
 	var edit bool
 	if err := survey.AskOne(
 		&survey.Confirm{

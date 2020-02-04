@@ -13,5 +13,4 @@ package pipeline
 // InstallSecretResponse struct for InstallSecretResponse
 type InstallSecretResponse struct {
 	Name string `json:"name"`
-	Sourcing string `json:"sourcing"`
 }

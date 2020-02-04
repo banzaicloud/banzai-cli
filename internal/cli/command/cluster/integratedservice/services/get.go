@@ -36,7 +36,7 @@ type GetOptions struct {
 
 type GetManager interface {
 	GetName() string
-	WriteDetailsTable(pipeline.ClusterFeatureDetails) map[string]map[string]interface{}
+	WriteDetailsTable(details pipeline.IntegratedServiceDetails) map[string]map[string]interface{}
 }
 
 func GetCommandFactory(banzaiCLI cli.Cli, use string, manager GetManager, name string) *cobra.Command {
@@ -76,7 +76,7 @@ func RunGet(
 	orgId := banzaiCLI.Context().OrganizationID()
 	clusterId := options.ClusterID()
 
-	details, resp, err := pipelineClient.ClusterFeaturesApi.ClusterFeatureDetails(context.Background(), orgId, clusterId, m.GetName())
+	details, resp, err := pipelineClient.IntegratedServicesApi.IntegratedServiceDetails(context.Background(), orgId, clusterId, m.GetName())
 
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("cluster service [%s] not found", m.GetName())

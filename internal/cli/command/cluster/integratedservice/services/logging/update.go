@@ -29,7 +29,7 @@ type UpdateManager struct {
 }
 
 func (UpdateManager) ValidateRequest(req interface{}) error {
-	var request pipeline.UpdateClusterFeatureRequest
+	var request pipeline.UpdateIntegratedServiceRequest
 	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
 		return errors.WrapIf(err, "request is not valid JSON")
 	}
@@ -37,7 +37,7 @@ func (UpdateManager) ValidateRequest(req interface{}) error {
 	return validateSpec(request.Spec)
 }
 
-func (UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error {
+func (UpdateManager) BuildRequestInteractively(banzaiCLI cli.Cli, req *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error {
 	var spec spec
 	if err := mapstructure.Decode(req.Spec, &spec); err != nil {
 		return errors.WrapIf(err, "integratedservice specification does not conform to schema")

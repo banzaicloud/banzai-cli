@@ -42,7 +42,7 @@ type outputResponse struct {
 
 type TableData map[string]interface{}
 
-func (GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]map[string]interface{} {
+func (GetManager) WriteDetailsTable(details pipeline.IntegratedServiceDetails) map[string]map[string]interface{} {
 	tableData := map[string]interface{}{
 		"Status": details.Status,
 	}

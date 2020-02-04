@@ -31,7 +31,7 @@ type ActivateManager struct {
 	baseManager
 }
 
-func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error) {
+func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateIntegratedServiceRequest, error) {
 	// get logging, tls and monitoring
 	logging, err := askLogging(loggingSpec{
 		Metrics: true, // TODO (colin): add monitoring integratedservice dependecy in v2
@@ -64,7 +64,7 @@ func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 		return nil, errors.WrapIf(err, "error during getting Cluster Output options")
 	}
 
-	return &pipeline.ActivateClusterFeatureRequest{
+	return &pipeline.ActivateIntegratedServiceRequest{
 		Spec: map[string]interface{}{
 			"logging":       logging,
 			"loki":          loki,
@@ -74,7 +74,7 @@ func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 }
 
 func (ActivateManager) ValidateRequest(req interface{}) error {
-	var request pipeline.ActivateClusterFeatureRequest
+	var request pipeline.ActivateIntegratedServiceRequest
 	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
 		return errors.WrapIf(err, "request is not valid JSON")
 	}

@@ -74,7 +74,7 @@ func runDelete(banzaiCli cli.Cli, options deleteOptions, args []string) error {
 			return errors.New("deletion cancelled")
 		}
 	}
-	if cluster, _, err := client.ClustersApi.DeleteCluster(context.Background(), orgId, id, &pipeline.DeleteClusterOpts{Force: optional.NewBool(options.force)}); err != nil {
+	if cluster, err := client.ClustersApi.DeleteCluster(context.Background(), orgId, id, &pipeline.DeleteClusterOpts{Force: optional.NewBool(options.force)}); err != nil {
 		cli.LogAPIError("delete cluster", err, id)
 		return errors.WrapIf(err, "failed to delete cluster")
 	} else {

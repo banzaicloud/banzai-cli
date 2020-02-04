@@ -18,8 +18,6 @@ import (
 	_neturl "net/url"
 	"fmt"
 	"strings"
-	"github.com/antihax/optional"
-	"reflect"
 )
 
 // Linger please
@@ -27,144 +25,36 @@ var (
 	_ _context.Context
 )
 
-// SecretsApiService SecretsApi service
-type SecretsApiService service
+// IntegratedServicesApiService IntegratedServicesApi service
+type IntegratedServicesApiService service
 
 /*
-AddSecretTag Add a tag to a secret
-Add a tag to a secret
+ActivateFeature Activate a feature
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param orgId Organization identifier
- * @param secretId Secret identification
- * @param tag Tag
-@return []string
+ * @param id Cluster identifier
+ * @param featureName Feature name
+ * @param activateIntegratedServiceRequest
 */
-func (a *SecretsApiService) AddSecretTag(ctx _context.Context, orgId int32, secretId string, tag string) ([]string, *_nethttp.Response, error) {
-	var (
-		localVarHTTPMethod   = _nethttp.MethodPut
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  []string
-	)
-
-	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/secrets/{secretId}/tags/{tag}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"secretId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", secretId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"tag"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", tag)), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(r)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		if localVarHTTPResponse.StatusCode == 200 {
-			var v []string
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
-}
-
-// AddSecretsOpts Optional parameters for the method 'AddSecrets'
-type AddSecretsOpts struct {
-    Validate optional.Bool
-}
-
-/*
-AddSecrets Add secrets
-Adding secrets
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identifier
- * @param createSecretRequest
- * @param optional nil or *AddSecretsOpts - Optional Parameters:
- * @param "Validate" (optional.Bool) -  validation is skipped or not
-@return CreateSecretResponse
-*/
-func (a *SecretsApiService) AddSecrets(ctx _context.Context, orgId int32, createSecretRequest CreateSecretRequest, localVarOptionals *AddSecretsOpts) (CreateSecretResponse, *_nethttp.Response, error) {
+func (a *IntegratedServicesApiService) ActivateFeature(ctx _context.Context, orgId int32, id int32, featureName string, activateIntegratedServiceRequest ActivateIntegratedServiceRequest) (*_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPost
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  CreateSecretResponse
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/secrets"
+	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/features/{featureName}"
 	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"featureName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", featureName)), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
 
-	if localVarOptionals != nil && localVarOptionals.Validate.IsSet() {
-		localVarQueryParams.Add("validate", parameterToString(localVarOptionals.Validate.Value(), ""))
-	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -183,21 +73,21 @@ func (a *SecretsApiService) AddSecrets(ctx _context.Context, orgId int32, create
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = &createSecretRequest
+	localVarPostBody = &activateIntegratedServiceRequest
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
-		return localVarReturnValue, nil, err
+		return nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(r)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
+		return localVarHTTPResponse, err
 	}
 
 	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
+		return localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -205,47 +95,107 @@ func (a *SecretsApiService) AddSecrets(ctx _context.Context, orgId int32, create
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		if localVarHTTPResponse.StatusCode == 201 {
-			var v CreateSecretResponse
+			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
+				return localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+/*
+ActivateIntegratedService Activate an integrated service
+ * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
+ * @param serviceName service name
+ * @param activateIntegratedServiceRequest
+*/
+func (a *IntegratedServicesApiService) ActivateIntegratedService(ctx _context.Context, orgId int32, id int32, serviceName string, activateIntegratedServiceRequest ActivateIntegratedServiceRequest) (*_nethttp.Response, error) {
+	var (
+		localVarHTTPMethod   = _nethttp.MethodPost
+		localVarPostBody     interface{}
+		localVarFormFileName string
+		localVarFileName     string
+		localVarFileBytes    []byte
+	)
+
+	// create path and map variables
+	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/services/{serviceName}"
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"serviceName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", serviceName)), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := _neturl.Values{}
+	localVarFormParams := _neturl.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = &activateIntegratedServiceRequest
+	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
 		}
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
+				return localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-		return localVarReturnValue, localVarHTTPResponse, newErr
+		return localVarHTTPResponse, newErr
 	}
 
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
+	return localVarHTTPResponse, nil
 }
 
 /*
-DeleteSecretTag Delete a tag from a secret
-Delete a tag from a secret
+DeactivateFeature Deactivate a feature
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param orgId Organization identifier
- * @param secretId Secret identification
- * @param tag Tag
+ * @param id Cluster identifier
+ * @param featureName Feature name
 */
-func (a *SecretsApiService) DeleteSecretTag(ctx _context.Context, orgId int32, secretId string, tag string) (*_nethttp.Response, error) {
+func (a *IntegratedServicesApiService) DeactivateFeature(ctx _context.Context, orgId int32, id int32, featureName string) (*_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodDelete
 		localVarPostBody     interface{}
@@ -255,10 +205,10 @@ func (a *SecretsApiService) DeleteSecretTag(ctx _context.Context, orgId int32, s
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/secrets/{secretId}/tags/{tag}"
+	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/features/{featureName}"
 	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"secretId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", secretId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"tag"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", tag)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"featureName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", featureName)), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -316,13 +266,13 @@ func (a *SecretsApiService) DeleteSecretTag(ctx _context.Context, orgId int32, s
 }
 
 /*
-DeleteSecrets Delete secrets
-Deleting secrets
+DeactivateIntegratedService Deactivate an integrated service
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param orgId Organization identifier
- * @param secretId Secret identification
+ * @param id Cluster identifier
+ * @param serviceName service name
 */
-func (a *SecretsApiService) DeleteSecrets(ctx _context.Context, orgId int32, secretId string) (*_nethttp.Response, error) {
+func (a *IntegratedServicesApiService) DeactivateIntegratedService(ctx _context.Context, orgId int32, id int32, serviceName string) (*_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodDelete
 		localVarPostBody     interface{}
@@ -332,9 +282,10 @@ func (a *SecretsApiService) DeleteSecrets(ctx _context.Context, orgId int32, sec
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/secrets/{secretId}"
+	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/services/{serviceName}"
 	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"secretId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", secretId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"serviceName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", serviceName)), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -392,27 +343,28 @@ func (a *SecretsApiService) DeleteSecrets(ctx _context.Context, orgId int32, sec
 }
 
 /*
-GetSecret Get secret
-Get secret
+FeatureDetails Get details of a feature
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param orgId Organization identifier
- * @param secretId Secret identification
-@return SecretItem
+ * @param id Cluster identifier
+ * @param featureName Feature name
+@return IntegratedServiceDetails
 */
-func (a *SecretsApiService) GetSecret(ctx _context.Context, orgId int32, secretId string) (SecretItem, *_nethttp.Response, error) {
+func (a *IntegratedServicesApiService) FeatureDetails(ctx _context.Context, orgId int32, id int32, featureName string) (IntegratedServiceDetails, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  SecretItem
+		localVarReturnValue  IntegratedServiceDetails
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/secrets/{secretId}"
+	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/features/{featureName}"
 	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"secretId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", secretId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"featureName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", featureName)), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -457,7 +409,7 @@ func (a *SecretsApiService) GetSecret(ctx _context.Context, orgId int32, secretI
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 200 {
-			var v SecretItem
+			var v IntegratedServiceDetails
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -489,27 +441,28 @@ func (a *SecretsApiService) GetSecret(ctx _context.Context, orgId int32, secretI
 }
 
 /*
-GetSecretTags Get the tags of a secret
-Get the tags of a secret
+IntegratedServiceDetails Get details of an integrated service
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param orgId Organization identifier
- * @param secretId Secret identification
-@return []string
+ * @param id Cluster identifier
+ * @param serviceName service name
+@return IntegratedServiceDetails
 */
-func (a *SecretsApiService) GetSecretTags(ctx _context.Context, orgId int32, secretId string) ([]string, *_nethttp.Response, error) {
+func (a *IntegratedServicesApiService) IntegratedServiceDetails(ctx _context.Context, orgId int32, id int32, serviceName string) (IntegratedServiceDetails, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  []string
+		localVarReturnValue  IntegratedServiceDetails
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/secrets/{secretId}/tags"
+	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/services/{serviceName}"
 	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"secretId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", secretId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"serviceName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", serviceName)), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -554,7 +507,7 @@ func (a *SecretsApiService) GetSecretTags(ctx _context.Context, orgId int32, sec
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 200 {
-			var v []string
+			var v IntegratedServiceDetails
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -586,153 +539,31 @@ func (a *SecretsApiService) GetSecretTags(ctx _context.Context, orgId int32, sec
 }
 
 /*
-GetSecretType Get a specific secret type
-Get a specific secret type and describe it&#39;s fields
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param type_ Secret type
-@return SecretTypeResponse
-*/
-func (a *SecretsApiService) GetSecretType(ctx _context.Context, type_ string) (SecretTypeResponse, *_nethttp.Response, error) {
-	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  SecretTypeResponse
-	)
-
-	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/api/v1/secret-types/{type}"
-	localVarPath = strings.Replace(localVarPath, "{"+"type"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", type_)), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(r)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		if localVarHTTPResponse.StatusCode == 200 {
-			var v SecretTypeResponse
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
-}
-
-// GetSecretsOpts Optional parameters for the method 'GetSecrets'
-type GetSecretsOpts struct {
-    Type_ optional.String
-    Tags optional.Interface
-    Values optional.Bool
-}
-
-/*
-GetSecrets List secrets
-Listing secrets
+ListFeatures List enabled features of a cluster
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param orgId Organization identifier
- * @param optional nil or *GetSecretsOpts - Optional Parameters:
- * @param "Type_" (optional.String) -  Secret's type to filter with
- * @param "Tags" (optional.Interface of []string) -  The selected tag to filter with
- * @param "Values" (optional.Bool) -  Marks if to present secret values or just the keys
-@return []SecretItem
+ * @param id Cluster identifier
+@return map[string]IntegratedServiceDetails
 */
-func (a *SecretsApiService) GetSecrets(ctx _context.Context, orgId int32, localVarOptionals *GetSecretsOpts) ([]SecretItem, *_nethttp.Response, error) {
+func (a *IntegratedServicesApiService) ListFeatures(ctx _context.Context, orgId int32, id int32) (map[string]IntegratedServiceDetails, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  []SecretItem
+		localVarReturnValue  map[string]IntegratedServiceDetails
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/secrets"
+	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/features"
 	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
 
-	if localVarOptionals != nil && localVarOptionals.Type_.IsSet() {
-		localVarQueryParams.Add("type", parameterToString(localVarOptionals.Type_.Value(), ""))
-	}
-	if localVarOptionals != nil && localVarOptionals.Tags.IsSet() {
-		t:=localVarOptionals.Tags.Value()
-		if reflect.TypeOf(t).Kind() == reflect.Slice {
-			s := reflect.ValueOf(t)
-			for i := 0; i < s.Len(); i++ {
-				localVarQueryParams.Add("tags", parameterToString(s.Index(i), "multi"))
-			}
-		} else {
-			localVarQueryParams.Add("tags", parameterToString(t, "multi"))
-		}
-	}
-	if localVarOptionals != nil && localVarOptionals.Values.IsSet() {
-		localVarQueryParams.Add("values", parameterToString(localVarOptionals.Values.Value(), ""))
-	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -772,7 +603,7 @@ func (a *SecretsApiService) GetSecrets(ctx _context.Context, orgId int32, localV
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 200 {
-			var v []SecretItem
+			var v map[string]IntegratedServiceDetails
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -804,23 +635,26 @@ func (a *SecretsApiService) GetSecrets(ctx _context.Context, orgId int32, localV
 }
 
 /*
-ListSecretTypes List secret types
-List secret types definitions
+ListIntegratedServices List enabled integrated services of a cluster
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-@return map[string]SecretTypeResponse
+ * @param orgId Organization identifier
+ * @param id Cluster identifier
+@return map[string]IntegratedServiceDetails
 */
-func (a *SecretsApiService) ListSecretTypes(ctx _context.Context) (map[string]SecretTypeResponse, *_nethttp.Response, error) {
+func (a *IntegratedServicesApiService) ListIntegratedServices(ctx _context.Context, orgId int32, id int32) (map[string]IntegratedServiceDetails, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  map[string]SecretTypeResponse
+		localVarReturnValue  map[string]IntegratedServiceDetails
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/api/v1/secret-types"
+	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/services"
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -865,7 +699,7 @@ func (a *SecretsApiService) ListSecretTypes(ctx _context.Context) (map[string]Se
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 200 {
-			var v map[string]SecretTypeResponse
+			var v map[string]IntegratedServiceDetails
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -896,44 +730,33 @@ func (a *SecretsApiService) ListSecretTypes(ctx _context.Context) (map[string]Se
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-// UpdateSecretsOpts Optional parameters for the method 'UpdateSecrets'
-type UpdateSecretsOpts struct {
-    Validate optional.Bool
-}
-
 /*
-UpdateSecrets Update secrets
-Update secrets
+UpdateFeature Update a feature
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param orgId Organization identifier
- * @param secretId Secret identification
- * @param createSecretRequest
- * @param optional nil or *UpdateSecretsOpts - Optional Parameters:
- * @param "Validate" (optional.Bool) -  validation is skipped or not
-@return CreateSecretResponse
+ * @param id Cluster identifier
+ * @param featureName Feature name
+ * @param updateIntegratedServiceRequest
 */
-func (a *SecretsApiService) UpdateSecrets(ctx _context.Context, orgId int32, secretId string, createSecretRequest CreateSecretRequest, localVarOptionals *UpdateSecretsOpts) (CreateSecretResponse, *_nethttp.Response, error) {
+func (a *IntegratedServicesApiService) UpdateFeature(ctx _context.Context, orgId int32, id int32, featureName string, updateIntegratedServiceRequest UpdateIntegratedServiceRequest) (*_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPut
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  CreateSecretResponse
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/secrets/{secretId}"
+	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/features/{featureName}"
 	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"secretId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", secretId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"featureName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", featureName)), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
 
-	if localVarOptionals != nil && localVarOptionals.Validate.IsSet() {
-		localVarQueryParams.Add("validate", parameterToString(localVarOptionals.Validate.Value(), ""))
-	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -952,21 +775,21 @@ func (a *SecretsApiService) UpdateSecrets(ctx _context.Context, orgId int32, sec
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = &createSecretRequest
+	localVarPostBody = &updateIntegratedServiceRequest
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
-		return localVarReturnValue, nil, err
+		return nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(r)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
+		return localVarHTTPResponse, err
 	}
 
 	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
+		return localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -974,58 +797,30 @@ func (a *SecretsApiService) UpdateSecrets(ctx _context.Context, orgId int32, sec
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		if localVarHTTPResponse.StatusCode == 200 {
-			var v CreateSecretResponse
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 409 {
 			var v CommonError
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
+				return localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-		return localVarReturnValue, localVarHTTPResponse, newErr
+		return localVarHTTPResponse, newErr
 	}
 
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
+	return localVarHTTPResponse, nil
 }
 
 /*
-ValidateSecret Validate secret
-Validate secret
+UpdateIntegratedService Update an integrated service
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param orgId Organization identifier
- * @param secretId Secret identification
+ * @param id Cluster identifier
+ * @param serviceName service name
+ * @param updateIntegratedServiceRequest
 */
-func (a *SecretsApiService) ValidateSecret(ctx _context.Context, orgId int32, secretId string) (*_nethttp.Response, error) {
+func (a *IntegratedServicesApiService) UpdateIntegratedService(ctx _context.Context, orgId int32, id int32, serviceName string, updateIntegratedServiceRequest UpdateIntegratedServiceRequest) (*_nethttp.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = _nethttp.MethodPut
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
@@ -1033,16 +828,17 @@ func (a *SecretsApiService) ValidateSecret(ctx _context.Context, orgId int32, se
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/secrets/{secretId}/validate"
+	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/services/{serviceName}"
 	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"secretId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", secretId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"serviceName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", serviceName)), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
 
 	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
+	localVarHTTPContentTypes := []string{"application/json"}
 
 	// set Content-Type header
 	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
@@ -1058,6 +854,8 @@ func (a *SecretsApiService) ValidateSecret(ctx _context.Context, orgId int32, se
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
+	// body params
+	localVarPostBody = &updateIntegratedServiceRequest
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return nil, err

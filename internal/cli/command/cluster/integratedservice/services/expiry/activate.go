@@ -31,13 +31,13 @@ type ActivateManager struct {
 	baseManager
 }
 
-func (ActivateManager) BuildRequestInteractively(_ cli.Cli, _ clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error) {
+func (ActivateManager) BuildRequestInteractively(_ cli.Cli, _ clustercontext.Context) (*pipeline.ActivateIntegratedServiceRequest, error) {
 	date, err := askForDate("")
 	if err != nil {
 		return nil, errors.WrapIf(err, "failed to get date")
 	}
 
-	return &pipeline.ActivateClusterFeatureRequest{
+	return &pipeline.ActivateIntegratedServiceRequest{
 		Spec: map[string]interface{}{
 			"date": date,
 		},
@@ -45,7 +45,7 @@ func (ActivateManager) BuildRequestInteractively(_ cli.Cli, _ clustercontext.Con
 }
 
 func (ActivateManager) ValidateRequest(req interface{}) error {
-	var request pipeline.ActivateClusterFeatureRequest
+	var request pipeline.ActivateIntegratedServiceRequest
 	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
 		return errors.WrapIf(err, "request is not valid JSON")
 	}

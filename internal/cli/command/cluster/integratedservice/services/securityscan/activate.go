@@ -37,7 +37,7 @@ func NewActivateManager() services.ActivateManager {
 	return &activateManager{}
 }
 
-func (am activateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error) {
+func (am activateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateIntegratedServiceRequest, error) {
 
 	// todo infer the cli directly to the manager instead
 	am.specAssembler = specAssembler{banzaiCLI}
@@ -56,11 +56,11 @@ func (am activateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCt
 		return nil, errors.WrapIf(err, "failed to transform integratedservice specification")
 	}
 
-	return &pipeline.ActivateClusterFeatureRequest{Spec: serviceSpecMap}, nil
+	return &pipeline.ActivateIntegratedServiceRequest{Spec: serviceSpecMap}, nil
 }
 
 func (am activateManager) ValidateRequest(req interface{}) error {
-	var request pipeline.ActivateClusterFeatureRequest
+	var request pipeline.ActivateIntegratedServiceRequest
 	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
 		return errors.WrapIf(err, "request is not valid JSON")
 	}
@@ -68,7 +68,7 @@ func (am activateManager) ValidateRequest(req interface{}) error {
 	return nil
 }
 
-func (am activateManager) readActivateReqFromFileOrStdin(filePath string, req *pipeline.ActivateClusterFeatureRequest) error {
+func (am activateManager) readActivateReqFromFileOrStdin(filePath string, req *pipeline.ActivateIntegratedServiceRequest) error {
 	filename, raw, err := utils.ReadFileOrStdin(filePath)
 	if err != nil {
 		return errors.WrapIfWithDetails(err, "failed to read", "filename", filename)

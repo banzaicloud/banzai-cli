@@ -37,7 +37,7 @@ func NewUpdateManager() services.UpdateManager {
 }
 
 func (um updateManager) ValidateRequest(req interface{}) error {
-	var request pipeline.UpdateClusterFeatureRequest
+	var request pipeline.UpdateIntegratedServiceRequest
 	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
 		return errors.WrapIf(err, "request is not valid JSON")
 	}
@@ -45,7 +45,7 @@ func (um updateManager) ValidateRequest(req interface{}) error {
 	return nil
 }
 
-func (um updateManager) BuildRequestInteractively(banzaiCLI cli.Cli, updateServiceRequest *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error {
+func (um updateManager) BuildRequestInteractively(banzaiCLI cli.Cli, updateServiceRequest *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error {
 
 	// todo infer the cli directly to the manager instead
 	um.specAssembler = specAssembler{banzaiCLI}

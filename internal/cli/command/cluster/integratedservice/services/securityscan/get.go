@@ -26,7 +26,7 @@ func NewGetManager() *getManager {
 	return new(getManager)
 }
 
-func (g getManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]map[string]interface{} {
+func (g getManager) WriteDetailsTable(details pipeline.IntegratedServiceDetails) map[string]map[string]interface{} {
 	tableData := map[string]interface{}{
 		"Status": details.Status,
 	}

@@ -27,12 +27,12 @@ import (
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 )
 
-type ActivateManager struct{
+type ActivateManager struct {
 	baseManager
 }
 
-func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error) {
-	var request pipeline.ActivateClusterFeatureRequest
+func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateIntegratedServiceRequest, error) {
+	var request pipeline.ActivateIntegratedServiceRequest
 
 	vaultType, err := askVaultComponent(vaultCustom)
 	if err != nil {
@@ -71,7 +71,7 @@ func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx c
 }
 
 func (ActivateManager) ValidateRequest(req interface{}) error {
-	var request pipeline.ActivateClusterFeatureRequest
+	var request pipeline.ActivateIntegratedServiceRequest
 	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
 		return errors.WrapIf(err, "request is not valid JSON")
 	}

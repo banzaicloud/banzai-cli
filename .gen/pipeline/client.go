@@ -61,8 +61,6 @@ type APIClient struct {
 
 	AuthApi *AuthApiService
 
-	ClusterFeaturesApi *ClusterFeaturesApiService
-
 	ClustergroupDeploymentsApi *ClustergroupDeploymentsApiService
 
 	ClustergroupFeaturesApi *ClustergroupFeaturesApiService
@@ -85,13 +83,13 @@ type APIClient struct {
 
 	InfoApi *InfoApiService
 
+	IntegratedServicesApi *IntegratedServicesApiService
+
 	NetworkApi *NetworkApiService
 
 	OrganizationsApi *OrganizationsApiService
 
 	PipelineApi *PipelineApiService
-
-	ProjectsApi *ProjectsApiService
 
 	ScanlogApi *ScanlogApiService
 
@@ -128,7 +126,6 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.ArkRestoresApi = (*ArkRestoresApiService)(&c.common)
 	c.ArkSchedulesApi = (*ArkSchedulesApiService)(&c.common)
 	c.AuthApi = (*AuthApiService)(&c.common)
-	c.ClusterFeaturesApi = (*ClusterFeaturesApiService)(&c.common)
 	c.ClustergroupDeploymentsApi = (*ClustergroupDeploymentsApiService)(&c.common)
 	c.ClustergroupFeaturesApi = (*ClustergroupFeaturesApiService)(&c.common)
 	c.ClustergroupsApi = (*ClustergroupsApiService)(&c.common)
@@ -140,10 +137,10 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.HpaApi = (*HpaApiService)(&c.common)
 	c.ImagesApi = (*ImagesApiService)(&c.common)
 	c.InfoApi = (*InfoApiService)(&c.common)
+	c.IntegratedServicesApi = (*IntegratedServicesApiService)(&c.common)
 	c.NetworkApi = (*NetworkApiService)(&c.common)
 	c.OrganizationsApi = (*OrganizationsApiService)(&c.common)
 	c.PipelineApi = (*PipelineApiService)(&c.common)
-	c.ProjectsApi = (*ProjectsApiService)(&c.common)
 	c.ScanlogApi = (*ScanlogApiService)(&c.common)
 	c.SecretsApi = (*SecretsApiService)(&c.common)
 	c.SpotguidesApi = (*SpotguidesApiService)(&c.common)
