@@ -42,7 +42,7 @@ func NewActivateManager() *ActivateManager {
 	return &ActivateManager{}
 }
 
-func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error) {
+func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateIntegratedServiceRequest, error) {
 
 	defaultSpec := ServiceSpec{
 		ExternalDNS: ExternalDNS{
@@ -57,13 +57,13 @@ func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx c
 		return nil, errors.WrapIf(err, "failed to build external DNS service request")
 	}
 
-	return &pipeline.ActivateClusterFeatureRequest{
+	return &pipeline.ActivateIntegratedServiceRequest{
 		Spec: builtSpec,
 	}, nil
 }
 
 func (ActivateManager) ValidateRequest(req interface{}) error {
-	var request pipeline.ActivateClusterFeatureRequest
+	var request pipeline.ActivateIntegratedServiceRequest
 	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
 		return errors.WrapIf(err, "request is not valid JSON")
 	}
@@ -250,7 +250,7 @@ func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Prov
 //getGoogleProjectsMap retrieves google projects
 func getGoogleProjectsMap(banzaiCLI cli.Cli, provider Provider) (serviceutils.IdToNameMap, error) {
 
-	projects, _, err := banzaiCLI.Client().ProjectsApi.GetProjects(
+	projects, _, err := banzaiCLI.Client().GoogleApi.ListProjects(
 		context.Background(),
 		banzaiCLI.Context().OrganizationID(),
 		provider.SecretID) // it's assumed, that the secret id is already filled

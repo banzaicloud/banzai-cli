@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 ## ListProjects
 
-> ListProjectsResponse ListProjects(ctx, orgId, secretId)
+> GoogleProjects ListProjects(ctx, orgId, secretId)
 
 Retrieves projects visible for the user identified by the secret id
 
@@ -27,7 +27,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**ListProjectsResponse**](ListProjectsResponse.md)
+[**GoogleProjects**](GoogleProjects.md)
 
 ### Authorization
 

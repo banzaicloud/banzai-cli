@@ -57,7 +57,7 @@ func runList(banzaiCli cli.Cli, options listOptions, args []string) error {
 
 	clusterId := options.ClusterID()
 
-	list, resp, err := pipeline.ClusterFeaturesApi.ListClusterFeatures(context.Background(), orgId, clusterId)
+	list, resp, err := pipeline.IntegratedServicesApi.ListIntegratedServices(context.Background(), orgId, clusterId)
 	if err != nil {
 		cli.LogAPIError("list cluster services", err, resp.Request)
 		log.Fatalf("could not list cluster services: %v", err)

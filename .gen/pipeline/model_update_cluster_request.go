@@ -13,7 +13,5 @@ package pipeline
 // UpdateClusterRequest struct for UpdateClusterRequest
 type UpdateClusterRequest struct {
 	Cloud string `json:"cloud"`
-	// The lifespan of the cluster expressed in minutes after which it is automatically deleted. Zero value means the cluster is never automatically deleted.
-	TtlMinutes int32 `json:"ttlMinutes,omitempty"`
 	Properties map[string]interface{} `json:"properties"`
 }

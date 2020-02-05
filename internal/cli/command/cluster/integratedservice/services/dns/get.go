@@ -28,7 +28,7 @@ func (GetManager) GetName() string {
 	return serviceName
 }
 
-func (GetManager) WriteDetailsTable(details pipeline.ClusterFeatureDetails) map[string]map[string]interface{} {
+func (GetManager) WriteDetailsTable(details pipeline.IntegratedServiceDetails) map[string]map[string]interface{} {
 	// helper for response processing
 	type serviceDetails struct {
 		Spec   ServiceSpec   `json:"spec" mapstructure:"spec"`

@@ -70,7 +70,7 @@ func runDeactivate(
 	orgId := banzaiCLI.Context().OrganizationID()
 	clusterId := options.ClusterID()
 
-	resp, err := pipeline.ClusterFeaturesApi.DeactivateClusterFeature(context.Background(), orgId, clusterId, m.GetName())
+	resp, err := pipeline.IntegratedServicesApi.DeactivateIntegratedService(context.Background(), orgId, clusterId, m.GetName())
 	if err != nil {
 		cli.LogAPIError(fmt.Sprintf("deactivate %s cluster service", m.GetName()), err, resp.Request)
 		log.Fatalf("could not deactivate %s cluster service: %v", m.GetName(), err)

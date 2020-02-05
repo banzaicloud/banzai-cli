@@ -63,11 +63,6 @@ Class | Method | HTTP request | Description
 *AuthApi* | [**CreateToken**](docs/AuthApi.md#createtoken) | **Post** /api/v1/tokens | Create token
 *AuthApi* | [**DeleteToken**](docs/AuthApi.md#deletetoken) | **Delete** /api/v1/tokens/{tokenId} | Delete an API token
 *AuthApi* | [**ListTokens**](docs/AuthApi.md#listtokens) | **Get** /api/v1/tokens | List all API tokens
-*ClusterFeaturesApi* | [**ActivateClusterFeature**](docs/ClusterFeaturesApi.md#activateclusterfeature) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/features/{featureName} | Activate a cluster feature
-*ClusterFeaturesApi* | [**ClusterFeatureDetails**](docs/ClusterFeaturesApi.md#clusterfeaturedetails) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/features/{featureName} | Get details of a cluster feature
-*ClusterFeaturesApi* | [**DeactivateClusterFeature**](docs/ClusterFeaturesApi.md#deactivateclusterfeature) | **Delete** /api/v1/orgs/{orgId}/clusters/{id}/features/{featureName} | Deactivate a cluster feature
-*ClusterFeaturesApi* | [**ListClusterFeatures**](docs/ClusterFeaturesApi.md#listclusterfeatures) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/features | List enabled features of a cluster
-*ClusterFeaturesApi* | [**UpdateClusterFeature**](docs/ClusterFeaturesApi.md#updateclusterfeature) | **Put** /api/v1/orgs/{orgId}/clusters/{id}/features/{featureName} | Update a cluster feature
 *ClustergroupDeploymentsApi* | [**ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNameDelete**](docs/ClustergroupDeploymentsApi.md#apiv1orgsorgidclustergroupsclustergroupiddeploymentsdeploymentnamedelete) | **Delete** /api/v1/orgs/{orgid}/clustergroups/{clusterGroupId}/deployments/{deploymentName} | Delete Cluster Group Deployment
 *ClustergroupDeploymentsApi* | [**ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNameGet**](docs/ClustergroupDeploymentsApi.md#apiv1orgsorgidclustergroupsclustergroupiddeploymentsdeploymentnameget) | **Get** /api/v1/orgs/{orgid}/clustergroups/{clusterGroupId}/deployments/{deploymentName} | Get Cluster Group Deployment
 *ClustergroupDeploymentsApi* | [**ApiV1OrgsOrgidClustergroupsClusterGroupIdDeploymentsDeploymentNamePut**](docs/ClustergroupDeploymentsApi.md#apiv1orgsorgidclustergroupsclustergroupiddeploymentsdeploymentnameput) | **Put** /api/v1/orgs/{orgid}/clustergroups/{clusterGroupId}/deployments/{deploymentName} | Update Cluster Group Deployment
@@ -140,6 +135,16 @@ Class | Method | HTTP request | Description
 *ImagesApi* | [**ListImages**](docs/ImagesApi.md#listimages) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/images | List Images used in cluster
 *InfoApi* | [**CreateResourceGroup**](docs/InfoApi.md#createresourcegroup) | **Post** /api/v1/orgs/{orgId}/azure/resourcegroups | Create resource groups
 *InfoApi* | [**GetResourceGroups**](docs/InfoApi.md#getresourcegroups) | **Get** /api/v1/orgs/{orgId}/azure/resourcegroups | Get all resource groups
+*IntegratedServicesApi* | [**ActivateFeature**](docs/IntegratedServicesApi.md#activatefeature) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/features/{featureName} | Activate a feature
+*IntegratedServicesApi* | [**ActivateIntegratedService**](docs/IntegratedServicesApi.md#activateintegratedservice) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/services/{serviceName} | Activate an integrated service
+*IntegratedServicesApi* | [**DeactivateFeature**](docs/IntegratedServicesApi.md#deactivatefeature) | **Delete** /api/v1/orgs/{orgId}/clusters/{id}/features/{featureName} | Deactivate a feature
+*IntegratedServicesApi* | [**DeactivateIntegratedService**](docs/IntegratedServicesApi.md#deactivateintegratedservice) | **Delete** /api/v1/orgs/{orgId}/clusters/{id}/services/{serviceName} | Deactivate an integrated service
+*IntegratedServicesApi* | [**FeatureDetails**](docs/IntegratedServicesApi.md#featuredetails) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/features/{featureName} | Get details of a feature
+*IntegratedServicesApi* | [**IntegratedServiceDetails**](docs/IntegratedServicesApi.md#integratedservicedetails) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/services/{serviceName} | Get details of an integrated service
+*IntegratedServicesApi* | [**ListFeatures**](docs/IntegratedServicesApi.md#listfeatures) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/features | List enabled features of a cluster
+*IntegratedServicesApi* | [**ListIntegratedServices**](docs/IntegratedServicesApi.md#listintegratedservices) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/services | List enabled integrated services of a cluster
+*IntegratedServicesApi* | [**UpdateFeature**](docs/IntegratedServicesApi.md#updatefeature) | **Put** /api/v1/orgs/{orgId}/clusters/{id}/features/{featureName} | Update a feature
+*IntegratedServicesApi* | [**UpdateIntegratedService**](docs/IntegratedServicesApi.md#updateintegratedservice) | **Put** /api/v1/orgs/{orgId}/clusters/{id}/services/{serviceName} | Update an integrated service
 *NetworkApi* | [**ListRouteTables**](docs/NetworkApi.md#listroutetables) | **Get** /api/v1/orgs/{orgId}/networks/{networkId}/routeTables | List VPC route tables
 *NetworkApi* | [**ListVPCNetworks**](docs/NetworkApi.md#listvpcnetworks) | **Get** /api/v1/orgs/{orgId}/networks | List VPC networks
 *NetworkApi* | [**ListVPCSubnets**](docs/NetworkApi.md#listvpcsubnets) | **Get** /api/v1/orgs/{orgId}/networks/{networkId}/subnets | List VPC subnetworks
@@ -147,13 +152,10 @@ Class | Method | HTTP request | Description
 *OrganizationsApi* | [**ListOrgs**](docs/OrganizationsApi.md#listorgs) | **Get** /api/v1/orgs | List organizations
 *OrganizationsApi* | [**SyncOrgs**](docs/OrganizationsApi.md#syncorgs) | **Put** /api/v1/orgs | Synchronize Github organizations
 *PipelineApi* | [**ListCapabilities**](docs/PipelineApi.md#listcapabilities) | **Get** /api/v1/capabilities | Lists configured Pipeline capabilities
-*ProjectsApi* | [**GetProjects**](docs/ProjectsApi.md#getprojects) | **Get** /api/v1/orgs/{orgId}/google/projects | Retrieves projects visible for the user identified by the secret id
 *ScanlogApi* | [**ListScans**](docs/ScanlogApi.md#listscans) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/scanlog | List scans
 *ScanlogApi* | [**ListScansByRelease**](docs/ScanlogApi.md#listscansbyrelease) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/scanlog/{releaseName} | List scans by release
 *SecretsApi* | [**AddSecretTag**](docs/SecretsApi.md#addsecrettag) | **Put** /api/v1/orgs/{orgId}/secrets/{secretId}/tags/{tag} | Add a tag to a secret
 *SecretsApi* | [**AddSecrets**](docs/SecretsApi.md#addsecrets) | **Post** /api/v1/orgs/{orgId}/secrets | Add secrets
-*SecretsApi* | [**AllowedSecretsTypes**](docs/SecretsApi.md#allowedsecretstypes) | **Get** /api/v1/allowed/secrets | List allowed secret types
-*SecretsApi* | [**AllowedSecretsTypesKeys**](docs/SecretsApi.md#allowedsecretstypeskeys) | **Get** /api/v1/allowed/secrets/{type} | List required keys
 *SecretsApi* | [**DeleteSecretTag**](docs/SecretsApi.md#deletesecrettag) | **Delete** /api/v1/orgs/{orgId}/secrets/{secretId}/tags/{tag} | Delete a tag from a secret
 *SecretsApi* | [**DeleteSecrets**](docs/SecretsApi.md#deletesecrets) | **Delete** /api/v1/orgs/{orgId}/secrets/{secretId} | Delete secrets
 *SecretsApi* | [**GetSecret**](docs/SecretsApi.md#getsecret) | **Get** /api/v1/orgs/{orgId}/secrets/{secretId} | Get secret
@@ -183,8 +185,7 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
- - [ActivateClusterFeatureRequest](docs/ActivateClusterFeatureRequest.md)
- - [AllowedSecretTypeResponse](docs/AllowedSecretTypeResponse.md)
+ - [ActivateIntegratedServiceRequest](docs/ActivateIntegratedServiceRequest.md)
  - [AmazonAutoScalingGroup](docs/AmazonAutoScalingGroup.md)
  - [AmazonAutoScalingGroupSize](docs/AmazonAutoScalingGroupSize.md)
  - [AmazonPoviderConfig](docs/AmazonPoviderConfig.md)
@@ -205,8 +206,6 @@ Class | Method | HTTP request | Description
  - [BucketInfo](docs/BucketInfo.md)
  - [BucketInfoSecret](docs/BucketInfoSecret.md)
  - [ClusterConfig](docs/ClusterConfig.md)
- - [ClusterDelete200](docs/ClusterDelete200.md)
- - [ClusterFeatureDetails](docs/ClusterFeatureDetails.md)
  - [ClusterImage](docs/ClusterImage.md)
  - [CommonError](docs/CommonError.md)
  - [CreateAckProperties](docs/CreateAckProperties.md)
@@ -293,6 +292,8 @@ Class | Method | HTTP request | Description
  - [GetPkeCommandsResponse](docs/GetPkeCommandsResponse.md)
  - [GetRestoreResponse](docs/GetRestoreResponse.md)
  - [GetRestoreResultsResponse](docs/GetRestoreResultsResponse.md)
+ - [GoogleProject](docs/GoogleProject.md)
+ - [GoogleProjects](docs/GoogleProjects.md)
  - [HelmChartDetailsResponse](docs/HelmChartDetailsResponse.md)
  - [HelmChartDetailsResponseChart](docs/HelmChartDetailsResponseChart.md)
  - [HelmChartDetailsResponseChartMaintainers](docs/HelmChartDetailsResponseChartMaintainers.md)
@@ -307,13 +308,13 @@ Class | Method | HTTP request | Description
  - [InstallSecretResponse](docs/InstallSecretResponse.md)
  - [InstallSecretsRequest](docs/InstallSecretsRequest.md)
  - [InstallSecretsRequestQuery](docs/InstallSecretsRequestQuery.md)
+ - [IntegratedServiceDetails](docs/IntegratedServiceDetails.md)
  - [Labels](docs/Labels.md)
  - [LaunchSpotguidesRequest](docs/LaunchSpotguidesRequest.md)
  - [ListDeploymentsResponseItem](docs/ListDeploymentsResponseItem.md)
  - [ListEndpointsResponse](docs/ListEndpointsResponse.md)
  - [ListNodesResponse](docs/ListNodesResponse.md)
  - [ListNodesResponseMetadata](docs/ListNodesResponseMetadata.md)
- - [ListProjectsResponse](docs/ListProjectsResponse.md)
  - [NamespaceItem](docs/NamespaceItem.md)
  - [NamespaceListResponse](docs/NamespaceListResponse.md)
  - [NodeItem](docs/NodeItem.md)
@@ -357,7 +358,6 @@ Class | Method | HTTP request | Description
  - [PostLeaderElectionRequest](docs/PostLeaderElectionRequest.md)
  - [PostLeaderElectionResponse](docs/PostLeaderElectionResponse.md)
  - [PostReadyPkeNodeRequest](docs/PostReadyPkeNodeRequest.md)
- - [ProjectDetails](docs/ProjectDetails.md)
  - [ReleaseWhiteListItem](docs/ReleaseWhiteListItem.md)
  - [RequestedResources](docs/RequestedResources.md)
  - [Resource](docs/Resource.md)
@@ -394,13 +394,13 @@ Class | Method | HTTP request | Description
  - [UpdateAckPropertiesAck](docs/UpdateAckPropertiesAck.md)
  - [UpdateAzureProperties](docs/UpdateAzureProperties.md)
  - [UpdateAzurePropertiesAzure](docs/UpdateAzurePropertiesAzure.md)
- - [UpdateClusterFeatureRequest](docs/UpdateClusterFeatureRequest.md)
  - [UpdateClusterRequest](docs/UpdateClusterRequest.md)
  - [UpdateClusterRequestV2](docs/UpdateClusterRequestV2.md)
  - [UpdateEksProperties](docs/UpdateEksProperties.md)
  - [UpdateEksPropertiesEks](docs/UpdateEksPropertiesEks.md)
  - [UpdateGoogleProperties](docs/UpdateGoogleProperties.md)
  - [UpdateGooglePropertiesMaster](docs/UpdateGooglePropertiesMaster.md)
+ - [UpdateIntegratedServiceRequest](docs/UpdateIntegratedServiceRequest.md)
  - [UpdateNodePoolsAzure](docs/UpdateNodePoolsAzure.md)
  - [UpdateNodePoolsGoogle](docs/UpdateNodePoolsGoogle.md)
  - [UpdateNodePoolsPke](docs/UpdateNodePoolsPke.md)

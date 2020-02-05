@@ -1,4 +1,4 @@
-# ClusterFeatureDetails
+# IntegratedServiceDetails
 
 ## Properties
 

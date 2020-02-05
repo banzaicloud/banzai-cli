@@ -146,7 +146,7 @@ Name | Type | Description  | Notes
 
 ## DeleteCluster
 
-> ClusterDelete200 DeleteCluster(ctx, orgId, id, optional)
+> DeleteCluster(ctx, orgId, id, optional)
 
 Delete cluster
 
@@ -175,7 +175,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**ClusterDelete200**](ClusterDelete_200.md)
+ (empty response body)
 
 ### Authorization
 
@@ -184,7 +184,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json, application/problem+json, 
+- **Accept**: application/json, application/problem+json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

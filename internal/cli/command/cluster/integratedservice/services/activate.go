@@ -37,7 +37,7 @@ type activateOptions struct {
 
 type ActivateManager interface {
 	GetName() string
-	BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateClusterFeatureRequest, error)
+	BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateIntegratedServiceRequest, error)
 	ValidateRequest(interface{}) error
 }
 
@@ -74,7 +74,7 @@ func runActivate(banzaiCLI cli.Cli, m ActivateManager, options activateOptions, 
 	}
 
 	var (
-		request *pipeline.ActivateClusterFeatureRequest
+		request *pipeline.ActivateIntegratedServiceRequest
 		err     error
 	)
 
@@ -87,7 +87,7 @@ func runActivate(banzaiCLI cli.Cli, m ActivateManager, options activateOptions, 
 			return errors.WrapIf(err, "failed during showing editor")
 		}
 	} else {
-		request = new(pipeline.ActivateClusterFeatureRequest)
+		request = new(pipeline.ActivateIntegratedServiceRequest)
 		if err = readActivateReqFromFileOrStdin(options.filePath, request); err != nil {
 			return errors.WrapIf(err, fmt.Sprintf("failed to read %s cluster service specification", m.GetName()))
 		}
@@ -95,7 +95,7 @@ func runActivate(banzaiCLI cli.Cli, m ActivateManager, options activateOptions, 
 
 	orgId := banzaiCLI.Context().OrganizationID()
 	clusterId := options.ClusterID()
-	_, err = banzaiCLI.Client().ClusterFeaturesApi.ActivateClusterFeature(context.Background(), orgId, clusterId, m.GetName(), *request)
+	_, err = banzaiCLI.Client().IntegratedServicesApi.ActivateIntegratedService(context.Background(), orgId, clusterId, m.GetName(), *request)
 	if err != nil {
 		cli.LogAPIError(fmt.Sprintf("activate %s cluster service", m.GetName()), err, request)
 		log.Fatalf("could not activate %s cluster service: %v", m.GetName(), err)
@@ -106,7 +106,7 @@ func runActivate(banzaiCLI cli.Cli, m ActivateManager, options activateOptions, 
 	return nil
 }
 
-func readActivateReqFromFileOrStdin(filePath string, req *pipeline.ActivateClusterFeatureRequest) error {
+func readActivateReqFromFileOrStdin(filePath string, req *pipeline.ActivateIntegratedServiceRequest) error {
 	filename, raw, err := utils.ReadFileOrStdin(filePath)
 	if err != nil {
 		return errors.WrapIfWithDetails(err, "failed to read", "filename", filename)
@@ -119,7 +119,7 @@ func readActivateReqFromFileOrStdin(filePath string, req *pipeline.ActivateClust
 	return nil
 }
 
-func showActivateEditor(m ActivateManager, req *pipeline.ActivateClusterFeatureRequest) error {
+func showActivateEditor(m ActivateManager, req *pipeline.ActivateIntegratedServiceRequest) error {
 	var edit bool
 	if err := survey.AskOne(
 		&survey.Confirm{

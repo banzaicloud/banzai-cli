@@ -33,7 +33,7 @@ func NewUpdateManager() *UpdateManager {
 	return &UpdateManager{}
 }
 
-func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateClusterFeatureRequest, clusterCtx clustercontext.Context) error {
+func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error {
 
 	currentSpec := ServiceSpec{
 		ExternalDNS: ExternalDNS{
@@ -59,7 +59,7 @@ func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateServiceR
 }
 
 func (UpdateManager) ValidateRequest(req interface{}) error {
-	var request pipeline.UpdateClusterFeatureRequest
+	var request pipeline.UpdateIntegratedServiceRequest
 	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
 		return errors.WrapIf(err, "request is not valid JSON")
 	}
