@@ -56,6 +56,8 @@ func runTerraform(command string, options *cpContext, env map[string]string, tar
 			fmt.Sprintf("-refresh=%v", options.refreshState),
 		}...)
 
+		cmd = append(cmd, "-input=false", "-force-copy")
+
 		if options.AutoApprove() {
 			cmd = append(cmd, "-auto-approve")
 		}
