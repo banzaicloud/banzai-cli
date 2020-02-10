@@ -56,8 +56,6 @@ func runTerraform(command string, options *cpContext, env map[string]string, tar
 			fmt.Sprintf("-refresh=%v", options.refreshState),
 		}...)
 
-		cmd = append(cmd, "-input=false", "-force-copy")
-
 		if options.AutoApprove() {
 			cmd = append(cmd, "-auto-approve")
 		}
@@ -65,6 +63,8 @@ func runTerraform(command string, options *cpContext, env map[string]string, tar
 		for _, target := range targets {
 			cmd = append(cmd, "-target", target)
 		}
+	} else {
+		cmd = append(cmd, "-input=false", "-force-copy")
 	}
 
 	return runTerraformCommandGeneric(options, cmd, cmdEnv)
