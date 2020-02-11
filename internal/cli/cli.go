@@ -16,6 +16,7 @@ package cli
 
 import (
 	"bytes"
+	"context"
 	"crypto/ecdsa"
 	"crypto/rsa"
 	"crypto/sha256"
@@ -48,6 +49,8 @@ import (
 
 const orgIdKey = "organization.id"
 const banzaiUserAgent = "banzai-cli/1.0.0/go"
+
+const supportedPipelineAPIVersion = "0.37.0"
 
 type Cli interface {
 	Out() io.Writer
@@ -132,6 +135,15 @@ func (c *banzaiCli) Client() *pipeline.APIClient {
 		config.HTTPClient.Transport.(*oauth2.Transport).Base = c.RoundTripper()
 
 		c.client = pipeline.NewAPIClient(config)
+
+		resp, _, err := c.client.CommonApi.ApiVersionGet(context.Background())
+		if err != nil {
+			LogAPIError("query API version", err, nil)
+			log.Fatalf("failed to query API version: %v", err)
+		}
+		if ver := resp.Version; ver != supportedPipelineAPIVersion {
+			log.Fatalf("Incompatible Pipeline API version %q. This version of the command line tool only supports Pipeline API version %q.", ver, supportedPipelineAPIVersion)
+		}
 	})
 
 	return c.client
