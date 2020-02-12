@@ -359,7 +359,9 @@ func askClusterOutput(banzaiCLI cli.Cli, defaults clusterOutputSpec) (*clusterOu
 		if err := input.DoQuestions([]input.QuestionMaker{
 			input.QuestionSelect{
 				QuestionInput: input.QuestionInput{
-					QuestionBase: input.QuestionBase{},
+					QuestionBase: input.QuestionBase{
+						Message: "Select log storage provider:",
+					},
 					DefaultValue: defaultProviderName,
 					Output:       &selectedProviderName,
 				},
