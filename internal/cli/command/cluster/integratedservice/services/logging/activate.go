@@ -246,7 +246,7 @@ func askSecret(banzaiCLI cli.Cli, secretType, defaultValue string, withSkipOptio
 		}
 		secretOptions[idx] = s.Name
 		secretIds[s.Name] = s.Id
-		if s.Id == defaultValue {
+		if s.Id == defaultValue || (defaultValue == "" && i == 0) {
 			defaultSecretName = s.Name
 		}
 	}
