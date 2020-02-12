@@ -199,8 +199,7 @@ func askIngress(componentType string, defaults ingressSpec) (*ingressSpec, error
 	}, nil
 }
 
-func askSecret(banzaiCLI cli.Cli, secretType, DefaultValue string, withSkipOption bool) (string, error) {
-
+func askSecret(banzaiCLI cli.Cli, secretType, defaultValue string, withSkipOption bool) (string, error) {
 	orgID := banzaiCLI.Context().OrganizationID()
 	secrets, _, err := banzaiCLI.Client().SecretsApi.GetSecrets(
 		context.Background(),
@@ -213,7 +212,15 @@ func askSecret(banzaiCLI cli.Cli, secretType, DefaultValue string, withSkipOptio
 		return "", errors.WrapIfWithDetails(err, "failed to get secret(s)", "secretType", secretType)
 	}
 
-	if len(secrets) == 0 {
+	// hide hidden secrets
+	var finalSecrets []pipeline.SecretItem
+	for _, s := range secrets {
+		if !isSecretHidden(s) {
+			finalSecrets = append(finalSecrets, s)
+		}
+	}
+
+	if len(finalSecrets) == 0 {
 		// TODO (colin): add option to create new secret
 		return "", nil
 	}
@@ -222,7 +229,7 @@ func askSecret(banzaiCLI cli.Cli, secretType, DefaultValue string, withSkipOptio
 
 	var secretName string
 	var defaultSecretName string
-	var secretLen = len(secrets)
+	var secretLen = len(finalSecrets)
 	var secretIds = make(map[string]string, secretLen)
 	if withSkipOption {
 		defaultSecretName = skip
@@ -232,14 +239,14 @@ func askSecret(banzaiCLI cli.Cli, secretType, DefaultValue string, withSkipOptio
 	if withSkipOption {
 		secretOptions[0] = skip
 	}
-	for i, s := range secrets {
+	for i, s := range finalSecrets {
 		var idx = i
 		if withSkipOption {
 			idx = idx + 1
 		}
 		secretOptions[idx] = s.Name
 		secretIds[s.Name] = s.Id
-		if s.Id == DefaultValue {
+		if s.Id == defaultValue {
 			defaultSecretName = s.Name
 		}
 	}
@@ -473,4 +480,13 @@ func askAzureOptions(banzaiCLI cli.Cli, defaults providerSpec) (*providerSpec, e
 		},
 		SecretID: secretID,
 	}, nil
+}
+
+func isSecretHidden(s pipeline.SecretItem) bool {
+	for _, t := range s.Tags {
+		if t == "banzai:hidden" {
+			return true
+		}
+	}
+	return false
 }
