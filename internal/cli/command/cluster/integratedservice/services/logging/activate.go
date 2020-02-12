@@ -293,7 +293,7 @@ func askBuckets(banzaiCLI cli.Cli, bucketType, secretID, defaultValue string) (*
 	secretOptions := make([]string, len(buckets))
 	for i, b := range buckets {
 		secretOptions[i] = b.Name
-		if b.Name == defaultValue {
+		if b.Name == defaultValue || (defaultValue == "" && i == 0) {
 			defaultBucketName = b.Name
 		}
 	}
@@ -408,7 +408,7 @@ func askS3Options(banzaiCLI cli.Cli, defaults providerSpec) (*providerSpec, erro
 		return nil, errors.WrapIf(err, "failed to get Amazon secret")
 	}
 
-	bucket, err := askBuckets(banzaiCLI, amazonType, secretID, defaults.Name)
+	bucket, err := askBuckets(banzaiCLI, amazonType, secretID, defaults.Bucket.Name)
 	if err != nil {
 		return nil, errors.WrapIf(err, "failed to get S3 buckets")
 	}
