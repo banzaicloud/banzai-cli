@@ -16,7 +16,6 @@ package vault
 
 import (
 	"context"
-	"encoding/json"
 	"strings"
 
 	"emperror.dev/errors"
@@ -70,13 +69,8 @@ func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx c
 	return request, nil
 }
 
-func (ActivateManager) ValidateRequest(req interface{}) error {
-	var request pipeline.ActivateIntegratedServiceRequest
-	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
-		return errors.WrapIf(err, "request is not valid JSON")
-	}
-
-	return validateSpec(request.Spec)
+func (ActivateManager) ValidateSpec(spec map[string]interface{}) error {
+	return validateSpec(spec)
 }
 
 func NewActivateManager() *ActivateManager {

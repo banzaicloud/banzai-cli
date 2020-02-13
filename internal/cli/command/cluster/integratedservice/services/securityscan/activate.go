@@ -59,12 +59,7 @@ func (am activateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCt
 	return pipeline.ActivateIntegratedServiceRequest{Spec: serviceSpecMap}, nil
 }
 
-func (am activateManager) ValidateRequest(req interface{}) error {
-	var request pipeline.ActivateIntegratedServiceRequest
-	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
-		return errors.WrapIf(err, "request is not valid JSON")
-	}
-
+func (activateManager) ValidateSpec(spec map[string]interface{}) error {
 	return nil
 }
 

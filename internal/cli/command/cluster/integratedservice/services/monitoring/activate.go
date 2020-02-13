@@ -16,7 +16,6 @@ package monitoring
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -121,13 +120,8 @@ func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 	}, nil
 }
 
-func (ActivateManager) ValidateRequest(req interface{}) error {
-	var request pipeline.ActivateIntegratedServiceRequest
-	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
-		return errors.WrapIf(err, "request is not valid JSON")
-	}
-
-	return validateSpec(request.Spec)
+func (ActivateManager) ValidateSpec(spec map[string]interface{}) error {
+	return validateSpec(spec)
 }
 
 func NewActivateManager() *ActivateManager {

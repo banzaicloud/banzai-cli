@@ -38,7 +38,7 @@ type activateOptions struct {
 type ActivateManager interface {
 	GetName() string
 	BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error)
-	ValidateRequest(interface{}) error
+	ValidateSpec(spec map[string]interface{}) error
 }
 
 func ActivateCommandFactory(banzaiCli cli.Cli, use string, manager ActivateManager, name string) *cobra.Command {
@@ -144,7 +144,7 @@ func showActivateEditor(m ActivateManager, req *pipeline.ActivateIntegratedServi
 			AppendDefault: true,
 		},
 		&result,
-		survey.WithValidator(m.ValidateRequest),
+		survey.WithValidator(makeActivationRequestValidator(m)),
 	); err != nil {
 		return errors.WrapIf(err, "failure during survey")
 	}
@@ -153,4 +153,17 @@ func showActivateEditor(m ActivateManager, req *pipeline.ActivateIntegratedServi
 	}
 
 	return nil
+}
+
+func makeActivationRequestValidator(specValidator interface {
+	ValidateSpec(spec map[string]interface{}) error
+}) survey.Validator {
+	return func(v interface{}) error {
+		var req pipeline.ActivateIntegratedServiceRequest
+		if err := json.Unmarshal([]byte(v.(string)), &req); err != nil {
+			return errors.WrapIf(err, "request is not valid JSON")
+		}
+
+		return specValidator.ValidateSpec(req.Spec)
+	}
 }
