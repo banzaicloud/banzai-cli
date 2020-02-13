@@ -123,11 +123,16 @@ func runHelm(banzaiCli cli.Cli, options helmOptions, args []string) error {
 	helmHome := filepath.Join(banzaiCli.Home(), fmt.Sprintf("helm/org-%d", org))
 	helmRepos := filepath.Join(helmHome, "repository")
 	if err := os.MkdirAll(helmRepos, 0755); err != nil {
-		return errors.WrapIff(err, "failed to create %q directory", bindir)
+		return errors.WrapIff(err, "failed to create %q directory", helmRepos)
 	}
 
 	if err := dumpRepositories(banzaiCli, helmRepos); err != nil {
 		return errors.WrapIf(err, "failed to sync Helm repositories")
+	}
+
+	helmPlugins := filepath.Join(helmHome, "plugins")
+	if err := os.MkdirAll(helmPlugins, 0755); err != nil {
+		return errors.WrapIff(err, "failed to create %q directory", helmPlugins)
 	}
 
 	env := os.Environ()
