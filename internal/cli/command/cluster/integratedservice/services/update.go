@@ -82,7 +82,7 @@ func runUpdate(
 
 	var (
 		err     error
-		request *pipeline.UpdateIntegratedServiceRequest
+		request pipeline.UpdateIntegratedServiceRequest
 	)
 	if options.filePath == "" && banzaiCLI.Interactive() {
 
@@ -92,27 +92,24 @@ func runUpdate(
 			return errors.WrapIf(err, "failed to get service details")
 		}
 
-		request = &pipeline.UpdateIntegratedServiceRequest{
-			Spec: details.Spec,
-		}
+		request.Spec = details.Spec
 
-		if err := m.BuildRequestInteractively(banzaiCLI, request, options.Context); err != nil {
+		if err := m.BuildRequestInteractively(banzaiCLI, &request, options.Context); err != nil {
 			return errors.WrapIf(err, "failed to build update request interactively")
 		}
 
 		// show editor
-		if err := showUpdateEditor(m, request); err != nil {
+		if err := showUpdateEditor(m, &request); err != nil {
 			return errors.WrapIf(err, "failed during showing editor")
 		}
 
 	} else {
-		request = new(pipeline.UpdateIntegratedServiceRequest)
-		if err := readUpdateReqFromFileOrStdin(options.filePath, request); err != nil {
+		if err := readUpdateReqFromFileOrStdin(options.filePath, &request); err != nil {
 			return errors.WrapIf(err, fmt.Sprintf("failed to read %s cluster service specification", m.GetName()))
 		}
 	}
 
-	resp, err := banzaiCLI.Client().IntegratedServicesApi.UpdateIntegratedService(context.Background(), orgID, clusterID, m.GetName(), *request)
+	resp, err := banzaiCLI.Client().IntegratedServicesApi.UpdateIntegratedService(context.Background(), orgID, clusterID, m.GetName(), request)
 	if err != nil {
 		cli.LogAPIError(fmt.Sprintf("update %s cluster service", m.GetName()), err, resp.Request)
 		log.Fatalf("could not update %s cluster service: %v", m.GetName(), err)
