@@ -15,8 +15,6 @@
 package expiry
 
 import (
-	"encoding/json"
-
 	"emperror.dev/errors"
 	"github.com/mitchellh/mapstructure"
 
@@ -29,13 +27,8 @@ type UpdateManager struct {
 	baseManager
 }
 
-func (UpdateManager) ValidateRequest(req interface{}) error {
-	var request pipeline.UpdateIntegratedServiceRequest
-	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
-		return errors.WrapIf(err, "request is not valid JSON")
-	}
-
-	return validateSpec(request.Spec)
+func (UpdateManager) ValidateSpec(spec map[string]interface{}) error {
+	return validateSpec(spec)
 }
 
 func (UpdateManager) BuildRequestInteractively(_ cli.Cli, req *pipeline.UpdateIntegratedServiceRequest, _ clustercontext.Context) error {

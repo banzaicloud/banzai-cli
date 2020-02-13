@@ -50,3 +50,7 @@ func isServiceEnabled(ctx context.Context, banzaiCLI cli.Cli, serviceName string
 
 	return errors.New(fmt.Sprintf("%s service disabled", serviceName))
 }
+
+type specValidator interface {
+	ValidateSpec(spec map[string]interface{}) error
+}

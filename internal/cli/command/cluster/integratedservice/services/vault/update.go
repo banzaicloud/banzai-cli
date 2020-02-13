@@ -15,8 +15,6 @@
 package vault
 
 import (
-	"encoding/json"
-
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -29,13 +27,8 @@ type UpdateManager struct {
 	baseManager
 }
 
-func (UpdateManager) ValidateRequest(req interface{}) error {
-	var request pipeline.UpdateIntegratedServiceRequest
-	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
-		return errors.WrapIf(err, "request is not valid JSON")
-	}
-
-	return validateSpec(request.Spec)
+func (UpdateManager) ValidateSpec(spec map[string]interface{}) error {
+	return validateSpec(spec)
 }
 
 func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error {

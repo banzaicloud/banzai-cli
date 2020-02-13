@@ -16,7 +16,6 @@ package securityscan
 
 import (
 	"context"
-	"encoding/json"
 
 	"emperror.dev/errors"
 	"github.com/mitchellh/mapstructure"
@@ -36,12 +35,7 @@ func NewUpdateManager() services.UpdateManager {
 	return updateManager{}
 }
 
-func (um updateManager) ValidateRequest(req interface{}) error {
-	var request pipeline.UpdateIntegratedServiceRequest
-	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
-		return errors.WrapIf(err, "request is not valid JSON")
-	}
-
+func (updateManager) ValidateSpec(spec map[string]interface{}) error {
 	return nil
 }
 

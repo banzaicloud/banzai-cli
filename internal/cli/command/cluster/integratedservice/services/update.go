@@ -37,8 +37,8 @@ type updateOptions struct {
 
 type UpdateManager interface {
 	GetName() string
-	ValidateRequest(interface{}) error
 	BuildRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error
+	specValidator
 }
 
 func UpdateCommandFactory(banzaiCLI cli.Cli, use string, manager UpdateManager, name string) *cobra.Command {
@@ -159,7 +159,7 @@ func showUpdateEditor(m UpdateManager, request *pipeline.UpdateIntegratedService
 			AppendDefault: true,
 		},
 		&result,
-		survey.WithValidator(m.ValidateRequest),
+		survey.WithValidator(makeUpdateRequestValidator(m)),
 	); err != nil {
 		return errors.WrapIf(err, "failure during survey")
 	}
@@ -168,4 +168,15 @@ func showUpdateEditor(m UpdateManager, request *pipeline.UpdateIntegratedService
 	}
 
 	return nil
+}
+
+func makeUpdateRequestValidator(specValidator specValidator) survey.Validator {
+	return func(v interface{}) error {
+		var req pipeline.UpdateIntegratedServiceRequest
+		if err := json.Unmarshal([]byte(v.(string)), &req); err != nil {
+			return errors.WrapIf(err, "request is not valid JSON")
+		}
+
+		return specValidator.ValidateSpec(req.Spec)
+	}
 }

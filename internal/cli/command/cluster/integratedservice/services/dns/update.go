@@ -15,8 +15,6 @@
 package dns
 
 import (
-	"encoding/json"
-
 	"emperror.dev/errors"
 	"github.com/mitchellh/mapstructure"
 
@@ -58,11 +56,6 @@ func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateServiceR
 	return nil
 }
 
-func (UpdateManager) ValidateRequest(req interface{}) error {
-	var request pipeline.UpdateIntegratedServiceRequest
-	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
-		return errors.WrapIf(err, "request is not valid JSON")
-	}
-
-	return validateSpec(request.Spec)
+func (UpdateManager) ValidateSpec(spec map[string]interface{}) error {
+	return validateSpec(spec)
 }
