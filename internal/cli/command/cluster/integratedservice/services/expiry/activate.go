@@ -31,13 +31,13 @@ type ActivateManager struct {
 	baseManager
 }
 
-func (ActivateManager) BuildRequestInteractively(_ cli.Cli, _ clustercontext.Context) (*pipeline.ActivateIntegratedServiceRequest, error) {
+func (ActivateManager) BuildRequestInteractively(_ cli.Cli, _ clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
 	date, err := askForDate("")
 	if err != nil {
-		return nil, errors.WrapIf(err, "failed to get date")
+		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "failed to get date")
 	}
 
-	return &pipeline.ActivateIntegratedServiceRequest{
+	return pipeline.ActivateIntegratedServiceRequest{
 		Spec: map[string]interface{}{
 			"date": date,
 		},

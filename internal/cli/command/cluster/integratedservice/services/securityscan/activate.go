@@ -37,26 +37,26 @@ func NewActivateManager() services.ActivateManager {
 	return &activateManager{}
 }
 
-func (am activateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateIntegratedServiceRequest, error) {
+func (am activateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
 
 	// todo infer the cli directly to the manager instead
 	am.specAssembler = specAssembler{banzaiCLI}
 
 	if err := am.isServiceEnabled(context.Background()); err != nil {
-		return nil, errors.WrapIf(err, "securityscan is not enabled")
+		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "securityscan is not enabled")
 	}
 
 	serviceSpec, err := am.assembleServiceSpec(context.Background(), banzaiCLI.Context().OrganizationID(), clusterCtx.ClusterID(), ServiceSpec{})
 	if err != nil {
-		return nil, errors.WrapIf(err, "failed to assemble integratedservice specification")
+		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "failed to assemble integratedservice specification")
 	}
 
 	serviceSpecMap, err := am.securityScanSpecAsMap(&serviceSpec)
 	if err != nil {
-		return nil, errors.WrapIf(err, "failed to transform integratedservice specification")
+		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "failed to transform integratedservice specification")
 	}
 
-	return &pipeline.ActivateIntegratedServiceRequest{Spec: serviceSpecMap}, nil
+	return pipeline.ActivateIntegratedServiceRequest{Spec: serviceSpecMap}, nil
 }
 
 func (am activateManager) ValidateRequest(req interface{}) error {
@@ -99,5 +99,3 @@ func (am activateManager) securityScanSpecAsMap(spec *ServiceSpec) (map[string]i
 
 	return specMap, nil
 }
-
-

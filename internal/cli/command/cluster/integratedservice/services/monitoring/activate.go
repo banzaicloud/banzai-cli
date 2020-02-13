@@ -35,7 +35,7 @@ type ActivateManager struct {
 	baseManager
 }
 
-func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateIntegratedServiceRequest, error) {
+func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
 
 	grafana, err := askGrafana(banzaiCLI, grafanaSpec{
 		Enabled:    true,
@@ -46,7 +46,7 @@ func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 		},
 	})
 	if err != nil {
-		return nil, errors.WrapIf(err, "error during getting Grafana options")
+		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "error during getting Grafana options")
 	}
 
 	prometheus, err := askPrometheus(banzaiCLI, prometheusSpec{
@@ -63,7 +63,7 @@ func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 		},
 	})
 	if err != nil {
-		return nil, errors.WrapIf(err, "error during getting Prometheus options")
+		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "error during getting Prometheus options")
 	}
 
 	alertmanager, err := askAlertmanager(banzaiCLI, alertmanagerSpec{
@@ -86,7 +86,7 @@ func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 		},
 	})
 	if err != nil {
-		return nil, errors.WrapIf(err, "error during getting Alertmanager options")
+		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "error during getting Alertmanager options")
 	}
 
 	pushgateway, err := askPushgateway(banzaiCLI, pushgatewaySpec{
@@ -99,10 +99,10 @@ func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 		},
 	})
 	if err != nil {
-		return nil, errors.WrapIf(err, "error during getting Pushgateway options")
+		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "error during getting Pushgateway options")
 	}
 
-	return &pipeline.ActivateIntegratedServiceRequest{
+	return pipeline.ActivateIntegratedServiceRequest{
 		Spec: map[string]interface{}{
 			"grafana":      grafana,
 			"prometheus":   prometheus,

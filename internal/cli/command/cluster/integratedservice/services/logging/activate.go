@@ -31,14 +31,14 @@ type ActivateManager struct {
 	baseManager
 }
 
-func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateIntegratedServiceRequest, error) {
+func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
 	// get logging, tls and monitoring
 	logging, err := askLogging(loggingSpec{
 		Metrics: true, // TODO (colin): add monitoring integratedservice dependecy in v2
 		TLS:     true,
 	})
 	if err != nil {
-		return nil, errors.WrapIf(err, "error during getting settings options")
+		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "error during getting settings options")
 	}
 
 	// get Loki
@@ -50,7 +50,7 @@ func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 		},
 	})
 	if err != nil {
-		return nil, errors.WrapIf(err, "error during getting Loki options")
+		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "error during getting Loki options")
 	}
 
 	// get Cluster output
@@ -61,10 +61,10 @@ func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 		},
 	})
 	if err != nil {
-		return nil, errors.WrapIf(err, "error during getting Cluster Output options")
+		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "error during getting Cluster Output options")
 	}
 
-	return &pipeline.ActivateIntegratedServiceRequest{
+	return pipeline.ActivateIntegratedServiceRequest{
 		Spec: map[string]interface{}{
 			"logging":       logging,
 			"loki":          loki,

@@ -42,7 +42,7 @@ func NewActivateManager() *ActivateManager {
 	return &ActivateManager{}
 }
 
-func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateIntegratedServiceRequest, error) {
+func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
 
 	defaultSpec := ServiceSpec{
 		ExternalDNS: ExternalDNS{
@@ -54,10 +54,10 @@ func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx c
 
 	builtSpec, err := assembleServiceRequest(banzaiCli, clusterCtx, defaultSpec, NewActionContext(actionNew))
 	if err != nil {
-		return nil, errors.WrapIf(err, "failed to build external DNS service request")
+		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "failed to build external DNS service request")
 	}
 
-	return &pipeline.ActivateIntegratedServiceRequest{
+	return pipeline.ActivateIntegratedServiceRequest{
 		Spec: builtSpec,
 	}, nil
 }

@@ -37,7 +37,7 @@ type activateOptions struct {
 
 type ActivateManager interface {
 	GetName() string
-	BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateIntegratedServiceRequest, error)
+	BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error)
 	ValidateRequest(interface{}) error
 }
 
@@ -74,7 +74,7 @@ func runActivate(banzaiCLI cli.Cli, m ActivateManager, options activateOptions, 
 	}
 
 	var (
-		request *pipeline.ActivateIntegratedServiceRequest
+		request pipeline.ActivateIntegratedServiceRequest
 		err     error
 	)
 
@@ -83,19 +83,18 @@ func runActivate(banzaiCLI cli.Cli, m ActivateManager, options activateOptions, 
 			return errors.WrapIf(err, "failed to build activate request interactively")
 		}
 
-		if err = showActivateEditor(m, request); err != nil {
+		if err := showActivateEditor(m, &request); err != nil {
 			return errors.WrapIf(err, "failed during showing editor")
 		}
 	} else {
-		request = new(pipeline.ActivateIntegratedServiceRequest)
-		if err = readActivateReqFromFileOrStdin(options.filePath, request); err != nil {
+		if err = readActivateReqFromFileOrStdin(options.filePath, &request); err != nil {
 			return errors.WrapIf(err, fmt.Sprintf("failed to read %s cluster service specification", m.GetName()))
 		}
 	}
 
 	orgId := banzaiCLI.Context().OrganizationID()
 	clusterId := options.ClusterID()
-	_, err = banzaiCLI.Client().IntegratedServicesApi.ActivateIntegratedService(context.Background(), orgId, clusterId, m.GetName(), *request)
+	_, err = banzaiCLI.Client().IntegratedServicesApi.ActivateIntegratedService(context.Background(), orgId, clusterId, m.GetName(), request)
 	if err != nil {
 		cli.LogAPIError(fmt.Sprintf("activate %s cluster service", m.GetName()), err, request)
 		log.Fatalf("could not activate %s cluster service: %v", m.GetName(), err)

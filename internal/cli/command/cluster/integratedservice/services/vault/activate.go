@@ -31,24 +31,24 @@ type ActivateManager struct {
 	baseManager
 }
 
-func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateIntegratedServiceRequest, error) {
+func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
 	var request pipeline.ActivateIntegratedServiceRequest
 
 	vaultType, err := askVaultComponent(vaultCustom)
 	if err != nil {
-		return nil, errors.WrapIf(err, "error during choosing Vault type")
+		return request, errors.WrapIf(err, "error during choosing Vault type")
 	}
 
 	switch vaultType {
 	case vaultCustom:
 		customSpec, err := buildCustomVaultServiceRequest(banzaiCli, defaults{})
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to build custom Vault integratedservice request")
+			return request, errors.Wrap(err, "failed to build custom Vault integratedservice request")
 		}
 		request.Spec = customSpec
 	case vaultCP:
 	default:
-		return nil, errors.New("not supported type of Vault component")
+		return request, errors.New("not supported type of Vault component")
 	}
 
 	settings, err := buildSettingsServiceRequest(
@@ -58,7 +58,7 @@ func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx c
 		},
 	)
 	if err != nil {
-		return nil, errors.WrapIf(err, "failed to build settings to integratedservice activate request")
+		return request, errors.WrapIf(err, "failed to build settings to integratedservice activate request")
 	}
 
 	if request.Spec == nil {
@@ -67,7 +67,7 @@ func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx c
 
 	request.Spec["settings"] = settings
 
-	return &request, nil
+	return request, nil
 }
 
 func (ActivateManager) ValidateRequest(req interface{}) error {
