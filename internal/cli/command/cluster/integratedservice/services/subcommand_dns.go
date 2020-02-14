@@ -25,21 +25,21 @@ func (DnsSubCommandManager) GetName() string {
 }
 
 func (DnsSubCommandManager) ActivateManager() ActivateManager {
-	return dns.NewActivateManager()
+	return dns.Manager{}
 }
 
 func (DnsSubCommandManager) DeactivateManager() DeactivateManager {
-	return dns.NewDeactivateManager()
+	return dns.Manager{}
 }
 
 func (DnsSubCommandManager) GetManager() GetManager {
-	return dns.NewGetManager()
+	return dns.Manager{}
 }
 
 func (DnsSubCommandManager) UpdateManager() UpdateManager {
-	return dns.NewUpdateManager()
+	return dns.Manager{}
 }
 
-func NewDNSSubCommandManager() *DnsSubCommandManager {
-	return &DnsSubCommandManager{}
+func NewDNSSubCommandManager() DnsSubCommandManager {
+	return DnsSubCommandManager{}
 }
