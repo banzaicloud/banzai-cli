@@ -19,10 +19,11 @@ import (
 	"fmt"
 
 	"emperror.dev/errors"
-	"github.com/banzaicloud/banzai-cli/internal/cli"
-	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+
+	"github.com/banzaicloud/banzai-cli/internal/cli"
+	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 )
 
 type deactivateOptions struct {

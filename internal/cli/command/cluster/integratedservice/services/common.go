@@ -19,11 +19,12 @@ import (
 	"fmt"
 
 	"emperror.dev/errors"
+	"github.com/spf13/cobra"
+
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/utils"
-	"github.com/spf13/cobra"
 )
 
 const (
