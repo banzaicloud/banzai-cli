@@ -32,8 +32,12 @@ import (
 
 type Manager struct{}
 
-func (Manager) GetName() string {
-	return serviceName
+func (Manager) ReadableName() string {
+	return "Vault"
+}
+
+func (Manager) ServiceName() string {
+	return "vault"
 }
 
 func (Manager) BuildActivateRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {

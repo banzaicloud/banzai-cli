@@ -28,12 +28,14 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 )
 
-const serviceName = "expiry"
-
 type Manager struct{}
 
-func (Manager) GetName() string {
-	return serviceName
+func (Manager) ReadableName() string {
+	return "Expiry"
+}
+
+func (Manager) ServiceName() string {
+	return "expiry"
 }
 
 func (Manager) BuildActivateRequestInteractively(_ cli.Cli, _ clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {

@@ -15,7 +15,6 @@
 package logging
 
 const (
-	serviceName          = "logging"
 	htpasswordSecretType = "htpasswd"
 	amazonType           = "amazon"
 	azureType            = "azure"

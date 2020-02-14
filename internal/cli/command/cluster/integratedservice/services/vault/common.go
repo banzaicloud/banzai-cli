@@ -15,8 +15,6 @@
 package vault
 
 const (
-	serviceName = "vault"
-
 	vaultCustom = "Custom vault"
 	vaultCP     = "Pipeline's Vault"
 

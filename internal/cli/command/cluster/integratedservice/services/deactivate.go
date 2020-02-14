@@ -29,31 +29,32 @@ type deactivateOptions struct {
 	clustercontext.Context
 }
 
-type DeactivateManager interface {
-	GetName() string
+type deactivateManager interface {
+	ReadableName() string
+	ServiceName() string
 }
 
-func DeactivateCommandFactory(banzaiCli cli.Cli, use string, manager DeactivateManager, name string) *cobra.Command {
+func newDeactivateCommand(banzaiCli cli.Cli, use string, mngr deactivateManager) *cobra.Command {
 	options := deactivateOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "deactivate",
 		Aliases: []string{"disable", "off", "remove", "rm", "uninstall"},
-		Short:   fmt.Sprintf("Deactivate the %s service of a cluster", name),
+		Short:   fmt.Sprintf("Deactivate the %s service of a cluster", mngr.ReadableName()),
 		Args:    cobra.NoArgs,
 		RunE: func(_ *cobra.Command, args []string) error {
-			return runDeactivate(banzaiCli, manager, options, args, use)
+			return runDeactivate(banzaiCli, mngr, options, args, use)
 		},
 	}
 
-	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, fmt.Sprintf("deactivate %s cluster service of", name))
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, fmt.Sprintf("deactivate %s cluster service of", mngr.ReadableName()))
 
 	return cmd
 }
 
 func runDeactivate(
 	banzaiCLI cli.Cli,
-	m DeactivateManager,
+	m deactivateManager,
 	options deactivateOptions,
 	args []string,
 	use string,
@@ -70,13 +71,13 @@ func runDeactivate(
 	orgId := banzaiCLI.Context().OrganizationID()
 	clusterId := options.ClusterID()
 
-	resp, err := pipeline.IntegratedServicesApi.DeactivateIntegratedService(context.Background(), orgId, clusterId, m.GetName())
+	resp, err := pipeline.IntegratedServicesApi.DeactivateIntegratedService(context.Background(), orgId, clusterId, m.ServiceName())
 	if err != nil {
-		cli.LogAPIError(fmt.Sprintf("deactivate %s cluster service", m.GetName()), err, resp.Request)
-		log.Fatalf("could not deactivate %s cluster service: %v", m.GetName(), err)
+		cli.LogAPIError(fmt.Sprintf("deactivate %s cluster service", m.ReadableName()), err, resp.Request)
+		log.Fatalf("could not deactivate %s cluster service: %v", m.ReadableName(), err)
 	}
 
-	log.Infof("service %q started to deactivate", m.GetName())
+	log.Infof("service %q started to deactivate", m.ReadableName())
 
 	return nil
 }

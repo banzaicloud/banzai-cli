@@ -20,10 +20,6 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/utils"
 )
 
-const (
-	serviceName = "securityscan"
-)
-
 var (
 	policyBundles = utils.IdToNameMap{
 		"2c53a13c-1765-11e8-82ef-23527761d060": "Default bundle",

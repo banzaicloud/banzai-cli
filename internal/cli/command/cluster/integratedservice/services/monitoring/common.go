@@ -15,8 +15,6 @@
 package monitoring
 
 const (
-	serviceName = "monitoring"
-
 	ingressTypeGrafana      = "Grafana"
 	ingressTypePrometheus   = "Prometheus"
 	ingressTypeAlertmanager = "Alertmanager"

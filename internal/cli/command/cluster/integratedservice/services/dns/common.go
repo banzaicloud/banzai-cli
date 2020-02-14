@@ -23,8 +23,6 @@ import (
 )
 
 const (
-	serviceName = "dns"
-
 	dnsRoute53     = "route53"
 	dnsAzure       = "azure"
 	dnsGoogle      = "google"

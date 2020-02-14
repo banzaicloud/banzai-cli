@@ -30,37 +30,38 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli/output"
 )
 
-type GetOptions struct {
+type getOptions struct {
 	clustercontext.Context
 }
 
-type GetManager interface {
-	GetName() string
+type getManager interface {
+	ReadableName() string
+	ServiceName() string
 	WriteDetailsTable(details pipeline.IntegratedServiceDetails) map[string]map[string]interface{}
 }
 
-func GetCommandFactory(banzaiCLI cli.Cli, use string, manager GetManager, name string) *cobra.Command {
-	options := GetOptions{}
+func newGetCommand(banzaiCLI cli.Cli, use string, mngr getManager) *cobra.Command {
+	options := getOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "get",
 		Aliases: []string{"details", "show", "query"},
-		Short:   fmt.Sprintf("Get details of the %s service for a cluster", name),
+		Short:   fmt.Sprintf("Get details of the %s service for a cluster", mngr.ReadableName()),
 		Args:    cobra.NoArgs,
 		RunE: func(_ *cobra.Command, args []string) error {
-			return RunGet(banzaiCLI, manager, options, args, use)
+			return runGet(banzaiCLI, mngr, options, args, use)
 		},
 	}
 
-	options.Context = clustercontext.NewClusterContext(cmd, banzaiCLI, fmt.Sprintf("get %s cluster service details of", name))
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCLI, fmt.Sprintf("get %s cluster service details of", mngr.ReadableName()))
 
 	return cmd
 }
 
-func RunGet(
+func runGet(
 	banzaiCLI cli.Cli,
-	m GetManager,
-	options GetOptions,
+	m getManager,
+	options getOptions,
 	args []string,
 	use string,
 ) error {
@@ -76,16 +77,16 @@ func RunGet(
 	orgId := banzaiCLI.Context().OrganizationID()
 	clusterId := options.ClusterID()
 
-	details, resp, err := pipelineClient.IntegratedServicesApi.IntegratedServiceDetails(context.Background(), orgId, clusterId, m.GetName())
+	details, resp, err := pipelineClient.IntegratedServicesApi.IntegratedServiceDetails(context.Background(), orgId, clusterId, m.ServiceName())
 
 	if resp.StatusCode == http.StatusNotFound {
-		log.Printf("cluster service [%s] not found", m.GetName())
+		log.Printf("cluster service %q not found", m.ServiceName())
 		return nil
 	}
 
 	if err != nil {
-		cli.LogAPIError(fmt.Sprintf("get %s cluster service details", m.GetName()), err, resp.Request)
-		log.Fatalf("could not get %s cluster service details: %v", m.GetName(), err)
+		cli.LogAPIError(fmt.Sprintf("get %s cluster service details", m.ReadableName()), err, resp.Request)
+		log.Fatalf("could not get %s cluster service details: %v", m.ReadableName(), err)
 		return err
 	}
 

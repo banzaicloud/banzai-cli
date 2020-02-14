@@ -35,28 +35,29 @@ type activateOptions struct {
 	filePath string
 }
 
-type ActivateManager interface {
-	GetName() string
+type activateManager interface {
+	ReadableName() string
+	ServiceName() string
 	BuildActivateRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error)
 	specValidator
 }
 
-func ActivateCommandFactory(banzaiCli cli.Cli, use string, manager ActivateManager, name string) *cobra.Command {
+func newActivateCommand(banzaiCLI cli.Cli, use string, mngr activateManager) *cobra.Command {
 	options := activateOptions{}
 
 	cmd := &cobra.Command{
 		Use:           "activate",
 		Aliases:       []string{"add", "enable", "install", "on"},
-		Short:         fmt.Sprintf("Activate the %s service of a cluster", name),
+		Short:         fmt.Sprintf("Activate the %s service of a cluster", mngr.ReadableName()),
 		Args:          cobra.NoArgs,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
-			return runActivate(banzaiCli, manager, options, args, use)
+			return runActivate(banzaiCLI, mngr, options, args, use)
 		},
 	}
 
-	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, fmt.Sprintf("activate %s cluster service for", name))
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCLI, fmt.Sprintf("activate %s cluster service for", mngr.ReadableName()))
 
 	flags := cmd.Flags()
 	flags.StringVarP(&options.filePath, "file", "f", "", "Service specification file")
@@ -64,7 +65,7 @@ func ActivateCommandFactory(banzaiCli cli.Cli, use string, manager ActivateManag
 	return cmd
 }
 
-func runActivate(banzaiCLI cli.Cli, m ActivateManager, options activateOptions, args []string, use string) error {
+func runActivate(banzaiCLI cli.Cli, m activateManager, options activateOptions, args []string, use string) error {
 	if err := isServiceEnabled(context.Background(), banzaiCLI, use); err != nil {
 		return errors.WrapIf(err, "failed to check service")
 	}
@@ -88,19 +89,19 @@ func runActivate(banzaiCLI cli.Cli, m ActivateManager, options activateOptions, 
 		}
 	} else {
 		if err = readActivateReqFromFileOrStdin(options.filePath, &request); err != nil {
-			return errors.WrapIf(err, fmt.Sprintf("failed to read %s cluster service specification", m.GetName()))
+			return errors.WrapIf(err, fmt.Sprintf("failed to read %s cluster service specification", m.ReadableName()))
 		}
 	}
 
 	orgId := banzaiCLI.Context().OrganizationID()
 	clusterId := options.ClusterID()
-	_, err = banzaiCLI.Client().IntegratedServicesApi.ActivateIntegratedService(context.Background(), orgId, clusterId, m.GetName(), request)
+	_, err = banzaiCLI.Client().IntegratedServicesApi.ActivateIntegratedService(context.Background(), orgId, clusterId, m.ServiceName(), request)
 	if err != nil {
-		cli.LogAPIError(fmt.Sprintf("activate %s cluster service", m.GetName()), err, request)
-		log.Fatalf("could not activate %s cluster service: %v", m.GetName(), err)
+		cli.LogAPIError(fmt.Sprintf("activate %s cluster service", m.ReadableName()), err, request)
+		log.Fatalf("could not activate %s cluster service: %v", m.ReadableName(), err)
 	}
 
-	log.Infof("service %q started to activate", m.GetName())
+	log.Infof("service %q started to activate", m.ReadableName())
 
 	return nil
 }
@@ -118,7 +119,7 @@ func readActivateReqFromFileOrStdin(filePath string, req *pipeline.ActivateInteg
 	return nil
 }
 
-func showActivateEditor(m ActivateManager, req *pipeline.ActivateIntegratedServiceRequest) error {
+func showActivateEditor(m activateManager, req *pipeline.ActivateIntegratedServiceRequest) error {
 	var edit bool
 	if err := survey.AskOne(
 		&survey.Confirm{
