@@ -16,21 +16,27 @@ package vault
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/antihax/optional"
+	"github.com/mitchellh/mapstructure"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 )
 
-type ActivateManager struct {
-	baseManager
+type Manager struct{}
+
+func (Manager) GetName() string {
+	return serviceName
 }
 
-func (ActivateManager) BuildActivateRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
+func (Manager) BuildActivateRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
 	var request pipeline.ActivateIntegratedServiceRequest
 
 	vaultType, err := askVaultComponent(vaultCustom)
@@ -69,12 +75,159 @@ func (ActivateManager) BuildActivateRequestInteractively(banzaiCli cli.Cli, clus
 	return request, nil
 }
 
-func (ActivateManager) ValidateSpec(spec map[string]interface{}) error {
-	return validateSpec(spec)
+func (Manager) BuildUpdateRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error {
+
+	var spec specResponse
+	if err := mapstructure.Decode(updateServiceRequest.Spec, &spec); err != nil {
+		return errors.WrapIf(err, "service specification does not conform to schema")
+	}
+
+	currentVaultType := vaultCP
+	isCustomVault := spec.CustomVault.Enabled
+	if isCustomVault {
+		currentVaultType = vaultCustom
+	}
+
+	vaultType, err := askVaultComponent(currentVaultType)
+	if err != nil {
+		return errors.WrapIf(err, "error during choosing Vault type")
+	}
+
+	switch vaultType {
+	case vaultCustom:
+		customSpec, err := buildCustomVaultServiceRequest(banzaiCli, defaults{
+			address:  spec.CustomVault.Address,
+			secretID: spec.CustomVault.SecretID,
+			policy:   spec.CustomVault.Policy,
+		})
+		if err != nil {
+			return errors.Wrap(err, "failed to build custom Vault integratedservice request")
+		}
+		updateServiceRequest.Spec = customSpec
+	case vaultCP:
+	default:
+		return errors.New("not supported type of Vault component")
+	}
+
+	settings, err := buildSettingsServiceRequest(
+		defaults{
+			namespaces:      spec.Settings.Namespaces,
+			serviceAccounts: spec.Settings.ServiceAccounts,
+		},
+	)
+	if err != nil {
+		return errors.WrapIf(err, "failed to build settings to integratedservice update request")
+	}
+
+	updateServiceRequest.Spec["settings"] = settings
+
+	return nil
 }
 
-func NewActivateManager() *ActivateManager {
-	return &ActivateManager{}
+func (Manager) ValidateSpec(specObj map[string]interface{}) error {
+	var spec struct {
+		CustomVault struct {
+			Enabled  bool   `mapstructure:"enabled"`
+			SecretID string `mapstructure:"secretId"`
+			Address  string `mapstructure:"address"`
+			Policy   string `mapstructure:"policy"`
+		} `mapstructure:"customVault"`
+		Settings struct {
+			Namespaces      []string `mapstructure:"namespaces"`
+			ServiceAccounts []string `mapstructure:"serviceAccounts"`
+		} `mapstructure:"settings"`
+	}
+
+	if err := mapstructure.Decode(specObj, &spec); err != nil {
+		return errors.WrapIf(err, "integratedservice specification does not conform to schema")
+	}
+
+	if spec.CustomVault.Enabled {
+		// address is required in case of custom Vault
+		if spec.CustomVault.Address == "" {
+			return errors.New("Vault address cannot be empty in case of custom Vault option")
+		}
+
+		// policy is required in case of custom Vault with token
+		if spec.CustomVault.Policy == "" && spec.CustomVault.SecretID != "" {
+			return errors.New("policy field is required in case of custom Vault")
+		}
+	}
+
+	if len(spec.Settings.Namespaces) == 1 && spec.Settings.Namespaces[0] == "*" &&
+		len(spec.Settings.ServiceAccounts) == 1 && spec.Settings.ServiceAccounts[0] == "*" {
+		return errors.New(`both namespaces and service accounts cannot be "*"`)
+	}
+
+	return nil
+}
+
+type outputResponse struct {
+	Vault struct {
+		Version        string `mapstructure:"version"`
+		AuthMethodPath string `mapstructure:"authMethodPath"`
+		Role           string `mapstructure:"role"`
+		Policy         string `mapstructure:"policy"`
+	} `mapstructure:"vault"`
+	Wehhook struct {
+		Version string `mapstructure:"version"`
+	} `mapstructure:"webhook"`
+}
+
+type specResponse struct {
+	CustomVault struct {
+		Enabled  bool   `json:"enabled"`
+		Address  string `json:"address"`
+		SecretID string `json:"secretId"`
+		Policy   string `json:"policy"`
+	} `json:"customVault"`
+	Settings struct {
+		Namespaces      []string `json:"namespaces"`
+		ServiceAccounts []string `json:"serviceAccounts"`
+	} `json:"settings"`
+}
+
+func (Manager) WriteDetailsTable(details pipeline.IntegratedServiceDetails) map[string]map[string]interface{} {
+	tableData := map[string]interface{}{
+		"Status": details.Status,
+	}
+
+	var output outputResponse
+	if err := mapstructure.Decode(details.Output, &output); err != nil {
+		log.Errorf("failed to unmarshal output: %s", err.Error())
+		return nil
+	}
+
+	var spec specResponse
+	if err := mapstructure.Decode(details.Spec, &spec); err != nil {
+		log.Errorf("failed to unmarshal output: %s", err.Error())
+		return nil
+	}
+
+	tableData["Vault_version"] = output.Vault.Version
+	tableData["Auth_method_path"] = output.Vault.AuthMethodPath
+	tableData["Role"] = output.Vault.Role
+	tableData["Webhook_version"] = output.Wehhook.Version
+	tableData["Namespaces"] = spec.Settings.Namespaces
+	tableData["Service_accounts"] = spec.Settings.ServiceAccounts
+
+	var policy string
+	if spec.CustomVault.Enabled {
+		tableData["Vault_address"] = spec.CustomVault.Address
+		if spec.CustomVault.SecretID != "" {
+			tableData["SecretID"] = spec.CustomVault.SecretID
+		}
+
+		policy = spec.CustomVault.Policy
+	} else {
+		policy = output.Vault.Policy
+	}
+
+	tableData["Policy"] = fmt.Sprintf("%q", strings.TrimSpace(strings.ReplaceAll(strings.ReplaceAll(policy, "\t", " "), "\n", "")))
+
+	return map[string]map[string]interface{}{
+		"Vault": tableData,
+	}
 }
 
 func buildCustomVaultServiceRequest(banzaiCLI cli.Cli, defaults defaults) (map[string]interface{}, error) {

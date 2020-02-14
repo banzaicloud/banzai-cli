@@ -25,21 +25,21 @@ func (VaultSubCommandManager) GetName() string {
 }
 
 func (VaultSubCommandManager) ActivateManager() ActivateManager {
-	return vault.NewActivateManager()
+	return vault.Manager{}
 }
 
 func (VaultSubCommandManager) DeactivateManager() DeactivateManager {
-	return vault.NewDeactivateManager()
+	return vault.Manager{}
 }
 
 func (VaultSubCommandManager) GetManager() GetManager {
-	return vault.NewGetManager()
+	return vault.Manager{}
 }
 
 func (VaultSubCommandManager) UpdateManager() UpdateManager {
-	return vault.NewUpdateManager()
+	return vault.Manager{}
 }
 
-func NewVaultSubCommandManager() *VaultSubCommandManager {
-	return &VaultSubCommandManager{}
+func NewVaultSubCommandManager() VaultSubCommandManager {
+	return VaultSubCommandManager{}
 }
