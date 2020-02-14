@@ -14,10 +14,29 @@
 
 package expiry
 
+import (
+	"time"
+
+	"emperror.dev/errors"
+)
+
 type serviceSpec struct {
 	Date string `json:"date" mapstructure:"date"`
 }
 
 func (s serviceSpec) Validate() error {
 	return validateDate(s.Date)
+}
+
+func validateDate(date string) error {
+	d, err := time.Parse(time.RFC3339, date)
+	if err != nil {
+		return errors.WrapIf(err, "wrong date format")
+	}
+
+	if !d.After(time.Now().UTC()) {
+		return errors.New("the provided date cannot be before the current date")
+	}
+
+	return nil
 }

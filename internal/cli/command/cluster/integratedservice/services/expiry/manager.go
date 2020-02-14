@@ -19,18 +19,24 @@ import (
 	"time"
 
 	"emperror.dev/errors"
+	"github.com/mitchellh/mapstructure"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
-	log "github.com/sirupsen/logrus"
 )
 
-type ActivateManager struct {
-	baseManager
+const serviceName = "expiry"
+
+type Manager struct{}
+
+func (Manager) GetName() string {
+	return serviceName
 }
 
-func (ActivateManager) BuildActivateRequestInteractively(_ cli.Cli, _ clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
+func (Manager) BuildActivateRequestInteractively(_ cli.Cli, _ clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
 	date, err := askForDate("")
 	if err != nil {
 		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "failed to get date")
@@ -43,12 +49,65 @@ func (ActivateManager) BuildActivateRequestInteractively(_ cli.Cli, _ clustercon
 	}, nil
 }
 
-func (ActivateManager) ValidateSpec(spec map[string]interface{}) error {
-	return validateSpec(spec)
+func (Manager) BuildUpdateRequestInteractively(_ cli.Cli, req *pipeline.UpdateIntegratedServiceRequest, _ clustercontext.Context) error {
+	var spec serviceSpec
+	if err := mapstructure.Decode(req.Spec, &spec); err != nil {
+		return errors.WrapIf(err, "service specification does not conform to schema")
+	}
+
+	date, err := askForDate(spec.Date)
+	if err != nil {
+		return errors.WrapIf(err, "error during getting date")
+	}
+
+	spec.Date = date
+	if err := mapstructure.Decode(spec, &req.Spec); err != nil {
+		return errors.WrapIf(err, "service specification does not conform to schema")
+	}
+
+	return nil
 }
 
-func NewActivateManager() *ActivateManager {
-	return &ActivateManager{}
+func (Manager) ValidateSpec(spec map[string]interface{}) error {
+	var typedSpec serviceSpec
+
+	if err := mapstructure.Decode(spec, &typedSpec); err != nil {
+		return errors.WrapIf(err, "service specification does not conform to schema")
+	}
+
+	return typedSpec.Validate()
+}
+
+func (Manager) WriteDetailsTable(details pipeline.IntegratedServiceDetails) map[string]map[string]interface{} {
+
+	const (
+		expiryTitle = "Expiry"
+		statusTitle = "Status"
+		dateTitle   = "Date"
+	)
+
+	var baseOutput = map[string]map[string]interface{}{
+		expiryTitle: {
+			statusTitle: details.Status,
+		},
+	}
+
+	if details.Status == "INACTIVE" {
+		return baseOutput
+	}
+
+	var spec serviceSpec
+	if err := mapstructure.Decode(details.Spec, &spec); err != nil {
+		log.Errorf("failed to unmarshal output: %s", err.Error())
+		return baseOutput
+	}
+
+	return map[string]map[string]interface{}{
+		expiryTitle: {
+			statusTitle: details.Status,
+			dateTitle:   spec.Date,
+		},
+	}
 }
 
 func askForDate(defaultValue string) (string, error) {

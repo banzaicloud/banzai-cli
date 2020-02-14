@@ -25,21 +25,21 @@ func (ExpirySubCommandManager) GetName() string {
 }
 
 func (ExpirySubCommandManager) ActivateManager() ActivateManager {
-	return expiry.NewActivateManager()
+	return expiry.Manager{}
 }
 
 func (ExpirySubCommandManager) DeactivateManager() DeactivateManager {
-	return expiry.NewDeactivateManager()
+	return expiry.Manager{}
 }
 
 func (ExpirySubCommandManager) GetManager() GetManager {
-	return expiry.NewGetManager()
+	return expiry.Manager{}
 }
 
 func (ExpirySubCommandManager) UpdateManager() UpdateManager {
-	return expiry.NewUpdateManager()
+	return expiry.Manager{}
 }
 
-func NewExpirySubCommandManager() *ExpirySubCommandManager {
-	return &ExpirySubCommandManager{}
+func NewExpirySubCommandManager() ExpirySubCommandManager {
+	return ExpirySubCommandManager{}
 }
