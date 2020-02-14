@@ -20,17 +20,22 @@ import (
 
 	"emperror.dev/errors"
 	"github.com/antihax/optional"
+	"github.com/mitchellh/mapstructure"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 )
 
-type ActivateManager struct {
-	baseManager
+type Manager struct{}
+
+func (Manager) GetName() string {
+	return serviceName
 }
 
-func (ActivateManager) BuildActivateRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
+func (Manager) BuildActivateRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
 	// get logging, tls and monitoring
 	logging, err := askLogging(loggingSpec{
 		Metrics: true, // TODO (colin): add monitoring integratedservice dependecy in v2
@@ -72,12 +77,110 @@ func (ActivateManager) BuildActivateRequestInteractively(banzaiCLI cli.Cli, clus
 	}, nil
 }
 
-func (ActivateManager) ValidateSpec(spec map[string]interface{}) error {
-	return validateSpec(spec)
+func (Manager) BuildUpdateRequestInteractively(banzaiCLI cli.Cli, req *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error {
+	var spec spec
+	if err := mapstructure.Decode(req.Spec, &spec); err != nil {
+		return errors.WrapIf(err, "integratedservice specification does not conform to schema")
+	}
+
+	// get logging, tls and monitoring
+	logging, err := askLogging(spec.Logging)
+	if err != nil {
+		return errors.WrapIf(err, "error during getting settings options")
+	}
+
+	// get Loki
+	loki, err := askLokiComponent(banzaiCLI, spec.Loki)
+	if err != nil {
+		return errors.WrapIf(err, "error during getting Loki options")
+	}
+
+	// get Cluster output
+	clusterOutput, err := askClusterOutput(banzaiCLI, spec.ClusterOutput)
+	if err != nil {
+		return errors.WrapIf(err, "error during getting Cluster Output options")
+	}
+
+	req.Spec["logging"] = logging
+	req.Spec["loki"] = loki
+	req.Spec["clusterOutput"] = clusterOutput
+
+	return nil
 }
 
-func NewActivateManager() *ActivateManager {
-	return &ActivateManager{}
+func (Manager) ValidateSpec(specObj map[string]interface{}) error {
+	var spec spec
+	if err := mapstructure.Decode(specObj, &spec); err != nil {
+		return errors.WrapIf(err, "integratedservice specification does not conform to schema")
+	}
+
+	return spec.Validate()
+}
+
+type outputResponse struct {
+	Logging struct {
+		OperatorVersion  string `mapstructure:"operatorVersion"`
+		FluentdVersion   string `mapstructure:"fluentdVersion"`
+		FluentbitVersion string `mapstructure:"fluentbitVersion"`
+	} `mapstructure:"logging"`
+	Loki struct {
+		Url        string `mapstructure:"url"`
+		Version    string `mapstructure:"version"`
+		ServiceURL string `mapstructure:"serviceUrl"`
+		SecretID   string `mapstructure:"secretId"`
+	} `mapstructure:"loki"`
+}
+
+type TableData map[string]interface{}
+
+func (Manager) WriteDetailsTable(details pipeline.IntegratedServiceDetails) map[string]map[string]interface{} {
+	tableData := map[string]interface{}{
+		"Status": details.Status,
+	}
+
+	var output outputResponse
+	if err := mapstructure.Decode(details.Output, &output); err != nil {
+		log.Errorf("failed to unmarshal output: %s", err.Error())
+		return map[string]map[string]interface{}{
+			"Logging": tableData,
+		}
+	}
+
+	var spec spec
+	if err := mapstructure.Decode(details.Spec, &spec); err != nil {
+		log.Errorf("failed to unmarshal output: %s", err.Error())
+		return map[string]map[string]interface{}{
+			"Logging": tableData,
+		}
+	}
+
+	if spec.Loki.Enabled && spec.Loki.Ingress.Enabled {
+		var secretID string
+		if spec.Loki.Ingress.Enabled {
+			secretID = spec.Loki.Ingress.SecretID
+			if secretID == "" {
+				secretID = output.Loki.SecretID
+			}
+		}
+		var lokiTable = TableData{
+			"url":        output.Loki.Url,
+			"version":    output.Loki.Version,
+			"serviceUrl": output.Loki.ServiceURL,
+			"secretID":   secretID,
+			"path":       spec.Loki.Ingress.Path,
+			"domain":     spec.Loki.Ingress.Domain,
+		}
+		tableData["Loki"] = lokiTable
+	}
+
+	tableData["Logging"] = TableData{
+		"metrics": spec.Logging.Metrics,
+		"TLS":     spec.Logging.TLS,
+	}
+
+	return map[string]map[string]interface{}{
+		"Logging": tableData,
+	}
 }
 
 func askLogging(defaults loggingSpec) (*loggingSpec, error) {

@@ -25,21 +25,21 @@ func (LoggingSubCommandManager) GetName() string {
 }
 
 func (LoggingSubCommandManager) ActivateManager() ActivateManager {
-	return logging.NewActivateManager()
+	return logging.Manager{}
 }
 
 func (LoggingSubCommandManager) DeactivateManager() DeactivateManager {
-	return logging.NewDeactivateManager()
+	return logging.Manager{}
 }
 
 func (LoggingSubCommandManager) GetManager() GetManager {
-	return logging.NewGetManager()
+	return logging.Manager{}
 }
 
 func (LoggingSubCommandManager) UpdateManager() UpdateManager {
-	return logging.NewUpdateManager()
+	return logging.Manager{}
 }
 
-func NewLoggingSubCommandManager() *LoggingSubCommandManager {
-	return &LoggingSubCommandManager{}
+func NewLoggingSubCommandManager() LoggingSubCommandManager {
+	return LoggingSubCommandManager{}
 }
