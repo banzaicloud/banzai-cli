@@ -14,11 +14,6 @@
 
 package monitoring
 
-import (
-	"emperror.dev/errors"
-	"github.com/mitchellh/mapstructure"
-)
-
 const (
 	serviceName = "monitoring"
 
@@ -45,24 +40,3 @@ const (
 	pdIntegrationTypeEventsApiV2     = "eventsApiV2"
 	pdIntegrationTypeEventsApiV2Name = "Events API V2"
 )
-
-type baseManager struct{}
-
-func (baseManager) GetName() string {
-	return serviceName
-}
-
-func NewDeactivateManager() *baseManager {
-	return &baseManager{}
-}
-
-func validateSpec(specObj map[string]interface{}) error {
-
-	var spec serviceSpec
-
-	if err := mapstructure.Decode(specObj, &spec); err != nil {
-		return errors.WrapIf(err, "service specification does not conform to schema")
-	}
-
-	return spec.Validate()
-}

@@ -25,21 +25,21 @@ func (MonitoringSubCommandManager) GetName() string {
 }
 
 func (MonitoringSubCommandManager) ActivateManager() ActivateManager {
-	return monitoring.NewActivateManager()
+	return monitoring.Manager{}
 }
 
 func (MonitoringSubCommandManager) DeactivateManager() DeactivateManager {
-	return monitoring.NewDeactivateManager()
+	return monitoring.Manager{}
 }
 
 func (MonitoringSubCommandManager) GetManager() GetManager {
-	return monitoring.NewGetManager()
+	return monitoring.Manager{}
 }
 
 func (MonitoringSubCommandManager) UpdateManager() UpdateManager {
-	return monitoring.NewUpdateManager()
+	return monitoring.Manager{}
 }
 
-func NewMonitoringSubCommandManager() *MonitoringSubCommandManager {
-	return &MonitoringSubCommandManager{}
+func NewMonitoringSubCommandManager() MonitoringSubCommandManager {
+	return MonitoringSubCommandManager{}
 }
