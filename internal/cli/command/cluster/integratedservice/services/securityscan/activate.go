@@ -37,7 +37,7 @@ func NewActivateManager() services.ActivateManager {
 	return &activateManager{}
 }
 
-func (am activateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
+func (am activateManager) BuildActivateRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
 
 	// todo infer the cli directly to the manager instead
 	am.specAssembler = specAssembler{banzaiCLI}

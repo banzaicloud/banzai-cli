@@ -31,7 +31,7 @@ func NewUpdateManager() *UpdateManager {
 	return &UpdateManager{}
 }
 
-func (UpdateManager) BuildRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error {
+func (UpdateManager) BuildUpdateRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error {
 
 	currentSpec := ServiceSpec{
 		ExternalDNS: ExternalDNS{

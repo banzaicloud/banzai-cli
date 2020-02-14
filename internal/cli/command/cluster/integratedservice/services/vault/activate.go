@@ -30,7 +30,7 @@ type ActivateManager struct {
 	baseManager
 }
 
-func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
+func (ActivateManager) BuildActivateRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
 	var request pipeline.ActivateIntegratedServiceRequest
 
 	vaultType, err := askVaultComponent(vaultCustom)

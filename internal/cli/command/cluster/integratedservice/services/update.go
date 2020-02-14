@@ -37,7 +37,7 @@ type updateOptions struct {
 
 type UpdateManager interface {
 	GetName() string
-	BuildRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error
+	BuildUpdateRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error
 	specValidator
 }
 
@@ -94,7 +94,7 @@ func runUpdate(
 
 		request.Spec = details.Spec
 
-		if err := m.BuildRequestInteractively(banzaiCLI, &request, options.Context); err != nil {
+		if err := m.BuildUpdateRequestInteractively(banzaiCLI, &request, options.Context); err != nil {
 			return errors.WrapIf(err, "failed to build update request interactively")
 		}
 

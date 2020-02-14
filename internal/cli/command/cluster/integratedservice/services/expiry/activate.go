@@ -30,7 +30,7 @@ type ActivateManager struct {
 	baseManager
 }
 
-func (ActivateManager) BuildRequestInteractively(_ cli.Cli, _ clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
+func (ActivateManager) BuildActivateRequestInteractively(_ cli.Cli, _ clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
 	date, err := askForDate("")
 	if err != nil {
 		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "failed to get date")

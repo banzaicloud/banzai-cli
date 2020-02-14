@@ -39,7 +39,7 @@ func (updateManager) ValidateSpec(spec map[string]interface{}) error {
 	return nil
 }
 
-func (um updateManager) BuildRequestInteractively(banzaiCLI cli.Cli, updateServiceRequest *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error {
+func (um updateManager) BuildUpdateRequestInteractively(banzaiCLI cli.Cli, updateServiceRequest *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error {
 
 	// todo infer the cli directly to the manager instead
 	um.specAssembler = specAssembler{banzaiCLI}

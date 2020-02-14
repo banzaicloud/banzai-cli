@@ -31,7 +31,7 @@ func (UpdateManager) ValidateSpec(spec map[string]interface{}) error {
 	return validateSpec(spec)
 }
 
-func (UpdateManager) BuildRequestInteractively(_ cli.Cli, req *pipeline.UpdateIntegratedServiceRequest, _ clustercontext.Context) error {
+func (UpdateManager) BuildUpdateRequestInteractively(_ cli.Cli, req *pipeline.UpdateIntegratedServiceRequest, _ clustercontext.Context) error {
 	var spec serviceSpec
 	if err := mapstructure.Decode(req.Spec, &spec); err != nil {
 		return errors.WrapIf(err, "service specification does not conform to schema")
