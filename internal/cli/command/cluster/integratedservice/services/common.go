@@ -33,8 +33,8 @@ const (
 )
 
 type ServiceCommandManager interface {
-	BuildActivateRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error)
-	BuildUpdateRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error
+	BuildActivateRequestInteractively(clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error)
+	BuildUpdateRequestInteractively(clusterCtx clustercontext.Context, request *pipeline.UpdateIntegratedServiceRequest) error
 	ReadableName() string
 	ServiceName() string
 	WriteDetailsTable(details pipeline.IntegratedServiceDetails) map[string]map[string]interface{}

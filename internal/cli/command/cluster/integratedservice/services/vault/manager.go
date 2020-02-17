@@ -30,7 +30,15 @@ import (
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 )
 
-type Manager struct{}
+type Manager struct {
+	banzaiCLI cli.Cli
+}
+
+func NewManager(banzaiCLI cli.Cli) Manager {
+	return Manager{
+		banzaiCLI: banzaiCLI,
+	}
+}
 
 func (Manager) ReadableName() string {
 	return "Vault"
@@ -40,7 +48,7 @@ func (Manager) ServiceName() string {
 	return "vault"
 }
 
-func (Manager) BuildActivateRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
+func (m Manager) BuildActivateRequestInteractively(clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
 	var request pipeline.ActivateIntegratedServiceRequest
 
 	vaultType, err := askVaultComponent(vaultCustom)
@@ -50,7 +58,7 @@ func (Manager) BuildActivateRequestInteractively(banzaiCli cli.Cli, clusterCtx c
 
 	switch vaultType {
 	case vaultCustom:
-		customSpec, err := buildCustomVaultServiceRequest(banzaiCli, defaults{})
+		customSpec, err := buildCustomVaultServiceRequest(m.banzaiCLI, defaults{})
 		if err != nil {
 			return request, errors.Wrap(err, "failed to build custom Vault integratedservice request")
 		}
@@ -79,10 +87,10 @@ func (Manager) BuildActivateRequestInteractively(banzaiCli cli.Cli, clusterCtx c
 	return request, nil
 }
 
-func (Manager) BuildUpdateRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error {
+func (m Manager) BuildUpdateRequestInteractively(clusterCtx clustercontext.Context, request *pipeline.UpdateIntegratedServiceRequest) error {
 
 	var spec specResponse
-	if err := mapstructure.Decode(updateServiceRequest.Spec, &spec); err != nil {
+	if err := mapstructure.Decode(request.Spec, &spec); err != nil {
 		return errors.WrapIf(err, "service specification does not conform to schema")
 	}
 
@@ -99,7 +107,7 @@ func (Manager) BuildUpdateRequestInteractively(banzaiCli cli.Cli, updateServiceR
 
 	switch vaultType {
 	case vaultCustom:
-		customSpec, err := buildCustomVaultServiceRequest(banzaiCli, defaults{
+		customSpec, err := buildCustomVaultServiceRequest(m.banzaiCLI, defaults{
 			address:  spec.CustomVault.Address,
 			secretID: spec.CustomVault.SecretID,
 			policy:   spec.CustomVault.Policy,
@@ -107,7 +115,7 @@ func (Manager) BuildUpdateRequestInteractively(banzaiCli cli.Cli, updateServiceR
 		if err != nil {
 			return errors.Wrap(err, "failed to build custom Vault integratedservice request")
 		}
-		updateServiceRequest.Spec = customSpec
+		request.Spec = customSpec
 	case vaultCP:
 	default:
 		return errors.New("not supported type of Vault component")
@@ -123,7 +131,7 @@ func (Manager) BuildUpdateRequestInteractively(banzaiCli cli.Cli, updateServiceR
 		return errors.WrapIf(err, "failed to build settings to integratedservice update request")
 	}
 
-	updateServiceRequest.Spec["settings"] = settings
+	request.Spec["settings"] = settings
 
 	return nil
 }

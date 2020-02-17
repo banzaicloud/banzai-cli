@@ -46,12 +46,12 @@ func NewIntegratedServiceCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd.AddCommand(
 		NewListCommand(banzaiCli),
 		// NOTE: add integratedservice commands here
-		services.NewServiceCommand(banzaiCli, "dns", dns.Manager{}),
-		services.NewServiceCommand(banzaiCli, "expiry", expiry.Manager{}),
-		services.NewServiceCommand(banzaiCli, "logging", logging.Manager{}),
-		services.NewServiceCommand(banzaiCli, "monitoring", monitoring.Manager{}),
-		services.NewServiceCommand(banzaiCli, "securityscan", securityscan.Manager{}),
-		services.NewServiceCommand(banzaiCli, "vault", vault.Manager{}),
+		services.NewServiceCommand(banzaiCli, "dns", dns.NewManager(banzaiCli)),
+		services.NewServiceCommand(banzaiCli, "expiry", expiry.NewManager(banzaiCli)),
+		services.NewServiceCommand(banzaiCli, "logging", logging.NewManager(banzaiCli)),
+		services.NewServiceCommand(banzaiCli, "monitoring", monitoring.NewManager(banzaiCli)),
+		services.NewServiceCommand(banzaiCli, "securityscan", securityscan.NewManager(banzaiCli)),
+		services.NewServiceCommand(banzaiCli, "vault", vault.NewManager(banzaiCli)),
 	)
 
 	return cmd

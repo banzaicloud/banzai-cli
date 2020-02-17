@@ -29,7 +29,15 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 )
 
-type Manager struct{}
+type Manager struct {
+	banzaiCLI cli.Cli
+}
+
+func NewManager(banzaiCLI cli.Cli) Manager {
+	return Manager{
+		banzaiCLI: banzaiCLI,
+	}
+}
 
 func (Manager) ReadableName() string {
 	return "Logging"
@@ -39,7 +47,7 @@ func (Manager) ServiceName() string {
 	return "logging"
 }
 
-func (Manager) BuildActivateRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
+func (m Manager) BuildActivateRequestInteractively(clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
 	// get logging, tls and monitoring
 	logging, err := askLogging(loggingSpec{
 		Metrics: true, // TODO (colin): add monitoring integratedservice dependecy in v2
@@ -50,7 +58,7 @@ func (Manager) BuildActivateRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 	}
 
 	// get Loki
-	loki, err := askLokiComponent(banzaiCLI, lokiSpec{
+	loki, err := askLokiComponent(m.banzaiCLI, lokiSpec{
 		Enabled: false,
 		Ingress: ingressSpec{
 			Enabled: false,
@@ -62,7 +70,7 @@ func (Manager) BuildActivateRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 	}
 
 	// get Cluster output
-	clusterOutput, err := askClusterOutput(banzaiCLI, clusterOutputSpec{
+	clusterOutput, err := askClusterOutput(m.banzaiCLI, clusterOutputSpec{
 		Enabled: true,
 		Provider: providerSpec{
 			Name: providerAmazonS3Key,
@@ -81,9 +89,9 @@ func (Manager) BuildActivateRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 	}, nil
 }
 
-func (Manager) BuildUpdateRequestInteractively(banzaiCLI cli.Cli, req *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error {
+func (m Manager) BuildUpdateRequestInteractively(clusterCtx clustercontext.Context, request *pipeline.UpdateIntegratedServiceRequest) error {
 	var spec spec
-	if err := mapstructure.Decode(req.Spec, &spec); err != nil {
+	if err := mapstructure.Decode(request.Spec, &spec); err != nil {
 		return errors.WrapIf(err, "integratedservice specification does not conform to schema")
 	}
 
@@ -94,20 +102,20 @@ func (Manager) BuildUpdateRequestInteractively(banzaiCLI cli.Cli, req *pipeline.
 	}
 
 	// get Loki
-	loki, err := askLokiComponent(banzaiCLI, spec.Loki)
+	loki, err := askLokiComponent(m.banzaiCLI, spec.Loki)
 	if err != nil {
 		return errors.WrapIf(err, "error during getting Loki options")
 	}
 
 	// get Cluster output
-	clusterOutput, err := askClusterOutput(banzaiCLI, spec.ClusterOutput)
+	clusterOutput, err := askClusterOutput(m.banzaiCLI, spec.ClusterOutput)
 	if err != nil {
 		return errors.WrapIf(err, "error during getting Cluster Output options")
 	}
 
-	req.Spec["logging"] = logging
-	req.Spec["loki"] = loki
-	req.Spec["clusterOutput"] = clusterOutput
+	request.Spec["logging"] = logging
+	request.Spec["loki"] = loki
+	request.Spec["clusterOutput"] = clusterOutput
 
 	return nil
 }
