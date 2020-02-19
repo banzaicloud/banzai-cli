@@ -65,6 +65,10 @@ func runTerraform(command string, options *cpContext, env map[string]string, tar
 		}
 	} else {
 		cmd = append(cmd, "-input=false", "-force-copy")
+
+		if fileExists(filepath.Join(options.workspace, "state.tfvars")) {
+			cmd = append(cmd, "-backend-config", "/workspace/state.tfvars")
+		}
 	}
 
 	return runTerraformCommandGeneric(options, cmd, cmdEnv)
