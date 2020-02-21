@@ -23,8 +23,29 @@ import (
 
 func main() {
 	cmd.Init("", "", "", "")
+
+	const fmTemplate = `---
+title: %s
+slug: %s
+---
+
+> This file was generated automatically. Do not modify it.
+
+`
+	const basePath = "/docs/pipeline/cli/reference/"
+
+	// Customized Hugo output based on https://github.com/spf13/cobra/blob/master/doc/md_docs.md
+	filePrepender := func(filename string) string {
+		name := filepath.Base(filename)
+		base := strings.TrimSuffix(name, path.Ext(name))
+		return fmt.Sprintf(fmTemplate, strings.Replace(base, "_", " ", -1), base)
+	}
+	linkHandler := func(name string) string {
+		base := strings.TrimSuffix(name, path.Ext(name))
+		return basePath + strings.ToLower(base) + "/"
+	}
 	c := cmd.GetRootCommand()
-	err := doc.GenMarkdownTree(c, ".")
+	err := doc.GenMarkdownTreeCustom(c, ".", filePrepender, linkHandler)
 	if err != nil {
 		log.Fatal(err)
 	}
