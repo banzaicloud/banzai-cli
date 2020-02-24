@@ -15,7 +15,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"path"
+	"path/filepath"
+	"strings"
 
 	"github.com/banzaicloud/banzai-cli/cmd"
 	"github.com/spf13/cobra/doc"
