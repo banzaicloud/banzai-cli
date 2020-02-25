@@ -1,13 +1,12 @@
 import { Component, ElementRef, ViewChild, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UniformService, CONTROL_TYPES, CONTROL_GROUP_TYPES, IFormFieldGroup, IFormField } from '@banzaicloud/uniform';
+import { UniformService, IFormFieldGroup } from '@banzaicloud/uniform';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { map, catchError } from 'rxjs/operators';
 import * as fp from 'lodash/fp';
 import { Observable, throwError } from 'rxjs';
 
 const reduceObject = fp.reduce.convert({ cap: false });
-const mapObject = fp.map.convert({ cap: false });
 
 // see https://codemirror.net/mode/index.html
 import 'codemirror/mode/javascript/javascript';
