@@ -306,8 +306,6 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		out[externalHost] = guessExternalAddr()
 
 	case providerCustom:
-		out["providerConfig"] = providerConfig
-
 		source := "/export"
 
 		hasExports, err := imageFileExists(options.cpContext, source)
@@ -387,7 +385,10 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 				return errors.New("Custom provisioning is available by specifying a custom installer image. Please refer to your deployment guide or use one of our support channels.")
 			}
 		}
+	}
 
+	if len(providerConfig) > 0 {
+		out["providerConfig"] = providerConfig
 	}
 
 	err = options.ensureImagePulled()
