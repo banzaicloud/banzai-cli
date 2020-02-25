@@ -30,6 +30,7 @@ require (
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.3
 	github.com/spf13/viper v1.3.2
+	github.com/stretchr/testify v1.3.0
 	github.com/ttacon/chalk v0.0.0-20140724125006-76b3c8b611de
 	golang.org/x/oauth2 v0.0.0-20190212230446-3e8b2be13635
 	golang.org/x/text v0.3.1-0.20180807135948-17ff2d5776d2 // indirect
