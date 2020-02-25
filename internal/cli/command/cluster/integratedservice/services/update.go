@@ -35,26 +35,27 @@ type updateOptions struct {
 	filePath string
 }
 
-type UpdateManager interface {
-	GetName() string
-	ValidateRequest(interface{}) error
-	BuildRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error
+type updateManager interface {
+	ReadableName() string
+	ServiceName() string
+	BuildUpdateRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error
+	specValidator
 }
 
-func UpdateCommandFactory(banzaiCLI cli.Cli, use string, manager UpdateManager, name string) *cobra.Command {
+func newUpdateCommand(banzaiCLI cli.Cli, use string, mngr updateManager) *cobra.Command {
 	options := updateOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "update",
 		Aliases: []string{"change", "modify", "set"},
-		Short:   fmt.Sprintf("Update the %s service of a cluster", name),
+		Short:   fmt.Sprintf("Update the %s service of a cluster", mngr.ReadableName()),
 		Args:    cobra.NoArgs,
 		RunE: func(_ *cobra.Command, args []string) error {
-			return runUpdate(banzaiCLI, manager, options, args, use)
+			return runUpdate(banzaiCLI, mngr, options, args, use)
 		},
 	}
 
-	options.Context = clustercontext.NewClusterContext(cmd, banzaiCLI, fmt.Sprintf("update %s cluster service for", name))
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCLI, fmt.Sprintf("update %s cluster service for", mngr.ReadableName()))
 
 	flags := cmd.Flags()
 	flags.StringVarP(&options.filePath, "file", "f", "", "Service specification file")
@@ -64,7 +65,7 @@ func UpdateCommandFactory(banzaiCLI cli.Cli, use string, manager UpdateManager, 
 
 func runUpdate(
 	banzaiCLI cli.Cli,
-	m UpdateManager,
+	m updateManager,
 	options updateOptions,
 	args []string,
 	use string,
@@ -82,43 +83,40 @@ func runUpdate(
 
 	var (
 		err     error
-		request *pipeline.UpdateIntegratedServiceRequest
+		request pipeline.UpdateIntegratedServiceRequest
 	)
 	if options.filePath == "" && banzaiCLI.Interactive() {
 
 		// get integratedservice details
-		details, _, err := banzaiCLI.Client().IntegratedServicesApi.IntegratedServiceDetails(context.Background(), orgID, clusterID, m.GetName())
+		details, _, err := banzaiCLI.Client().IntegratedServicesApi.IntegratedServiceDetails(context.Background(), orgID, clusterID, m.ServiceName())
 		if err != nil {
 			return errors.WrapIf(err, "failed to get service details")
 		}
 
-		request = &pipeline.UpdateIntegratedServiceRequest{
-			Spec: details.Spec,
-		}
+		request.Spec = details.Spec
 
-		if err := m.BuildRequestInteractively(banzaiCLI, request, options.Context); err != nil {
+		if err := m.BuildUpdateRequestInteractively(banzaiCLI, &request, options.Context); err != nil {
 			return errors.WrapIf(err, "failed to build update request interactively")
 		}
 
 		// show editor
-		if err := showUpdateEditor(m, request); err != nil {
+		if err := showUpdateEditor(m, &request); err != nil {
 			return errors.WrapIf(err, "failed during showing editor")
 		}
 
 	} else {
-		request = new(pipeline.UpdateIntegratedServiceRequest)
-		if err := readUpdateReqFromFileOrStdin(options.filePath, request); err != nil {
-			return errors.WrapIf(err, fmt.Sprintf("failed to read %s cluster service specification", m.GetName()))
+		if err := readUpdateReqFromFileOrStdin(options.filePath, &request); err != nil {
+			return errors.WrapIf(err, fmt.Sprintf("failed to read %s cluster service specification", m.ReadableName()))
 		}
 	}
 
-	resp, err := banzaiCLI.Client().IntegratedServicesApi.UpdateIntegratedService(context.Background(), orgID, clusterID, m.GetName(), *request)
+	resp, err := banzaiCLI.Client().IntegratedServicesApi.UpdateIntegratedService(context.Background(), orgID, clusterID, m.ServiceName(), request)
 	if err != nil {
-		cli.LogAPIError(fmt.Sprintf("update %s cluster service", m.GetName()), err, resp.Request)
-		log.Fatalf("could not update %s cluster service: %v", m.GetName(), err)
+		cli.LogAPIError(fmt.Sprintf("update %s cluster service", m.ReadableName()), err, resp.Request)
+		log.Fatalf("could not update %s cluster service: %v", m.ReadableName(), err)
 	}
 
-	log.Infof("service %q started to update", m.GetName())
+	log.Infof("service %q started to update", m.ReadableName())
 
 	return nil
 }
@@ -136,7 +134,7 @@ func readUpdateReqFromFileOrStdin(filePath string, req *pipeline.UpdateIntegrate
 	return nil
 }
 
-func showUpdateEditor(m UpdateManager, request *pipeline.UpdateIntegratedServiceRequest) error {
+func showUpdateEditor(m updateManager, request *pipeline.UpdateIntegratedServiceRequest) error {
 	var edit bool
 	if err := survey.AskOne(
 		&survey.Confirm{
@@ -162,7 +160,7 @@ func showUpdateEditor(m UpdateManager, request *pipeline.UpdateIntegratedService
 			AppendDefault: true,
 		},
 		&result,
-		survey.WithValidator(m.ValidateRequest),
+		survey.WithValidator(makeUpdateRequestValidator(m)),
 	); err != nil {
 		return errors.WrapIf(err, "failure during survey")
 	}
@@ -171,4 +169,15 @@ func showUpdateEditor(m UpdateManager, request *pipeline.UpdateIntegratedService
 	}
 
 	return nil
+}
+
+func makeUpdateRequestValidator(specValidator specValidator) survey.Validator {
+	return func(v interface{}) error {
+		var req pipeline.UpdateIntegratedServiceRequest
+		if err := json.Unmarshal([]byte(v.(string)), &req); err != nil {
+			return errors.WrapIf(err, "request is not valid JSON")
+		}
+
+		return specValidator.ValidateSpec(req.Spec)
+	}
 }

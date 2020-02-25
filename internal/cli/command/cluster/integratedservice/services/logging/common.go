@@ -14,13 +14,7 @@
 
 package logging
 
-import (
-	"emperror.dev/errors"
-	"github.com/mitchellh/mapstructure"
-)
-
 const (
-	serviceName          = "logging"
 	htpasswordSecretType = "htpasswd"
 	amazonType           = "amazon"
 	azureType            = "azure"
@@ -36,22 +30,3 @@ const (
 	providerAzureKey       = "azure"
 	providerAzureName      = "Azure Blob Storage"
 )
-
-type baseManager struct{}
-
-func (baseManager) GetName() string {
-	return serviceName
-}
-
-func NewDeactivateManager() *baseManager {
-	return &baseManager{}
-}
-
-func validateSpec(specObj map[string]interface{}) error {
-	var spec spec
-	if err := mapstructure.Decode(specObj, &spec); err != nil {
-		return errors.WrapIf(err, "integratedservice specification does not conform to schema")
-	}
-
-	return spec.Validate()
-}

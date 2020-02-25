@@ -14,14 +14,7 @@
 
 package vault
 
-import (
-	"emperror.dev/errors"
-	"github.com/mitchellh/mapstructure"
-)
-
 const (
-	serviceName = "vault"
-
 	vaultCustom = "Custom vault"
 	vaultCP     = "Pipeline's Vault"
 
@@ -36,53 +29,4 @@ type defaults struct {
 	policy          string
 	namespaces      []string
 	serviceAccounts []string
-}
-
-type baseManager struct{}
-
-func (baseManager) GetName() string {
-	return serviceName
-}
-
-func NewDeactivateManager() *baseManager {
-	return &baseManager{}
-}
-
-func validateSpec(specObj map[string]interface{}) error {
-
-	var spec struct {
-		CustomVault struct {
-			Enabled  bool   `mapstructure:"enabled"`
-			SecretID string `mapstructure:"secretId"`
-			Address  string `mapstructure:"address"`
-			Policy   string `mapstructure:"policy"`
-		} `mapstructure:"customVault"`
-		Settings struct {
-			Namespaces      []string `mapstructure:"namespaces"`
-			ServiceAccounts []string `mapstructure:"serviceAccounts"`
-		} `mapstructure:"settings"`
-	}
-
-	if err := mapstructure.Decode(specObj, &spec); err != nil {
-		return errors.WrapIf(err, "integratedservice specification does not conform to schema")
-	}
-
-	if spec.CustomVault.Enabled {
-		// address is required in case of custom Vault
-		if spec.CustomVault.Address == "" {
-			return errors.New("Vault address cannot be empty in case of custom Vault option")
-		}
-
-		// policy is required in case of custom Vault with token
-		if spec.CustomVault.Policy == "" && spec.CustomVault.SecretID != "" {
-			return errors.New("policy field is required in case of custom Vault")
-		}
-	}
-
-	if len(spec.Settings.Namespaces) == 1 && spec.Settings.Namespaces[0] == "*" &&
-		len(spec.Settings.ServiceAccounts) == 1 && spec.Settings.ServiceAccounts[0] == "*" {
-		return errors.New(`both namespaces and service accounts cannot be "*"`)
-	}
-
-	return nil
 }

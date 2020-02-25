@@ -16,7 +16,6 @@ package dns
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -34,15 +33,17 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 )
 
-type ActivateManager struct {
-	baseManager
+type Manager struct{}
+
+func (Manager) ReadableName() string {
+	return "DNS"
 }
 
-func NewActivateManager() *ActivateManager {
-	return &ActivateManager{}
+func (Manager) ServiceName() string {
+	return "dns"
 }
 
-func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateIntegratedServiceRequest, error) {
+func (Manager) BuildActivateRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
 
 	defaultSpec := ServiceSpec{
 		ExternalDNS: ExternalDNS{
@@ -54,21 +55,78 @@ func (ActivateManager) BuildRequestInteractively(banzaiCli cli.Cli, clusterCtx c
 
 	builtSpec, err := assembleServiceRequest(banzaiCli, clusterCtx, defaultSpec, NewActionContext(actionNew))
 	if err != nil {
-		return nil, errors.WrapIf(err, "failed to build external DNS service request")
+		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "failed to build external DNS service request")
 	}
 
-	return &pipeline.ActivateIntegratedServiceRequest{
+	return pipeline.ActivateIntegratedServiceRequest{
 		Spec: builtSpec,
 	}, nil
 }
 
-func (ActivateManager) ValidateRequest(req interface{}) error {
-	var request pipeline.ActivateIntegratedServiceRequest
-	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
-		return errors.WrapIf(err, "request is not valid JSON")
+func (Manager) BuildUpdateRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error {
+
+	currentSpec := ServiceSpec{
+		ExternalDNS: ExternalDNS{
+			Provider: &Provider{},
+		},
 	}
 
-	return validateSpec(request.Spec)
+	if updateServiceRequest.Spec != nil {
+		// update integratedservice case
+		if err := mapstructure.Decode(updateServiceRequest.Spec, &currentSpec); err != nil {
+			return errors.WrapIf(err, "failed to decode service DNSServiceSpec")
+		}
+	}
+
+	externalDNS, err := assembleServiceRequest(banzaiCli, clusterCtx, currentSpec, NewActionContext(actionUpdate))
+	if err != nil {
+		return errors.Wrap(err, "failed to build custom DNS service request")
+	}
+	// set the modified DNSServiceSpec into the request
+	updateServiceRequest.Spec = externalDNS
+
+	return nil
+}
+
+func (Manager) ValidateSpec(spec map[string]interface{}) error {
+	var dnsSpec ServiceSpec
+
+	if err := mapstructure.Decode(spec, &dnsSpec); err != nil {
+		return errors.WrapIf(err, "service specification does not conform to schema")
+	}
+
+	err := dnsSpec.ExternalDNS.Validate()
+
+	if dnsSpec.ClusterDomain == "" {
+		err = errors.Append(err, errors.New("cluster domain must not be empty"))
+	}
+
+	return err
+}
+
+func (Manager) WriteDetailsTable(details pipeline.IntegratedServiceDetails) map[string]map[string]interface{} {
+	// helper for response processing
+	type serviceDetails struct {
+		Spec   ServiceSpec   `json:"spec" mapstructure:"spec"`
+		Output ServiceOutput `json:"output" mapstructure:"output"`
+	}
+
+	tableData := map[string]interface{}{}
+
+	boundResponse := serviceDetails{}
+	if err := mapstructure.Decode(details, &boundResponse); err != nil {
+		tableData["error"] = fmt.Sprintf("failed to decode spec %q", err)
+		return map[string]map[string]interface{}{
+			"DNS": tableData,
+		}
+	}
+
+	tableData["Status"] = details.Status
+	tableData["Version"] = boundResponse.Output.ExternalDns.Version
+
+	return map[string]map[string]interface{}{
+		"DNS": tableData,
+	}
 }
 
 func readClusterDomain(currentDomain string) (string, error) {
@@ -474,4 +532,31 @@ func getServiceSpecDefaults(banzaiCLI cli.Cli, clusterCtx clustercontext.Context
 			TxtOwnerId: "",
 		},
 	}, nil
+}
+
+func getList(target map[string]interface{}, key string) ([]interface{}, bool) {
+	if value, ok := target[key]; ok {
+		if list, ok := value.([]interface{}); ok {
+			return list, true
+		}
+	}
+	return nil, false
+}
+
+func getObj(target map[string]interface{}, key string) (map[string]interface{}, bool) {
+	if value, ok := target[key]; ok {
+		if obj, ok := value.(map[string]interface{}); ok {
+			return obj, true
+		}
+	}
+	return nil, false
+}
+
+func getStr(target map[string]interface{}, key string) (string, bool) {
+	if value, ok := target[key]; ok {
+		if str, ok := value.(string); ok {
+			return str, true
+		}
+	}
+	return "", false
 }

@@ -16,26 +16,31 @@ package monitoring
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
 
 	"emperror.dev/errors"
 	"github.com/antihax/optional"
-	"github.com/banzaicloud/banzai-cli/internal/cli/input"
+	"github.com/mitchellh/mapstructure"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
-
-	"github.com/mitchellh/mapstructure"
+	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 )
 
-type ActivateManager struct {
-	baseManager
+type Manager struct{}
+
+func (Manager) ReadableName() string {
+	return "Monitoring"
 }
 
-func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (*pipeline.ActivateIntegratedServiceRequest, error) {
+func (Manager) ServiceName() string {
+	return "monitoring"
+}
+
+func (Manager) BuildActivateRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
 
 	grafana, err := askGrafana(banzaiCLI, grafanaSpec{
 		Enabled:    true,
@@ -46,7 +51,7 @@ func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 		},
 	})
 	if err != nil {
-		return nil, errors.WrapIf(err, "error during getting Grafana options")
+		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "error during getting Grafana options")
 	}
 
 	prometheus, err := askPrometheus(banzaiCLI, prometheusSpec{
@@ -63,7 +68,7 @@ func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 		},
 	})
 	if err != nil {
-		return nil, errors.WrapIf(err, "error during getting Prometheus options")
+		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "error during getting Prometheus options")
 	}
 
 	alertmanager, err := askAlertmanager(banzaiCLI, alertmanagerSpec{
@@ -86,7 +91,7 @@ func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 		},
 	})
 	if err != nil {
-		return nil, errors.WrapIf(err, "error during getting Alertmanager options")
+		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "error during getting Alertmanager options")
 	}
 
 	pushgateway, err := askPushgateway(banzaiCLI, pushgatewaySpec{
@@ -99,10 +104,10 @@ func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 		},
 	})
 	if err != nil {
-		return nil, errors.WrapIf(err, "error during getting Pushgateway options")
+		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "error during getting Pushgateway options")
 	}
 
-	return &pipeline.ActivateIntegratedServiceRequest{
+	return pipeline.ActivateIntegratedServiceRequest{
 		Spec: map[string]interface{}{
 			"grafana":      grafana,
 			"prometheus":   prometheus,
@@ -121,17 +126,196 @@ func (ActivateManager) BuildRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 	}, nil
 }
 
-func (ActivateManager) ValidateRequest(req interface{}) error {
-	var request pipeline.ActivateIntegratedServiceRequest
-	if err := json.Unmarshal([]byte(req.(string)), &request); err != nil {
-		return errors.WrapIf(err, "request is not valid JSON")
+func (Manager) BuildUpdateRequestInteractively(banzaiCLI cli.Cli, req *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error {
+
+	var spec serviceSpec
+	if err := mapstructure.Decode(req.Spec, &spec); err != nil {
+		return errors.WrapIf(err, "service specification does not conform to schema")
 	}
 
-	return validateSpec(request.Spec)
+	grafana, err := askGrafana(banzaiCLI, spec.Grafana)
+	if err != nil {
+		return errors.WrapIf(err, "error during getting Grafana options")
+	}
+
+	prometheus, err := askPrometheus(banzaiCLI, spec.Prometheus)
+	if err != nil {
+		return errors.WrapIf(err, "error during getting Prometheus options")
+	}
+
+	alertmanager, err := askAlertmanager(banzaiCLI, spec.Alertmanager)
+	if err != nil {
+		return errors.WrapIf(err, "error during getting Alertmanager options")
+	}
+
+	pushgateway, err := askPushgateway(banzaiCLI, spec.Pushgateway)
+	if err != nil {
+		return errors.WrapIf(err, "error during getting Pushgateway options")
+	}
+
+	req.Spec["grafana"] = grafana
+	req.Spec["prometheus"] = prometheus
+	req.Spec["alertmanager"] = alertmanager
+	req.Spec["pushgateway"] = pushgateway
+
+	return nil
 }
 
-func NewActivateManager() *ActivateManager {
-	return &ActivateManager{}
+func (Manager) ValidateSpec(specObj map[string]interface{}) error {
+	var spec serviceSpec
+
+	if err := mapstructure.Decode(specObj, &spec); err != nil {
+		return errors.WrapIf(err, "service specification does not conform to schema")
+	}
+
+	return spec.Validate()
+}
+
+type baseOutputItems struct {
+	Url        string `mapstructure:"url"`
+	SecretID   string `mapstructure:"secretId"`
+	Version    string `mapstructure:"version"`
+	ServiceURL string `mapstructure:"serviceUrl"`
+}
+
+type outputResponse struct {
+	Alertmanager struct {
+		baseOutputItems `mapstructure:",squash"`
+	} `mapstructure:"alertmanager"`
+	Grafana struct {
+		baseOutputItems `mapstructure:",squash"`
+	} `mapstructure:"grafana"`
+	Prometheus struct {
+		baseOutputItems `mapstructure:",squash"`
+	} `mapstructure:"prometheus"`
+	PrometheusOperator struct {
+		Version string `mapstructure:"version"`
+	} `mapstructure:"prometheusOperator"`
+	Pushgateway struct {
+		baseOutputItems `mapstructure:",squash"`
+	} `mapstructure:"pushgateway"`
+}
+
+type TableData map[string]interface{}
+
+func (Manager) WriteDetailsTable(details pipeline.IntegratedServiceDetails) map[string]map[string]interface{} {
+	tableData := map[string]map[string]interface{}{
+		"Monitoring": {
+			"Status": details.Status,
+		},
+	}
+
+	if details.Status == "INACTIVE" {
+		return tableData
+	}
+
+	var output outputResponse
+	if err := mapstructure.Decode(details.Output, &output); err != nil {
+		log.Errorf("failed to unmarshal output: %s", err.Error())
+		return tableData
+	}
+
+	var spec serviceSpec
+	if err := mapstructure.Decode(details.Spec, &spec); err != nil {
+		log.Errorf("failed to unmarshal output: %s", err.Error())
+		return tableData
+	}
+
+	// Alertmanager outputs
+	if spec.Alertmanager.Enabled {
+		var secretID string
+		if spec.Alertmanager.Ingress.Enabled {
+			secretID = spec.Alertmanager.Ingress.SecretId
+			if secretID == "" {
+				secretID = output.Alertmanager.SecretID
+			}
+		}
+		var alertmanagerTable = TableData{
+			"url":        output.Alertmanager.Url,
+			"version":    output.Alertmanager.Version,
+			"serviceUrl": output.Alertmanager.ServiceURL,
+			"secretID":   secretID,
+			"path":       spec.Alertmanager.Ingress.Path,
+			"domain":     spec.Alertmanager.Ingress.Domain,
+		}
+		tableData["Alertmanager"] = alertmanagerTable
+		// todo (colin): add provider outputs
+	}
+
+	// Grafana outputs
+	if spec.Grafana.Enabled {
+		var secretID = spec.Grafana.SecretId
+		if secretID == "" {
+			secretID = output.Grafana.SecretID
+		}
+		var grafanaTable = TableData{
+			"url":        output.Grafana.Url,
+			"version":    output.Grafana.Version,
+			"serviceUrl": output.Grafana.ServiceURL,
+			"secretID":   secretID,
+			"path":       spec.Grafana.Ingress.Path,
+			"domain":     spec.Grafana.Ingress.Domain,
+		}
+		tableData["Grafana"] = grafanaTable
+	}
+
+	// Prometheus outputs
+	if spec.Prometheus.Enabled {
+		var secretID string
+		if spec.Prometheus.Ingress.Enabled {
+			secretID = spec.Prometheus.Ingress.SecretId
+			if secretID == "" {
+				secretID = output.Prometheus.SecretID
+			}
+		}
+		var prometheusTable = TableData{
+			"url":        output.Prometheus.Url,
+			"version":    output.Prometheus.Version,
+			"serviceUrl": output.Prometheus.ServiceURL,
+			"secretID":   secretID,
+			"path":       spec.Prometheus.Ingress.Path,
+			"domain":     spec.Prometheus.Ingress.Domain,
+		}
+		tableData["Prometheus"] = prometheusTable
+
+		tableData["Prometheus_storage"] = TableData{
+			"class":     spec.Prometheus.Storage.Class,
+			"size":      spec.Prometheus.Storage.Size,
+			"retention": spec.Prometheus.Storage.Retention,
+		}
+	}
+
+	if spec.Pushgateway.Enabled {
+		var secretID string
+		if spec.Pushgateway.Ingress.Enabled {
+			secretID = spec.Pushgateway.Ingress.SecretId
+			if secretID == "" {
+				secretID = output.Pushgateway.SecretID
+			}
+		}
+		var pushgatewayTable = TableData{
+			"url":        output.Pushgateway.Url,
+			"version":    output.Pushgateway.Version,
+			"serviceUrl": output.Pushgateway.ServiceURL,
+			"secretID":   secretID,
+			"path":       spec.Pushgateway.Ingress.Path,
+			"domain":     spec.Pushgateway.Ingress.Domain,
+		}
+		tableData["Pushgateway"] = pushgatewayTable
+	}
+
+	if spec.Exporters.Enabled {
+		tableData["Exporters"] = TableData{
+			"nodeExporter":     spec.Exporters.NodeExporter.Enabled,
+			"kubeStateMetrics": spec.Exporters.KubeStateMetrics.Enabled,
+		}
+	}
+
+	tableData["Prometheus_operator"] = TableData{
+		"version": output.PrometheusOperator.Version,
+	}
+
+	return tableData
 }
 
 func askIngress(compType string, defaults baseIngressSpec) (*baseIngressSpec, error) {
