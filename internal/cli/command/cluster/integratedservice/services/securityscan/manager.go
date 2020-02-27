@@ -32,7 +32,15 @@ import (
 	cliutils "github.com/banzaicloud/banzai-cli/internal/cli/utils"
 )
 
-type Manager struct{}
+type Manager struct {
+	banzaiCLI cli.Cli
+}
+
+func NewManager(banzaiCLI cli.Cli) Manager {
+	return Manager{
+		banzaiCLI: banzaiCLI,
+	}
+}
 
 func (Manager) ReadableName() string {
 	return "Security scan"
@@ -42,13 +50,13 @@ func (Manager) ServiceName() string {
 	return "securityscan"
 }
 
-func (Manager) BuildActivateRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
+func (m Manager) BuildActivateRequestInteractively(clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
 
-	if err := isServiceEnabled(context.Background(), banzaiCLI); err != nil {
+	if err := isServiceEnabled(context.Background(), m.banzaiCLI); err != nil {
 		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "securityscan is not enabled")
 	}
 
-	serviceSpec, err := assembleServiceSpec(context.Background(), banzaiCLI, banzaiCLI.Context().OrganizationID(), clusterCtx.ClusterID(), ServiceSpec{})
+	serviceSpec, err := assembleServiceSpec(context.Background(), m.banzaiCLI, m.banzaiCLI.Context().OrganizationID(), clusterCtx.ClusterID(), ServiceSpec{})
 	if err != nil {
 		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "failed to assemble integratedservice specification")
 	}
@@ -61,17 +69,17 @@ func (Manager) BuildActivateRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 	return pipeline.ActivateIntegratedServiceRequest{Spec: serviceSpecMap}, nil
 }
 
-func (Manager) BuildUpdateRequestInteractively(banzaiCLI cli.Cli, updateServiceRequest *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error {
-	if err := isServiceEnabled(context.Background(), banzaiCLI); err != nil {
+func (m Manager) BuildUpdateRequestInteractively(clusterCtx clustercontext.Context, request *pipeline.UpdateIntegratedServiceRequest) error {
+	if err := isServiceEnabled(context.Background(), m.banzaiCLI); err != nil {
 		return errors.WrapIf(err, "securityscan is not enabled")
 	}
 
 	serviceSpec := ServiceSpec{}
-	if err := mapstructure.Decode(updateServiceRequest.Spec, &serviceSpec); err != nil {
+	if err := mapstructure.Decode(request.Spec, &serviceSpec); err != nil {
 		return errors.WrapIf(err, "failed to decode service specification for update")
 	}
 
-	serviceSpec, err := assembleServiceSpec(context.Background(), banzaiCLI, banzaiCLI.Context().OrganizationID(), clusterCtx.ClusterID(), serviceSpec)
+	serviceSpec, err := assembleServiceSpec(context.Background(), m.banzaiCLI, m.banzaiCLI.Context().OrganizationID(), clusterCtx.ClusterID(), serviceSpec)
 	if err != nil {
 		return errors.WrapIf(err, "failed to assemble service specification")
 	}
@@ -81,7 +89,7 @@ func (Manager) BuildUpdateRequestInteractively(banzaiCLI cli.Cli, updateServiceR
 		return errors.WrapIf(err, "failed to transform service specification")
 	}
 
-	updateServiceRequest.Spec = serviceSpecMap
+	request.Spec = serviceSpecMap
 
 	return nil
 }

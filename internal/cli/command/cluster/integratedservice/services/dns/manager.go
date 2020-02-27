@@ -33,7 +33,15 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 )
 
-type Manager struct{}
+type Manager struct {
+	banzaiCLI cli.Cli
+}
+
+func NewManager(banzaiCLI cli.Cli) Manager {
+	return Manager{
+		banzaiCLI: banzaiCLI,
+	}
+}
 
 func (Manager) ReadableName() string {
 	return "DNS"
@@ -43,7 +51,7 @@ func (Manager) ServiceName() string {
 	return "dns"
 }
 
-func (Manager) BuildActivateRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
+func (m Manager) BuildActivateRequestInteractively(clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
 
 	defaultSpec := ServiceSpec{
 		ExternalDNS: ExternalDNS{
@@ -53,7 +61,7 @@ func (Manager) BuildActivateRequestInteractively(banzaiCli cli.Cli, clusterCtx c
 		},
 	}
 
-	builtSpec, err := assembleServiceRequest(banzaiCli, clusterCtx, defaultSpec, NewActionContext(actionNew))
+	builtSpec, err := assembleServiceRequest(m.banzaiCLI, clusterCtx, defaultSpec, NewActionContext(actionNew))
 	if err != nil {
 		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "failed to build external DNS service request")
 	}
@@ -63,7 +71,7 @@ func (Manager) BuildActivateRequestInteractively(banzaiCli cli.Cli, clusterCtx c
 	}, nil
 }
 
-func (Manager) BuildUpdateRequestInteractively(banzaiCli cli.Cli, updateServiceRequest *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error {
+func (m Manager) BuildUpdateRequestInteractively(clusterCtx clustercontext.Context, request *pipeline.UpdateIntegratedServiceRequest) error {
 
 	currentSpec := ServiceSpec{
 		ExternalDNS: ExternalDNS{
@@ -71,19 +79,19 @@ func (Manager) BuildUpdateRequestInteractively(banzaiCli cli.Cli, updateServiceR
 		},
 	}
 
-	if updateServiceRequest.Spec != nil {
+	if request.Spec != nil {
 		// update integratedservice case
-		if err := mapstructure.Decode(updateServiceRequest.Spec, &currentSpec); err != nil {
+		if err := mapstructure.Decode(request.Spec, &currentSpec); err != nil {
 			return errors.WrapIf(err, "failed to decode service DNSServiceSpec")
 		}
 	}
 
-	externalDNS, err := assembleServiceRequest(banzaiCli, clusterCtx, currentSpec, NewActionContext(actionUpdate))
+	externalDNS, err := assembleServiceRequest(m.banzaiCLI, clusterCtx, currentSpec, NewActionContext(actionUpdate))
 	if err != nil {
 		return errors.Wrap(err, "failed to build custom DNS service request")
 	}
 	// set the modified DNSServiceSpec into the request
-	updateServiceRequest.Spec = externalDNS
+	request.Spec = externalDNS
 
 	return nil
 }

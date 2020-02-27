@@ -38,7 +38,7 @@ type activateOptions struct {
 type activateManager interface {
 	ReadableName() string
 	ServiceName() string
-	BuildActivateRequestInteractively(banzaiCli cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error)
+	BuildActivateRequestInteractively(clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error)
 	specValidator
 }
 
@@ -80,7 +80,7 @@ func runActivate(banzaiCLI cli.Cli, m activateManager, options activateOptions, 
 	)
 
 	if options.filePath == "" && banzaiCLI.Interactive() {
-		if request, err = m.BuildActivateRequestInteractively(banzaiCLI, options.Context); err != nil {
+		if request, err = m.BuildActivateRequestInteractively(options.Context); err != nil {
 			return errors.WrapIf(err, "failed to build activate request interactively")
 		}
 

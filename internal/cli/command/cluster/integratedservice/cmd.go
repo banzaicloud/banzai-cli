@@ -22,6 +22,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/services"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/services/dns"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/services/expiry"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/services/ingress"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/services/logging"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/services/monitoring"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/services/securityscan"
@@ -46,12 +47,13 @@ func NewIntegratedServiceCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd.AddCommand(
 		NewListCommand(banzaiCli),
 		// NOTE: add integratedservice commands here
-		services.NewServiceCommand(banzaiCli, "dns", dns.Manager{}),
-		services.NewServiceCommand(banzaiCli, "expiry", expiry.Manager{}),
-		services.NewServiceCommand(banzaiCli, "logging", logging.Manager{}),
-		services.NewServiceCommand(banzaiCli, "monitoring", monitoring.Manager{}),
-		services.NewServiceCommand(banzaiCli, "securityscan", securityscan.Manager{}),
-		services.NewServiceCommand(banzaiCli, "vault", vault.Manager{}),
+		services.NewServiceCommand(banzaiCli, "dns", dns.NewManager(banzaiCli)),
+		services.NewServiceCommand(banzaiCli, "expiry", expiry.NewManager(banzaiCli)),
+		services.NewServiceCommand(banzaiCli, "ingress", ingress.NewManager(banzaiCli)),
+		services.NewServiceCommand(banzaiCli, "logging", logging.NewManager(banzaiCli)),
+		services.NewServiceCommand(banzaiCli, "monitoring", monitoring.NewManager(banzaiCli)),
+		services.NewServiceCommand(banzaiCli, "securityscan", securityscan.NewManager(banzaiCli)),
+		services.NewServiceCommand(banzaiCli, "vault", vault.NewManager(banzaiCli)),
 	)
 
 	return cmd

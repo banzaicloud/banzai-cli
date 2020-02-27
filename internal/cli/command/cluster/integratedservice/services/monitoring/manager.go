@@ -30,7 +30,15 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 )
 
-type Manager struct{}
+type Manager struct {
+	banzaiCLI cli.Cli
+}
+
+func NewManager(banzaiCLI cli.Cli) Manager {
+	return Manager{
+		banzaiCLI: banzaiCLI,
+	}
+}
 
 func (Manager) ReadableName() string {
 	return "Monitoring"
@@ -40,9 +48,9 @@ func (Manager) ServiceName() string {
 	return "monitoring"
 }
 
-func (Manager) BuildActivateRequestInteractively(banzaiCLI cli.Cli, clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
+func (m Manager) BuildActivateRequestInteractively(clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
 
-	grafana, err := askGrafana(banzaiCLI, grafanaSpec{
+	grafana, err := askGrafana(m.banzaiCLI, grafanaSpec{
 		Enabled:    true,
 		Dashboards: true,
 		Ingress: baseIngressSpec{
@@ -54,7 +62,7 @@ func (Manager) BuildActivateRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "error during getting Grafana options")
 	}
 
-	prometheus, err := askPrometheus(banzaiCLI, prometheusSpec{
+	prometheus, err := askPrometheus(m.banzaiCLI, prometheusSpec{
 		Enabled: true,
 		Storage: storageSpec{
 			Size:      100,
@@ -71,7 +79,7 @@ func (Manager) BuildActivateRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "error during getting Prometheus options")
 	}
 
-	alertmanager, err := askAlertmanager(banzaiCLI, alertmanagerSpec{
+	alertmanager, err := askAlertmanager(m.banzaiCLI, alertmanagerSpec{
 		Enabled: true,
 		Ingress: ingressSpecWithSecret{
 			baseIngressSpec: baseIngressSpec{
@@ -94,7 +102,7 @@ func (Manager) BuildActivateRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "error during getting Alertmanager options")
 	}
 
-	pushgateway, err := askPushgateway(banzaiCLI, pushgatewaySpec{
+	pushgateway, err := askPushgateway(m.banzaiCLI, pushgatewaySpec{
 		Enabled: true,
 		Ingress: ingressSpecWithSecret{
 			baseIngressSpec: baseIngressSpec{
@@ -126,37 +134,37 @@ func (Manager) BuildActivateRequestInteractively(banzaiCLI cli.Cli, clusterCtx c
 	}, nil
 }
 
-func (Manager) BuildUpdateRequestInteractively(banzaiCLI cli.Cli, req *pipeline.UpdateIntegratedServiceRequest, clusterCtx clustercontext.Context) error {
+func (m Manager) BuildUpdateRequestInteractively(clusterCtx clustercontext.Context, request *pipeline.UpdateIntegratedServiceRequest) error {
 
 	var spec serviceSpec
-	if err := mapstructure.Decode(req.Spec, &spec); err != nil {
+	if err := mapstructure.Decode(request.Spec, &spec); err != nil {
 		return errors.WrapIf(err, "service specification does not conform to schema")
 	}
 
-	grafana, err := askGrafana(banzaiCLI, spec.Grafana)
+	grafana, err := askGrafana(m.banzaiCLI, spec.Grafana)
 	if err != nil {
 		return errors.WrapIf(err, "error during getting Grafana options")
 	}
 
-	prometheus, err := askPrometheus(banzaiCLI, spec.Prometheus)
+	prometheus, err := askPrometheus(m.banzaiCLI, spec.Prometheus)
 	if err != nil {
 		return errors.WrapIf(err, "error during getting Prometheus options")
 	}
 
-	alertmanager, err := askAlertmanager(banzaiCLI, spec.Alertmanager)
+	alertmanager, err := askAlertmanager(m.banzaiCLI, spec.Alertmanager)
 	if err != nil {
 		return errors.WrapIf(err, "error during getting Alertmanager options")
 	}
 
-	pushgateway, err := askPushgateway(banzaiCLI, spec.Pushgateway)
+	pushgateway, err := askPushgateway(m.banzaiCLI, spec.Pushgateway)
 	if err != nil {
 		return errors.WrapIf(err, "error during getting Pushgateway options")
 	}
 
-	req.Spec["grafana"] = grafana
-	req.Spec["prometheus"] = prometheus
-	req.Spec["alertmanager"] = alertmanager
-	req.Spec["pushgateway"] = pushgateway
+	request.Spec["grafana"] = grafana
+	request.Spec["prometheus"] = prometheus
+	request.Spec["alertmanager"] = alertmanager
+	request.Spec["pushgateway"] = pushgateway
 
 	return nil
 }

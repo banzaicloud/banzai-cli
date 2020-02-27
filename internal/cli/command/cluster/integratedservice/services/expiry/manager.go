@@ -28,7 +28,15 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 )
 
-type Manager struct{}
+type Manager struct {
+	banzaiCLI cli.Cli
+}
+
+func NewManager(banzaiCLI cli.Cli) Manager {
+	return Manager{
+		banzaiCLI: banzaiCLI,
+	}
+}
 
 func (Manager) ReadableName() string {
 	return "Expiry"
@@ -38,7 +46,7 @@ func (Manager) ServiceName() string {
 	return "expiry"
 }
 
-func (Manager) BuildActivateRequestInteractively(_ cli.Cli, _ clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
+func (m Manager) BuildActivateRequestInteractively(clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
 	date, err := askForDate("")
 	if err != nil {
 		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "failed to get date")
@@ -51,9 +59,9 @@ func (Manager) BuildActivateRequestInteractively(_ cli.Cli, _ clustercontext.Con
 	}, nil
 }
 
-func (Manager) BuildUpdateRequestInteractively(_ cli.Cli, req *pipeline.UpdateIntegratedServiceRequest, _ clustercontext.Context) error {
+func (m Manager) BuildUpdateRequestInteractively(clusterCtx clustercontext.Context, request *pipeline.UpdateIntegratedServiceRequest) error {
 	var spec serviceSpec
-	if err := mapstructure.Decode(req.Spec, &spec); err != nil {
+	if err := mapstructure.Decode(request.Spec, &spec); err != nil {
 		return errors.WrapIf(err, "service specification does not conform to schema")
 	}
 
@@ -63,7 +71,7 @@ func (Manager) BuildUpdateRequestInteractively(_ cli.Cli, req *pipeline.UpdateIn
 	}
 
 	spec.Date = date
-	if err := mapstructure.Decode(spec, &req.Spec); err != nil {
+	if err := mapstructure.Decode(spec, &request.Spec); err != nil {
 		return errors.WrapIf(err, "service specification does not conform to schema")
 	}
 
