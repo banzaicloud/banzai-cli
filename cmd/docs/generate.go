@@ -30,11 +30,8 @@ func main() {
 
 	const fmTemplate = `---
 title: %s
-slug: %s
+generated_file: true
 ---
-
-> This file was generated automatically. Do not modify it.
-
 `
 	const basePath = "/docs/pipeline/cli/reference/"
 
