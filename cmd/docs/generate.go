@@ -30,11 +30,8 @@ func main() {
 
 	const fmTemplate = `---
 title: %s
-slug: %s
+generated_file: true
 ---
-
-> This file was generated automatically. Do not modify it.
-
 `
 	const basePath = "/docs/pipeline/cli/reference/"
 
@@ -42,7 +39,7 @@ slug: %s
 	filePrepender := func(filename string) string {
 		name := filepath.Base(filename)
 		base := strings.TrimSuffix(name, path.Ext(name))
-		return fmt.Sprintf(fmTemplate, strings.Replace(base, "_", " ", -1), base)
+		return fmt.Sprintf(fmTemplate, strings.Replace(base, "_", " ", -1))
 	}
 	linkHandler := func(name string) string {
 		base := strings.TrimSuffix(name, path.Ext(name))
