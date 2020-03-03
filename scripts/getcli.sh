@@ -49,7 +49,9 @@ main() {
 }
 
 install_brew() {
+    brew unlink banzaicloud/tap/banzai-cli
     brew install banzaicloud/tap/banzai-cli
+    brew link --overwrite banzaicloud/tap/banzai-cli
 }
 
 install_rpm() {
