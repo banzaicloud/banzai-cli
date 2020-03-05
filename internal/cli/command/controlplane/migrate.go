@@ -16,6 +16,7 @@ package controlplane
 
 import (
 	"emperror.dev/errors"
+	"github.com/AlecAivazis/survey/v2"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -54,13 +55,28 @@ func runMigrate(options *migrateOptions, banzaiCli cli.Cli) error {
 		return err
 	}
 
-	if err := setMigrationVersion(options.cpContext, map[string]string{}); err != nil {
+	if banzaiCli.Interactive() {
+		var migrate bool
+		_ = survey.AskOne(
+			&survey.Confirm{
+				Message: "Do you want to MIGRATE the controlplane database now?",
+				Default: true,
+			},
+			&migrate,
+		)
+
+		if !migrate {
+			return errors.New("controlplane database migration cancelled")
+		}
+	}
+
+	if err := applyMigrateModule(options.cpContext, map[string]string{}); err != nil {
 		return err
 	}
 	return nil
 }
 
-func setMigrationVersion(options *cpContext, env map[string]string) error {
+func applyMigrateModule(options *cpContext, env map[string]string) error {
 	log.Info("upgrading database...")
 	targets := []string{"module.database.module.upgrade"}
 	if err := runTerraform("apply", options, env, targets...); err != nil {
