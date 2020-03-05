@@ -20,6 +20,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/bucket"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/completion"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/controlplane"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/form"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/login"
@@ -38,5 +39,6 @@ func AddCommands(cmd *cobra.Command, banzaiCli cli.Cli) {
 		secret.NewSecretCommand(banzaiCli),
 		controlplane.NewControlPlaneCommand(banzaiCli),
 		bucket.NewBucketCommand(banzaiCli),
+		completion.NewCompletionCommand(banzaiCli),
 	)
 }
