@@ -11,7 +11,6 @@ Method | HTTP request | Description
 [**DeleteLeaderElection**](ClustersApi.md#DeleteLeaderElection) | **Delete** /api/v1/orgs/{orgId}/clusters/{id}/pke/leader | Delete cluster leader
 [**DeleteNamespace**](ClustersApi.md#DeleteNamespace) | **Delete** /api/v1/orgs/{orgId}/clusters/{id}/namespaces/{namespace} | Delete namespace from a cluster
 [**DeleteNodePool**](ClustersApi.md#DeleteNodePool) | **Delete** /api/v1/orgs/{orgId}/clusters/{id}/nodepools/{name} | Delete a node pool
-[**GetAPIEndpoint**](ClustersApi.md#GetAPIEndpoint) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/apiendpoint | Get API endpoint
 [**GetCluster**](ClustersApi.md#GetCluster) | **Get** /api/v1/orgs/{orgId}/clusters/{id} | Get cluster status
 [**GetClusterBootstrap**](ClustersApi.md#GetClusterBootstrap) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/bootstrap | Get cluster bootstrap info
 [**GetClusterConfig**](ClustersApi.md#GetClusterConfig) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/config | Get a cluster config
@@ -33,7 +32,6 @@ Method | HTTP request | Description
 [**PostLeaderElection**](ClustersApi.md#PostLeaderElection) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/pke/leader | Apply as new cluster leader
 [**PostReadyPKENode**](ClustersApi.md#PostReadyPKENode) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/pke/ready | Report to Pipeline that a new node is ready (to be called by PKE installer)
 [**UpdateCluster**](ClustersApi.md#UpdateCluster) | **Put** /api/v1/orgs/{orgId}/clusters/{id} | Update cluster
-[**UpdateMonitoring**](ClustersApi.md#UpdateMonitoring) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/monitoring | Update monitoring
 
 
 
@@ -290,41 +288,6 @@ Name | Type | Description  | Notes
 
 - **Content-Type**: Not defined
 - **Accept**: application/json, application/problem+json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
-## GetAPIEndpoint
-
-> string GetAPIEndpoint(ctx, orgId, id)
-
-Get API endpoint
-
-Get API endpoint
-
-### Required Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identifier | 
-**id** | **int32**| Cluster identifier | 
-
-### Return type
-
-**string**
-
-### Authorization
-
-[bearerAuth](../README.md#bearerAuth)
-
-### HTTP request headers
-
-- **Content-Type**: Not defined
-- **Accept**: text/plain, application/json, application/problem+json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -1083,41 +1046,6 @@ Name | Type | Description  | Notes
 
 - **Content-Type**: application/json
 - **Accept**: application/json, application/problem+json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
-## UpdateMonitoring
-
-> string UpdateMonitoring(ctx, orgId, id)
-
-Update monitoring
-
-Update monitoring
-
-### Required Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**orgId** | **int32**| Organization identifier | 
-**id** | **int32**| Cluster identifier | 
-
-### Return type
-
-**string**
-
-### Authorization
-
-[bearerAuth](../README.md#bearerAuth)
-
-### HTTP request headers
-
-- **Content-Type**: Not defined
-- **Accept**: text/plain
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

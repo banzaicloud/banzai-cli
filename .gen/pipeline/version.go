@@ -1,3 +1,3 @@
 package pipeline
 
-const PipelineVersion = "0.37.0"
+const PipelineVersion = "vsphere-integration"

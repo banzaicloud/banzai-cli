@@ -17,4 +17,6 @@ type HelmReposAddRequest struct {
 	CertFile string `json:"certFile,omitempty"`
 	KeyFile string `json:"keyFile,omitempty"`
 	CaFile string `json:"caFile,omitempty"`
+	PasswordSecretRef string `json:"passwordSecretRef,omitempty"`
+	TlsSecretRef string `json:"tlsSecretRef,omitempty"`
 }
