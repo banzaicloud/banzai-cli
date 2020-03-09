@@ -40,6 +40,11 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 )
 
+const (
+	pkeOnAzure   = "pke-on-azure"
+	pkeOnVsphere = "pke-on-vsphere"
+)
+
 type createOptions struct {
 	file     string
 	wait     bool
@@ -149,9 +154,9 @@ func validateClusterCreateRequest(val interface{}) error {
 	decoder.DisallowUnknownFields()
 
 	switch typer.Type {
-	case "pke-on-azure":
+	case pkeOnAzure:
 		err = decoder.Decode(&pipeline.CreatePkeOnAzureClusterRequest{})
-	case "pke-on-vsphere":
+	case pkeOnVsphere:
 		err = decoder.Decode(&pipeline.CreatePkeOnVsphereClusterRequest{})
 	case "":
 		err = decoder.Decode(&pipeline.CreateClusterRequest{})
@@ -328,9 +333,9 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 	if !ok || cloud == "" {
 		Type, _ := out["type"].(string)
 		switch Type {
-		case "pke-on-azure":
+		case pkeOnAzure:
 			cloud = "azure"
-		case "pke-on-vsphere":
+		case pkeOnVsphere:
 			cloud = "vsphere"
 		default:
 			return errors.New("couldn't determine cloud provider from request")
@@ -348,7 +353,7 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 		out["name"] = name
 	}
 
-	if out["type"] == "pke-on-azure" && out["resourceGroup"] == "" {
+	if out["type"] == pkeOnAzure && out["resourceGroup"] == "" {
 		rgs, _, err := banzaiCli.Client().InfoApi.GetResourceGroups(context.Background(), orgID, secretID)
 		if err != nil {
 			return errors.WrapIf(err, "can't list resource groups")
@@ -446,8 +451,8 @@ func getProviders() map[string]interface{} {
 				},
 			},
 		},
-		"pke-on-vsphere": pipeline.CreatePkeOnVsphereClusterRequest{
-			Type: "pke-on-vsphere",
+		pkeOnVsphere: pipeline.CreatePkeOnVsphereClusterRequest{
+			Type: pkeOnVsphere,
 			Nodepools: []pipeline.PkeOnVsphereNodePool{
 				{
 					Name:          "master",
