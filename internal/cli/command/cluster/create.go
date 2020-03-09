@@ -193,20 +193,20 @@ func buildInteractiveEKSCreateRequest(banzaiCli cli.Cli, out map[string]interfac
 
 	recommendationResponse, _, err := banzaiCli.TelescopesClient().RecommendApi.RecommendCluster(context.Background(),
 		provider, service, region, telescopes.RecommendClusterRequest{
-			SumCpu: float64(sumCpu),
-			SumMem: float64(sumMem),
-			MinNodes: int64(minNodes),
-			MaxNodes: int64(maxNodes),
-			SameSize: false,
+			SumCpu:      float64(sumCpu),
+			SumMem:      float64(sumMem),
+			MinNodes:    int64(minNodes),
+			MaxNodes:    int64(maxNodes),
+			SameSize:    false,
 			OnDemandPct: int64(onDemandPct),
-			Includes: getEksInstanceTypes(),
+			Includes:    getEksInstanceTypes(),
 		})
 
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve recommendation for EKS")
 	}
 
-	eksNodePools:= make(map[string]pipeline.EksNodePool, 0)
+	eksNodePools := make(map[string]pipeline.EksNodePool, 0)
 	for i, np := range recommendationResponse.NodePools {
 		if np.Role != "worker" {
 			continue
@@ -215,9 +215,9 @@ func buildInteractiveEKSCreateRequest(banzaiCli cli.Cli, out map[string]interfac
 		eksNodePool := pipeline.EksNodePool{
 			InstanceType: np.Vm.Type,
 			Autoscaling:  false,
-			Count:     int32(np.SumNodes),
-			MinCount:  int32(0),
-			MaxCount:  int32(maxNodes),
+			Count:        int32(np.SumNodes),
+			MinCount:     int32(0),
+			MaxCount:     int32(maxNodes),
 		}
 		if np.VmClass == "spot" {
 			eksNodePool.SpotPrice = fmt.Sprintf("%v", np.Vm.OnDemandPrice)
@@ -237,7 +237,7 @@ func buildInteractiveEKSCreateRequest(banzaiCli cli.Cli, out map[string]interfac
 		}
 	}
 	eksProperties := pipeline.CreateEksPropertiesEks{
-		Version: k8sVersion,
+		Version:   k8sVersion,
 		NodePools: eksNodePools,
 	}
 
@@ -248,7 +248,7 @@ func buildInteractiveEKSCreateRequest(banzaiCli cli.Cli, out map[string]interfac
 	var eksOut map[string]interface{}
 	utils.Unmarshal(marshalledEksProps, &eksOut)
 	delete(eksOut, "vpc")
-	unstructured.SetNestedField(out,  eksOut, "properties", "eks")
+	unstructured.SetNestedField(out, eksOut, "properties", "eks")
 	out["location"] = region
 
 	// add scaleOptions
@@ -259,11 +259,11 @@ func buildInteractiveEKSCreateRequest(banzaiCli cli.Cli, out map[string]interfac
 	}
 
 	scaleOptions := pipeline.ScaleOptions{
-		Enabled: true,
-		DesiredCpu: float64(sumCpu),
-		DesiredMem: float64(sumMem),
-		DesiredGpu: 0,
-		OnDemandPct: int32(onDemandPct),
+		Enabled:             true,
+		DesiredCpu:          float64(sumCpu),
+		DesiredMem:          float64(sumMem),
+		DesiredGpu:          0,
+		OnDemandPct:         int32(onDemandPct),
 		KeepDesiredCapacity: true,
 	}
 
