@@ -189,6 +189,17 @@ jobs:
                        --distribution-id ${CDN_DISTRIBUTION_ID} \
                        --paths "/downloads/banzai-cli/*"
 
+    trigger-docs-update:
+        docker:
+            -
+                image: cimg/base:stable
+        steps:
+            - checkout
+            -
+                run:
+                   name: Trigger
+                   command: scripts/trigger-docs-update.sh "${CIRCLE_TAG}"
+
 workflows:
     version: 2
     ci:
@@ -197,12 +208,12 @@ workflows:
                 build:
                     filters:
                         tags:
-                            only: /^v?\d+\.\d+\.\d+(-\S*)?$/
+                            only: /^\d+\.\d+\.\d+(-\S*)?$/
             -
                 frontend-build:
                     filters:
                         tags:
-                            only: /^v?\d+\.\d+\.\d+(-\S*)?$/
+                            only: /^v\d+\.\d+\.\d+(-\S*)?$/
             -
                 release:
                     requires:
@@ -210,7 +221,7 @@ workflows:
                         - frontend-build
                     filters:
                         tags:
-                            only: /^v?\d+\.\d+\.\d+(-\S*)?$/
+                            only: /^\d+\.\d+\.\d+(-\S*)?$/
                         branches:
                             ignore: /.*/
             -
@@ -219,6 +230,13 @@ workflows:
                         - release
                     filters:
                         tags:
-                            only: /^v?\d+\.\d+\.\d+(-\S*)?$/
+                            only: /^\d+\.\d+\.\d+(-\S*)?$/
                         branches:
                             ignore: /.*/
+            -
+                trigger-docs-update:
+                    requires:
+                        - release
+                    filters:
+                        tags:
+                            only: /^\d+\.\d+\.\d+$/
