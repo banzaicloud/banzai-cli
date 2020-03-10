@@ -170,8 +170,6 @@ func runzSSHToNode(banzaiCli cli.Cli, options nodeSSHOptions, args []string) err
 		switch cluster.Distribution {
 		case "oke":
 			username = "opc"
-		case "pke":
-			username = "centos"
 		case "aks":
 			username = "aks-user"
 		case "eks":
