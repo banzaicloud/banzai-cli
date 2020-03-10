@@ -37,6 +37,7 @@ type nodeSSHOptions struct {
 	nodeName        string
 	directConnect   bool
 	podConnect      bool
+	punchThrough    bool
 	username        string
 	namespace       string
 	useNodeAffinity bool
@@ -64,11 +65,15 @@ func NewSSHToNodeCommand(banzaiCli cli.Cli) *cobra.Command {
 		Short:   "Connect to node with SSH",
 		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if o.punchThrough {
+				o.podConnect = true
+				o.useInternalIP = true
+			}
 			if !o.directConnect && !o.podConnect {
 				o.directConnect = true
 			}
 			if o.directConnect && o.podConnect {
-				return fmt.Errorf("--direct and --pod are mutually exclusive")
+				return fmt.Errorf("--direct-connect and --pod-connect are mutually exclusive")
 			}
 			if !o.useInternalIP && !o.useExternalIP {
 				o.useExternalIP = true
@@ -83,8 +88,9 @@ func NewSSHToNodeCommand(banzaiCli cli.Cli) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.StringVar(&o.nodeName, "node-name", o.nodeName, "Node name")
-	flags.StringVar(&o.username, "username", o.username, "Username")
+	flags.StringVar(&o.nodeName, "node-name", o.nodeName, "Name of Kubernetes node to connect to")
+	flags.StringVar(&o.username, "username", o.username, "Username to use for the SSH connection")
+	flags.BoolVarP(&o.punchThrough, "punch-through", "p", o.punchThrough, "Shorthand for --pod-connect --use-internal-ip")
 	flags.BoolVar(&o.directConnect, "direct-connect", o.directConnect, "Use direct connection to the node internal or external IP (default)")
 	flags.BoolVar(&o.podConnect, "pod-connect", o.podConnect, "Create a pod on one of the nodes and connect to a node through that pod")
 	flags.StringVar(&o.namespace, "namespace", o.namespace, "Namespace for the pod when using --pod-connect")
