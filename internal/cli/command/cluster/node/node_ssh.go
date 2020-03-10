@@ -177,6 +177,21 @@ func runzSSHToNode(banzaiCli cli.Cli, options nodeSSHOptions, args []string) err
 		case "eks":
 			username = "ec2-user"
 		}
+
+		if !banzaiCli.Interactive() && username == "" {
+			return errors.New("can't determine username to use for the connection (you can specify it with an option like --username=ubuntu)")
+		}
+
+		if banzaiCli.Interactive() {
+			err = survey.AskOne(&survey.Input{
+				Message: "Username:",
+				Default: username,
+				Help:    "The username to use for the SSH connection, for example ubuntu, centos, root, or ec2-user.",
+			}, &username, survey.WithValidator(survey.Required))
+			if err != nil {
+				return errors.WrapIf(err, "failed to select username")
+			}
+		}
 	}
 
 	if options.directConnect {
