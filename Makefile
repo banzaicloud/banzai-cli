@@ -33,7 +33,7 @@ GORELEASER_VERSION = 0.112.2
 PACKR_VERSION = 2.6.0
 OPENAPI_GENERATOR_VERSION = v4.2.2
 
-GOLANG_VERSION = 1.12
+GOLANG_VERSION = 1.14
 
 # Add the ability to override some variables
 # Use with care

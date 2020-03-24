@@ -1,5 +1,7 @@
 module github.com/banzaicloud/banzai-cli
 
+go 1.14
+
 require (
 	emperror.dev/errors v0.4.2
 	github.com/AlecAivazis/survey/v2 v2.0.2
@@ -40,5 +42,3 @@ require (
 	k8s.io/client-go v11.0.0+incompatible
 	sigs.k8s.io/kind v0.4.0
 )
-
-go 1.13
