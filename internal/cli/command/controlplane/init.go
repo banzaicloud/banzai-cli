@@ -16,7 +16,6 @@ package controlplane
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -29,7 +28,6 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	"github.com/google/uuid"
-	json "github.com/json-iterator/go"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -407,12 +405,6 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 
 	out["installer"] = installer
 
-	err = initStateBackend(options.cpContext, out)
-
-	if err != nil {
-		return err
-	}
-
 	return options.writeValues(out)
 }
 
@@ -444,45 +436,6 @@ func initImageValues(options initOptions, out map[string]interface{}) (image str
 		}
 	}
 	return image, tag
-}
-
-func initStateBackend(options *cpContext, values map[string]interface{}) error {
-	var stateData []byte
-
-	if stateValues, ok := values["state"]; ok {
-		var err error
-		stateData, err = json.MarshalIndent(stateValues, "", "  ")
-		if err != nil {
-			return errors.WrapIf(err, "failed to marshal state backend configuration")
-		}
-	} else {
-		stateData = []byte(fmt.Sprintf(localStateBackend, tfstateFilename))
-	}
-
-	err := ioutil.WriteFile(options.workspace+"/state.tf.json", stateData, 0600)
-	if err != nil {
-		return errors.WrapIf(err, "failed to create state backend configuration")
-	}
-
-	err = os.MkdirAll(options.workspace+"/.terraform", 0700)
-	if err != nil {
-		return errors.WrapIf(err, "failed to create state backend directory")
-	}
-
-	stateFile, err := os.Create(options.workspace + "/.terraform/terraform.tfstate")
-	if err != nil {
-		return errors.WrapIf(err, "failed to create state config file")
-	}
-	_ = stateFile.Close()
-
-	if err := runTerraform("init", options, nil); err != nil {
-		return errors.WrapIf(err, "failed to init state backend")
-	}
-
-	// remove old state.tf if any
-	_ = os.Remove(options.workspace + "/state.tf")
-
-	return nil
 }
 
 func getAmazonCredentialsRegion(defaultAwsRegion string) (string, string, error) {

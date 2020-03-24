@@ -16,9 +16,11 @@ package controlplane
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -130,10 +132,6 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		return errors.New("workspace is already initialized but a different --provider is specified")
 	}
 
-	if err := initStateBackend(options.cpContext, values); err != nil {
-		return err
-	}
-
 	source := "/export"
 	var defaultValues map[string]interface{}
 	exportHandlers := []ExportedFilesHandler{
@@ -146,7 +144,34 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		return err
 	}
 
-	var env map[string]string
+	env := make(map[string]string)
+
+	switch values["provider"] {
+	case providerCustom:
+		if pc, ok := values["providerConfig"]; ok {
+			pc := cast.ToStringMap(pc)
+			if _, ok := pc["accessKey"]; ok { // if using aws key
+				_, creds, err := input.GetAmazonCredentials()
+				if err != nil {
+					return errors.WrapIf(err, "failed to get AWS credentials")
+				}
+				env = creds
+			}
+		}
+	case providerEc2:
+		_, creds, err := input.GetAmazonCredentials()
+		if err != nil {
+			return errors.WrapIf(err, "failed to get AWS credentials")
+		}
+		env = creds
+	}
+
+	if options.terraformInit {
+		if err := initStateBackend(options.cpContext, values, env); err != nil {
+			return errors.WrapIf(err, "failed to initialize state backend")
+		}
+	}
+
 	switch values["provider"] {
 	case providerPke:
 		err := ensurePKECluster(banzaiCli, options.cpContext)
@@ -161,11 +186,6 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		}
 
 	case providerEc2:
-		_, creds, err := input.GetAmazonCredentials()
-		if err != nil {
-			return errors.WrapIf(err, "failed to get AWS credentials")
-		}
-
 		useGeneratedKey := true
 		if pc, ok := values["providerConfig"]; ok {
 			if pc, ok := pc.(map[string]interface{}); ok {
@@ -173,25 +193,12 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 			}
 		}
 
-		if err := ensureEC2Cluster(options.cpContext, creds, useGeneratedKey); err != nil {
+		if err := ensureEC2Cluster(options.cpContext, env, useGeneratedKey); err != nil {
 			return errors.WrapIf(err, "failed to create EC2 cluster")
 		}
-		env = creds
 
 	case providerCustom:
-		creds := map[string]string{}
-		if pc, ok := values["providerConfig"]; ok {
-			pc := cast.ToStringMap(pc)
-			if _, ok := pc["accessKey"]; ok {
-				_, awsCreds, err := input.GetAmazonCredentials()
-				if err != nil {
-					return errors.WrapIf(err, "failed to get AWS credentials")
-				}
-				creds = awsCreds
-			}
-		}
-
-		if err := ensureCustomCluster(options.cpContext, creds); err != nil {
+		if err := ensureCustomCluster(options.cpContext, env); err != nil {
 			return errors.WrapIf(err, "failed to create Custom infrastructure")
 		}
 
@@ -202,16 +209,6 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 	}
 
 	log.Info("Deploying Banzai Cloud Pipeline to Kubernetes cluster...")
-	if values["provider"] == providerCustom {
-		_, creds, err := input.GetAmazonCredentials()
-		if err != nil {
-			return errors.WrapIf(err, "failed to get AWS credentials")
-		}
-		env = map[string]string{}
-		for k, v := range creds {
-			env[k] = v
-		}
-	}
 
 	if err := runTerraform("apply", options.cpContext, env); err != nil {
 		return errors.WrapIf(err, "failed to deploy pipeline components")
@@ -330,6 +327,65 @@ func imageFileExists(options *cpContext, source string) (bool, error) {
 	} else {
 		return true, nil
 	}
+}
+
+func stringifyMap(m interface{}) interface{} {
+	switch v := m.(type) {
+	case map[string]interface{}:
+		out := make(map[string]interface{})
+		for k, v := range v {
+			out[k] = stringifyMap(v)
+		}
+		return out
+	case map[interface{}]interface{}:
+		out := make(map[string]interface{})
+		for k, v := range v {
+			out[fmt.Sprint(k)] = stringifyMap(v)
+		}
+		return out
+	default:
+		return v
+	}
+}
+
+func initStateBackend(options *cpContext, values map[string]interface{}, env map[string]string) error {
+	var stateData []byte
+
+	if stateValues, ok := values["state"]; ok {
+		values := stringifyMap(stateValues)
+		var err error
+		stateData, err = json.MarshalIndent(values, "", "  ")
+		if err != nil {
+			return errors.WrapIf(err, "failed to marshal state backend configuration")
+		}
+	} else {
+		stateData = []byte(fmt.Sprintf(localStateBackend, tfstateFilename))
+	}
+
+	err := ioutil.WriteFile(options.workspace+"/state.tf.json", stateData, 0600)
+	if err != nil {
+		return errors.WrapIf(err, "failed to create state backend configuration")
+	}
+
+	err = os.MkdirAll(options.workspace+"/.terraform", 0700)
+	if err != nil {
+		return errors.WrapIf(err, "failed to create state backend directory")
+	}
+
+	stateFile, err := os.Create(options.workspace + "/.terraform/terraform.tfstate")
+	if err != nil {
+		return errors.WrapIf(err, "failed to create state config file")
+	}
+	_ = stateFile.Close()
+
+	if err := runTerraform("init", options, env); err != nil {
+		return errors.WrapIf(err, "failed to init state backend")
+	}
+
+	// remove old state.tf if any
+	_ = os.Remove(options.workspace + "/state.tf")
+
+	return nil
 }
 
 func defaultValuesExporter(source string, defaultValues *map[string]interface{}) ExportedFilesHandler {
