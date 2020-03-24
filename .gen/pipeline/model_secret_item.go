@@ -18,7 +18,6 @@ type SecretItem struct {
 	Id string `json:"id,omitempty"`
 	Name string `json:"name,omitempty"`
 	Type string `json:"type,omitempty"`
-	Version int32 `json:"version,omitempty"`
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	UpdatedBy string `json:"updatedBy,omitempty"`
 	Tags []string `json:"tags,omitempty"`

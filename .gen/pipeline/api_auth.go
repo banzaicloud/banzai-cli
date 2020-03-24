@@ -16,7 +16,6 @@ import (
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"fmt"
 	"strings"
 )
 
@@ -47,7 +46,6 @@ func (a *AuthApiService) CreateToken(ctx _context.Context, tokenCreateRequest To
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/tokens"
-
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
@@ -141,7 +139,7 @@ func (a *AuthApiService) DeleteToken(ctx _context.Context, tokenId string) (*_ne
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/tokens/{tokenId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"tokenId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", tokenId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"tokenId"+"}", _neturl.QueryEscape(parameterToString(tokenId, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -216,7 +214,6 @@ func (a *AuthApiService) ListTokens(ctx _context.Context) ([]TokenListResponseIt
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/tokens"
-
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}

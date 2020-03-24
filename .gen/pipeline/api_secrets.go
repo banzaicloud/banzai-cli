@@ -16,7 +16,6 @@ import (
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"fmt"
 	"strings"
 	"github.com/antihax/optional"
 	"reflect"
@@ -51,9 +50,11 @@ func (a *SecretsApiService) AddSecretTag(ctx _context.Context, orgId int32, secr
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/secrets/{secretId}/tags/{tag}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"secretId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", secretId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"tag"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", tag)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"secretId"+"}", _neturl.QueryEscape(parameterToString(secretId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"tag"+"}", _neturl.QueryEscape(parameterToString(tag, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -156,7 +157,7 @@ func (a *SecretsApiService) AddSecrets(ctx _context.Context, orgId int32, create
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/secrets"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -256,9 +257,11 @@ func (a *SecretsApiService) DeleteSecretTag(ctx _context.Context, orgId int32, s
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/secrets/{secretId}/tags/{tag}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"secretId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", secretId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"tag"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", tag)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"secretId"+"}", _neturl.QueryEscape(parameterToString(secretId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"tag"+"}", _neturl.QueryEscape(parameterToString(tag, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -333,8 +336,9 @@ func (a *SecretsApiService) DeleteSecrets(ctx _context.Context, orgId int32, sec
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/secrets/{secretId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"secretId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", secretId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"secretId"+"}", _neturl.QueryEscape(parameterToString(secretId, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -411,8 +415,9 @@ func (a *SecretsApiService) GetSecret(ctx _context.Context, orgId int32, secretI
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/secrets/{secretId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"secretId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", secretId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"secretId"+"}", _neturl.QueryEscape(parameterToString(secretId, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -508,8 +513,9 @@ func (a *SecretsApiService) GetSecretTags(ctx _context.Context, orgId int32, sec
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/secrets/{secretId}/tags"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"secretId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", secretId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"secretId"+"}", _neturl.QueryEscape(parameterToString(secretId, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -604,7 +610,7 @@ func (a *SecretsApiService) GetSecretType(ctx _context.Context, type_ string) (S
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/secret-types/{type}"
-	localVarPath = strings.Replace(localVarPath, "{"+"type"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", type_)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"type"+"}", _neturl.QueryEscape(parameterToString(type_, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -710,7 +716,7 @@ func (a *SecretsApiService) GetSecrets(ctx _context.Context, orgId int32, localV
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/secrets"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -821,7 +827,6 @@ func (a *SecretsApiService) ListSecretTypes(ctx _context.Context) (map[string]Se
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/secret-types"
-
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
@@ -924,8 +929,9 @@ func (a *SecretsApiService) UpdateSecrets(ctx _context.Context, orgId int32, sec
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/secrets/{secretId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"secretId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", secretId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"secretId"+"}", _neturl.QueryEscape(parameterToString(secretId, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -1034,8 +1040,9 @@ func (a *SecretsApiService) ValidateSecret(ctx _context.Context, orgId int32, se
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/secrets/{secretId}/validate"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"secretId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", secretId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"secretId"+"}", _neturl.QueryEscape(parameterToString(secretId, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}

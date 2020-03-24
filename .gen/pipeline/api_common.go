@@ -44,7 +44,6 @@ func (a *CommonApiService) ApiVersionGet(ctx _context.Context) (VersionResponse,
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/version"
-
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
@@ -129,7 +128,6 @@ func (a *CommonApiService) ListEndpoints(ctx _context.Context) ([]string, *_neth
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api"
-
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}

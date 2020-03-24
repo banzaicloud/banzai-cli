@@ -16,7 +16,6 @@ import (
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"fmt"
 	"strings"
 )
 
@@ -46,7 +45,6 @@ func (a *UsersApiService) GetCurrentUser(ctx _context.Context) (User, *_nethttp.
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/me"
-
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
@@ -141,8 +139,9 @@ func (a *UsersApiService) GetUsers(ctx _context.Context, orgId int32, userId int
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/users/{userId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"userId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", userId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"userId"+"}", _neturl.QueryEscape(parameterToString(userId, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -229,7 +228,7 @@ func (a *UsersApiService) ListUsers(ctx _context.Context, orgId int32) ([]User, 
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/users"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -314,7 +313,6 @@ func (a *UsersApiService) UpdateCurrentUser(ctx _context.Context, updateUserRequ
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/me"
-
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
