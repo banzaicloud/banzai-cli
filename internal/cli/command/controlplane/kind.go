@@ -56,7 +56,6 @@ func findKINDPath(banzaiCli cli.Cli) (string, error) {
 }
 
 func downloadKIND(banzaiCli cli.Cli) error {
-
 	src := fmt.Sprintf("https://github.com/kubernetes-sigs/kind/releases/download/%s/kind-%s-amd64", version, runtime.GOOS)
 
 	binDir := filepath.Join(banzaiCli.Home(), "bin")

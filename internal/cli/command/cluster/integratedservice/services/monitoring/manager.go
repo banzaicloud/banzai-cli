@@ -49,7 +49,6 @@ func (Manager) ServiceName() string {
 }
 
 func (m Manager) BuildActivateRequestInteractively(clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
-
 	grafana, err := askGrafana(m.banzaiCLI, grafanaSpec{
 		Enabled:    true,
 		Dashboards: true,
@@ -135,7 +134,6 @@ func (m Manager) BuildActivateRequestInteractively(clusterCtx clustercontext.Con
 }
 
 func (m Manager) BuildUpdateRequestInteractively(clusterCtx clustercontext.Context, request *pipeline.UpdateIntegratedServiceRequest) error {
-
 	var spec serviceSpec
 	if err := mapstructure.Decode(request.Spec, &spec); err != nil {
 		return errors.WrapIf(err, "service specification does not conform to schema")
@@ -364,7 +362,6 @@ func askIngress(compType string, defaults baseIngressSpec) (*baseIngressSpec, er
 		if err := input.DoQuestions(questions); err != nil {
 			return nil, errors.WrapIf(err, "error during asking ingress fields")
 		}
-
 	}
 	return &baseIngressSpec{
 		Enabled: isIngressEnabled,
@@ -577,7 +574,6 @@ func askAlertmanager(banzaiCLI cli.Cli, defaults alertmanagerSpec) (*alertmanage
 }
 
 func askSecret(banzaiCLI cli.Cli, secretType, DefaultValue string, withSkipOption bool) (string, error) {
-
 	orgID := banzaiCLI.Context().OrganizationID()
 	secrets, _, err := banzaiCLI.Client().SecretsApi.GetSecrets(
 		context.Background(),

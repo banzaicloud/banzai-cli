@@ -90,7 +90,6 @@ func (ac actionContext) IsUpdate() bool {
 // assembleServiceRequest assembles the request for activate and update the ExternalDNS integrated service
 // if the input rawSpec is nil -> activate flow, otherwise update flow
 func assembleServiceRequest(banzaiCli cli.Cli, clusterCtx clustercontext.Context, spec ServiceSpec, actionContext actionContext) (map[string]interface{}, error) {
-
 	// select the provider
 	selectedProviderInfo, err := selectProvider(*spec.ExternalDNS.Provider)
 	if err != nil {

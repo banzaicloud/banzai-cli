@@ -26,14 +26,14 @@ CLOUDINFO_VERSION = 0.7.8
 TELESCOPES_VERSION = 0.5.2
 
 # Dependency versions
-GOTESTSUM_VERSION = 0.3.5
-GOLANGCI_VERSION = 1.18.0
+GOTESTSUM_VERSION = 0.4.1
+GOLANGCI_VERSION = 1.24.0
 LICENSEI_VERSION = 0.1.0
 GORELEASER_VERSION = 0.112.2
 PACKR_VERSION = 2.6.0
 OPENAPI_GENERATOR_VERSION = v4.2.2
 
-GOLANG_VERSION = 1.12
+GOLANG_VERSION = 1.14
 
 # Add the ability to override some variables
 # Use with care
@@ -114,6 +114,11 @@ bin/golangci-lint-${GOLANGCI_VERSION}:
 .PHONY: lint
 lint: bin/golangci-lint ## Run linter
 	bin/golangci-lint run
+
+.PHONY: fix
+fix: export CGO_ENABLED = 1
+fix: bin/golangci-lint ## Fix lint violations
+	bin/golangci-lint run --fix
 
 bin/licensei: bin/licensei-${LICENSEI_VERSION}
 	@ln -sf licensei-${LICENSEI_VERSION} bin/licensei

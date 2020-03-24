@@ -278,7 +278,6 @@ func askIngress(componentType string, defaults ingressSpec) (*ingressSpec, error
 	}
 
 	if isEnabled {
-
 		if err := input.DoQuestions([]input.QuestionMaker{
 			input.QuestionInput{
 				QuestionBase: input.QuestionBase{
@@ -298,7 +297,6 @@ func askIngress(componentType string, defaults ingressSpec) (*ingressSpec, error
 		}); err != nil {
 			return nil, errors.WrapIf(err, "error during asking ingress fields")
 		}
-
 	}
 
 	return &ingressSpec{
@@ -433,7 +431,6 @@ func askBuckets(banzaiCLI cli.Cli, bucketType, secretID, defaultValue string) (*
 }
 
 func askClusterOutput(banzaiCLI cli.Cli, defaults clusterOutputSpec) (*clusterOutputSpec, error) {
-
 	var isEnabled bool
 	if err := input.DoQuestions([]input.QuestionMaker{
 		input.QuestionConfirm{

@@ -89,7 +89,6 @@ func (Manager) ValidateSpec(spec map[string]interface{}) error {
 }
 
 func (Manager) WriteDetailsTable(details pipeline.IntegratedServiceDetails) map[string]map[string]interface{} {
-
 	const (
 		expiryTitle = "Expiry"
 		statusTitle = "Status"

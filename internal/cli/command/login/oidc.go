@@ -66,7 +66,6 @@ type app struct {
 }
 
 func runServer(banzaiCli cli.Cli, pipelineBasePath string) (string, error) {
-
 	issuerURL, err := url.Parse(pipelineBasePath)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse pipelineBasePath: %v", err)
@@ -201,7 +200,6 @@ func (a *app) handleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *app) handleCallback(w http.ResponseWriter, r *http.Request) {
-
 	pipelineToken := ""
 	defer func() {
 		a.shutdownChan <- struct{}{}

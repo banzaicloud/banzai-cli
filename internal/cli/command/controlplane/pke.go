@@ -62,7 +62,6 @@ func findPKEPath(banzaiCli cli.Cli) (string, error) {
 }
 
 func downloadPKE(banzaiCli cli.Cli) error {
-
 	const src = "https://banzaicloud.com/downloads/pke/latest"
 
 	binDir := filepath.Join(banzaiCli.Home(), "bin")

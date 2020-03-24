@@ -2,9 +2,12 @@ linters:
     enable-all: true
     disable:
         - funlen
+        - gomnd
         - maligned
+        - wsl
 
         # TODO: fix these
+        - stylecheck
         - bodyclose
         - deadcode
         - dupl
@@ -14,12 +17,14 @@ linters:
         - gochecknoinits
         - gocritic
         - gocyclo
+        - gocognit
         - gofmt
         - goimports
         - golint
         - lll
         - megacheck
         - varcheck
+        - godox
 
 linters-settings:
     golint:

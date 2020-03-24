@@ -51,7 +51,6 @@ func (Manager) ServiceName() string {
 }
 
 func (m Manager) BuildActivateRequestInteractively(clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
-
 	if err := isServiceEnabled(context.Background(), m.banzaiCLI); err != nil {
 		return pipeline.ActivateIntegratedServiceRequest{}, errors.WrapIf(err, "securityscan is not enabled")
 	}
@@ -207,7 +206,6 @@ func isServiceEnabled(ctx context.Context, banzaiCLI cli.Cli) error {
 }
 
 func askForAnchoreConfig(banzaiCLI cli.Cli, currentAnchoreSpec *anchoreSpec) (*anchoreSpec, error) {
-
 	if currentAnchoreSpec == nil {
 		currentAnchoreSpec = &anchoreSpec{}
 	}
@@ -320,7 +318,6 @@ func getNamespaces(ctx context.Context, banzaiCLI cli.Cli, orgID int32, clusterI
 
 // policies are statically stored, the selection is made from a "wired" list
 func askForPolicy(policySpecIn policySpec) (policySpec, error) {
-
 	defaultPolicyBundle := utils.NameForID(policyBundles, policySpecIn.PolicyID)
 	if defaultPolicyBundle == "" {
 		defaultPolicyBundle = "Default bundle"
@@ -346,7 +343,6 @@ func askForPolicy(policySpecIn policySpec) (policySpec, error) {
 }
 
 func askForWebHookConfig(ctx context.Context, banzaiCLI cli.Cli, orgID int32, clusterID int32, webhookSpecIn webHookConfigSpec) (webHookConfigSpec, error) {
-
 	qs := []*survey.Question{
 		{
 			Name: "Enabled",
@@ -429,7 +425,6 @@ func askForWebHookConfig(ctx context.Context, banzaiCLI cli.Cli, orgID int32, cl
 }
 
 func askForWhiteLists() ([]releaseSpec, error) {
-
 	addMore := true
 	releaseWhiteList := make([]releaseSpec, 0)
 
@@ -458,7 +453,6 @@ func askForWhiteLists() ([]releaseSpec, error) {
 }
 
 func askForWhiteListItem() (*releaseSpec, error) {
-
 	var releaseName string
 	if err := survey.AskOne(
 		&survey.Input{
@@ -497,7 +491,6 @@ func askForWhiteListItem() (*releaseSpec, error) {
 }
 
 func assembleServiceSpec(ctx context.Context, banzaiCLI cli.Cli, orgID int32, clusterID int32, serviceSpecIn ServiceSpec) (ServiceSpec, error) {
-
 	policy, err := askForPolicy(serviceSpecIn.Policy)
 	if err != nil {
 		return ServiceSpec{}, errors.WrapIf(err, "failed to assembele policy data")
@@ -506,7 +499,6 @@ func assembleServiceSpec(ctx context.Context, banzaiCLI cli.Cli, orgID int32, cl
 	webhookConfig, err := askForWebHookConfig(ctx, banzaiCLI, orgID, clusterID, serviceSpecIn.WebhookConfig)
 	if err != nil {
 		return ServiceSpec{}, errors.WrapIf(err, "failed to assembele webhook data")
-
 	}
 
 	return ServiceSpec{

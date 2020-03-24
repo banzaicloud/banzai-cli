@@ -267,7 +267,6 @@ func CheckPipelineEndpoint(endpoint string) (string, error, error) {
 		if err != nil {
 			return "", nil, errors.WrapIf(err, "failed to connect to Pipeline")
 		}
-
 	}
 
 	defer response.Body.Close()
