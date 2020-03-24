@@ -518,7 +518,6 @@ func buildDefaultRequest(out map[string]interface{}) error {
 }
 
 func buildSecretChoice(banzaiCli cli.Cli, orgID int32, cloud string, out map[string]interface{}) (string, error) {
-
 	if id, ok := out["secretId"].(string); id != "" && ok {
 		return id, nil
 	}
@@ -535,7 +534,6 @@ func buildSecretChoice(banzaiCli cli.Cli, orgID int32, cloud string, out map[str
 
 	// get ID from Name + validate
 	if name, ok := out["secretName"].(string); name != "" && ok {
-
 		for _, secret := range secrets {
 			if secret.Name == name {
 				return secret.Id, nil

@@ -88,7 +88,6 @@ func GetAmazonCredentials() (string, map[string]string, error) {
 	session, err := session.NewSession(&aws.Config{})
 	if err != nil {
 		return "", nil, err
-
 	}
 
 	value, err := session.Config.Credentials.Get()

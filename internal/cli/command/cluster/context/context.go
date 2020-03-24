@@ -40,7 +40,6 @@ type clusterContext struct {
 const clusterIdKey = "cluster.id"
 
 func NewClusterContext(cmd *cobra.Command, banzaiCli cli.Cli, verb string) Context {
-
 	ctx := clusterContext{
 		banzaiCli: banzaiCli,
 	}

@@ -79,7 +79,6 @@ func NewInstallCommand(banzaiCli cli.Cli) *cobra.Command {
 }
 
 func runInstallSecret(banzaiCli cli.Cli, options installSecretOptions) error {
-
 	if options.secretName == "" {
 		return errors.New("secret name is not specified (--name)") // TODO: ask from existing secrets
 	}
@@ -114,7 +113,6 @@ func runInstallSecret(banzaiCli cli.Cli, options installSecretOptions) error {
 		if err := utils.Unmarshal(raw, &out); err != nil {
 			return errors.WrapIf(err, "failed to unmarshal create cluster request")
 		}
-
 	}
 
 	orgID := banzaiCli.Context().OrganizationID()

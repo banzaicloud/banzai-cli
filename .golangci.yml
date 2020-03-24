@@ -7,7 +7,6 @@ linters:
         - wsl
 
         # TODO: fix these
-        - whitespace
         - stylecheck
         - bodyclose
         - deadcode

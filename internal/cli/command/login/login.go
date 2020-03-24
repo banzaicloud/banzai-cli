@@ -214,7 +214,6 @@ func runLogin(banzaiCli cli.Cli, options loginOptions) error {
 }
 
 func createPermanentToken(banzaiCli cli.Cli) error {
-
 	hostname, err := os.Hostname()
 	if err != nil || hostname == "" {
 		hostname = "unknown"

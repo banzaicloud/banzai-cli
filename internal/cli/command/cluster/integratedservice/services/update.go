@@ -86,7 +86,6 @@ func runUpdate(
 		request pipeline.UpdateIntegratedServiceRequest
 	)
 	if options.filePath == "" && banzaiCLI.Interactive() {
-
 		// get integratedservice details
 		details, _, err := banzaiCLI.Client().IntegratedServicesApi.IntegratedServiceDetails(context.Background(), orgID, clusterID, m.ServiceName())
 		if err != nil {
@@ -103,7 +102,6 @@ func runUpdate(
 		if err := showUpdateEditor(m, &request); err != nil {
 			return errors.WrapIf(err, "failed during showing editor")
 		}
-
 	} else {
 		if err := readUpdateReqFromFileOrStdin(options.filePath, &request); err != nil {
 			return errors.WrapIf(err, fmt.Sprintf("failed to read %s cluster service specification", m.ReadableName()))

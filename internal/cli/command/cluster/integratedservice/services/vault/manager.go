@@ -88,7 +88,6 @@ func (m Manager) BuildActivateRequestInteractively(clusterCtx clustercontext.Con
 }
 
 func (m Manager) BuildUpdateRequestInteractively(clusterCtx clustercontext.Context, request *pipeline.UpdateIntegratedServiceRequest) error {
-
 	var spec specResponse
 	if err := mapstructure.Decode(request.Spec, &spec); err != nil {
 		return errors.WrapIf(err, "service specification does not conform to schema")

@@ -52,7 +52,6 @@ func (Manager) ServiceName() string {
 }
 
 func (m Manager) BuildActivateRequestInteractively(clusterCtx clustercontext.Context) (pipeline.ActivateIntegratedServiceRequest, error) {
-
 	defaultSpec := ServiceSpec{
 		ExternalDNS: ExternalDNS{
 			Provider: &Provider{
@@ -72,7 +71,6 @@ func (m Manager) BuildActivateRequestInteractively(clusterCtx clustercontext.Con
 }
 
 func (m Manager) BuildUpdateRequestInteractively(clusterCtx clustercontext.Context, request *pipeline.UpdateIntegratedServiceRequest) error {
-
 	currentSpec := ServiceSpec{
 		ExternalDNS: ExternalDNS{
 			Provider: &Provider{},
@@ -206,7 +204,6 @@ func decorateProviderSecret(banzaiCLI cli.Cli, selectedProvider Provider) (Provi
 }
 
 func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Provider, error) {
-
 	// helper struct for requesting provider specific integratedservice-options
 	type providerOptions struct {
 		Project       string `json:"project,omitempty" mapstructure:"project"`
@@ -315,7 +312,6 @@ func decorateProviderOptions(banzaiCLI cli.Cli, selectedProvider Provider) (Prov
 
 //getGoogleProjectsMap retrieves google projects
 func getGoogleProjectsMap(banzaiCLI cli.Cli, provider Provider) (serviceutils.IdToNameMap, error) {
-
 	projects, _, err := banzaiCLI.Client().GoogleApi.ListProjects(
 		context.Background(),
 		banzaiCLI.Context().OrganizationID(),
@@ -334,7 +330,6 @@ func getGoogleProjectsMap(banzaiCLI cli.Cli, provider Provider) (serviceutils.Id
 
 //getGoogleProjectsMap retrieves google projects
 func getAzureResourceGroupMap(banzaiCLI cli.Cli, provider Provider) ([]string, error) {
-
 	resourceGroups, _, err := banzaiCLI.Client().InfoApi.GetResourceGroups(
 		context.Background(),
 		banzaiCLI.Context().OrganizationID(),

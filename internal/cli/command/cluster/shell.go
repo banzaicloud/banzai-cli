@@ -127,11 +127,9 @@ func runShell(banzaiCli cli.Cli, options shellOptions, args []string) error {
 		case "bash":
 			commandArgs = []string{"-i"}
 		}
-
 	} else if len(args) == 1 {
 		// let the shell split arg to words
 		commandArgs = []string{"-c", args[0]}
-
 	} else {
 		// exec args as separate words
 		shell = args[0]

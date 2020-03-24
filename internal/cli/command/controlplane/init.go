@@ -401,7 +401,6 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 			return errors.WrapIf(err, "failed to determine installer image hash")
 		}
 		installer["image"] = strings.TrimSpace(string(ref))
-
 	} else {
 		installer["image"] = options.installerImage()
 	}
@@ -448,7 +447,6 @@ func initImageValues(options initOptions, out map[string]interface{}) (image str
 }
 
 func initStateBackend(options *cpContext, values map[string]interface{}) error {
-
 	var stateData []byte
 
 	if stateValues, ok := values["state"]; ok {

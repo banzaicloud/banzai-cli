@@ -41,7 +41,6 @@ type ServiceSpec struct {
 
 // Validate validates the input security scan specification.
 func (s ServiceSpec) Validate() error {
-
 	var validationErrors error
 
 	if s.CustomAnchore.Enabled {
@@ -68,7 +67,6 @@ type anchoreSpec struct {
 }
 
 func (a anchoreSpec) Validate() error {
-
 	if a.Enabled {
 		if a.Url == "" && a.SecretID == "" {
 			return errors.New("both anchore url and secretId are required")
