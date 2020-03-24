@@ -135,31 +135,15 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 	}
 
 	source := "/export"
-
-	// for backward compatibility
-	hasExports, err := imageFileExists(options.cpContext, source)
-	if err != nil {
+	var defaultValues map[string]interface{}
+	exportHandlers := []ExportedFilesHandler{
+		defaultValuesExporter(filepath.Join(strings.TrimPrefix(source, "/"), "values.yaml"), &defaultValues),
+	}
+	if err := processExports(options.cpContext, source, exportHandlers); err != nil {
 		return err
 	}
-
-	if hasExports {
-		var defaultValues map[string]interface{}
-		exportHandlers := []ExportedFilesHandler{
-			defaultValuesExporter(filepath.Join(strings.TrimPrefix(source, "/"), "values.yaml"), &defaultValues),
-		}
-		if err := processExports(options.cpContext, source, exportHandlers); err != nil {
-			return err
-		}
-		if err := writeMergedValues(options.cpContext, defaultValues, values); err != nil {
-			return err
-		}
-	} else {
-		log.Warnf("%s is not available in the image, skipping export handlers", source)
-		// this is the legacy behaviour that should be removed as soon as we can deprecate old image versions
-		// where the null_resource.preapply_hook did the merging
-		if err := runTerraform("apply", options.cpContext, nil, "null_resource.preapply_hook"); err != nil {
-			return errors.WrapIf(err, "failed to run null_resource.preapply_hook as a standalone target")
-		}
+	if err := writeMergedValues(options.cpContext, defaultValues, values); err != nil {
+		return err
 	}
 
 	var env map[string]string
