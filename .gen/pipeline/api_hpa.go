@@ -16,7 +16,6 @@ import (
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"fmt"
 	"strings"
 )
 
@@ -47,8 +46,9 @@ func (a *HpaApiService) DeleteDeploymentAutoscaling(ctx _context.Context, orgId 
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/hpa"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -127,8 +127,9 @@ func (a *HpaApiService) GetDeploymentAutoscaling(ctx _context.Context, orgId int
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/hpa"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -224,8 +225,9 @@ func (a *HpaApiService) UpdateDeploymentAutoscaling(ctx _context.Context, orgId 
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/hpa"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}

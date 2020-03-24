@@ -16,7 +16,6 @@ import (
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"fmt"
 	"strings"
 	"github.com/antihax/optional"
 )
@@ -48,8 +47,9 @@ func (a *ClustersApiService) ClusterPostHooks(ctx _context.Context, orgId int32,
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/posthooks"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -121,7 +121,7 @@ func (a *ClustersApiService) CreateCluster(ctx _context.Context, orgId int32, bo
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -218,8 +218,9 @@ func (a *ClustersApiService) CreateNodePool(ctx _context.Context, orgId int32, i
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/nodepools"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -303,8 +304,9 @@ func (a *ClustersApiService) DeleteCluster(ctx _context.Context, orgId int32, id
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -381,8 +383,9 @@ func (a *ClustersApiService) DeleteLeaderElection(ctx _context.Context, orgId in
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/pke/leader"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -458,9 +461,11 @@ func (a *ClustersApiService) DeleteNamespace(ctx _context.Context, orgId int32, 
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/namespaces/{namespace}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", namespace)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", _neturl.QueryEscape(parameterToString(namespace, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -536,9 +541,11 @@ func (a *ClustersApiService) DeleteNodePool(ctx _context.Context, orgId int32, i
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/nodepools/{name}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"name"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", name)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"name"+"}", _neturl.QueryEscape(parameterToString(name, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -596,103 +603,6 @@ func (a *ClustersApiService) DeleteNodePool(ctx _context.Context, orgId int32, i
 }
 
 /*
-GetAPIEndpoint Get API endpoint
-Get API endpoint
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identifier
- * @param id Cluster identifier
-@return string
-*/
-func (a *ClustersApiService) GetAPIEndpoint(ctx _context.Context, orgId int32, id int32) (string, *_nethttp.Response, error) {
-	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  string
-	)
-
-	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/apiendpoint"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"text/plain", "application/json", "application/problem+json"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(r)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		if localVarHTTPResponse.StatusCode == 200 {
-			var v string
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-			var v CommonError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
-}
-
-/*
 GetCluster Get cluster status
 Getting cluster status
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -712,8 +622,9 @@ func (a *ClustersApiService) GetCluster(ctx _context.Context, orgId int32, id in
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -809,8 +720,9 @@ func (a *ClustersApiService) GetClusterBootstrap(ctx _context.Context, orgId int
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/bootstrap"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -906,8 +818,9 @@ func (a *ClustersApiService) GetClusterConfig(ctx _context.Context, orgId int32,
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/config"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -1001,8 +914,9 @@ func (a *ClustersApiService) GetClusterStatus(ctx _context.Context, orgId int32,
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -1078,8 +992,9 @@ func (a *ClustersApiService) GetLeaderElection(ctx _context.Context, orgId int32
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/pke/leader"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -1175,8 +1090,9 @@ func (a *ClustersApiService) GetOIDCClusterConfig(ctx _context.Context, orgId in
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/oidcconfig"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -1272,8 +1188,9 @@ func (a *ClustersApiService) GetPKECommands(ctx _context.Context, orgId int32, i
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/pke/commands"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -1369,8 +1286,9 @@ func (a *ClustersApiService) GetPodDetails(ctx _context.Context, orgId int32, id
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/pods"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -1465,8 +1383,9 @@ func (a *ClustersApiService) GetReadyPKENode(ctx _context.Context, orgId int32, 
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/pke/ready"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -1564,9 +1483,11 @@ func (a *ClustersApiService) InstallSecret(ctx _context.Context, orgId int32, id
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/secrets/{secretName}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"secretName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", secretName)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"secretName"+"}", _neturl.QueryEscape(parameterToString(secretName, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -1665,8 +1586,9 @@ func (a *ClustersApiService) InstallSecrets(ctx _context.Context, orgId int32, i
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/secrets"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -1771,8 +1693,9 @@ func (a *ClustersApiService) ListClusterEndpoints(ctx _context.Context, orgId in
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/endpoints"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -1878,8 +1801,9 @@ func (a *ClustersApiService) ListClusterSecrets(ctx _context.Context, orgId int3
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/secrets"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -1977,7 +1901,7 @@ func (a *ClustersApiService) ListClusters(ctx _context.Context, orgId int32) ([]
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -2073,8 +1997,9 @@ func (a *ClustersApiService) ListNamespaces(ctx _context.Context, orgId int32, i
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/namespaces"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -2170,8 +2095,9 @@ func (a *ClustersApiService) ListNodepoolLabels(ctx _context.Context, orgId int3
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/nodepool-labels"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -2267,8 +2193,9 @@ func (a *ClustersApiService) ListNodes(ctx _context.Context, orgId int32, id int
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/nodes"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -2366,9 +2293,11 @@ func (a *ClustersApiService) MergeSecret(ctx _context.Context, orgId int32, id i
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/secrets/{secretName}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"secretName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", secretName)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"secretName"+"}", _neturl.QueryEscape(parameterToString(secretName, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -2466,8 +2395,9 @@ func (a *ClustersApiService) PostLeaderElection(ctx _context.Context, orgId int3
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/pke/leader"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -2575,8 +2505,9 @@ func (a *ClustersApiService) PostReadyPKENode(ctx _context.Context, orgId int32,
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/pke/ready"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -2673,8 +2604,9 @@ func (a *ClustersApiService) UpdateCluster(ctx _context.Context, orgId int32, id
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -2731,93 +2663,4 @@ func (a *ClustersApiService) UpdateCluster(ctx _context.Context, orgId int32, id
 	}
 
 	return localVarHTTPResponse, nil
-}
-
-/*
-UpdateMonitoring Update monitoring
-Update monitoring
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param orgId Organization identifier
- * @param id Cluster identifier
-@return string
-*/
-func (a *ClustersApiService) UpdateMonitoring(ctx _context.Context, orgId int32, id int32) (string, *_nethttp.Response, error) {
-	var (
-		localVarHTTPMethod   = _nethttp.MethodPost
-		localVarPostBody     interface{}
-		localVarFormFileName string
-		localVarFileName     string
-		localVarFileBytes    []byte
-		localVarReturnValue  string
-	)
-
-	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/clusters/{id}/monitoring"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"text/plain"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(r)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		if localVarHTTPResponse.StatusCode == 200 {
-			var v string
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
 }

@@ -16,7 +16,6 @@ import (
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"fmt"
 	"strings"
 	"github.com/antihax/optional"
 )
@@ -60,8 +59,9 @@ func (a *NetworkApiService) ListRouteTables(ctx _context.Context, orgId int32, n
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/networks/{networkId}/routeTables"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"networkId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", networkId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"networkId"+"}", _neturl.QueryEscape(parameterToString(networkId, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -175,7 +175,7 @@ func (a *NetworkApiService) ListVPCNetworks(ctx _context.Context, orgId int32, s
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/networks"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -290,8 +290,9 @@ func (a *NetworkApiService) ListVPCSubnets(ctx _context.Context, orgId int32, ne
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/networks/{networkId}/subnets"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"networkId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", networkId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"networkId"+"}", _neturl.QueryEscape(parameterToString(networkId, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}

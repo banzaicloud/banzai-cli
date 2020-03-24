@@ -16,7 +16,6 @@ import (
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"fmt"
 	"strings"
 )
 
@@ -48,7 +47,7 @@ func (a *ArkBucketsApiService) CreateBackupBucket(ctx _context.Context, orgId in
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/backupbuckets"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -146,8 +145,9 @@ func (a *ArkBucketsApiService) DeleteBackupBucket(ctx _context.Context, orgId in
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/backupbuckets/{bucketId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"bucketId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", bucketId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"bucketId"+"}", _neturl.QueryEscape(parameterToString(bucketId, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -243,8 +243,9 @@ func (a *ArkBucketsApiService) GetBackupBucket(ctx _context.Context, orgId int32
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/backupbuckets/{bucketId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"bucketId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", bucketId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"bucketId"+"}", _neturl.QueryEscape(parameterToString(bucketId, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -339,7 +340,7 @@ func (a *ArkBucketsApiService) ListBackupBuckets(ctx _context.Context, orgId int
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/backupbuckets"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -432,7 +433,7 @@ func (a *ArkBucketsApiService) SyncBackupBucket(ctx _context.Context, orgId int3
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgId}/backupbuckets/sync"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}

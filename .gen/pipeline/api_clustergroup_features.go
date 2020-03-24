@@ -16,7 +16,6 @@ import (
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"fmt"
 	"strings"
 )
 
@@ -49,9 +48,11 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgid}/clustergroups/{clusterGroupId}/features/{featureName}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"clusterGroupId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", clusterGroupId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"featureName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", featureName)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"clusterGroupId"+"}", _neturl.QueryEscape(parameterToString(clusterGroupId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"featureName"+"}", _neturl.QueryEscape(parameterToString(featureName, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -148,9 +149,11 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgid}/clustergroups/{clusterGroupId}/features/{featureName}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"clusterGroupId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", clusterGroupId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"featureName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", featureName)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"clusterGroupId"+"}", _neturl.QueryEscape(parameterToString(clusterGroupId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"featureName"+"}", _neturl.QueryEscape(parameterToString(featureName, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -248,9 +251,11 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgid}/clustergroups/{clusterGroupId}/features/{featureName}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"clusterGroupId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", clusterGroupId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"featureName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", featureName)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"clusterGroupId"+"}", _neturl.QueryEscape(parameterToString(clusterGroupId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"featureName"+"}", _neturl.QueryEscape(parameterToString(featureName, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -350,9 +355,11 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgid}/clustergroups/{clusterGroupId}/features/{featureName}"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"clusterGroupId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", clusterGroupId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"featureName"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", featureName)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"clusterGroupId"+"}", _neturl.QueryEscape(parameterToString(clusterGroupId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"featureName"+"}", _neturl.QueryEscape(parameterToString(featureName, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -450,8 +457,9 @@ func (a *ClustergroupFeaturesApiService) ApiV1OrgsOrgidClustergroupsClusterGroup
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/orgs/{orgid}/clustergroups/{clusterGroupId}/features"
-	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", orgId)), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"clusterGroupId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", clusterGroupId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"orgId"+"}", _neturl.QueryEscape(parameterToString(orgId, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"clusterGroupId"+"}", _neturl.QueryEscape(parameterToString(clusterGroupId, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}

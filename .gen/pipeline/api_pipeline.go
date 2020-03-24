@@ -44,7 +44,6 @@ func (a *PipelineApiService) ListCapabilities(ctx _context.Context) (map[string]
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/api/v1/capabilities"
-
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
