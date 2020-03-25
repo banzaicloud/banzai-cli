@@ -148,10 +148,15 @@ func validateClusterCreateRequest(val interface{}) error {
 	decoder = json.NewDecoder(strings.NewReader(str))
 	decoder.DisallowUnknownFields()
 
-	if typer.Type == "" {
+	switch typer.Type {
+	case pkeOnAzure:
+		err = decoder.Decode(&pipeline.CreatePkeOnAzureClusterRequest{})
+	case pkeOnVsphere:
+		err = decoder.Decode(&pipeline.CreatePkeOnVsphereClusterRequest{})
+	case "":
 		err = decoder.Decode(&pipeline.CreateClusterRequest{})
-	} else {
-		err = decoder.Decode(&pipeline.CreateClusterRequestV2{})
+	default:
+		err = fmt.Errorf("unknown cluster type: %q", typer.Type)
 	}
 	return errors.WrapIf(err, "invalid request")
 }
@@ -193,20 +198,20 @@ func buildInteractiveEKSCreateRequest(banzaiCli cli.Cli, out map[string]interfac
 
 	recommendationResponse, _, err := banzaiCli.TelescopesClient().RecommendApi.RecommendCluster(context.Background(),
 		provider, service, region, telescopes.RecommendClusterRequest{
-			SumCpu: float64(sumCpu),
-			SumMem: float64(sumMem),
-			MinNodes: int64(minNodes),
-			MaxNodes: int64(maxNodes),
-			SameSize: false,
+			SumCpu:      float64(sumCpu),
+			SumMem:      float64(sumMem),
+			MinNodes:    int64(minNodes),
+			MaxNodes:    int64(maxNodes),
+			SameSize:    false,
 			OnDemandPct: int64(onDemandPct),
-			Includes: getEksInstanceTypes(),
+			Includes:    getEksInstanceTypes(),
 		})
 
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve recommendation for EKS")
 	}
 
-	eksNodePools:= make(map[string]pipeline.EksNodePool, 0)
+	eksNodePools := make(map[string]pipeline.EksNodePool, 0)
 	for i, np := range recommendationResponse.NodePools {
 		if np.Role != "worker" {
 			continue
@@ -215,9 +220,9 @@ func buildInteractiveEKSCreateRequest(banzaiCli cli.Cli, out map[string]interfac
 		eksNodePool := pipeline.EksNodePool{
 			InstanceType: np.Vm.Type,
 			Autoscaling:  false,
-			Count:     int32(np.SumNodes),
-			MinCount:  int32(0),
-			MaxCount:  int32(maxNodes),
+			Count:        int32(np.SumNodes),
+			MinCount:     int32(0),
+			MaxCount:     int32(maxNodes),
 		}
 		if np.VmClass == "spot" {
 			eksNodePool.SpotPrice = fmt.Sprintf("%v", np.Vm.OnDemandPrice)
@@ -237,7 +242,7 @@ func buildInteractiveEKSCreateRequest(banzaiCli cli.Cli, out map[string]interfac
 		}
 	}
 	eksProperties := pipeline.CreateEksPropertiesEks{
-		Version: k8sVersion,
+		Version:   k8sVersion,
 		NodePools: eksNodePools,
 	}
 
@@ -248,7 +253,7 @@ func buildInteractiveEKSCreateRequest(banzaiCli cli.Cli, out map[string]interfac
 	var eksOut map[string]interface{}
 	utils.Unmarshal(marshalledEksProps, &eksOut)
 	delete(eksOut, "vpc")
-	unstructured.SetNestedField(out,  eksOut, "properties", "eks")
+	unstructured.SetNestedField(out, eksOut, "properties", "eks")
 	out["location"] = region
 
 	// add scaleOptions
@@ -259,11 +264,11 @@ func buildInteractiveEKSCreateRequest(banzaiCli cli.Cli, out map[string]interfac
 	}
 
 	scaleOptions := pipeline.ScaleOptions{
-		Enabled: true,
-		DesiredCpu: float64(sumCpu),
-		DesiredMem: float64(sumMem),
-		DesiredGpu: 0,
-		OnDemandPct: int32(onDemandPct),
+		Enabled:             true,
+		DesiredCpu:          float64(sumCpu),
+		DesiredMem:          float64(sumMem),
+		DesiredGpu:          0,
+		OnDemandPct:         int32(onDemandPct),
 		KeepDesiredCapacity: true,
 	}
 
@@ -323,8 +328,10 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 	if !ok || cloud == "" {
 		Type, _ := out["type"].(string)
 		switch Type {
-		case "pke-on-azure":
+		case pkeOnAzure:
 			cloud = "azure"
+		case pkeOnVsphere:
+			cloud = "vsphere"
 		default:
 			return errors.New("couldn't determine cloud provider from request")
 		}
@@ -341,7 +348,7 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 		out["name"] = name
 	}
 
-	if out["type"] == "pke-on-azure" && out["resourceGroup"] == "" {
+	if out["type"] == pkeOnAzure && out["resourceGroup"] == "" {
 		rgs, _, err := banzaiCli.Client().InfoApi.GetResourceGroups(context.Background(), orgID, secretID)
 		if err != nil {
 			return errors.WrapIf(err, "can't list resource groups")
@@ -403,7 +410,7 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 }
 func getProviders() map[string]interface{} {
 	return map[string]interface{}{
-		"pke-on-aws": pipeline.CreateClusterRequest{
+		pkeOnAws: pipeline.CreateClusterRequest{
 			Cloud:    "amazon",
 			Location: "us-east-2",
 			Properties: map[string]interface{}{
@@ -439,8 +446,8 @@ func getProviders() map[string]interface{} {
 				},
 			},
 		},
-		"pke-on-azure": pipeline.CreatePkeOnAzureClusterRequest{
-			Type:     "pke-on-azure",
+		pkeOnAzure: pipeline.CreatePkeOnAzureClusterRequest{
+			Type:     pkeOnAzure,
 			Location: "westus2",
 			Nodepools: []pipeline.PkeOnAzureNodePool{
 				{
@@ -456,6 +463,27 @@ func getProviders() map[string]interface{} {
 			Kubernetes: pipeline.CreatePkeClusterKubernetes{
 				Version: "1.15.3",
 				Rbac:    true,
+			},
+		},
+		pkeOnVsphere: pipeline.CreatePkeOnVsphereClusterRequest{
+			Type: pkeOnVsphere,
+			Kubernetes: pipeline.CreatePkeClusterKubernetes{
+				Version: "1.15.3",
+				Rbac:    true,
+			},
+			Folder:       "folder",
+			Datastore:    "DatastoreCluster",
+			ResourcePool: "resource-pool",
+			NodePools: []pipeline.PkeOnVsphereNodePool{
+				{
+					Name:          "master",
+					Roles:         []string{"master", "worker"},
+					Size:          1,
+					Vcpu:          2,
+					Ram:           1024,
+					Template:      "pke-template",
+					AdminUsername: "root",
+				},
 			},
 		},
 		"ack": pipeline.CreateClusterRequest{
