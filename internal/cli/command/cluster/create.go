@@ -154,10 +154,15 @@ func validateClusterCreateRequest(val interface{}) error {
 	decoder = json.NewDecoder(strings.NewReader(str))
 	decoder.DisallowUnknownFields()
 
-	if typer.Type == "" {
+	switch typer.Type {
+	case pkeOnAzure:
+		err = decoder.Decode(&pipeline.CreatePkeOnAzureClusterRequest{})
+	case pkeOnVsphere:
+		err = decoder.Decode(&pipeline.CreatePkeOnVsphereClusterRequest{})
+	case "":
 		err = decoder.Decode(&pipeline.CreateClusterRequest{})
-	} else {
-		err = decoder.Decode(&pipeline.CreateClusterRequestV2{})
+	default:
+		err = fmt.Errorf("unknown cluster type: %q", typer.Type)
 	}
 	return errors.WrapIf(err, "invalid request")
 }
@@ -329,8 +334,10 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 	if !ok || cloud == "" {
 		Type, _ := out["type"].(string)
 		switch Type {
-		case "pke-on-azure":
+		case pkeOnAzure:
 			cloud = "azure"
+		case pkeOnVsphere:
+			cloud = "vsphere"
 		default:
 			return errors.New("couldn't determine cloud provider from request")
 		}
@@ -351,7 +358,7 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 		out["name"] = name
 	}
 
-	if out["type"] == "pke-on-azure" && out["resourceGroup"] == "" {
+	if out["type"] == pkeOnAzure && out["resourceGroup"] == "" {
 		rgs, _, err := banzaiCli.Client().InfoApi.GetResourceGroups(context.Background(), orgID, secretID)
 		if err != nil {
 			return errors.WrapIf(err, "can't list resource groups")
@@ -413,7 +420,7 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 }
 func getProviders() map[string]interface{} {
 	return map[string]interface{}{
-		"pke-on-aws": pipeline.CreateClusterRequest{
+		pkeOnAws: pipeline.CreateClusterRequest{
 			Cloud:    "amazon",
 			Location: "us-east-2",
 			Properties: map[string]interface{}{
@@ -449,8 +456,8 @@ func getProviders() map[string]interface{} {
 				},
 			},
 		},
-		"pke-on-azure": pipeline.CreatePkeOnAzureClusterRequest{
-			Type:     "pke-on-azure",
+		pkeOnAzure: pipeline.CreatePkeOnAzureClusterRequest{
+			Type:     pkeOnAzure,
 			Location: "westus2",
 			Nodepools: []pipeline.PkeOnAzureNodePool{
 				{
@@ -466,6 +473,27 @@ func getProviders() map[string]interface{} {
 			Kubernetes: pipeline.CreatePkeClusterKubernetes{
 				Version: "1.15.3",
 				Rbac:    true,
+			},
+		},
+		pkeOnVsphere: pipeline.CreatePkeOnVsphereClusterRequest{
+			Type: pkeOnVsphere,
+			Kubernetes: pipeline.CreatePkeClusterKubernetes{
+				Version: "1.15.3",
+				Rbac:    true,
+			},
+			Folder:       "folder",
+			Datastore:    "DatastoreCluster",
+			ResourcePool: "resource-pool",
+			NodePools: []pipeline.PkeOnVsphereNodePool{
+				{
+					Name:          "master",
+					Roles:         []string{"master", "worker"},
+					Size:          1,
+					Vcpu:          2,
+					Ram:           1024,
+					Template:      "pke-template",
+					AdminUsername: "root",
+				},
 			},
 		},
 		"ack": pipeline.CreateClusterRequest{
