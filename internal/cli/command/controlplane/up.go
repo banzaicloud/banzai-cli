@@ -30,7 +30,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/imdario/mergo"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 
@@ -132,33 +131,31 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		return errors.New("workspace is already initialized but a different --provider is specified")
 	}
 
-	source := "/export"
 	var defaultValues map[string]interface{}
 	exportHandlers := []ExportedFilesHandler{
-		defaultValuesExporter(filepath.Join(strings.TrimPrefix(source, "/"), "values.yaml"), &defaultValues),
+		defaultValuesExporter("export/values.yaml", &defaultValues),
 	}
-	if err := processExports(options.cpContext, source, exportHandlers); err != nil {
+
+	var imageMeta ImageMetadata
+	if values["provider"] == providerCustom {
+		log.Debug("parsing metadata")
+		exportHandlers = append(exportHandlers, metadataExporter(metadataFile, &imageMeta))
+	}
+
+	if err := processExports(options.cpContext, exportPath, exportHandlers); err != nil {
 		return err
 	}
+
+	log.Debugf("custom image metadata: %+v", imageMeta)
+
 	if err := writeMergedValues(options.cpContext, defaultValues, values); err != nil {
 		return err
 	}
 
 	env := make(map[string]string)
 
-	switch values["provider"] {
-	case providerCustom:
-		if pc, ok := values["providerConfig"]; ok {
-			pc := cast.ToStringMap(pc)
-			if _, ok := pc["accessKey"]; ok { // if using aws key
-				_, creds, err := input.GetAmazonCredentials()
-				if err != nil {
-					return errors.WrapIf(err, "failed to get AWS credentials")
-				}
-				env = creds
-			}
-		}
-	case providerEc2:
+	if values["provider"] == providerEc2 || imageMeta.Custom.CredentialType == "aws" {
+		log.Debug("using local AWS credentials")
 		_, creds, err := input.GetAmazonCredentials()
 		if err != nil {
 			return errors.WrapIf(err, "failed to get AWS credentials")

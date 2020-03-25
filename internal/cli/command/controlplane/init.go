@@ -52,13 +52,15 @@ const (
 		}
 	}
 }`
+	exportPath   = "/export"
+	metadataFile = "export/metadata.yaml"
 )
 
 type ImageMetadata struct {
 	Custom struct {
-		CredentialType      *string `yaml:"credentialType,omitempty"`
-		Enabled             bool    `yaml:"enabled"`
-		GenerateClusterName bool    `yaml:"generateClusterName"`
+		CredentialType      string `yaml:"credentialType,omitempty"`
+		Enabled             bool   `yaml:"enabled"`
+		GenerateClusterName bool   `yaml:"generateClusterName"`
 	}
 }
 
@@ -147,17 +149,6 @@ func askProvider(k8sContext string) (string, error) {
 	}
 
 	return lookup[provider], nil
-}
-
-func askCredential() (string, error) {
-	choices := []string{"Use Amazon credentials", "Don't use provider credentials"}
-	lookup := []string{"aws", "none"}
-
-	var providerCreds int
-	if err := survey.AskOne(&survey.Select{Message: "Select provider:", Options: choices}, &providerCreds); err != nil {
-		return "", err
-	}
-	return lookup[providerCreds], nil
 }
 
 func runInit(options initOptions, banzaiCli cli.Cli) error {
@@ -276,17 +267,12 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 			return err
 		}
 		providerConfig["region"] = region
-		providerConfig["accessKey"] = id
 		providerConfig["tags"] = map[string]string{
 			"banzaicloud-pipeline-controlplane-uuid": uuID,
 			"local-id":                               fmt.Sprintf("%s@%s/%s", os.Getenv("USER"), hostname, filepath.Base(options.workspace)),
 		}
 
-		var confirmed bool
-		_ = survey.AskOne(&survey.Confirm{Message: fmt.Sprintf("Do you want to use the following AWS access key: %s?", id)}, &confirmed)
-		if !confirmed {
-			return errors.New("cancelled")
-		}
+		log.Infof("The following AWS key will be used: %v", id)
 
 		if out[externalHost] == nil {
 			out[externalHost] = autoHost // address of ec2 instance
@@ -304,48 +290,35 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		out[externalHost] = guessExternalAddr()
 
 	case providerCustom:
-		source := "/export"
-
-		hasExports, err := imageFileExists(options.cpContext, source)
+		hasExports, err := imageFileExists(options.cpContext, exportPath)
 		if err != nil {
 			return err
 		}
 
+		if !hasExports {
+			return errors.New("The provided custom image has no metadata")
+		}
+
 		imageMeta := &ImageMetadata{}
-		if hasExports {
-			metadataFile := filepath.Join(strings.TrimPrefix(source, "/"), "metadata.yaml")
-			exportHandlers := []ExportedFilesHandler{
-				metadataExporter(metadataFile, imageMeta),
-			}
-			if err := processExports(options.cpContext, source, exportHandlers); err != nil {
-				return err
-			}
+		exportHandlers := []ExportedFilesHandler{
+			metadataExporter(metadataFile, imageMeta),
 		}
 
-		var providerCreds string
-		if imageMeta.Custom.CredentialType == nil {
-			providerCreds, err = askCredential()
-			if err != nil {
-				return err
-			}
-		} else {
-			providerCreds = *imageMeta.Custom.CredentialType
+		if err := processExports(options.cpContext, exportPath, exportHandlers); err != nil {
+			return err
 		}
 
-		if providerCreds == "aws" {
+		switch imageMeta.Custom.CredentialType {
+		case "aws":
 			id, region, err := getAmazonCredentialsRegion(defaultAwsRegion)
 			if err != nil {
 				return err
 			}
 			providerConfig["region"] = region
-			providerConfig["accessKey"] = id
 
-			var confirmed bool
-			_ = survey.AskOne(&survey.Confirm{Message: fmt.Sprintf("Do you want to use the following AWS access key: %s?", id)}, &confirmed)
-			if !confirmed {
-				return errors.New("cancelled")
-			}
+			log.Infof("The following AWS key will be used: %v", id)
 		}
+
 		out["ingressHostPort"] = false
 		providerConfig["tags"] = map[string]string{
 			"banzaicloud-pipeline-controlplane-uuid": uuID,
