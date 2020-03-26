@@ -318,10 +318,6 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 		}
 	}
 
-	if options.name != "" {
-		out["name"] = options.name
-	}
-
 	if out["cloud"] == nil && out["type"] == nil {
 		err := buildDefaultRequest(out)
 		if err != nil {
@@ -343,6 +339,10 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 	secretID, err := buildSecretChoice(banzaiCli, orgID, cloud, out)
 	if err != nil {
 		return err
+	}
+
+	if options.name != "" {
+		out["name"] = options.name
 	}
 
 	if out["name"] == nil || out["name"] == "" {
