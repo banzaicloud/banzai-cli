@@ -17,6 +17,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"emperror.dev/errors"
 	"github.com/spf13/cobra"
@@ -75,8 +76,14 @@ func isServiceEnabled(ctx context.Context, banzaiCLI cli.Cli, serviceName string
 		return errors.WrapIf(err, "failed to retrieve capabilities")
 	}
 
+	serviceName = strings.ToLower(serviceName)
 	if services, ok := capabilities[serviceKeyOnCap]; ok {
-		if s, ok := services[serviceName]; ok {
+		lowerCaseServiceMap := map[string]interface{}{}
+		for k, v := range services {
+			lowerCaseServiceMap[strings.ToLower(k)] = v
+		}
+
+		if s, ok := lowerCaseServiceMap[serviceName]; ok {
 			if svc, ok := s.(map[string]interface{}); ok {
 				if en, ok := svc[enabledKeyOnCap]; ok {
 					if enabled, ok := en.(bool); ok {
