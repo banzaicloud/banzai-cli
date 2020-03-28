@@ -78,12 +78,17 @@ func isServiceEnabled(ctx context.Context, banzaiCLI cli.Cli, serviceName string
 
 	serviceName = strings.ToLower(serviceName)
 	if services, ok := capabilities[serviceKeyOnCap]; ok {
-		lowerCaseServiceMap := map[string]interface{}{}
+		var (
+			s  interface{}
+			ok bool
+		)
 		for k, v := range services {
-			lowerCaseServiceMap[strings.ToLower(k)] = v
+			if strings.ToLower(k) == serviceName {
+				s, ok = v, true
+				break
+			}
 		}
-
-		if s, ok := lowerCaseServiceMap[serviceName]; ok {
+		if ok {
 			if svc, ok := s.(map[string]interface{}); ok {
 				if en, ok := svc[enabledKeyOnCap]; ok {
 					if enabled, ok := en.(bool); ok {
