@@ -160,6 +160,11 @@ func (c *cpContext) tfstatePath() string {
 	return filepath.Join(c.workspace, tfstateFilename)
 }
 
+func (c *cpContext) tfstateExists() bool {
+	_, err := os.Stat(c.tfstatePath())
+	return err == nil
+}
+
 func (c *cpContext) deleteTfstate() error {
 	_, err := os.Stat(c.tfstatePath())
 	if os.IsNotExist(err) {
