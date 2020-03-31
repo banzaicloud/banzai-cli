@@ -17,7 +17,6 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/huandu/xstrings v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.7
-	github.com/json-iterator/go v1.1.6
 	github.com/mattn/go-isatty v0.0.8
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.1.2

@@ -82,6 +82,7 @@ Class | Method | HTTP request | Description
 *ClustergroupsApi* | [**ApiV1OrgsOrgidClustergroupsClusterGroupIdPut**](docs/ClustergroupsApi.md#apiv1orgsorgidclustergroupsclustergroupidput) | **Put** /api/v1/orgs/{orgid}/clustergroups/{clusterGroupId} | Update Cluster Group
 *ClustergroupsApi* | [**ApiV1OrgsOrgidClustergroupsGet**](docs/ClustergroupsApi.md#apiv1orgsorgidclustergroupsget) | **Get** /api/v1/orgs/{orgid}/clustergroups | List Cluster Groups of an Organization
 *ClustergroupsApi* | [**ApiV1OrgsOrgidClustergroupsPost**](docs/ClustergroupsApi.md#apiv1orgsorgidclustergroupspost) | **Post** /api/v1/orgs/{orgid}/clustergroups | Create Cluster Group
+*ClustersApi* | [**CancelNodePoolUpdate**](docs/ClustersApi.md#cancelnodepoolupdate) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/nodepools/{name}/cancel-update/{processId} | Cancel a running node pool update process
 *ClustersApi* | [**ClusterPostHooks**](docs/ClustersApi.md#clusterposthooks) | **Put** /api/v1/orgs/{orgId}/clusters/{id}/posthooks | Run posthook functions
 *ClustersApi* | [**CreateCluster**](docs/ClustersApi.md#createcluster) | **Post** /api/v1/orgs/{orgId}/clusters | Create cluster
 *ClustersApi* | [**CreateNodePool**](docs/ClustersApi.md#createnodepool) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/nodepools | Create new node pool
@@ -110,6 +111,7 @@ Class | Method | HTTP request | Description
 *ClustersApi* | [**PostLeaderElection**](docs/ClustersApi.md#postleaderelection) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/pke/leader | Apply as new cluster leader
 *ClustersApi* | [**PostReadyPKENode**](docs/ClustersApi.md#postreadypkenode) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/pke/ready | Report to Pipeline that a new node is ready (to be called by PKE installer)
 *ClustersApi* | [**UpdateCluster**](docs/ClustersApi.md#updatecluster) | **Put** /api/v1/orgs/{orgId}/clusters/{id} | Update cluster
+*ClustersApi* | [**UpdateNodePool**](docs/ClustersApi.md#updatenodepool) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/nodepools/{name}/update | Update an existing node pool
 *CommonApi* | [**ApiVersionGet**](docs/CommonApi.md#apiversionget) | **Get** /api/version | 
 *CommonApi* | [**ListEndpoints**](docs/CommonApi.md#listendpoints) | **Get** /api | List Pipeline API endpoints
 *DeploymentsApi* | [**CreateDeployment**](docs/DeploymentsApi.md#createdeployment) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/deployments | Create a Helm deployment
@@ -148,6 +150,8 @@ Class | Method | HTTP request | Description
 *OrganizationsApi* | [**ListOrgs**](docs/OrganizationsApi.md#listorgs) | **Get** /api/v1/orgs | List organizations
 *OrganizationsApi* | [**SyncOrgs**](docs/OrganizationsApi.md#syncorgs) | **Put** /api/v1/orgs | Synchronize Github organizations
 *PipelineApi* | [**ListCapabilities**](docs/PipelineApi.md#listcapabilities) | **Get** /api/v1/capabilities | Lists configured Pipeline capabilities
+*ProcessesApi* | [**GetProcess**](docs/ProcessesApi.md#getprocess) | **Get** /api/v1/orgs/{orgId}/processes/{id} | Get a process in Pipeline
+*ProcessesApi* | [**ListProcesses**](docs/ProcessesApi.md#listprocesses) | **Get** /api/v1/orgs/{orgId}/processes | List processes in Pipeline
 *ScanlogApi* | [**ListScans**](docs/ScanlogApi.md#listscans) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/scanlog | List scans
 *ScanlogApi* | [**ListScansByRelease**](docs/ScanlogApi.md#listscansbyrelease) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/scanlog/{releaseName} | List scans by release
 *SecretsApi* | [**AddSecretTag**](docs/SecretsApi.md#addsecrettag) | **Put** /api/v1/orgs/{orgId}/secrets/{secretId}/tags/{tag} | Add a tag to a secret
@@ -199,6 +203,7 @@ Class | Method | HTTP request | Description
  - [BackupServiceResponse](docs/BackupServiceResponse.md)
  - [BackupServiceStatusResponse](docs/BackupServiceStatusResponse.md)
  - [BasePostHook](docs/BasePostHook.md)
+ - [BaseUpdateNodePoolRequest](docs/BaseUpdateNodePoolRequest.md)
  - [BucketInfo](docs/BucketInfo.md)
  - [BucketInfoSecret](docs/BucketInfoSecret.md)
  - [ClusterConfig](docs/ClusterConfig.md)
@@ -275,6 +280,8 @@ Class | Method | HTTP request | Description
  - [EksNodePool](docs/EksNodePool.md)
  - [EksNodePoolAllOf](docs/EksNodePoolAllOf.md)
  - [EksSubnet](docs/EksSubnet.md)
+ - [EksUpdateNodePoolRequest](docs/EksUpdateNodePoolRequest.md)
+ - [EksUpdateNodePoolRequestAllOf](docs/EksUpdateNodePoolRequestAllOf.md)
  - [EksVpc](docs/EksVpc.md)
  - [EnableArkRequest](docs/EnableArkRequest.md)
  - [EnableArkResponse](docs/EnableArkResponse.md)
@@ -357,6 +364,9 @@ Class | Method | HTTP request | Description
  - [PostLeaderElectionRequest](docs/PostLeaderElectionRequest.md)
  - [PostLeaderElectionResponse](docs/PostLeaderElectionResponse.md)
  - [PostReadyPkeNodeRequest](docs/PostReadyPkeNodeRequest.md)
+ - [Process](docs/Process.md)
+ - [ProcessEvent](docs/ProcessEvent.md)
+ - [ProcessStatus](docs/ProcessStatus.md)
  - [ReleaseWhiteListItem](docs/ReleaseWhiteListItem.md)
  - [RequestedResources](docs/RequestedResources.md)
  - [Resource](docs/Resource.md)
@@ -400,6 +410,8 @@ Class | Method | HTTP request | Description
  - [UpdateGoogleProperties](docs/UpdateGoogleProperties.md)
  - [UpdateGooglePropertiesMaster](docs/UpdateGooglePropertiesMaster.md)
  - [UpdateIntegratedServiceRequest](docs/UpdateIntegratedServiceRequest.md)
+ - [UpdateNodePoolRequest](docs/UpdateNodePoolRequest.md)
+ - [UpdateNodePoolResponse](docs/UpdateNodePoolResponse.md)
  - [UpdateNodePoolsAzure](docs/UpdateNodePoolsAzure.md)
  - [UpdateNodePoolsGoogle](docs/UpdateNodePoolsGoogle.md)
  - [UpdateNodePoolsPke](docs/UpdateNodePoolsPke.md)
