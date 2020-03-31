@@ -355,6 +355,7 @@ func initStateBackend(options *cpContext, values map[string]interface{}, env map
 		if err != nil {
 			return errors.WrapIf(err, "failed to marshal state backend configuration")
 		}
+		options.explicitState = true
 	} else {
 		stateData = []byte(fmt.Sprintf(localStateBackend, tfstateFilename))
 	}

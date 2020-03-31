@@ -51,6 +51,7 @@ type cpContext struct {
 	refreshState        bool
 	pullInstaller       bool
 	autoApprove         bool
+	explicitState       bool
 	workspace           string
 	banzaiCli           cli.Cli
 	installerPulled     *sync.Once
@@ -158,6 +159,11 @@ func (c *cpContext) kubeconfigExists() bool {
 
 func (c *cpContext) tfstatePath() string {
 	return filepath.Join(c.workspace, tfstateFilename)
+}
+
+func (c *cpContext) tfstateExists() bool {
+	_, err := os.Stat(c.tfstatePath())
+	return err == nil
 }
 
 func (c *cpContext) deleteTfstate() error {
