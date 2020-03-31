@@ -47,7 +47,8 @@ const (
 	"terraform": {
 		"backend": {
 			"local": {
-				"path": "/workspace/%s"
+				"path": "/workspace/%s",
+				"workspace_dir": "/workspace/"
 			}
 		}
 	}

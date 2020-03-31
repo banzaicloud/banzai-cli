@@ -262,10 +262,13 @@ func runTerraformCommandGeneric(options *cpContext, cmd []string, cmdEnv map[str
 			"-v", fmt.Sprintf("%s:/terraform/state.tf.json", options.workspace+"/state.tf.json"),
 			"-v", fmt.Sprintf("%s:/terraform/.terraform/terraform.tfstate", options.workspace+"/.terraform/terraform.tfstate"),
 		}
+		if options.explicitState && options.tfstateExists() {
+			args = append(args, "-v", fmt.Sprintf("%s:/terraform/terraform.tfstate", options.tfstatePath()))
+		}
 		if options.banzaiCli.Interactive() {
 			args = append(args, "-ti")
 		}
-		for key, _ := range cmdEnv {
+		for key := range cmdEnv {
 			args = append(args, "-e", key)
 		}
 		return runDocker(cmd, options, args, cmdOpt)
@@ -274,6 +277,9 @@ func runTerraformCommandGeneric(options *cpContext, cmd []string, cmdEnv map[str
 			"--mount", fmt.Sprintf("type=bind,src=%s,dst=/workspace,options=rbind:rw", options.workspace),
 			"--mount", fmt.Sprintf("type=bind,src=%s,dst=/terraform/state.tf.json,options=rbind:rw", options.workspace+"/state.tf.json"),
 			"--mount", fmt.Sprintf("type=bind,src=%s,dst=/terraform/.terraform/terraform.tfstate,options=rbind:rw", options.workspace+"/.terraform/terraform.tfstate"),
+		}
+		if options.explicitState && options.tfstateExists() {
+			args = append(args, "--mount", fmt.Sprintf("type=bind,src=%s,dst=/terraform/terraform.tfstate,options=rbind:rw", options.tfstatePath()))
 		}
 		if options.banzaiCli.Interactive() {
 			args = append(args, "-t")
