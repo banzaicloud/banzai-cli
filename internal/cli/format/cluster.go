@@ -21,6 +21,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var clusterFields = []string{"Id", "Name", "Distribution", "Location", "CreatorName", "CreatedAt", "Status", "StatusMessage"}
+
 // ClusterShortWrite writes the basic params of a cluster to the output.
 func ClusterShortWrite(context formatContext, data interface{}) {
 	clustersWrite(context.Out(), context.OutputFormat(), context.Color(), []interface{}{data}, []string{"Id", "Name"})
@@ -28,12 +30,12 @@ func ClusterShortWrite(context formatContext, data interface{}) {
 
 // ClusterWrite writes a cluster to the output.
 func ClusterWrite(context formatContext, data interface{}) {
-	clustersWrite(context.Out(), context.OutputFormat(), context.Color(), []interface{}{data}, []string{"Id", "Name", "Distribution", "CreatorName", "CreatedAt", "Status", "StatusMessage"})
+	clustersWrite(context.Out(), context.OutputFormat(), context.Color(), []interface{}{data}, clusterFields)
 }
 
 // ClustersWrite writes a cluster list to the output.
 func ClustersWrite(context formatContext, data interface{}) {
-	clustersWrite(context.Out(), context.OutputFormat(), context.Color(), data, []string{"Id", "Name", "Distribution", "CreatorName", "CreatedAt", "Status"})
+	clustersWrite(context.Out(), context.OutputFormat(), context.Color(), data, clusterFields)
 }
 
 func clustersWrite(out io.Writer, format string, color bool, data interface{}, fields []string) {
