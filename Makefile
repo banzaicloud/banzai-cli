@@ -45,19 +45,6 @@ bin/packr2-${PACKR_VERSION}:
 	@mkdir -p bin
 	curl -L https://github.com/gobuffalo/packr/releases/download/v${PACKR_VERSION}/packr_${PACKR_VERSION}_${OS}_amd64.tar.gz | tar -zOxf - packr2 > ./bin/packr2-${PACKR_VERSION} && chmod +x ./bin/packr2-${PACKR_VERSION}
 
-.PHONY: client-build
-client-build: ## Build form client
-	@${MAKE} -C internal/cli/command/form/web build
-
-.PHONY: client-bundle
-client-bundle: bin/packr2 ## Bundle client assets
-	cd internal/cli/command/form && $(abspath bin/packr2)
-
-.PHONY: pre-build
-pre-build: ## Pre build bundles of static assets
-	@${MAKE} client-build
-	@${MAKE} client-bundle
-
 .PHONY: build
 build: ## Build a binary
 ifeq (${VERBOSE}, 1)
@@ -78,7 +65,7 @@ debug: build-debug
 
 .PHONY: build-release
 build-release: LDFLAGS += -w
-build-release: pre-build build ## Build a binary without debug information
+build-release: build ## Build a binary without debug information
 
 .PHONY: generate-banzai-cli-docs
 generate-banzai-cli-docs: ## Generate documentation for Banzai CLI
