@@ -36,7 +36,8 @@ import (
 
 type shellOptions struct {
 	clustercontext.Context
-	wrapHelm bool
+	wrapHelm   bool
+	configFile string
 }
 
 func NewShellCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -69,6 +70,7 @@ func NewShellCommand(banzaiCli cli.Cli) *cobra.Command {
 	}
 
 	cmd.Flags().BoolVar(&options.wrapHelm, "wrap-helm", true, "Wrap the helm command with a version that downloads the matching version and creates a custom helm home")
+	cmd.Flags().StringVarP(&options.configFile, "config", "", "", "K8S config file")
 
 	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "run a shell for")
 
@@ -83,15 +85,19 @@ func writeConfig(ctx context.Context, client *pipeline.APIClient, orgId, id int3
 		return
 	}
 
-	if _, err = tmpfile.Write([]byte(config.Data)); err != nil {
-		err = errors.WrapIf(err, "could not write temporary file")
-		return
+	return false, writeConfigData([]byte(config.Data), tmpfile)
+}
+
+func writeConfigData(raw []byte, tmpfile io.WriteCloser) error {
+	if _, err := tmpfile.Write(raw); err != nil {
+		return errors.WrapIf(err, "could not write temporary file")
 	}
 
-	if err = tmpfile.Close(); err != nil {
-		err = errors.WrapIf(err, "could not close temporary file")
+	if err := tmpfile.Close(); err != nil {
+		return errors.WrapIf(err, "could not close temporary file")
 	}
-	return
+
+	return nil
 }
 
 func runShell(banzaiCli cli.Cli, options shellOptions, args []string) error {
@@ -136,32 +142,44 @@ func runShell(banzaiCli cli.Cli, options shellOptions, args []string) error {
 		commandArgs = args[1:]
 	}
 
-	retry, err := writeConfig(ctx, pipeline, orgId, id, tmpfile)
-	if err != nil {
-		if !interactive || !retry {
-			return errors.WrapIf(err, "writing kubeconfig")
+	if options.configFile == "" {
+		retry, err := writeConfig(ctx, pipeline, orgId, id, tmpfile)
+		if err != nil {
+			if !interactive || !retry {
+				return errors.WrapIf(err, "writing kubeconfig")
+			}
+
+			go func() {
+				for {
+					retry, err := writeConfig(ctx, pipeline, orgId, id, tmpfile)
+					if err != nil {
+						if !retry {
+							log.Fatalf("%v", err)
+						}
+						log.Warningf("cluster config is still not available. retrying in 30 seconds")
+					} else {
+						log.Infof("cluster config successfully written")
+						return
+					}
+
+					select {
+					case <-time.After(30 * time.Second):
+					case <-ctx.Done():
+						return
+					}
+				}
+			}()
+		}
+	} else {
+		// write config file into temp file
+		raw, err := ioutil.ReadFile(options.configFile)
+		if err != nil {
+			return errors.WrapIff(err, "failed to load file", "filename", options.configFile)
 		}
 
-		go func() {
-			for {
-				retry, err := writeConfig(ctx, pipeline, orgId, id, tmpfile)
-				if err != nil {
-					if !retry {
-						log.Fatalf("%v", err)
-					}
-					log.Warningf("cluster config is still not available. retrying in 30 seconds")
-				} else {
-					log.Infof("cluster config successfully written")
-					return
-				}
-
-				select {
-				case <-time.After(30 * time.Second):
-				case <-ctx.Done():
-					return
-				}
-			}
-		}()
+		if err := writeConfigData(raw, tmpfile); err != nil {
+			return errors.WrapIff(err, "failed to read file", "filename", options.configFile)
+		}
 	}
 
 	org, _, err := pipeline.OrganizationsApi.GetOrg(ctx, orgId)
