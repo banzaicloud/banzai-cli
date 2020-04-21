@@ -174,11 +174,11 @@ func runShell(banzaiCli cli.Cli, options shellOptions, args []string) error {
 		// write config file into temp file
 		raw, err := ioutil.ReadFile(options.configFile)
 		if err != nil {
-			return errors.WrapIff(err, "failed to load file", "filename", options.configFile)
+			return errors.WrapIfWithDetails(err, "failed to load file", "filename", options.configFile)
 		}
 
 		if err := writeConfigData(raw, tmpfile); err != nil {
-			return errors.WrapIff(err, "failed to read file", "filename", options.configFile)
+			return errors.WrapIfWithDetails(err, "failed to read file", "filename", options.configFile)
 		}
 	}
 
