@@ -311,13 +311,12 @@ func (a *app) requestTokenFromPipeline(rawIDToken string, refreshToken string) (
 		return "", fmt.Errorf("request returned: %s", string(body))
 	}
 
-	for _, cookie := range resp.Cookies() {
-		if cookie.Name == "user_sess" {
-			return cookie.Value, nil
-		}
+	sessionToken := resp.Header.Get("Authorization")
+	if sessionToken != "" {
+		return sessionToken, nil
 	}
 
-	return "", fmt.Errorf("failed to find user_sess cookie in Pipeline response")
+	return "", fmt.Errorf("failed to find Authorization header in Pipeline response")
 }
 
 func (a *app) waitShutdown(server *http.Server) {

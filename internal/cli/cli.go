@@ -199,6 +199,8 @@ func (c curlRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) {
 
 	log.Debug(command.String())
 
+	r.Header.Add("Client", "banzai-cli")
+
 	return c.base.RoundTrip(r)
 }
 
