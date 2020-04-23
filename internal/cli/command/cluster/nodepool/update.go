@@ -16,7 +16,6 @@ package nodepool
 
 import (
 	"context"
-	"time"
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
@@ -105,9 +104,6 @@ func updateNodePool(banzaiCli cli.Cli, options updateOptions, args []string) err
 
 		return err
 	}
-
-	// We need to give some time for the process to appear
-	time.Sleep(1 * time.Second)
 
 	return process.TailProcess(banzaiCli, response.ProcessId)
 }

@@ -26,14 +26,24 @@ import (
 	"github.com/banzaicloud/banzai-cli/pkg/spinner"
 )
 
+const processVisibleThreshold = 3
+
 func TailProcess(banzaiCli cli.Cli, processId string) error {
 	client := banzaiCli.Client()
 	orgID := banzaiCli.Context().OrganizationID()
 
 	statuses := map[string]*spinner.Status{}
 
+	processVisibleChecks := 0
+
 	for {
 		process, resp, err := client.ProcessesApi.GetProcess(context.Background(), orgID, processId)
+		// we need to give some time for the process to appear
+		if resp != nil && resp.StatusCode == 404 && processVisibleChecks < processVisibleThreshold {
+			processVisibleChecks++
+			time.Sleep(2 * time.Second)
+			continue
+		}
 		if err != nil {
 			return errors.WrapIf(err, "failed to list node pool update processes")
 		}
