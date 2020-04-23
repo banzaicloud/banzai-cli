@@ -30,7 +30,6 @@ GOTESTSUM_VERSION = 0.4.1
 GOLANGCI_VERSION = 1.24.0
 LICENSEI_VERSION = 0.1.0
 GORELEASER_VERSION = 0.112.2
-PACKR_VERSION = 2.6.0
 OPENAPI_GENERATOR_VERSION = v4.2.3
 
 GOLANG_VERSION = 1.14
@@ -38,12 +37,6 @@ GOLANG_VERSION = 1.14
 # Add the ability to override some variables
 # Use with care
 -include override.mk
-
-bin/packr2: bin/packr2-${PACKR_VERSION}
-	@ln -sf packr2-${PACKR_VERSION} bin/packr2
-bin/packr2-${PACKR_VERSION}:
-	@mkdir -p bin
-	curl -L https://github.com/gobuffalo/packr/releases/download/v${PACKR_VERSION}/packr_${PACKR_VERSION}_${OS}_amd64.tar.gz | tar -zOxf - packr2 > ./bin/packr2-${PACKR_VERSION} && chmod +x ./bin/packr2-${PACKR_VERSION}
 
 .PHONY: build
 build: ## Build a binary
