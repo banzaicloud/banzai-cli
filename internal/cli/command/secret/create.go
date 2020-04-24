@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"sort"
 	"strings"
 
 	"emperror.dev/errors"
@@ -348,6 +349,8 @@ func surveySecretType(options *createSecretOptions, secretTypes map[string]pipel
 		for name := range secretTypes {
 			typeOptions = append(typeOptions, name)
 		}
+
+		sort.Strings(typeOptions)
 
 		selectTypePrompt := &survey.Select{
 			Message:  "Choose secret type:",
