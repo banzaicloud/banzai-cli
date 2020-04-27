@@ -4,6 +4,7 @@ All URIs are relative to *http://localhost:9090*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**CancelNodePoolUpdate**](ClustersApi.md#CancelNodePoolUpdate) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/nodepools/{name}/cancel-update/{processId} | Cancel a running node pool update process
 [**ClusterPostHooks**](ClustersApi.md#ClusterPostHooks) | **Put** /api/v1/orgs/{orgId}/clusters/{id}/posthooks | Run posthook functions
 [**CreateCluster**](ClustersApi.md#CreateCluster) | **Post** /api/v1/orgs/{orgId}/clusters | Create cluster
 [**CreateNodePool**](ClustersApi.md#CreateNodePool) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/nodepools | Create new node pool
@@ -32,7 +33,43 @@ Method | HTTP request | Description
 [**PostLeaderElection**](ClustersApi.md#PostLeaderElection) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/pke/leader | Apply as new cluster leader
 [**PostReadyPKENode**](ClustersApi.md#PostReadyPKENode) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/pke/ready | Report to Pipeline that a new node is ready (to be called by PKE installer)
 [**UpdateCluster**](ClustersApi.md#UpdateCluster) | **Put** /api/v1/orgs/{orgId}/clusters/{id} | Update cluster
+[**UpdateNodePool**](ClustersApi.md#UpdateNodePool) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/nodepools/{name}/update | Update an existing node pool
 
+
+
+## CancelNodePoolUpdate
+
+> CancelNodePoolUpdate(ctx, orgId, id, name, processId)
+
+Cancel a running node pool update process
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
+**name** | **string**| Node pool name | 
+**processId** | **string**| Node pool update process ID | 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json, application/problem+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
 
 
 ## ClusterPostHooks
@@ -1046,6 +1083,41 @@ Name | Type | Description  | Notes
 
 - **Content-Type**: application/json
 - **Accept**: application/json, application/problem+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## UpdateNodePool
+
+> UpdateNodePoolResponse UpdateNodePool(ctx, orgId, id, name, updateNodePoolRequest)
+
+Update an existing node pool
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
+**name** | **string**| Node pool name | 
+**updateNodePoolRequest** | [**UpdateNodePoolRequest**](UpdateNodePoolRequest.md)|  | 
+
+### Return type
+
+[**UpdateNodePoolResponse**](UpdateNodePoolResponse.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json, application/problem+json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

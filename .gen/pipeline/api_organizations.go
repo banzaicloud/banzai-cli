@@ -215,7 +215,7 @@ func (a *OrganizationsApiService) ListOrgs(ctx _context.Context) ([]Organization
 }
 
 /*
-SyncOrgs Synchronize Github organizations
+SyncOrgs Synchronize organizations
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 */
 func (a *OrganizationsApiService) SyncOrgs(ctx _context.Context) (*_nethttp.Response, error) {

@@ -12,11 +12,17 @@
 package pipeline
 // CreatePkeOnVsphereClusterRequestAllOf struct for CreatePkeOnVsphereClusterRequestAllOf
 type CreatePkeOnVsphereClusterRequestAllOf struct {
-	// Folder to create nodes in.
+	// Secret ID used to setup VSphere storage classes. Overrides the default settings in main cluster secret.
+	StorageSecretId string `json:"storageSecretId,omitempty"`
+	// Secret name used to setup VSphere storage classes. Overrides default value from the main cluster secret.
+	StorageSecretName string `json:"storageSecretName,omitempty"`
+	// Folder to create nodes in. Overrides default value from the main cluster secret.
 	Folder string `json:"folder,omitempty"`
-	// Name of datastore or datastore cluster to place VM disks on.
+	// Name of datastore or datastore cluster to place VM disks on. Overrides default value from the main cluster secret.
 	Datastore string `json:"datastore,omitempty"`
-	// Virtual machines will be created in this resource pool.
+	// Virtual machines will be created in this resource pool. Overrides default value from the main cluster secret.
 	ResourcePool string `json:"resourcePool,omitempty"`
 	NodePools []PkeOnVsphereNodePool `json:"nodePools,omitempty"`
+	// IPv4 range to allocate addresses for LoadBalancer Services (MetalLB)
+	LoadBalancerIPRange string `json:"loadBalancerIPRange,omitempty"`
 }

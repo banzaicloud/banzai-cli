@@ -21,6 +21,7 @@ Name | Type | Description | Notes
 **CreatorName** | **string** |  | [optional] 
 **CreatorId** | **int32** |  | [optional] 
 **Region** | **string** |  | [optional] 
+**Oidc** | [**OidcConfig**](OIDCConfig.md) |  | [optional] 
 **NodePools** | [**map[string]NodePoolStatus**](NodePoolStatus.md) |  | [optional] 
 **TotalSummary** | [**ResourceSummary**](ResourceSummary.md) |  | [optional] 
 

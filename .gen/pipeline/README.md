@@ -82,6 +82,7 @@ Class | Method | HTTP request | Description
 *ClustergroupsApi* | [**ApiV1OrgsOrgidClustergroupsClusterGroupIdPut**](docs/ClustergroupsApi.md#apiv1orgsorgidclustergroupsclustergroupidput) | **Put** /api/v1/orgs/{orgid}/clustergroups/{clusterGroupId} | Update Cluster Group
 *ClustergroupsApi* | [**ApiV1OrgsOrgidClustergroupsGet**](docs/ClustergroupsApi.md#apiv1orgsorgidclustergroupsget) | **Get** /api/v1/orgs/{orgid}/clustergroups | List Cluster Groups of an Organization
 *ClustergroupsApi* | [**ApiV1OrgsOrgidClustergroupsPost**](docs/ClustergroupsApi.md#apiv1orgsorgidclustergroupspost) | **Post** /api/v1/orgs/{orgid}/clustergroups | Create Cluster Group
+*ClustersApi* | [**CancelNodePoolUpdate**](docs/ClustersApi.md#cancelnodepoolupdate) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/nodepools/{name}/cancel-update/{processId} | Cancel a running node pool update process
 *ClustersApi* | [**ClusterPostHooks**](docs/ClustersApi.md#clusterposthooks) | **Put** /api/v1/orgs/{orgId}/clusters/{id}/posthooks | Run posthook functions
 *ClustersApi* | [**CreateCluster**](docs/ClustersApi.md#createcluster) | **Post** /api/v1/orgs/{orgId}/clusters | Create cluster
 *ClustersApi* | [**CreateNodePool**](docs/ClustersApi.md#createnodepool) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/nodepools | Create new node pool
@@ -110,6 +111,7 @@ Class | Method | HTTP request | Description
 *ClustersApi* | [**PostLeaderElection**](docs/ClustersApi.md#postleaderelection) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/pke/leader | Apply as new cluster leader
 *ClustersApi* | [**PostReadyPKENode**](docs/ClustersApi.md#postreadypkenode) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/pke/ready | Report to Pipeline that a new node is ready (to be called by PKE installer)
 *ClustersApi* | [**UpdateCluster**](docs/ClustersApi.md#updatecluster) | **Put** /api/v1/orgs/{orgId}/clusters/{id} | Update cluster
+*ClustersApi* | [**UpdateNodePool**](docs/ClustersApi.md#updatenodepool) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/nodepools/{name}/update | Update an existing node pool
 *CommonApi* | [**ApiVersionGet**](docs/CommonApi.md#apiversionget) | **Get** /api/version | 
 *CommonApi* | [**ListEndpoints**](docs/CommonApi.md#listendpoints) | **Get** /api | List Pipeline API endpoints
 *DeploymentsApi* | [**CreateDeployment**](docs/DeploymentsApi.md#createdeployment) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/deployments | Create a Helm deployment
@@ -146,8 +148,10 @@ Class | Method | HTTP request | Description
 *NetworkApi* | [**ListVPCSubnets**](docs/NetworkApi.md#listvpcsubnets) | **Get** /api/v1/orgs/{orgId}/networks/{networkId}/subnets | List VPC subnetworks
 *OrganizationsApi* | [**GetOrg**](docs/OrganizationsApi.md#getorg) | **Get** /api/v1/orgs/{orgId} | Get organization
 *OrganizationsApi* | [**ListOrgs**](docs/OrganizationsApi.md#listorgs) | **Get** /api/v1/orgs | List organizations
-*OrganizationsApi* | [**SyncOrgs**](docs/OrganizationsApi.md#syncorgs) | **Put** /api/v1/orgs | Synchronize Github organizations
+*OrganizationsApi* | [**SyncOrgs**](docs/OrganizationsApi.md#syncorgs) | **Put** /api/v1/orgs | Synchronize organizations
 *PipelineApi* | [**ListCapabilities**](docs/PipelineApi.md#listcapabilities) | **Get** /api/v1/capabilities | Lists configured Pipeline capabilities
+*ProcessesApi* | [**GetProcess**](docs/ProcessesApi.md#getprocess) | **Get** /api/v1/orgs/{orgId}/processes/{id} | Get a process in Pipeline
+*ProcessesApi* | [**ListProcesses**](docs/ProcessesApi.md#listprocesses) | **Get** /api/v1/orgs/{orgId}/processes | List processes in Pipeline
 *ScanlogApi* | [**ListScans**](docs/ScanlogApi.md#listscans) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/scanlog | List scans
 *ScanlogApi* | [**ListScansByRelease**](docs/ScanlogApi.md#listscansbyrelease) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/scanlog/{releaseName} | List scans by release
 *SecretsApi* | [**AddSecretTag**](docs/SecretsApi.md#addsecrettag) | **Put** /api/v1/orgs/{orgId}/secrets/{secretId}/tags/{tag} | Add a tag to a secret
@@ -161,10 +165,6 @@ Class | Method | HTTP request | Description
 *SecretsApi* | [**ListSecretTypes**](docs/SecretsApi.md#listsecrettypes) | **Get** /api/v1/secret-types | List secret types
 *SecretsApi* | [**UpdateSecrets**](docs/SecretsApi.md#updatesecrets) | **Put** /api/v1/orgs/{orgId}/secrets/{secretId} | Update secrets
 *SecretsApi* | [**ValidateSecret**](docs/SecretsApi.md#validatesecret) | **Get** /api/v1/orgs/{orgId}/secrets/{secretId}/validate | Validate secret
-*SpotguidesApi* | [**GetSpotguideDetail**](docs/SpotguidesApi.md#getspotguidedetail) | **Get** /api/v1/orgs/{orgId}/spotguides/{name} | Get spotguide details
-*SpotguidesApi* | [**LaunchSpotguide**](docs/SpotguidesApi.md#launchspotguide) | **Post** /api/v1/orgs/{orgId}/spotguides | Launch spotguide
-*SpotguidesApi* | [**ListSpotguides**](docs/SpotguidesApi.md#listspotguides) | **Get** /api/v1/orgs/{orgId}/spotguides | List spotguides
-*SpotguidesApi* | [**UpdateSpotguides**](docs/SpotguidesApi.md#updatespotguides) | **Put** /api/v1/orgs/{orgId}/spotguides | Update spotguide repositories
 *StorageApi* | [**CreateObjectStoreBucket**](docs/StorageApi.md#createobjectstorebucket) | **Post** /api/v1/orgs/{orgId}/buckets | Creates a new object store bucket with the given params
 *StorageApi* | [**DeleteObjectStoreBucket**](docs/StorageApi.md#deleteobjectstorebucket) | **Delete** /api/v1/orgs/{orgId}/buckets/{name} | Deletes the object store bucket with the given name
 *StorageApi* | [**GetBucket**](docs/StorageApi.md#getbucket) | **Get** /api/v1/orgs/{orgId}/buckets/{name} | Get object store bucket details
@@ -173,7 +173,6 @@ Class | Method | HTTP request | Description
 *UsersApi* | [**GetCurrentUser**](docs/UsersApi.md#getcurrentuser) | **Get** /api/v1/me | Get current user
 *UsersApi* | [**GetUsers**](docs/UsersApi.md#getusers) | **Get** /api/v1/orgs/{orgId}/users/{userId} | Get user
 *UsersApi* | [**ListUsers**](docs/UsersApi.md#listusers) | **Get** /api/v1/orgs/{orgId}/users | List users
-*UsersApi* | [**UpdateCurrentUser**](docs/UsersApi.md#updatecurrentuser) | **Patch** /api/v1/me | Update current user&#39;s settings
 *WhitelistApi* | [**CreateWhitelists**](docs/WhitelistApi.md#createwhitelists) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/whitelists | Create Whitelisted deployment
 *WhitelistApi* | [**DeleteWhitelist**](docs/WhitelistApi.md#deletewhitelist) | **Delete** /api/v1/orgs/{orgId}/clusters/{id}/whitelists/{name} | Delete Whitelisted deployment
 *WhitelistApi* | [**ListWhitelists**](docs/WhitelistApi.md#listwhitelists) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/whitelists | List Whitelisted deployments
@@ -199,6 +198,7 @@ Class | Method | HTTP request | Description
  - [BackupServiceResponse](docs/BackupServiceResponse.md)
  - [BackupServiceStatusResponse](docs/BackupServiceStatusResponse.md)
  - [BasePostHook](docs/BasePostHook.md)
+ - [BaseUpdateNodePoolRequest](docs/BaseUpdateNodePoolRequest.md)
  - [BucketInfo](docs/BucketInfo.md)
  - [BucketInfoSecret](docs/BucketInfoSecret.md)
  - [ClusterConfig](docs/ClusterConfig.md)
@@ -275,6 +275,8 @@ Class | Method | HTTP request | Description
  - [EksNodePool](docs/EksNodePool.md)
  - [EksNodePoolAllOf](docs/EksNodePoolAllOf.md)
  - [EksSubnet](docs/EksSubnet.md)
+ - [EksUpdateNodePoolRequest](docs/EksUpdateNodePoolRequest.md)
+ - [EksUpdateNodePoolRequestAllOf](docs/EksUpdateNodePoolRequestAllOf.md)
  - [EksVpc](docs/EksVpc.md)
  - [EnableArkRequest](docs/EnableArkRequest.md)
  - [EnableArkResponse](docs/EnableArkResponse.md)
@@ -308,7 +310,6 @@ Class | Method | HTTP request | Description
  - [InstallSecretsRequestQuery](docs/InstallSecretsRequestQuery.md)
  - [IntegratedServiceDetails](docs/IntegratedServiceDetails.md)
  - [Labels](docs/Labels.md)
- - [LaunchSpotguidesRequest](docs/LaunchSpotguidesRequest.md)
  - [ListDeploymentsResponseItem](docs/ListDeploymentsResponseItem.md)
  - [ListEndpointsResponse](docs/ListEndpointsResponse.md)
  - [ListNodesResponse](docs/ListNodesResponse.md)
@@ -339,6 +340,7 @@ Class | Method | HTTP request | Description
  - [NodePoolsOracle](docs/NodePoolsOracle.md)
  - [NodePoolsPke](docs/NodePoolsPke.md)
  - [NodepoolLabels](docs/NodepoolLabels.md)
+ - [OidcConfig](docs/OidcConfig.md)
  - [OracleStorageProps](docs/OracleStorageProps.md)
  - [OrganizationListItemResponse](docs/OrganizationListItemResponse.md)
  - [PkeClusterHttpProxy](docs/PkeClusterHttpProxy.md)
@@ -357,6 +359,9 @@ Class | Method | HTTP request | Description
  - [PostLeaderElectionRequest](docs/PostLeaderElectionRequest.md)
  - [PostLeaderElectionResponse](docs/PostLeaderElectionResponse.md)
  - [PostReadyPkeNodeRequest](docs/PostReadyPkeNodeRequest.md)
+ - [Process](docs/Process.md)
+ - [ProcessEvent](docs/ProcessEvent.md)
+ - [ProcessStatus](docs/ProcessStatus.md)
  - [ReleaseWhiteListItem](docs/ReleaseWhiteListItem.md)
  - [RequestedResources](docs/RequestedResources.md)
  - [Resource](docs/Resource.md)
@@ -383,8 +388,6 @@ Class | Method | HTTP request | Description
  - [SecretKeyValueTls](docs/SecretKeyValueTls.md)
  - [SecretTypeResponse](docs/SecretTypeResponse.md)
  - [SecretTypeResponseFields](docs/SecretTypeResponseFields.md)
- - [SpotguideDetailsResponse](docs/SpotguideDetailsResponse.md)
- - [SpotguideOption](docs/SpotguideOption.md)
  - [SubnetInfo](docs/SubnetInfo.md)
  - [TokenCreateRequest](docs/TokenCreateRequest.md)
  - [TokenCreateResponse](docs/TokenCreateResponse.md)
@@ -400,13 +403,14 @@ Class | Method | HTTP request | Description
  - [UpdateGoogleProperties](docs/UpdateGoogleProperties.md)
  - [UpdateGooglePropertiesMaster](docs/UpdateGooglePropertiesMaster.md)
  - [UpdateIntegratedServiceRequest](docs/UpdateIntegratedServiceRequest.md)
+ - [UpdateNodePoolRequest](docs/UpdateNodePoolRequest.md)
+ - [UpdateNodePoolResponse](docs/UpdateNodePoolResponse.md)
  - [UpdateNodePoolsAzure](docs/UpdateNodePoolsAzure.md)
  - [UpdateNodePoolsGoogle](docs/UpdateNodePoolsGoogle.md)
  - [UpdateNodePoolsPke](docs/UpdateNodePoolsPke.md)
  - [UpdatePkeOnAzureClusterRequest](docs/UpdatePkeOnAzureClusterRequest.md)
  - [UpdatePkeProperties](docs/UpdatePkeProperties.md)
  - [UpdatePkePropertiesPke](docs/UpdatePkePropertiesPke.md)
- - [UpdateUserRequest](docs/UpdateUserRequest.md)
  - [UrlItem](docs/UrlItem.md)
  - [User](docs/User.md)
  - [VersionResponse](docs/VersionResponse.md)

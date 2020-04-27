@@ -1,4 +1,4 @@
-// Copyright © 2019 Banzai Cloud
+// Copyright © 2020 Banzai Cloud
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,26 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package nodepool
+package process
 
 import (
-	"github.com/spf13/cobra"
-
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/spf13/cobra"
 )
 
-// NewNodePoolCommand returns a cobra command for `nodepool` subcommands.
-func NewNodePoolCommand(banzaiCli cli.Cli) *cobra.Command {
+// NewProcessCommand returns a cobra command for `process` subcommands.
+func NewProcessCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "nodepool",
-		Aliases: []string{"nodepools", "np"},
-		Short:   "Manage node pools",
+		Use:     "process",
+		Aliases: []string{"processes", "p", "proc"},
+		Short:   "List processes",
+		Hidden:  true,
 	}
 
 	cmd.AddCommand(
-		NewCreateCommand(banzaiCli),
-		NewUpdateCommand(banzaiCli),
-		NewDeleteCommand(banzaiCli),
+		NewListCommand(banzaiCli),
+		NewTailCommand(banzaiCli),
 	)
 
 	return cmd

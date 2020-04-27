@@ -29,6 +29,7 @@ type GetClusterStatusResponse struct {
 	CreatorName string `json:"creatorName,omitempty"`
 	CreatorId int32 `json:"creatorId,omitempty"`
 	Region string `json:"region,omitempty"`
+	Oidc OidcConfig `json:"oidc,omitempty"`
 	NodePools map[string]NodePoolStatus `json:"nodePools,omitempty"`
 	TotalSummary ResourceSummary `json:"totalSummary,omitempty"`
 }
