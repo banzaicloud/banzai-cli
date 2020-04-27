@@ -18,6 +18,7 @@ Name | Type | Description | Notes
 **Datastore** | **string** | Name of datastore or datastore cluster to place VM disks on. Overrides default value from the main cluster secret. | [optional] 
 **ResourcePool** | **string** | Virtual machines will be created in this resource pool. Overrides default value from the main cluster secret. | [optional] 
 **NodePools** | [**[]PkeOnVsphereNodePool**](PKEOnVsphereNodePool.md) |  | [optional] 
+**LoadBalancerIPRange** | **string** | IPv4 range to allocate addresses for LoadBalancer Services (MetalLB) | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

@@ -6,7 +6,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**GetOrg**](OrganizationsApi.md#GetOrg) | **Get** /api/v1/orgs/{orgId} | Get organization
 [**ListOrgs**](OrganizationsApi.md#ListOrgs) | **Get** /api/v1/orgs | List organizations
-[**SyncOrgs**](OrganizationsApi.md#SyncOrgs) | **Put** /api/v1/orgs | Synchronize Github organizations
+[**SyncOrgs**](OrganizationsApi.md#SyncOrgs) | **Put** /api/v1/orgs | Synchronize organizations
 
 
 
@@ -78,7 +78,7 @@ This endpoint does not need any parameter.
 
 > SyncOrgs(ctx, )
 
-Synchronize Github organizations
+Synchronize organizations
 
 ### Required Parameters
 

@@ -16,8 +16,6 @@ servers:
 tags:
 - description: Clusters related funtions
   name: clusters
-- description: Application spotguides
-  name: spotguides
 - description: Deployment related functions for a cluster
   name: deployments
 - description: Auth related functions
@@ -61,208 +59,6 @@ paths:
           description: Version info
       tags:
       - common
-  /api/v1/orgs/{orgId}/spotguides:
-    get:
-      description: List all available spotguides
-      operationId: ListSpotguides
-      parameters:
-      - description: Organization identifier
-        explode: false
-        in: path
-        name: orgId
-        required: true
-        schema:
-          type: integer
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ListSpotguidesResponse'
-          description: Spotguide list
-      security:
-      - bearerAuth: []
-      summary: List spotguides
-      tags:
-      - spotguides
-    post:
-      description: Launch a spotguide
-      operationId: LaunchSpotguide
-      parameters:
-      - description: Organization identifier
-        explode: false
-        in: path
-        name: orgId
-        required: true
-        schema:
-          type: integer
-        style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LaunchSpotguidesRequest'
-        required: true
-      responses:
-        "202":
-          description: Spotguide launch response
-      security:
-      - bearerAuth: []
-      summary: Launch spotguide
-      tags:
-      - spotguides
-    put:
-      operationId: UpdateSpotguides
-      parameters:
-      - description: Organization identifier
-        explode: false
-        in: path
-        name: orgId
-        required: true
-        schema:
-          type: integer
-        style: simple
-      responses:
-        "202":
-          description: Spotguides update
-      security:
-      - bearerAuth: []
-      summary: Update spotguide repositories
-      tags:
-      - spotguides
-  /api/v1/orgs/{orgId}/spotguides/{name}:
-    get:
-      description: Get details about specific spotguide
-      operationId: GetSpotguideDetail
-      parameters:
-      - description: Organization identifier
-        explode: false
-        in: path
-        name: orgId
-        required: true
-        schema:
-          type: integer
-        style: simple
-      - description: Spotguide name
-        explode: false
-        in: path
-        name: name
-        required: true
-        schema:
-          example: banzaicloud/spotguide-nodejs-mongodb
-          type: string
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SpotguideDetailsResponse'
-          description: Spotguide details
-        default:
-          content:
-            application/json:
-              examples:
-                BadRequest:
-                  value:
-                    code: 400
-                    message: Invalid request
-                    error: Failed to parse request.
-                Unauthorized:
-                  value:
-                    code: 401
-                    message: Unauthorized
-                    error: Unauthorized
-                OrganizationNotFound:
-                  value:
-                    code: 404
-                    message: Organization not found
-                    error: Organization not found
-                SecretAlreadyExists:
-                  value:
-                    code: 409
-                    message: Secret already exists
-                    error: Secret already exists
-                InternalServerError:
-                  value:
-                    code: 500
-                    message: Something went wrong
-                    error: Something went wrong
-              schema:
-                $ref: '#/components/schemas/CommonError'
-            application/problem+json:
-              examples:
-                BadRequest:
-                  value:
-                    type: about:blank
-                    title: Invalid request
-                    status: 400
-                    detail: Failed to parse request.
-                    instance: ""
-                    code: 400
-                    message: Failed to parse request.
-                    error: Invalid request
-                Unauthorized:
-                  value:
-                    type: about:blank
-                    title: Unauthorized
-                    status: 401
-                    detail: You are unauthorized to access this resource.
-                    instance: ""
-                    code: 401
-                    message: You are unauthorized to access this resource.
-                    error: Unauthorized
-                AccessDenied:
-                  value:
-                    type: about:blank
-                    title: Access denied
-                    status: 403
-                    detail: You are unauthorized to perform this action access this
-                      resource.
-                    instance: ""
-                    code: 403
-                    message: You are unauthorized to perform this action access this
-                      resource.
-                    error: Access denied
-                OrganizationNotFound:
-                  value:
-                    type: about:blank
-                    title: Organization not found
-                    status: 404
-                    detail: Organization not found
-                    instance: ""
-                    code: 404
-                    message: Organization not found
-                    error: Organization not found
-                SecretAlreadyExists:
-                  value:
-                    type: about:blank
-                    title: Secret already exists
-                    status: 409
-                    detail: Secret already exists
-                    instance: ""
-                    code: 409
-                    message: Secret already exists
-                    error: Secret already exists
-                InternalServerError:
-                  value:
-                    type: about:blank
-                    title: Internal server error
-                    status: 500
-                    detail: Something went wrong
-                    instance: ""
-                    code: 500
-                    message: Something went wrong
-                    error: Internal server error
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Internal server error
-      security:
-      - bearerAuth: []
-      summary: Get spotguide details
-      tags:
-      - spotguides
   /api/v1/orgs/{orgId}/clusters:
     get:
       description: Listing all the K8S clusters from the cloud
@@ -7326,7 +7122,7 @@ paths:
           description: Internal server error
       security:
       - bearerAuth: []
-      summary: Synchronize Github organizations
+      summary: Synchronize organizations
       tags:
       - organizations
   /api:
@@ -7520,121 +7316,6 @@ paths:
       summary: Get current user
       tags:
       - users
-    patch:
-      description: Update current user
-      operationId: UpdateCurrentUser
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateUserRequest'
-        required: true
-      responses:
-        "204":
-          description: Modifiying current user's settings succeeded
-        default:
-          content:
-            application/json:
-              examples:
-                BadRequest:
-                  value:
-                    code: 400
-                    message: Invalid request
-                    error: Failed to parse request.
-                Unauthorized:
-                  value:
-                    code: 401
-                    message: Unauthorized
-                    error: Unauthorized
-                OrganizationNotFound:
-                  value:
-                    code: 404
-                    message: Organization not found
-                    error: Organization not found
-                SecretAlreadyExists:
-                  value:
-                    code: 409
-                    message: Secret already exists
-                    error: Secret already exists
-                InternalServerError:
-                  value:
-                    code: 500
-                    message: Something went wrong
-                    error: Something went wrong
-              schema:
-                $ref: '#/components/schemas/CommonError'
-            application/problem+json:
-              examples:
-                BadRequest:
-                  value:
-                    type: about:blank
-                    title: Invalid request
-                    status: 400
-                    detail: Failed to parse request.
-                    instance: ""
-                    code: 400
-                    message: Failed to parse request.
-                    error: Invalid request
-                Unauthorized:
-                  value:
-                    type: about:blank
-                    title: Unauthorized
-                    status: 401
-                    detail: You are unauthorized to access this resource.
-                    instance: ""
-                    code: 401
-                    message: You are unauthorized to access this resource.
-                    error: Unauthorized
-                AccessDenied:
-                  value:
-                    type: about:blank
-                    title: Access denied
-                    status: 403
-                    detail: You are unauthorized to perform this action access this
-                      resource.
-                    instance: ""
-                    code: 403
-                    message: You are unauthorized to perform this action access this
-                      resource.
-                    error: Access denied
-                OrganizationNotFound:
-                  value:
-                    type: about:blank
-                    title: Organization not found
-                    status: 404
-                    detail: Organization not found
-                    instance: ""
-                    code: 404
-                    message: Organization not found
-                    error: Organization not found
-                SecretAlreadyExists:
-                  value:
-                    type: about:blank
-                    title: Secret already exists
-                    status: 409
-                    detail: Secret already exists
-                    instance: ""
-                    code: 409
-                    message: Secret already exists
-                    error: Secret already exists
-                InternalServerError:
-                  value:
-                    type: about:blank
-                    title: Internal server error
-                    status: 500
-                    detail: Something went wrong
-                    instance: ""
-                    code: 500
-                    message: Something went wrong
-                    error: Internal server error
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Internal server error
-      security:
-      - bearerAuth: []
-      summary: Update current user's settings
-      tags:
-      - users
   /api/v1/capabilities:
     get:
       description: Retrieve Pipeline capabilities
@@ -7647,8 +7328,6 @@ paths:
                 additionalProperties:
                   type: object
                 example:
-                  cicd:
-                    enabled: false
                   features:
                     monitoring:
                       enabled: true
@@ -18548,232 +18227,7 @@ components:
         instance_uuid:
           type: string
       type: object
-    UpdateUserRequest:
-      example:
-        gitHubToken: b8d9cfb5df15fd513bf3351719876ffff4b310d2
-        gitLabToken: a_tguocsP6vqqHBh8vYQ
-      properties:
-        gitHubToken:
-          example: b8d9cfb5df15fd513bf3351719876ffff4b310d2
-          type: string
-        gitLabToken:
-          example: a_tguocsP6vqqHBh8vYQ
-          type: string
-      type: object
-    SpotguideDetailsResponse:
-      example:
-        createdAt: 2018-06-11T14:28:13Z
-        displayName: The spotguide for NodeJS and MongoDB
-        name: banzaicloud/spotguide-nodejs-mongodb
-        questions:
-        - default: "5.6"
-          readonly: false
-          name: mysql_version
-          type: string
-          key: mysql.version
-          info: Mysql database version
-        - default: "5.6"
-          readonly: false
-          name: mysql_version
-          type: string
-          key: mysql.version
-          info: Mysql database version
-        resources:
-          onDemandPct: 10
-          sumMem: 32
-          filters:
-          - filters
-          - filters
-          maxNodes: 3
-          sumCpu: 8
-          sameSize: true
-          minNodes: 1
-        readme: '# Spotguide for Node.js with MongoDB database'
-        version: v0.0.1
-        updatedAt: 2018-06-11T14:28:24Z
-        tags:
-        - tags
-        - tags
-      properties:
-        name:
-          example: banzaicloud/spotguide-nodejs-mongodb
-          type: string
-        displayName:
-          example: The spotguide for NodeJS and MongoDB
-          type: string
-        createdAt:
-          example: 2018-06-11T14:28:13Z
-          type: string
-        updatedAt:
-          example: 2018-06-11T14:28:24Z
-          type: string
-        readme:
-          example: '# Spotguide for Node.js with MongoDB database'
-          type: string
-        version:
-          example: v0.0.1
-          type: string
-        tags:
-          items:
-            type: string
-          type: array
-        resources:
-          $ref: '#/components/schemas/RequestedResources'
-        questions:
-          items:
-            $ref: '#/components/schemas/SpotguideOption'
-          type: array
-      type: object
-    LaunchSpotguidesRequest:
-      example:
-        pipeline: '{}'
-        cluster:
-          cloud: google
-          secretName: my-aws-secret
-          scaleOptions:
-            desiredMem: 1.6027456183070403
-            onDemandPct: 59
-            excludes:
-            - excludes
-            - excludes
-            desiredCpu: 1.0800828190461012
-            keepDesiredCapacity: true
-            desiredGpu: 0
-            enabled: true
-          secretIds:
-          - 62bc3c75-91fb-4670-bad4-24b401a9deac
-          - 4378ae32-2355-12ed-b984-1234567804ed
-          name: gkecluster-pipelineuser-123
-          secretId: 62bc3c75-91fb-4670-bad4-24b401a9deac
-          location: us-central1-a
-          postHooks:
-            InstallIngressController: null
-          properties:
-            gke:
-              master:
-                version: 1.8.7-gke.1
-              nodePools:
-                pool1:
-                  count: 1
-                  instanceType: n1-standard-2
-              nodeVersion: 1.8.7-gke.1
-        spotguideVersion: v0.3.2
-        repoName: spotguide-nodejs-mongodb-test
-        repoLatent: false
-        repoOrganization: banzaicloud
-        spotguideName: banzaicloud/spotguide-nodejs-mongodb
-        repoPrivate: false
-        secrets:
-        - values:
-            type: string
-            project_id: string
-            private_key_id: string
-            private_key: string
-            client_email: string
-            client_id: string
-            auth_uri: string
-            token_uri: string
-            auth_provider_x509_cert_url: string
-            client_x509_cert_url: string
-          name: My google secret
-          type: google
-          tags:
-          - repo:pipeline
-          - tag2
-        - values:
-            type: string
-            project_id: string
-            private_key_id: string
-            private_key: string
-            client_email: string
-            client_id: string
-            auth_uri: string
-            token_uri: string
-            auth_provider_x509_cert_url: string
-            client_x509_cert_url: string
-          name: My google secret
-          type: google
-          tags:
-          - repo:pipeline
-          - tag2
-      properties:
-        repoOrganization:
-          example: banzaicloud
-          type: string
-        repoName:
-          example: spotguide-nodejs-mongodb-test
-          type: string
-        repoPrivate:
-          example: false
-          type: boolean
-        repoLatent:
-          example: false
-          type: boolean
-        spotguideName:
-          example: banzaicloud/spotguide-nodejs-mongodb
-          type: string
-        spotguideVersion:
-          example: v0.3.2
-          type: string
-        cluster:
-          $ref: '#/components/schemas/CreateClusterRequest'
-        secrets:
-          items:
-            $ref: '#/components/schemas/CreateSecretRequest'
-          type: array
-        pipeline:
-          type: object
-      required:
-      - repoName
-      - repoOrganization
-      - spotguideName
-      type: object
-    SpotguideOption:
-      example:
-        default: "5.6"
-        readonly: false
-        name: mysql_version
-        type: string
-        key: mysql.version
-        info: Mysql database version
-      properties:
-        name:
-          example: mysql_version
-          type: string
-        type:
-          example: string
-          type: string
-        info:
-          example: Mysql database version
-          type: string
-        default:
-          enum:
-          - "5.6"
-          - "5.7"
-          example: "5.6"
-          type: string
-        readonly:
-          example: false
-          type: boolean
-        key:
-          example: mysql.version
-          type: string
-      type: object
-    ListSpotguidesResponse:
-      items:
-        $ref: '#/components/schemas/SpotguideDetailsResponse'
-      type: array
     RequestedResources:
-      example:
-        onDemandPct: 10
-        sumMem: 32
-        filters:
-        - filters
-        - filters
-        maxNodes: 3
-        sumCpu: 8
-        sameSize: true
-        minNodes: 1
       properties:
         sumCpu:
           description: Total CPU requested for the cluster
@@ -18806,36 +18260,6 @@ components:
           type: integer
       type: object
     CreateClusterRequest:
-      example:
-        cloud: google
-        secretName: my-aws-secret
-        scaleOptions:
-          desiredMem: 1.6027456183070403
-          onDemandPct: 59
-          excludes:
-          - excludes
-          - excludes
-          desiredCpu: 1.0800828190461012
-          keepDesiredCapacity: true
-          desiredGpu: 0
-          enabled: true
-        secretIds:
-        - 62bc3c75-91fb-4670-bad4-24b401a9deac
-        - 4378ae32-2355-12ed-b984-1234567804ed
-        name: gkecluster-pipelineuser-123
-        secretId: 62bc3c75-91fb-4670-bad4-24b401a9deac
-        location: us-central1-a
-        postHooks:
-          InstallIngressController: null
-        properties:
-          gke:
-            master:
-              version: 1.8.7-gke.1
-            nodePools:
-              pool1:
-                count: 1
-                instanceType: n1-standard-2
-            nodeVersion: 1.8.7-gke.1
       properties:
         name:
           example: gkecluster-pipelineuser-123
@@ -18905,16 +18329,6 @@ components:
       - type
       type: object
     ScaleOptions:
-      example:
-        desiredMem: 1.6027456183070403
-        onDemandPct: 59
-        excludes:
-        - excludes
-        - excludes
-        desiredCpu: 1.0800828190461012
-        keepDesiredCapacity: true
-        desiredGpu: 0
-        enabled: true
       properties:
         enabled:
           type: boolean
@@ -20041,14 +19455,14 @@ components:
         values:
           ingress:
             enabled: "true"
-        name: banzaicloud-stable/cicd
+        name: banzaicloud-stable/pipeline
         namespace: default
         reuseValues: true
         version: 0.1.0
         timeout: 500
       properties:
         name:
-          example: banzaicloud-stable/cicd
+          example: banzaicloud-stable/pipeline
           type: string
         version:
           description: Version of the deployment. If not specified, the latest version
@@ -20877,7 +20291,6 @@ components:
       example:
         createdAt: 2018-03-09T13:24:49+01:00
         image: githubImageUrl.com/imageId/3
-        gitHubTokenSet: true
         name: myName
         organizations: '{}'
         id: 1
@@ -20908,9 +20321,6 @@ components:
           type: string
         organizations:
           type: object
-        gitHubTokenSet:
-          example: true
-          type: boolean
       type: object
     SecretTypeResponse:
       example:
@@ -20940,6 +20350,11 @@ components:
         distribution: gke
         monitoring: false
         version: 1.12.6-gke.10
+        oidc:
+          clientId: clientId
+          idpUrl: idpUrl
+          clientSecret: clientSecret
+          enabled: true
         statusMessage: Cluster is running
         cloud: google
         createdAt: 2018-07-03T14:23:19+02:00
@@ -21018,6 +20433,8 @@ components:
         region:
           example: us-central1
           type: string
+        oidc:
+          $ref: '#/components/schemas/OIDCConfig'
         nodePools:
           additionalProperties:
             $ref: '#/components/schemas/NodePoolStatus'
@@ -21529,6 +20946,22 @@ components:
           type: string
         lastTransitionTime:
           example: 2018-08-01T07:04:37Z
+          type: string
+      type: object
+    OIDCConfig:
+      example:
+        clientId: clientId
+        idpUrl: idpUrl
+        clientSecret: clientSecret
+        enabled: true
+      properties:
+        enabled:
+          type: boolean
+        idpUrl:
+          type: string
+        clientId:
+          type: string
+        clientSecret:
           type: string
       type: object
     ResourceSummary:
@@ -23336,6 +22769,11 @@ components:
           items:
             $ref: '#/components/schemas/PKEOnVsphereNodePool'
           type: array
+        loadBalancerIPRange:
+          description: IPv4 range to allocate addresses for LoadBalancer Services
+            (MetalLB)
+          example: 192.168.23.150-192.168.23.180
+          type: string
       required:
       - resourceGroup
     EksNodePool_allOf:
@@ -23378,9 +22816,6 @@ components:
             field is empty or 0 on-demand instances are used instead of spot instances.
           example: "0.2"
           type: string
-      required:
-      - image
-      - instanceType
     CreateEKSProperties_eks:
       properties:
         version:

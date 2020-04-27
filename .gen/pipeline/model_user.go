@@ -20,5 +20,4 @@ type User struct {
 	Login string `json:"login,omitempty"`
 	Image string `json:"image,omitempty"`
 	Organizations map[string]interface{} `json:"organizations,omitempty"`
-	GitHubTokenSet bool `json:"gitHubTokenSet,omitempty"`
 }

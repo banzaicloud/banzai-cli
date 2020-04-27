@@ -148,7 +148,7 @@ Class | Method | HTTP request | Description
 *NetworkApi* | [**ListVPCSubnets**](docs/NetworkApi.md#listvpcsubnets) | **Get** /api/v1/orgs/{orgId}/networks/{networkId}/subnets | List VPC subnetworks
 *OrganizationsApi* | [**GetOrg**](docs/OrganizationsApi.md#getorg) | **Get** /api/v1/orgs/{orgId} | Get organization
 *OrganizationsApi* | [**ListOrgs**](docs/OrganizationsApi.md#listorgs) | **Get** /api/v1/orgs | List organizations
-*OrganizationsApi* | [**SyncOrgs**](docs/OrganizationsApi.md#syncorgs) | **Put** /api/v1/orgs | Synchronize Github organizations
+*OrganizationsApi* | [**SyncOrgs**](docs/OrganizationsApi.md#syncorgs) | **Put** /api/v1/orgs | Synchronize organizations
 *PipelineApi* | [**ListCapabilities**](docs/PipelineApi.md#listcapabilities) | **Get** /api/v1/capabilities | Lists configured Pipeline capabilities
 *ProcessesApi* | [**GetProcess**](docs/ProcessesApi.md#getprocess) | **Get** /api/v1/orgs/{orgId}/processes/{id} | Get a process in Pipeline
 *ProcessesApi* | [**ListProcesses**](docs/ProcessesApi.md#listprocesses) | **Get** /api/v1/orgs/{orgId}/processes | List processes in Pipeline
@@ -165,10 +165,6 @@ Class | Method | HTTP request | Description
 *SecretsApi* | [**ListSecretTypes**](docs/SecretsApi.md#listsecrettypes) | **Get** /api/v1/secret-types | List secret types
 *SecretsApi* | [**UpdateSecrets**](docs/SecretsApi.md#updatesecrets) | **Put** /api/v1/orgs/{orgId}/secrets/{secretId} | Update secrets
 *SecretsApi* | [**ValidateSecret**](docs/SecretsApi.md#validatesecret) | **Get** /api/v1/orgs/{orgId}/secrets/{secretId}/validate | Validate secret
-*SpotguidesApi* | [**GetSpotguideDetail**](docs/SpotguidesApi.md#getspotguidedetail) | **Get** /api/v1/orgs/{orgId}/spotguides/{name} | Get spotguide details
-*SpotguidesApi* | [**LaunchSpotguide**](docs/SpotguidesApi.md#launchspotguide) | **Post** /api/v1/orgs/{orgId}/spotguides | Launch spotguide
-*SpotguidesApi* | [**ListSpotguides**](docs/SpotguidesApi.md#listspotguides) | **Get** /api/v1/orgs/{orgId}/spotguides | List spotguides
-*SpotguidesApi* | [**UpdateSpotguides**](docs/SpotguidesApi.md#updatespotguides) | **Put** /api/v1/orgs/{orgId}/spotguides | Update spotguide repositories
 *StorageApi* | [**CreateObjectStoreBucket**](docs/StorageApi.md#createobjectstorebucket) | **Post** /api/v1/orgs/{orgId}/buckets | Creates a new object store bucket with the given params
 *StorageApi* | [**DeleteObjectStoreBucket**](docs/StorageApi.md#deleteobjectstorebucket) | **Delete** /api/v1/orgs/{orgId}/buckets/{name} | Deletes the object store bucket with the given name
 *StorageApi* | [**GetBucket**](docs/StorageApi.md#getbucket) | **Get** /api/v1/orgs/{orgId}/buckets/{name} | Get object store bucket details
@@ -177,7 +173,6 @@ Class | Method | HTTP request | Description
 *UsersApi* | [**GetCurrentUser**](docs/UsersApi.md#getcurrentuser) | **Get** /api/v1/me | Get current user
 *UsersApi* | [**GetUsers**](docs/UsersApi.md#getusers) | **Get** /api/v1/orgs/{orgId}/users/{userId} | Get user
 *UsersApi* | [**ListUsers**](docs/UsersApi.md#listusers) | **Get** /api/v1/orgs/{orgId}/users | List users
-*UsersApi* | [**UpdateCurrentUser**](docs/UsersApi.md#updatecurrentuser) | **Patch** /api/v1/me | Update current user&#39;s settings
 *WhitelistApi* | [**CreateWhitelists**](docs/WhitelistApi.md#createwhitelists) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/whitelists | Create Whitelisted deployment
 *WhitelistApi* | [**DeleteWhitelist**](docs/WhitelistApi.md#deletewhitelist) | **Delete** /api/v1/orgs/{orgId}/clusters/{id}/whitelists/{name} | Delete Whitelisted deployment
 *WhitelistApi* | [**ListWhitelists**](docs/WhitelistApi.md#listwhitelists) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/whitelists | List Whitelisted deployments
@@ -315,7 +310,6 @@ Class | Method | HTTP request | Description
  - [InstallSecretsRequestQuery](docs/InstallSecretsRequestQuery.md)
  - [IntegratedServiceDetails](docs/IntegratedServiceDetails.md)
  - [Labels](docs/Labels.md)
- - [LaunchSpotguidesRequest](docs/LaunchSpotguidesRequest.md)
  - [ListDeploymentsResponseItem](docs/ListDeploymentsResponseItem.md)
  - [ListEndpointsResponse](docs/ListEndpointsResponse.md)
  - [ListNodesResponse](docs/ListNodesResponse.md)
@@ -346,6 +340,7 @@ Class | Method | HTTP request | Description
  - [NodePoolsOracle](docs/NodePoolsOracle.md)
  - [NodePoolsPke](docs/NodePoolsPke.md)
  - [NodepoolLabels](docs/NodepoolLabels.md)
+ - [OidcConfig](docs/OidcConfig.md)
  - [OracleStorageProps](docs/OracleStorageProps.md)
  - [OrganizationListItemResponse](docs/OrganizationListItemResponse.md)
  - [PkeClusterHttpProxy](docs/PkeClusterHttpProxy.md)
@@ -393,8 +388,6 @@ Class | Method | HTTP request | Description
  - [SecretKeyValueTls](docs/SecretKeyValueTls.md)
  - [SecretTypeResponse](docs/SecretTypeResponse.md)
  - [SecretTypeResponseFields](docs/SecretTypeResponseFields.md)
- - [SpotguideDetailsResponse](docs/SpotguideDetailsResponse.md)
- - [SpotguideOption](docs/SpotguideOption.md)
  - [SubnetInfo](docs/SubnetInfo.md)
  - [TokenCreateRequest](docs/TokenCreateRequest.md)
  - [TokenCreateResponse](docs/TokenCreateResponse.md)
@@ -418,7 +411,6 @@ Class | Method | HTTP request | Description
  - [UpdatePkeOnAzureClusterRequest](docs/UpdatePkeOnAzureClusterRequest.md)
  - [UpdatePkeProperties](docs/UpdatePkeProperties.md)
  - [UpdatePkePropertiesPke](docs/UpdatePkePropertiesPke.md)
- - [UpdateUserRequest](docs/UpdateUserRequest.md)
  - [UrlItem](docs/UrlItem.md)
  - [User](docs/User.md)
  - [VersionResponse](docs/VersionResponse.md)

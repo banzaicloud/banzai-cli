@@ -39,7 +39,7 @@ func NewUpdateCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "update [NAME]",
 		Aliases: []string{"u"},
-		Short:   "Updates a node pool",
+		Short:   "Update a node pool",
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
