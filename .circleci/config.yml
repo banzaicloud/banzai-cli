@@ -214,7 +214,7 @@ workflows:
                         - Stable release
                     filters:
                         tags:
-                            only: /^\d+\.\d+\.\d+(-\S*)?$/
+                            only: /^\d+\.\d+\.\d+$/
                         branches:
                             ignore: /.*/
             -
