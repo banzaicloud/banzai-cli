@@ -1,0 +1,39 @@
+builds:
+    -
+        main: ./cmd/banzai
+        binary: banzai
+        env:
+            - CGO_ENABLED=0
+        ldflags: "-s -w -X main.version={{ .Version }} -X main.commitHash={{ .ShortCommit }} -X main.buildDate={{ .Date }}"
+        goos:
+            - linux
+            - darwin
+            - windows
+        goarch:
+            - amd64
+
+archives:
+    -
+        name_template: "banzai_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+        format_overrides:
+            -
+                goos: windows
+                format: zip
+
+checksum:
+    name_template: "banzai_checksums.txt"
+
+changelog:
+    skip: true
+
+nfpms:
+    -
+        vendor: Banzai Cloud
+        maintainer: Banzai Cloud <info@banzaicloud.com>
+        homepage: https://banzaicloud.com/
+        description: Command-line interface for Banzai Cloud Pipeline platform
+        formats:
+            - deb
+            - rpm
+        bindir: /usr/bin
+        license: Apache 2.0
