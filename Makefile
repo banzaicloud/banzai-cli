@@ -207,6 +207,10 @@ minor: ## Release a new minor version
 major: ## Release a new major version
 	@${MAKE} release-$(shell (git describe --abbrev=0 --tags 2> /dev/null || echo "0.0.0") | sed 's/^v//' | awk -F'[ .]' '{print $$1+1".0.0"}')
 
+.PHONY: unstable
+unstable: bin/goreleaser # Publish an experimental release
+	bin/goreleaser release -f .goreleaser.unstable.yml ${GORELEASERFLAGS}
+
 .PHONY: list
 list: ## List all make targets
 	@${MAKE} -pRrn : -f $(MAKEFILE_LIST) 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | sort

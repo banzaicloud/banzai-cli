@@ -107,6 +107,15 @@ jobs:
                     # Required for packr
                     GO111MODULE: "on"
 
+        parameters:
+            release-type:
+                default: "stable"
+                description: Type of release
+                type: enum
+                enum:
+                    - stable
+                    - unstable
+
         steps:
             - checkout
 
@@ -132,7 +141,15 @@ jobs:
             -
                 run:
                     name: Release
-                    command: make release
+                    command: |
+                      case "<<parameters.release-type>>" in
+                        stable)
+                          make release
+                          ;;
+                        unstable)
+                          make unstable
+                          ;;
+                      esac
 
     cdn-invalidate:
         executor: aws/default
@@ -171,17 +188,30 @@ workflows:
                             only: /^\d+\.\d+\.\d+(-\S*)?$/
             -
                 release:
+                    name: Stable release
+                    release-type: stable
                     requires:
                         - build
                     filters:
                         tags:
-                            only: /^\d+\.\d+\.\d+(-\S*)?$/
+                            only: /^\d+\.\d+\.\d+$/
+                        branches:
+                            ignore: /.*/
+            -
+                release:
+                    name: Unstable release
+                    release-type: unstable
+                    requires:
+                        - build
+                    filters:
+                        tags:
+                            only: /^\d+\.\d+\.\d+-\S*$/
                         branches:
                             ignore: /.*/
             -
                 cdn-invalidate:
                     requires:
-                        - release
+                        - Stable release
                     filters:
                         tags:
                             only: /^\d+\.\d+\.\d+(-\S*)?$/
@@ -190,7 +220,7 @@ workflows:
             -
                 trigger-docs-update:
                     requires:
-                        - release
+                        - Stable release
                     filters:
                         tags:
                             only: /^\d+\.\d+\.\d+$/
