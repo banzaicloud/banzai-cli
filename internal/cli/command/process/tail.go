@@ -30,7 +30,7 @@ func NewTailCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := tailOptions{}
 
 	cmd := &cobra.Command{
-		Use:   "tail",
+		Use:   "tail processId",
 		Short: "Tail a process",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {

@@ -18,4 +18,5 @@ const (
 	RUNNING ProcessStatus = "running"
 	FAILED ProcessStatus = "failed"
 	FINISHED ProcessStatus = "finished"
+	CANCELED ProcessStatus = "canceled"
 )

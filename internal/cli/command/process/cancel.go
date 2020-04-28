@@ -15,24 +15,35 @@
 package process
 
 import (
+	"context"
+	"fmt"
+
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-// NewProcessCommand returns a cobra command for `process` subcommands.
-func NewProcessCommand(banzaiCli cli.Cli) *cobra.Command {
+// NewCancelCommand creates a new cobra.Command for `banzai process cancel`.
+func NewCancelCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "process",
-		Aliases: []string{"processes", "p", "proc"},
-		Short:   "List processes",
-		Hidden:  true,
+		Use:   "cancel processId",
+		Short: "Cancel a process",
+		Args:  cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			runCancel(banzaiCli, args)
+		},
 	}
 
-	cmd.AddCommand(
-		NewListCommand(banzaiCli),
-		NewTailCommand(banzaiCli),
-		NewCancelCommand(banzaiCli),
-	)
-
 	return cmd
+}
+
+func runCancel(banzaiCli cli.Cli, args []string) {
+	id := args[0]
+	_, err := banzaiCli.Client().ProcessesApi.CancelProcess(context.Background(), banzaiCli.Context().OrganizationID(), id)
+	if err != nil {
+		// TODO: review log usage
+		log.Fatalf("could not cancel process: %v", err)
+	}
+
+	_, _ = fmt.Fprintf(banzaiCli.Out(), "process %q canceled\n", id)
 }
