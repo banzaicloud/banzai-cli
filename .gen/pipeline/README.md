@@ -150,6 +150,7 @@ Class | Method | HTTP request | Description
 *OrganizationsApi* | [**ListOrgs**](docs/OrganizationsApi.md#listorgs) | **Get** /api/v1/orgs | List organizations
 *OrganizationsApi* | [**SyncOrgs**](docs/OrganizationsApi.md#syncorgs) | **Put** /api/v1/orgs | Synchronize organizations
 *PipelineApi* | [**ListCapabilities**](docs/PipelineApi.md#listcapabilities) | **Get** /api/v1/capabilities | Lists configured Pipeline capabilities
+*ProcessesApi* | [**CancelProcess**](docs/ProcessesApi.md#cancelprocess) | **Post** /api/v1/orgs/{orgId}/processes/{id}/cancel | Cancel a process in Pipeline
 *ProcessesApi* | [**GetProcess**](docs/ProcessesApi.md#getprocess) | **Get** /api/v1/orgs/{orgId}/processes/{id} | Get a process in Pipeline
 *ProcessesApi* | [**ListProcesses**](docs/ProcessesApi.md#listprocesses) | **Get** /api/v1/orgs/{orgId}/processes | List processes in Pipeline
 *ScanlogApi* | [**ListScans**](docs/ScanlogApi.md#listscans) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/scanlog | List scans

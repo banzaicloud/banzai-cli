@@ -72,9 +72,10 @@ func TailProcess(banzaiCli cli.Cli, processId string) error {
 		}
 
 		if process.Status == pipeline.FINISHED {
-			return nil
-		} else if process.Status == pipeline.FAILED {
-			return errors.NewWithDetails("process failed", "err", process.Log)
+			_, err = fmt.Fprintf(banzaiCli.Out(), process.Type+" process finished")
+			return err
+		} else if process.Status != pipeline.RUNNING {
+			return errors.New(fmt.Sprintf("%s process %s: %s", process.Type, process.Status, process.Log))
 		}
 	}
 }
