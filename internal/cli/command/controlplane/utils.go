@@ -151,7 +151,7 @@ func getImageMetadata(cpContext *cpContext, values map[string]interface{}, write
 		}
 	}
 
-	awsAccesKeyID := ""
+	awsAccessKeyID := ""
 	if values["provider"] == providerEc2 || imageMeta.Custom.CredentialType == "aws" {
 		log.Debug("using local AWS credentials")
 		id, creds, err := input.GetAmazonCredentials()
@@ -159,7 +159,7 @@ func getImageMetadata(cpContext *cpContext, values map[string]interface{}, write
 			return "", env, errors.WrapIf(err, "failed to get AWS credentials")
 		}
 		env = creds
-		awsAccesKeyID = id
+		awsAccessKeyID = id
 	}
-	return awsAccesKeyID, env, nil
+	return awsAccessKeyID, env, nil
 }

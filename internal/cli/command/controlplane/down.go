@@ -74,7 +74,7 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
-	awsAccesKeyID, env, err := getImageMetadata(options.cpContext, values, false)
+	awsAccessKeyID, env, err := getImageMetadata(options.cpContext, values, false)
 	if err != nil {
 		return err
 	}
@@ -87,8 +87,8 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 		if valuesConfig, ok := values["providerConfig"]; ok {
 			if valuesConfig, ok := valuesConfig.(map[string]interface{}); ok {
 				if ak := valuesConfig["accessKey"]; ak != "" {
-					if ak != awsAccesKeyID {
-						return errors.Errorf("Current AWS access key %q differs from the one used earlier: %q", ak, awsAccesKeyID)
+					if ak != awsAccessKeyID {
+						return errors.Errorf("Current AWS access key %q differs from the one used earlier: %q", ak, awsAccessKeyID)
 					}
 				}
 			}
@@ -121,8 +121,8 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 			pc := cast.ToStringMap(pc)
 			if _, ok := pc["accessKey"]; ok {
 				if ak := pc["accessKey"]; ak != "" {
-					if ak != awsAccesKeyID {
-						return errors.Errorf("Current AWS access key %q differs from the one used earlier: %q", ak, awsAccesKeyID)
+					if ak != awsAccessKeyID {
+						return errors.Errorf("Current AWS access key %q differs from the one used earlier: %q", ak, awsAccessKeyID)
 					}
 				}
 			}
