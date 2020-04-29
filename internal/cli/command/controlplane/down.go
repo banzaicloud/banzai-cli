@@ -75,29 +75,51 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
-	// TODO: check if there are any clusters are created with the pipeline instance
+	var defaultValues map[string]interface{}
+	exportHandlers := []ExportedFilesHandler{
+		defaultValuesExporter("export/values.yaml", &defaultValues),
+	}
 
-	log.Info("controlplane is being destroyed")
-	var env map[string]string
-	switch values["provider"] {
-	case providerEc2:
+	var imageMeta ImageMetadata
+	if values["provider"] == providerCustom {
+		log.Debug("parsing metadata")
+		exportHandlers = append(exportHandlers, metadataExporter(metadataFile, &imageMeta))
+	}
+
+	if err := processExports(options.cpContext, exportPath, exportHandlers); err != nil {
+		return err
+	}
+
+	log.Debugf("custom image metadata: %+v", imageMeta)
+
+	env := make(map[string]string)
+	var awsAccesKeyID string
+	if values["provider"] == providerEc2 || imageMeta.Custom.CredentialType == "aws" {
+		log.Debug("using local AWS credentials")
 		id, creds, err := input.GetAmazonCredentials()
 		if err != nil {
 			return errors.WrapIf(err, "failed to get AWS credentials")
 		}
+		env = creds
+		awsAccesKeyID = id
+	}
 
+	// TODO: check if there are any clusters are created with the pipeline instance
+
+	log.Info("controlplane is being destroyed")
+	switch values["provider"] {
+	case providerEc2:
 		if valuesConfig, ok := values["providerConfig"]; ok {
 			if valuesConfig, ok := valuesConfig.(map[string]interface{}); ok {
 				if ak := valuesConfig["accessKey"]; ak != "" {
-					if ak != id {
-						return errors.Errorf("Current AWS access key %q differs from the one used earlier: %q", ak, id)
+					if ak != awsAccesKeyID {
+						return errors.Errorf("Current AWS access key %q differs from the one used earlier: %q", ak, awsAccesKeyID)
 					}
 				}
 			}
 		}
-		env = creds
 
-		err = deleteEC2Cluster(options.cpContext, env)
+		err := deleteEC2Cluster(options.cpContext, env)
 		if err != nil {
 			return errors.WrapIf(err, "EC2 cluster destroy failed")
 		}
@@ -124,16 +146,11 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 		if pc, ok := values["providerConfig"]; ok {
 			pc := cast.ToStringMap(pc)
 			if _, ok := pc["accessKey"]; ok {
-				id, awsCreds, err := input.GetAmazonCredentials()
-				if err != nil {
-					return errors.WrapIf(err, "failed to get AWS credentials")
-				}
 				if ak := pc["accessKey"]; ak != "" {
-					if ak != id {
-						return errors.Errorf("Current AWS access key %q differs from the one used earlier: %q", ak, id)
+					if ak != awsAccesKeyID {
+						return errors.Errorf("Current AWS access key %q differs from the one used earlier: %q", ak, awsAccesKeyID)
 					}
 				}
-				creds = awsCreds
 			}
 		}
 
