@@ -18,7 +18,6 @@ import (
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
@@ -75,33 +74,9 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
-	var defaultValues map[string]interface{}
-	exportHandlers := []ExportedFilesHandler{
-		defaultValuesExporter("export/values.yaml", &defaultValues),
-	}
-
-	var imageMeta ImageMetadata
-	if values["provider"] == providerCustom {
-		log.Debug("parsing metadata")
-		exportHandlers = append(exportHandlers, metadataExporter(metadataFile, &imageMeta))
-	}
-
-	if err := processExports(options.cpContext, exportPath, exportHandlers); err != nil {
+	awsAccesKeyID, env, err := getImageMetadata(options.cpContext, values, false)
+	if err != nil {
 		return err
-	}
-
-	log.Debugf("custom image metadata: %+v", imageMeta)
-
-	env := make(map[string]string)
-	var awsAccesKeyID string
-	if values["provider"] == providerEc2 || imageMeta.Custom.CredentialType == "aws" {
-		log.Debug("using local AWS credentials")
-		id, creds, err := input.GetAmazonCredentials()
-		if err != nil {
-			return errors.WrapIf(err, "failed to get AWS credentials")
-		}
-		env = creds
-		awsAccesKeyID = id
 	}
 
 	// TODO: check if there are any clusters are created with the pipeline instance
