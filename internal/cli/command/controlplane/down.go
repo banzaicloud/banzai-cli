@@ -142,7 +142,6 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 		}
 
 	case providerCustom:
-		creds := map[string]string{}
 		if pc, ok := values["providerConfig"]; ok {
 			pc := cast.ToStringMap(pc)
 			if _, ok := pc["accessKey"]; ok {
@@ -154,7 +153,7 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 			}
 		}
 
-		if err := deleteCustomCluster(options.cpContext, creds); err != nil {
+		if err := deleteCustomCluster(options.cpContext, env); err != nil {
 			return errors.WrapIf(err, "Custom Kubernetes cluster destroy failed")
 		}
 
