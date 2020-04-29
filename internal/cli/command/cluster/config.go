@@ -18,8 +18,10 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"path"
 
 	"emperror.dev/errors"
+	"github.com/mitchellh/go-homedir"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -29,6 +31,7 @@ import (
 
 type configOptions struct {
 	clustercontext.Context
+	path string
 }
 
 func NewConfigCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -43,6 +46,9 @@ func NewConfigCommand(banzaiCli cli.Cli) *cobra.Command {
 		},
 	}
 	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "config")
+
+	flags := cmd.Flags()
+	flags.StringVarP(&options.path, "path", "p", "", "Path to save cluster K8S config")
 
 	return cmd
 }
@@ -60,12 +66,23 @@ func runDownloadConfig(banzaiCli cli.Cli, options configOptions, args []string) 
 		return errors.WrapIf(err, "could not get cluster config")
 	}
 
-	err = ioutil.WriteFile(fmt.Sprintf("%s.yaml", options.ClusterName()), []byte(config.Data), 0644)
+	if options.path == "" {
+		options.path = "."
+	}
+
+	// expand the path to include the home directory if the path is prefixed with `~`
+	myPath, err := homedir.Expand(options.path)
+	if err != nil {
+		return errors.WrapIf(err, "failed to expand the path to include the home directory")
+	}
+
+	var p = path.Join(myPath, fmt.Sprintf("%s.yaml", options.ClusterName()))
+	err = ioutil.WriteFile(p, []byte(config.Data), 0644)
 	if err != nil {
 		return errors.WrapIf(err, "failed to write initial repository config")
 	}
 
-	log.Infof("K8S config saved: %s", options.ClusterName())
+	log.Infof("K8S config saved: %s", p)
 
 	return nil
 }
