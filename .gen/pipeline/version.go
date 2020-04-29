@@ -1,3 +1,3 @@
 package pipeline
 
-const PipelineVersion = "cancel-process"
+const PipelineVersion = "0.42.0-dev.5"
