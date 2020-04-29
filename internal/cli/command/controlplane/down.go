@@ -18,7 +18,6 @@ import (
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
@@ -75,29 +74,27 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
+	awsAccessKeyID, env, err := getImageMetadata(options.cpContext, values, false)
+	if err != nil {
+		return err
+	}
+
 	// TODO: check if there are any clusters are created with the pipeline instance
 
 	log.Info("controlplane is being destroyed")
-	var env map[string]string
 	switch values["provider"] {
 	case providerEc2:
-		id, creds, err := input.GetAmazonCredentials()
-		if err != nil {
-			return errors.WrapIf(err, "failed to get AWS credentials")
-		}
-
 		if valuesConfig, ok := values["providerConfig"]; ok {
 			if valuesConfig, ok := valuesConfig.(map[string]interface{}); ok {
 				if ak := valuesConfig["accessKey"]; ak != "" {
-					if ak != id {
-						return errors.Errorf("Current AWS access key %q differs from the one used earlier: %q", ak, id)
+					if ak != awsAccessKeyID {
+						return errors.Errorf("Current AWS access key %q differs from the one used earlier: %q", ak, awsAccessKeyID)
 					}
 				}
 			}
 		}
-		env = creds
 
-		err = deleteEC2Cluster(options.cpContext, env)
+		err := deleteEC2Cluster(options.cpContext, env)
 		if err != nil {
 			return errors.WrapIf(err, "EC2 cluster destroy failed")
 		}
@@ -120,24 +117,18 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 		}
 
 	case providerCustom:
-		creds := map[string]string{}
 		if pc, ok := values["providerConfig"]; ok {
 			pc := cast.ToStringMap(pc)
 			if _, ok := pc["accessKey"]; ok {
-				id, awsCreds, err := input.GetAmazonCredentials()
-				if err != nil {
-					return errors.WrapIf(err, "failed to get AWS credentials")
-				}
 				if ak := pc["accessKey"]; ak != "" {
-					if ak != id {
-						return errors.Errorf("Current AWS access key %q differs from the one used earlier: %q", ak, id)
+					if ak != awsAccessKeyID {
+						return errors.Errorf("Current AWS access key %q differs from the one used earlier: %q", ak, awsAccessKeyID)
 					}
 				}
-				creds = awsCreds
 			}
 		}
 
-		if err := deleteCustomCluster(options.cpContext, creds); err != nil {
+		if err := deleteCustomCluster(options.cpContext, env); err != nil {
 			return errors.WrapIf(err, "Custom Kubernetes cluster destroy failed")
 		}
 

@@ -15,27 +15,20 @@
 package controlplane
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net"
 	"os"
-	"os/exec"
-	"path/filepath"
-	"strings"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/google/uuid"
-	"github.com/imdario/mergo"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/login"
-	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 )
 
 const (
@@ -131,36 +124,9 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		return errors.New("workspace is already initialized but a different --provider is specified")
 	}
 
-	var defaultValues map[string]interface{}
-	exportHandlers := []ExportedFilesHandler{
-		defaultValuesExporter("export/values.yaml", &defaultValues),
-	}
-
-	var imageMeta ImageMetadata
-	if values["provider"] == providerCustom {
-		log.Debug("parsing metadata")
-		exportHandlers = append(exportHandlers, metadataExporter(metadataFile, &imageMeta))
-	}
-
-	if err := processExports(options.cpContext, exportPath, exportHandlers); err != nil {
+	_, env, err := getImageMetadata(options.cpContext, values, true)
+	if err != nil {
 		return err
-	}
-
-	log.Debugf("custom image metadata: %+v", imageMeta)
-
-	if err := writeMergedValues(options.cpContext, defaultValues, values); err != nil {
-		return err
-	}
-
-	env := make(map[string]string)
-
-	if values["provider"] == providerEc2 || imageMeta.Custom.CredentialType == "aws" {
-		log.Debug("using local AWS credentials")
-		_, creds, err := input.GetAmazonCredentials()
-		if err != nil {
-			return errors.WrapIf(err, "failed to get AWS credentials")
-		}
-		env = creds
 	}
 
 	if options.terraformInit {
@@ -269,82 +235,6 @@ func postInstall(options *createOptions, banzaiCli cli.Cli, values map[string]in
 	return nil
 }
 
-type ExportedFilesHandler func(map[string][]byte) error
-
-func processExports(options *cpContext, source string, exportedFilesHandlers []ExportedFilesHandler) error {
-	files, err := readFilesFromContainerToMemory(options, source)
-	if err != nil {
-		return errors.WrapIf(err, "failed to export files from the image")
-	}
-
-	for _, h := range exportedFilesHandlers {
-		if err := h(files); err != nil {
-			return errors.WrapIf(err, "failed to run handler on exported files")
-		}
-	}
-	return nil
-}
-
-func writeMergedValues(options *cpContext, defaultValues, overrideValues map[string]interface{}) error {
-	var mergedValues map[string]interface{}
-	if err := mergeValues(&mergedValues, defaultValues, overrideValues); err != nil {
-		return err
-	}
-	bytes, err := yaml.Marshal(&mergedValues)
-	if err != nil {
-		return errors.Wrap(err, "failed to marshal merged values")
-	}
-	if err := ioutil.WriteFile(filepath.Join(options.workspace, generatedValuesFileName), bytes, 0600); err != nil {
-		return errors.Wrap(err, "failed to write out generated values file")
-	}
-	return nil
-}
-
-func mergeValues(mergedValues *map[string]interface{}, defaultValues, overrideValues map[string]interface{}) error {
-	if err := mergo.Merge(mergedValues, &defaultValues, mergo.WithOverride); err != nil {
-		return errors.Wrap(err, "failed to process default values in the image")
-	}
-	if err := mergo.Merge(mergedValues, &overrideValues, mergo.WithOverride); err != nil {
-		return errors.Wrap(err, "failed to merge override values from the workspace on top of default values in the image")
-	}
-	return nil
-}
-
-func imageFileExists(options *cpContext, source string) (bool, error) {
-	errorMsg := &bytes.Buffer{}
-	cmdOpt := func(cmd *exec.Cmd) error {
-		cmd.Stderr = errorMsg
-		return nil
-	}
-	if err := runContainerCommandGeneric(options, []string{"ls", source}, nil, cmdOpt); err != nil {
-		if strings.Contains(errorMsg.String(), "No such file or directory") {
-			return false, nil
-		}
-		return false, err
-	} else {
-		return true, nil
-	}
-}
-
-func stringifyMap(m interface{}) interface{} {
-	switch v := m.(type) {
-	case map[string]interface{}:
-		out := make(map[string]interface{})
-		for k, v := range v {
-			out[k] = stringifyMap(v)
-		}
-		return out
-	case map[interface{}]interface{}:
-		out := make(map[string]interface{})
-		for k, v := range v {
-			out[fmt.Sprint(k)] = stringifyMap(v)
-		}
-		return out
-	default:
-		return v
-	}
-}
-
 func initStateBackend(options *cpContext, values map[string]interface{}, env map[string]string) error {
 	var stateData []byte
 
@@ -384,15 +274,4 @@ func initStateBackend(options *cpContext, values map[string]interface{}, env map
 	_ = os.Remove(options.workspace + "/state.tf")
 
 	return nil
-}
-
-func defaultValuesExporter(source string, defaultValues *map[string]interface{}) ExportedFilesHandler {
-	return ExportedFilesHandler(func(files map[string][]byte) error {
-		if valuesFileContent, ok := files[source]; ok {
-			if err := yaml.Unmarshal(valuesFileContent, defaultValues); err != nil {
-				return errors.Wrap(err, "failed to unmarshal default values exported from the image")
-			}
-		}
-		return nil
-	})
 }
