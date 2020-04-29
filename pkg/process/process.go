@@ -35,6 +35,7 @@ func TailProcess(banzaiCli cli.Cli, processId string) error {
 	statuses := map[string]*spinner.Status{}
 
 	processVisibleChecks := 0
+	processedEvents := 0
 
 	for {
 		process, resp, err := client.ProcessesApi.GetProcess(context.Background(), orgID, processId)
@@ -53,7 +54,9 @@ func TailProcess(banzaiCli cli.Cli, processId string) error {
 			return errors.NewWithDetails("node pool update process list failed with http status code", "status_code", resp.StatusCode)
 		}
 
-		for i, event := range process.Events {
+		for i := processedEvents; i < len(process.Events); i++ {
+			event := process.Events[i]
+			processedEvents++
 			if s, ok := statuses[event.Type]; !ok {
 				status := spinner.NewStatus()
 				status.Start(fmt.Sprintf("[%s] executing %s activity %s", event.Timestamp.Local().Format(time.RFC3339), event.Type, event.Log))
@@ -64,6 +67,7 @@ func TailProcess(banzaiCli cli.Cli, processId string) error {
 				}
 			} else if event.Status != pipeline.RUNNING {
 				s.End(event.Status == pipeline.FINISHED)
+				delete(statuses, event.Type)
 			} else {
 				if i == len(process.Events)-1 {
 					time.Sleep(2 * time.Second)
