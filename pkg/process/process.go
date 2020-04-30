@@ -60,8 +60,12 @@ func TailProcess(banzaiCli cli.Cli, processId string) error {
 
 		for i := processedEvents; i < len(process.Events); i++ {
 			event := process.Events[i]
-			processedEvents++
 			if s, ok := statuses[event.Type]; !ok {
+				// TODO(nandi) don't let multiple statuses run for now
+				if len(statuses) > 0 {
+					continue
+				}
+
 				status := spinner.NewStatus()
 				status.Start(fmt.Sprintf("[%s] executing %s activity %s", event.Timestamp.Local().Format(time.RFC3339), event.Type, event.Log))
 				statuses[event.Type] = status
@@ -69,9 +73,13 @@ func TailProcess(banzaiCli cli.Cli, processId string) error {
 				if i == len(process.Events)-1 {
 					time.Sleep(2 * time.Second)
 				}
+
+				processedEvents++
 			} else if event.Status != pipeline.RUNNING {
 				s.End(event.Status == pipeline.FINISHED)
 				delete(statuses, event.Type)
+
+				processedEvents++
 			} else {
 				if i == len(process.Events)-1 {
 					time.Sleep(2 * time.Second)
