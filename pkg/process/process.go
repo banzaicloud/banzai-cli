@@ -32,6 +32,9 @@ func TailProcess(banzaiCli cli.Cli, processId string) error {
 	client := banzaiCli.Client()
 	orgID := banzaiCli.Context().OrganizationID()
 
+	status := spinner.NewStatus()
+	status.Start(fmt.Sprintf("[%s] tailing process %s", time.Now().Local().Format(time.RFC3339), processId))
+
 	statuses := map[string]*spinner.Status{}
 
 	processVisibleChecks := 0
@@ -49,6 +52,7 @@ func TailProcess(banzaiCli cli.Cli, processId string) error {
 			return errors.WrapIf(err, "failed to list node pool update processes")
 		}
 		defer resp.Body.Close()
+		status.End(true)
 
 		if resp.StatusCode < 200 || resp.StatusCode > 299 {
 			return errors.NewWithDetails("node pool update process list failed with http status code", "status_code", resp.StatusCode)
@@ -56,8 +60,12 @@ func TailProcess(banzaiCli cli.Cli, processId string) error {
 
 		for i := processedEvents; i < len(process.Events); i++ {
 			event := process.Events[i]
-			processedEvents++
 			if s, ok := statuses[event.Type]; !ok {
+				// TODO(nandi) don't let multiple statuses run for now
+				if len(statuses) > 0 {
+					continue
+				}
+
 				status := spinner.NewStatus()
 				status.Start(fmt.Sprintf("[%s] executing %s activity %s", event.Timestamp.Local().Format(time.RFC3339), event.Type, event.Log))
 				statuses[event.Type] = status
@@ -65,9 +73,13 @@ func TailProcess(banzaiCli cli.Cli, processId string) error {
 				if i == len(process.Events)-1 {
 					time.Sleep(2 * time.Second)
 				}
+
+				processedEvents++
 			} else if event.Status != pipeline.RUNNING {
 				s.End(event.Status == pipeline.FINISHED)
 				delete(statuses, event.Type)
+
+				processedEvents++
 			} else {
 				if i == len(process.Events)-1 {
 					time.Sleep(2 * time.Second)
@@ -76,8 +88,8 @@ func TailProcess(banzaiCli cli.Cli, processId string) error {
 		}
 
 		if process.Status == pipeline.FINISHED {
-			_, err = fmt.Fprintf(banzaiCli.Out(), process.Type+" process finished")
-			return err
+			_, _ = fmt.Fprintf(banzaiCli.Out(), "%s process finished", process.Type)
+			return nil
 		} else if process.Status != pipeline.RUNNING {
 			return errors.New(fmt.Sprintf("%s process %s: %s", process.Type, process.Status, process.Log))
 		}
