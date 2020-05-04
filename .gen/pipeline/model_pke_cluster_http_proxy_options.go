@@ -18,4 +18,6 @@ type PkeClusterHttpProxyOptions struct {
 	Port int32 `json:"port,omitempty"`
 	// ID of the secret containing the username and password for the proxy
 	SecretId string `json:"secretId,omitempty"`
+	// Scheme of the proxy
+	Scheme string `json:"scheme,omitempty"`
 }
