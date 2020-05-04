@@ -17,7 +17,6 @@ package update
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -39,35 +38,20 @@ func NewCancelCommand(banzaiCli cli.Cli) *cobra.Command {
 }
 
 func runCancelUpdate(banzaiCli cli.Cli, args []string) error {
-	id := args[0]
+	processID := args[0]
 
-	p, resp, err := banzaiCli.Client().ProcessesApi.GetProcess(context.Background(), banzaiCli.Context().OrganizationID(), id)
+	err := checkUpdateProcess(banzaiCli, processID)
 	if err != nil {
-		cli.LogAPIError("cancel node pool update", err, resp)
-
-		return errors.WrapIf(err, "failed to cancel node pool update")
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		err := errors.NewWithDetails("node pool update cancel failed with http status code", "status_code", resp.StatusCode)
-
-		cli.LogAPIError("cancel node pool update", err, resp)
-
 		return err
 	}
 
-	if !strings.HasSuffix(p.Type, "update-node-pool") {
-		return errors.New("not a nodepool update process")
-	}
-
-	_, err = banzaiCli.Client().ProcessesApi.CancelProcess(context.Background(), banzaiCli.Context().OrganizationID(), id)
+	_, err = banzaiCli.Client().ProcessesApi.CancelProcess(context.Background(), banzaiCli.Context().OrganizationID(), processID)
 	if err != nil {
 		// TODO: review log usage
 		return errors.WrapIf(err, "failed to cancel node pool update")
 	}
 
-	_, _ = fmt.Fprintf(banzaiCli.Out(), "update process %q canceled\n", id)
+	_, _ = fmt.Fprintf(banzaiCli.Out(), "update process %q canceled\n", processID)
 
 	return nil
 }

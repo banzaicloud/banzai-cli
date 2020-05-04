@@ -56,7 +56,10 @@ func NewUpdateCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "update")
 
-	cmd.AddCommand(update.NewCancelCommand(banzaiCli))
+	cmd.AddCommand(
+		update.NewCancelCommand(banzaiCli),
+		update.NewTailCommand(banzaiCli),
+	)
 
 	return cmd
 }
