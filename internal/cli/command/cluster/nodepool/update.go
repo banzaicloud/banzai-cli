@@ -21,6 +21,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/nodepool/update"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	"github.com/banzaicloud/banzai-cli/pkg/process"
 	log "github.com/sirupsen/logrus"
@@ -39,7 +40,7 @@ func NewUpdateCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "update [NAME]",
 		Aliases: []string{"u"},
-		Short:   "Update a node pool",
+		Short:   "Update a node pool (and related subcommands)",
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
@@ -49,11 +50,13 @@ func NewUpdateCommand(banzaiCli cli.Cli) *cobra.Command {
 		},
 	}
 
-	flags := cmd.Flags()
+	flags := cmd.LocalFlags()
 
 	flags.StringVarP(&options.file, "file", "f", "", "Node pool descriptor file")
 
 	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "update")
+
+	cmd.AddCommand(update.NewCancelCommand(banzaiCli))
 
 	return cmd
 }
