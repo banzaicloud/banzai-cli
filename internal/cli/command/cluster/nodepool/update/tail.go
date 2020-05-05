@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package process
+package update
 
 import (
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -20,11 +20,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewTailCommand creates a new cobra.Command for `banzai process tail`.
+// NewTailCommand creates a new cobra.Command for `banzai cluster nodepool update tail`.
 func NewTailCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "tail processId",
-		Short: "Tail a process",
+		Short: "Tail a node pool update",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runTail(banzaiCli, args)
@@ -35,5 +35,12 @@ func NewTailCommand(banzaiCli cli.Cli) *cobra.Command {
 }
 
 func runTail(banzaiCli cli.Cli, args []string) error {
-	return process.TailProcess(banzaiCli, args[0])
+	processID := args[0]
+
+	err := checkUpdateProcess(banzaiCli, processID)
+	if err != nil {
+		return err
+	}
+
+	return process.TailProcess(banzaiCli, processID)
 }
