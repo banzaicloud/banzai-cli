@@ -148,9 +148,6 @@ func (a *LoginApp) handleCallback(w http.ResponseWriter, r *http.Request) {
 	var claims json.RawMessage
 	idToken.Claims(&claims)
 
-	buff := new(bytes.Buffer)
-	json.Indent(buff, claims, "", "  ")
-
 	pipelineToken, err = a.requestTokenFromPipeline(rawIDToken, token.RefreshToken)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to request Pipeline token: %v", err), http.StatusInternalServerError)
@@ -206,4 +203,3 @@ func (a *LoginApp) requestTokenFromPipeline(rawIDToken string, refreshToken stri
 
 	return "", fmt.Errorf("failed to find Authorization header in Pipeline response")
 }
-
