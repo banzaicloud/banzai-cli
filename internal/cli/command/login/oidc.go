@@ -16,6 +16,7 @@ package login
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
 
 	"emperror.dev/errors"
@@ -24,22 +25,52 @@ import (
 )
 
 func runServer(banzaiCli cli.Cli, pipelineBasePath string) (string, error) {
-	issuerURL, err := url.Parse(pipelineBasePath)
+	baseURL, err := url.Parse(pipelineBasePath)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse pipelineBasePath: %v", err)
 	}
 
-	// detect localhost setup, and derive the issuer URL
-	if issuerURL.Port() == "9090" {
-		issuerURL.Host = issuerURL.Hostname() + ":5556"
+	issuerURL, err := getIdPURL(baseURL)
+	if err != nil {
+		return "", errors.WrapIf(err, "failed to get IdP url")
 	}
-	issuerURL.Path = "/dex"
 
-	lApp := auth.NewLoginApp(banzaiCli, issuerURL.String(), pipelineBasePath)
+	lApp := auth.NewLoginApp(banzaiCli, issuerURL, pipelineBasePath)
 	tokenBytes, err := auth.RunAuthServer(lApp)
 	if err != nil {
 		return "", errors.WrapIf(err, "login failed")
 	}
 
 	return string(tokenBytes), nil
+}
+
+func getIdPURL(baseURL *url.URL) (string, error) {
+	redirectUrl := fmt.Sprintf("%s://%s", baseURL.Scheme, baseURL.Hostname())
+	port := baseURL.Port()
+	if port != "" {
+		redirectUrl = fmt.Sprintf("%s:%s", redirectUrl, port)
+	}
+
+	// get issuerURL from header of redirect
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		}}
+
+	resp, err := client.Get(fmt.Sprintf("%s/auth/dex/login", redirectUrl))
+	if err != nil {
+		return "", errors.WrapIf(err, "failed to redirect login")
+	}
+	var location = resp.Header.Get("Location")
+	issuerURL, err := url.Parse(location)
+	if err != nil {
+		return "", errors.WrapIf(err, "failed to get issuer url")
+	}
+
+	var finalUrl = fmt.Sprintf("%s://%s", issuerURL.Scheme, issuerURL.Hostname())
+	if issuerURL.Port() != "" {
+		finalUrl = fmt.Sprintf("%s:%s", finalUrl, issuerURL.Port())
+	}
+
+	return fmt.Sprintf("%s/dex", finalUrl), nil
 }
