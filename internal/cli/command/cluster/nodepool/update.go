@@ -50,7 +50,7 @@ func NewUpdateCommand(banzaiCli cli.Cli) *cobra.Command {
 		},
 	}
 
-	flags := cmd.LocalFlags()
+	flags := cmd.Flags()
 
 	flags.StringVarP(&options.file, "file", "f", "", "Node pool descriptor file")
 
