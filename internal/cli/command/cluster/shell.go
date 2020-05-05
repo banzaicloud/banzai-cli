@@ -200,7 +200,6 @@ func runShell(banzaiCli cli.Cli, options shellOptions, args []string) error {
 			}
 		}
 	} else {
-
 		retry, err := writeConfig(ctx, pipeline, orgId, id, tmpfile)
 		if err != nil {
 			if !interactive || !retry {

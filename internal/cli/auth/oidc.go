@@ -15,7 +15,6 @@
 package auth
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 
@@ -149,7 +148,7 @@ func (a *OidcConfigDownloadApp) handleDexCallback(w http.ResponseWriter, r *http
 		return
 	}
 
-	oidcConfig, err = a.generateKubeConfig(r.Context(), claims, rawIDToken, token.RefreshToken)
+	oidcConfig, err = a.generateKubeConfig(claims, rawIDToken, token.RefreshToken)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to generate kubeconfig: %s", err), http.StatusInternalServerError)
 		return
@@ -158,7 +157,7 @@ func (a *OidcConfigDownloadApp) handleDexCallback(w http.ResponseWriter, r *http
 	a.renderClosingTemplate(w)
 }
 
-func (a *OidcConfigDownloadApp) generateKubeConfig(ctx context.Context, claims claim, IDToken, refreshToken string) ([]byte, error) {
+func (a *OidcConfigDownloadApp) generateKubeConfig(claims claim, IDToken, refreshToken string) ([]byte, error) {
 	config, err := k8sClient.Load([]byte(a.clusterConfig.Data))
 	if err != nil {
 		return nil, errors.WrapIf(err, "failed to convert pipeline k8s config to k8s client config")
