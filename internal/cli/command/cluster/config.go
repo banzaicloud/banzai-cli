@@ -21,6 +21,7 @@ import (
 	"path"
 
 	"emperror.dev/errors"
+	"github.com/banzaicloud/banzai-cli/internal/cli/auth"
 	"github.com/mitchellh/go-homedir"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -31,7 +32,9 @@ import (
 
 type configOptions struct {
 	clustercontext.Context
+
 	path string
+	oidc bool
 }
 
 func NewConfigCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -49,6 +52,7 @@ func NewConfigCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.StringVarP(&options.path, "path", "p", "", "Path to save cluster K8S config")
+	flags.BoolVarP(&options.oidc, "oidc", "", false, "Get personal OIDC authenticated configuration")
 
 	return cmd
 }
@@ -58,12 +62,30 @@ func runDownloadConfig(banzaiCli cli.Cli, options configOptions, args []string) 
 		return err
 	}
 
+	var configData []byte
 	orgId := banzaiCli.Context().OrganizationID()
 	id := options.ClusterID()
+	ctx := context.Background()
 
 	config, _, err := banzaiCli.Client().ClustersApi.GetClusterConfig(context.Background(), orgId, id)
 	if err != nil {
 		return errors.WrapIf(err, "could not get cluster config")
+	}
+	configData = []byte(config.Data)
+
+	clusterDetails, _, err := banzaiCli.Client().ClustersApi.GetCluster(ctx, orgId, id)
+	if err != nil {
+		return errors.WrapIf(err, "failed to get cluster details")
+	}
+
+	if clusterDetails.Oidc.Enabled && options.oidc {
+		app := auth.NewOIDCConfigApp(banzaiCli, id, config, clusterDetails.Oidc)
+		oidcConfig, err := auth.RunAuthServer(app)
+		if err != nil {
+			return errors.WrapIf(err, "failed to get OIDC config")
+		}
+
+		configData = oidcConfig
 	}
 
 	if options.path == "" {
@@ -77,7 +99,7 @@ func runDownloadConfig(banzaiCli cli.Cli, options configOptions, args []string) 
 	}
 
 	var p = path.Join(myPath, fmt.Sprintf("%s.yaml", options.ClusterName()))
-	err = ioutil.WriteFile(p, []byte(config.Data), 0644)
+	err = ioutil.WriteFile(p, configData, 0644)
 	if err != nil {
 		return errors.WrapIf(err, "failed to write initial repository config")
 	}

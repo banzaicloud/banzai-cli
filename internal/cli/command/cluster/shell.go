@@ -28,6 +28,7 @@ import (
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/banzaicloud/banzai-cli/internal/cli/auth"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -36,7 +37,9 @@ import (
 
 type shellOptions struct {
 	clustercontext.Context
+
 	wrapHelm bool
+	oidc     bool
 }
 
 func NewShellCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -69,13 +72,14 @@ func NewShellCommand(banzaiCli cli.Cli) *cobra.Command {
 	}
 
 	cmd.Flags().BoolVar(&options.wrapHelm, "wrap-helm", true, "Wrap the helm command with a version that downloads the matching version and creates a custom helm home")
+	cmd.Flags().BoolVar(&options.oidc, "oidc", false, "Use your personal OIDC authenticated config")
 
 	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "run a shell for")
 
 	return cmd
 }
 
-func writeConfig(ctx context.Context, client *pipeline.APIClient, orgId, id int32, tmpfile io.WriteCloser) (retry bool, err error) {
+func getKubeConfig(ctx context.Context, client *pipeline.APIClient, orgId, id int32) (config pipeline.ClusterConfig, retry bool, err error) {
 	config, response, clusterErr := client.ClustersApi.GetClusterConfig(ctx, orgId, id)
 	if clusterErr != nil {
 		retry = response.StatusCode == 400
@@ -83,15 +87,30 @@ func writeConfig(ctx context.Context, client *pipeline.APIClient, orgId, id int3
 		return
 	}
 
-	if _, err = tmpfile.Write([]byte(config.Data)); err != nil {
-		err = errors.WrapIf(err, "could not write temporary file")
+	return
+}
+
+func writeConfig(ctx context.Context, client *pipeline.APIClient, orgId, id int32, tmpfile io.WriteCloser) (retry bool, err error) {
+	var config pipeline.ClusterConfig
+	config, retry, err = getKubeConfig(ctx, client, orgId, id)
+	if err != nil {
 		return
 	}
 
-	if err = tmpfile.Close(); err != nil {
-		err = errors.WrapIf(err, "could not close temporary file")
-	}
+	err = writeKubeConfigToTempFile([]byte(config.Data), tmpfile)
 	return
+}
+
+func writeKubeConfigToTempFile(config []byte, tmpfile io.WriteCloser) error {
+	if _, err := tmpfile.Write(config); err != nil {
+		return errors.WrapIf(err, "could not write temporary file")
+	}
+
+	if err := tmpfile.Close(); err != nil {
+		return errors.WrapIf(err, "could not close temporary file")
+	}
+
+	return nil
 }
 
 func runShell(banzaiCli cli.Cli, options shellOptions, args []string) error {
@@ -136,32 +155,78 @@ func runShell(banzaiCli cli.Cli, options shellOptions, args []string) error {
 		commandArgs = args[1:]
 	}
 
-	retry, err := writeConfig(ctx, pipeline, orgId, id, tmpfile)
+	clusterStatus, _, err := pipeline.ClustersApi.GetCluster(ctx, orgId, id)
 	if err != nil {
-		if !interactive || !retry {
-			return errors.WrapIf(err, "writing kubeconfig")
-		}
+		return errors.WrapIf(err, "failed to get cluster details")
+	}
 
-		go func() {
-			for {
-				retry, err := writeConfig(ctx, pipeline, orgId, id, tmpfile)
-				if err != nil {
-					if !retry {
-						log.Fatalf("%v", err)
-					}
-					log.Warningf("cluster config is still not available. retrying in 30 seconds")
-				} else {
-					log.Infof("cluster config successfully written")
-					return
-				}
-
-				select {
-				case <-time.After(30 * time.Second):
-				case <-ctx.Done():
-					return
-				}
+	if clusterStatus.Oidc.Enabled && options.oidc {
+		c, retry, err := getKubeConfig(ctx, pipeline, orgId, id)
+		if err != nil {
+			if !interactive || !retry {
+				return errors.WrapIf(err, "writing kubeconfig")
 			}
-		}()
+
+			go func() {
+				for {
+					c, retry, err := getKubeConfig(ctx, pipeline, orgId, id)
+					if err != nil {
+						if !retry {
+							log.Fatalf("%v", err)
+						}
+						log.Warningf("cluster config is still not available. retrying in 30 seconds")
+					} else {
+						err := writeOIDCConfig(banzaiCli, options.ClusterID(), c, clusterStatus.Oidc, tmpfile)
+						if err != nil {
+							log.Fatalf("%v", err)
+						}
+
+						log.Infof("cluster config successfully got")
+
+						return
+					}
+
+					select {
+					case <-time.After(30 * time.Second):
+					case <-ctx.Done():
+						return
+					}
+				}
+			}()
+		} else {
+			err := writeOIDCConfig(banzaiCli, options.ClusterID(), c, clusterStatus.Oidc, tmpfile)
+			if err != nil {
+				return errors.WrapIf(err, "failed to write OIDC config")
+			}
+		}
+	} else {
+		retry, err := writeConfig(ctx, pipeline, orgId, id, tmpfile)
+		if err != nil {
+			if !interactive || !retry {
+				return errors.WrapIf(err, "writing kubeconfig")
+			}
+
+			go func() {
+				for {
+					retry, err := writeConfig(ctx, pipeline, orgId, id, tmpfile)
+					if err != nil {
+						if !retry {
+							log.Fatalf("%v", err)
+						}
+						log.Warningf("cluster config is still not available. retrying in 30 seconds")
+					} else {
+						log.Infof("cluster config successfully written")
+						return
+					}
+
+					select {
+					case <-time.After(30 * time.Second):
+					case <-ctx.Done():
+						return
+					}
+				}
+			}()
+		}
 	}
 
 	org, _, err := pipeline.OrganizationsApi.GetOrg(ctx, orgId)
@@ -244,5 +309,20 @@ exec %s cluster _helm -- "$@"
 		return wrapped
 	}
 	log.Printf("Command exited successfully")
+	return nil
+}
+
+func writeOIDCConfig(banzaiCli cli.Cli, clusterID int32, clusterConfig pipeline.ClusterConfig, config pipeline.OidcConfig, tmpFile io.WriteCloser) error {
+	oidcApp := auth.NewOIDCConfigApp(banzaiCli, clusterID, clusterConfig, config)
+	oidcConfig, err := auth.RunAuthServer(oidcApp)
+	if err != nil {
+		return errors.WrapIf(err, "failed to run auth server")
+	}
+
+	err = writeKubeConfigToTempFile(oidcConfig, tmpFile)
+	if err != nil {
+		return errors.WrapIf(err, "failed to write OIDC config to file")
+	}
+
 	return nil
 }
