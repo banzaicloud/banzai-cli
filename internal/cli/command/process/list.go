@@ -56,7 +56,6 @@ func runList(banzaiCli cli.Cli, options listOptions) error {
 
 	processes, _, err := banzaiCli.Client().ProcessesApi.ListProcesses(context.Background(), banzaiCli.Context().OrganizationID(), &o)
 	if err != nil {
-		// TODO: review log usage
 		return errors.Wrap(err, "could not list processes")
 	}
 
