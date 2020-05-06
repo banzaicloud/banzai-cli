@@ -27,6 +27,9 @@ func NewTailCommand(banzaiCli cli.Cli) *cobra.Command {
 		Short: "Tail a process",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
+			cmd.SilenceErrors = true
+
 			return runTail(banzaiCli, args)
 		},
 	}
@@ -35,5 +38,10 @@ func NewTailCommand(banzaiCli cli.Cli) *cobra.Command {
 }
 
 func runTail(banzaiCli cli.Cli, args []string) error {
-	return process.TailProcess(banzaiCli, args[0])
+	err := process.TailProcess(banzaiCli, args[0])
+	if err != nil && !process.IsProcessFailedError(err) {
+		return err
+	}
+
+	return nil
 }

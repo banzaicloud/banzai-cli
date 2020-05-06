@@ -30,6 +30,9 @@ func NewCancelCommand(banzaiCli cli.Cli) *cobra.Command {
 		Short: "Cancel a node pool update",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
+			cmd.SilenceErrors = true
+
 			return runCancelUpdate(banzaiCli, args)
 		},
 	}
@@ -47,7 +50,6 @@ func runCancelUpdate(banzaiCli cli.Cli, args []string) error {
 
 	_, err = banzaiCli.Client().ProcessesApi.CancelProcess(context.Background(), banzaiCli.Context().OrganizationID(), processID)
 	if err != nil {
-		// TODO: review log usage
 		return errors.WrapIf(err, "failed to cancel node pool update")
 	}
 

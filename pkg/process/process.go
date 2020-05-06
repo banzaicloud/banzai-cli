@@ -28,6 +28,19 @@ import (
 
 const processVisibleThreshold = 3
 
+type ProcessFailedError struct {
+	msg string
+}
+
+func (e ProcessFailedError) Error() string {
+	return e.msg
+}
+
+func IsProcessFailedError(err error) bool {
+	_, ok := err.(ProcessFailedError)
+	return ok
+}
+
 func TailProcess(banzaiCli cli.Cli, processId string) error {
 	client := banzaiCli.Client()
 	orgID := banzaiCli.Context().OrganizationID()
@@ -91,7 +104,7 @@ func TailProcess(banzaiCli cli.Cli, processId string) error {
 			_, _ = fmt.Fprintf(banzaiCli.Out(), "%s process finished", process.Type)
 			return nil
 		} else if process.Status != pipeline.RUNNING {
-			return errors.New(fmt.Sprintf("%s process %s: %s", process.Type, process.Status, process.Log))
+			return ProcessFailedError{fmt.Sprintf("%s process %s: %s", process.Type, process.Status, process.Log)}
 		}
 	}
 }

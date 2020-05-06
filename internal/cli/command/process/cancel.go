@@ -18,8 +18,8 @@ import (
 	"context"
 	"fmt"
 
+	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -29,21 +29,24 @@ func NewCancelCommand(banzaiCli cli.Cli) *cobra.Command {
 		Use:   "cancel processId",
 		Short: "Cancel a process",
 		Args:  cobra.ExactArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
-			runCancel(banzaiCli, args)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
+			cmd.SilenceErrors = true
+
+			return runCancel(banzaiCli, args)
 		},
 	}
 
 	return cmd
 }
 
-func runCancel(banzaiCli cli.Cli, args []string) {
+func runCancel(banzaiCli cli.Cli, args []string) error {
 	id := args[0]
 	_, err := banzaiCli.Client().ProcessesApi.CancelProcess(context.Background(), banzaiCli.Context().OrganizationID(), id)
 	if err != nil {
-		// TODO: review log usage
-		log.Fatalf("could not cancel process: %v", err)
+		return errors.Wrap(err, "could not cancel process")
 	}
 
-	_, _ = fmt.Fprintf(banzaiCli.Out(), "process %q canceled\n", id)
+	_, err = fmt.Fprintf(banzaiCli.Out(), "process %q canceled\n", id)
+	return err
 }
