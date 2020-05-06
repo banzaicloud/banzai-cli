@@ -17,11 +17,11 @@ package process
 import (
 	"context"
 
+	"emperror.dev/errors"
 	"github.com/antihax/optional"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/format"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -38,6 +38,9 @@ func NewListCommand(banzaiCli cli.Cli) *cobra.Command {
 		Short: "List processes",
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
+			cmd.SilenceUsage = true
+			cmd.SilenceErrors = true
+
 			options.format, _ = cmd.Flags().GetString("output")
 			runList(banzaiCli, options)
 		},
@@ -46,7 +49,7 @@ func NewListCommand(banzaiCli cli.Cli) *cobra.Command {
 	return cmd
 }
 
-func runList(banzaiCli cli.Cli, options listOptions) {
+func runList(banzaiCli cli.Cli, options listOptions) error {
 	o := pipeline.ListProcessesOpts{
 		Status: optional.NewInterface(pipeline.RUNNING),
 	}
@@ -54,8 +57,10 @@ func runList(banzaiCli cli.Cli, options listOptions) {
 	processes, _, err := banzaiCli.Client().ProcessesApi.ListProcesses(context.Background(), banzaiCli.Context().OrganizationID(), &o)
 	if err != nil {
 		// TODO: review log usage
-		log.Fatalf("could not list processes: %v", err)
+		return errors.Wrap(err, "could not list processes")
 	}
 
 	format.ProcessWrite(banzaiCli.Out(), options.format, banzaiCli.Color(), processes)
+
+	return nil
 }

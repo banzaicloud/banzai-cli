@@ -27,6 +27,9 @@ func NewTailCommand(banzaiCli cli.Cli) *cobra.Command {
 		Short: "Tail a node pool update",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
+			cmd.SilenceErrors = true
+
 			return runTail(banzaiCli, args)
 		},
 	}
@@ -42,5 +45,10 @@ func runTail(banzaiCli cli.Cli, args []string) error {
 		return err
 	}
 
-	return process.TailProcess(banzaiCli, processID)
+	err = process.TailProcess(banzaiCli, processID)
+	if err != nil && !process.IsProcessFailedError(err) {
+		return err
+	}
+
+	return nil
 }
