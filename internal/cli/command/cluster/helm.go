@@ -38,6 +38,7 @@ import (
 )
 
 type helmOptions struct {
+	version string
 }
 
 func NewHelmCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -51,6 +52,9 @@ func NewHelmCommand(banzaiCli cli.Cli) *cobra.Command {
 			return runHelm(banzaiCli, options, args)
 		},
 	}
+
+	flags := cmd.Flags()
+	flags.StringVarP(&options.version, "version", "v", "", "Helm version")
 
 	return cmd
 }
@@ -94,45 +98,6 @@ func writeHelm(url, name string) error {
 }
 
 func runHelm(banzaiCli cli.Cli, options helmOptions, args []string) error {
-	version, err := tillerVersion()
-	if err != nil {
-		return err
-	}
-
-	bindir := filepath.Join(banzaiCli.Home(), "bin")
-	if err := os.MkdirAll(bindir, 0755); err != nil {
-		return errors.WrapIff(err, "failed to create %q directory", bindir)
-	}
-
-	url := fmt.Sprintf("https://get.helm.sh/helm-%s-%s-amd64.tar.gz", version, runtime.GOOS)
-	name := filepath.Join(bindir, fmt.Sprintf("helm-%s", version))
-
-	if _, err := os.Stat(name); err != nil {
-		log.Infof("Downloading helm %s...", version)
-		if runtime.GOARCH != "amd64" {
-			return errors.Errorf("unsupported architecture: %v", runtime.GOARCH)
-		}
-		if err := writeHelm(url, name); err != nil {
-			return errors.WrapIf(err, "failed to download helm client")
-		}
-		log.Infof("Helm %s downloaded successfully", version)
-	}
-
-	org := banzaiCli.Context().OrganizationID()
-	helmHome := filepath.Join(banzaiCli.Home(), fmt.Sprintf("helm/org-%d", org))
-	helmRepos := filepath.Join(helmHome, "repository")
-	if err := os.MkdirAll(helmRepos, 0755); err != nil {
-		return errors.WrapIff(err, "failed to create %q directory", helmRepos)
-	}
-
-	if err := dumpRepositories(banzaiCli, helmRepos); err != nil {
-		return errors.WrapIf(err, "failed to sync Helm repositories")
-	}
-
-	helmPlugins := filepath.Join(helmHome, "plugins")
-	if err := os.MkdirAll(helmPlugins, 0755); err != nil {
-		return errors.WrapIff(err, "failed to create %q directory", helmPlugins)
-	}
 
 	env := os.Environ()
 	envs := make(map[string]string, len(env))
@@ -144,7 +109,27 @@ func runHelm(banzaiCli cli.Cli, options helmOptions, args []string) error {
 		envs[parts[0]] = parts[1]
 	}
 
-	envs["HELM_HOME"] = helmHome
+	var version string
+	var err error
+	if options.version == "2" {
+		version, err = tillerVersion()
+		if err != nil {
+			return err
+		}
+		envs, err = setHelm2Envs(envs, banzaiCli)
+	} else {
+		// TODO get helm3 version from pipeline
+		version, err = getHelmVersion()
+		if err != nil {
+			return err
+		}
+		envs, err = setHelmEnv(envs, banzaiCli)
+	}
+
+	name, err := getHelmBinary(version, banzaiCli)
+	if err != nil {
+		return err
+	}
 
 	env = make([]string, 0, len(envs))
 	for k, v := range envs {
@@ -225,4 +210,75 @@ func tillerVersion() (string, error) {
 	}
 	version := parts[1] // TODO check format
 	return version, nil
+}
+
+func getHelmVersion() (string, error) {
+	// TODO withdraw form pipeline capabilities api
+	return "v3.1.2", nil
+}
+
+func getHelmBinary(version string, banzaiCli cli.Cli) (string, error) {
+	bindir := filepath.Join(banzaiCli.Home(), "bin")
+	if err := os.MkdirAll(bindir, 0755); err != nil {
+		return "", errors.WrapIff(err, "failed to create %q directory", bindir)
+	}
+
+	url := fmt.Sprintf("https://get.helm.sh/helm-%s-%s-amd64.tar.gz", version, runtime.GOOS)
+	name := filepath.Join(bindir, fmt.Sprintf("helm-%s", version))
+
+	if _, err := os.Stat(name); err != nil {
+		log.Infof("Downloading helm %s...", version)
+		if runtime.GOARCH != "amd64" {
+			return "", errors.Errorf("unsupported architecture: %v", runtime.GOARCH)
+		}
+		if err := writeHelm(url, name); err != nil {
+			return "", errors.WrapIf(err, "failed to download helm client")
+		}
+		log.Infof("Helm %s downloaded successfully", version)
+	}
+	return name, nil
+}
+
+func setHelmEnv(envs map[string]string, banzaiCli cli.Cli) (map[string]string, error) {
+	org := banzaiCli.Context().OrganizationID()
+	helmDataHome := filepath.Join(banzaiCli.Home(), fmt.Sprintf("helm/org-%d/data", org))
+	if err := os.MkdirAll(helmDataHome, 0755); err != nil {
+		return envs, errors.WrapIff(err, "failed to create %q directory", helmDataHome)
+	}
+	helmConfigHome := filepath.Join(banzaiCli.Home(), fmt.Sprintf("helm/org-%d/config", org))
+	if err := os.MkdirAll(helmConfigHome, 0755); err != nil {
+		return envs, errors.WrapIff(err, "failed to create %q directory", helmConfigHome)
+	}
+	helmCacheHome := filepath.Join(banzaiCli.Home(), fmt.Sprintf("helm/org-%d/cache", org))
+	if err := os.MkdirAll(helmCacheHome, 0755); err != nil {
+		return envs, errors.WrapIff(err, "failed to create %q directory", helmConfigHome)
+	}
+
+	envs["XDG_DATA_HOME"] = helmDataHome
+	envs["XDG_CONFIG_HOME"] = helmConfigHome
+	envs["XDG_CACHE_HOME"] = helmCacheHome
+
+	return envs, nil
+}
+
+func setHelm2Envs(envs map[string]string, banzaiCli cli.Cli) (map[string]string, error) {
+	org := banzaiCli.Context().OrganizationID()
+	helmHome := filepath.Join(banzaiCli.Home(), fmt.Sprintf("helm/org-%d", org))
+	helmRepos := filepath.Join(helmHome, "repository")
+	if err := os.MkdirAll(helmRepos, 0755); err != nil {
+		return envs, errors.WrapIff(err, "failed to create %q directory", helmRepos)
+	}
+
+	if err := dumpRepositories(banzaiCli, helmRepos); err != nil {
+		return envs, errors.WrapIf(err, "failed to sync Helm repositories")
+	}
+
+	helmPlugins := filepath.Join(helmHome, "plugins")
+	if err := os.MkdirAll(helmPlugins, 0755); err != nil {
+		return envs, errors.WrapIff(err, "failed to create %q directory", helmPlugins)
+	}
+
+	envs["HELM_HOME"] = helmHome
+
+	return envs, nil
 }
