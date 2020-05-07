@@ -30,7 +30,7 @@ func runServer(banzaiCli cli.Cli, pipelineBasePath string) (string, error) {
 		return "", fmt.Errorf("failed to parse pipelineBasePath: %v", err)
 	}
 
-	issuerURL, err := getIdPURL(baseURL)
+	issuerURL, err := getIdPURL(banzaiCli, baseURL)
 	if err != nil {
 		return "", errors.WrapIf(err, "failed to get IdP url")
 	}
@@ -44,20 +44,22 @@ func runServer(banzaiCli cli.Cli, pipelineBasePath string) (string, error) {
 	return string(tokenBytes), nil
 }
 
-func getIdPURL(baseURL *url.URL) (string, error) {
-	redirectUrl := fmt.Sprintf("%s://%s", baseURL.Scheme, baseURL.Hostname())
+func getIdPURL(banzaiCli cli.Cli, baseURL *url.URL) (string, error) {
+	redirectURL := fmt.Sprintf("%s://%s", baseURL.Scheme, baseURL.Hostname())
 	port := baseURL.Port()
 	if port != "" {
-		redirectUrl = fmt.Sprintf("%s:%s", redirectUrl, port)
+		redirectURL = fmt.Sprintf("%s:%s", redirectURL, port)
 	}
 
 	// get issuerURL from header of redirect
 	client := &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
-		}}
+		},
+		Transport: banzaiCli.Client().GetConfig().HTTPClient.Transport,
+	}
 
-	resp, err := client.Get(fmt.Sprintf("%s/auth/dex/login", redirectUrl))
+	resp, err := client.Get(fmt.Sprintf("%s/auth/dex/login", redirectURL))
 	if err != nil {
 		return "", errors.WrapIf(err, "failed to redirect login")
 	}
@@ -67,10 +69,10 @@ func getIdPURL(baseURL *url.URL) (string, error) {
 		return "", errors.WrapIf(err, "failed to get issuer url")
 	}
 
-	var finalUrl = fmt.Sprintf("%s://%s", issuerURL.Scheme, issuerURL.Hostname())
+	var finalURL = fmt.Sprintf("%s://%s", issuerURL.Scheme, issuerURL.Hostname())
 	if issuerURL.Port() != "" {
-		finalUrl = fmt.Sprintf("%s:%s", finalUrl, issuerURL.Port())
+		finalURL = fmt.Sprintf("%s:%s", finalURL, issuerURL.Port())
 	}
 
-	return fmt.Sprintf("%s/dex", finalUrl), nil
+	return fmt.Sprintf("%s/dex", finalURL), nil
 }
