@@ -100,7 +100,6 @@ func writeHelm(url, name string) error {
 }
 
 func runHelm(banzaiCli cli.Cli, options helmOptions, args []string) error {
-
 	env := os.Environ()
 	envs := make(map[string]string, len(env))
 	for _, pair := range env {
@@ -119,12 +118,18 @@ func runHelm(banzaiCli cli.Cli, options helmOptions, args []string) error {
 			return err
 		}
 		envs, err = setHelm2Env(envs, banzaiCli)
+		if err != nil {
+			return err
+		}
 	} else {
 		version, err = getHelmVersion(banzaiCli)
 		if err != nil {
 			return err
 		}
 		envs, err = setHelmEnv(envs, banzaiCli)
+		if err != nil {
+			return err
+		}
 	}
 
 	name, err := getHelmBinary(version, banzaiCli)
