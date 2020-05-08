@@ -35,6 +35,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	yaml "gopkg.in/yaml.v2"
+
+	serviceutils "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/utils"
 )
 
 type helmOptions struct {
@@ -116,10 +118,9 @@ func runHelm(banzaiCli cli.Cli, options helmOptions, args []string) error {
 		if err != nil {
 			return err
 		}
-		envs, err = setHelm2Envs(envs, banzaiCli)
+		envs, err = setHelm2Env(envs, banzaiCli)
 	} else {
-		// TODO get helm3 version from pipeline
-		version, err = getHelmVersion()
+		version, err = getHelmVersion(banzaiCli)
 		if err != nil {
 			return err
 		}
@@ -212,9 +213,13 @@ func tillerVersion() (string, error) {
 	return version, nil
 }
 
-func getHelmVersion() (string, error) {
-	// TODO withdraw form pipeline capabilities api
-	return "v3.1.2", nil
+func getHelmVersion(banzaiCli cli.Cli) (string, error) {
+	caps, r, err := banzaiCli.Client().PipelineApi.ListCapabilities(context.Background())
+	if err := serviceutils.CheckCallResults(r, err); err != nil {
+		return "", errors.WrapIf(err, "failed to retrieve capabilities")
+	}
+
+	return fmt.Sprintf("v%s", caps["helm"]["version"]), nil
 }
 
 func getHelmBinary(version string, banzaiCli cli.Cli) (string, error) {
@@ -261,7 +266,8 @@ func setHelmEnv(envs map[string]string, banzaiCli cli.Cli) (map[string]string, e
 	return envs, nil
 }
 
-func setHelm2Envs(envs map[string]string, banzaiCli cli.Cli) (map[string]string, error) {
+// TODO remove after deprecation
+func setHelm2Env(envs map[string]string, banzaiCli cli.Cli) (map[string]string, error) {
 	org := banzaiCli.Context().OrganizationID()
 	helmHome := filepath.Join(banzaiCli.Home(), fmt.Sprintf("helm/org-%d", org))
 	helmRepos := filepath.Join(helmHome, "repository")
