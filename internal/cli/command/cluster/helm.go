@@ -112,6 +112,7 @@ func runHelm(banzaiCli cli.Cli, options helmOptions, args []string) error {
 
 	var version string
 	var err error
+	// TODO remove after helm2 eol
 	if options.version == "2" {
 		version, err = tillerVersion()
 		if err != nil {
@@ -126,9 +127,24 @@ func runHelm(banzaiCli cli.Cli, options helmOptions, args []string) error {
 		if err != nil {
 			return err
 		}
-		envs, err = setHelmEnv(envs, banzaiCli)
-		if err != nil {
-			return err
+		// TODO remove after helm2 eol
+		if version == "" {
+			version, err = tillerVersion()
+			if err != nil {
+				return err
+			}
+			envs, err = setHelm2Env(envs, banzaiCli)
+			if err != nil {
+				return err
+			}
+		} else {
+			if tiller, _ := tillerVersion(); tiller != "" {
+				log.Warn("Helm version 2 is deprecated but tiller is found on the cluster. Please migrate to helm version 3.")
+			}
+			envs, err = setHelmEnv(envs, banzaiCli)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -271,7 +287,7 @@ func setHelmEnv(envs map[string]string, banzaiCli cli.Cli) (map[string]string, e
 	return envs, nil
 }
 
-// TODO remove after deprecation
+// TODO remove after helm2 eol
 func setHelm2Env(envs map[string]string, banzaiCli cli.Cli) (map[string]string, error) {
 	org := banzaiCli.Context().OrganizationID()
 	helmHome := filepath.Join(banzaiCli.Home(), fmt.Sprintf("helm/org-%d", org))

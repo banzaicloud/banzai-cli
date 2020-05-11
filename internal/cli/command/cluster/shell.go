@@ -290,7 +290,7 @@ exec %s cluster _helm -- "$@"
 		if err := ioutil.WriteFile(filepath.Join(bindir, "helm"), []byte(script), 0755); err != nil {
 			return errors.WrapIf(err, "failed to write helm wrapper script")
 		}
-
+		// TODO remove after helm2 eol
 		script = fmt.Sprintf(`#!/bin/sh
 exec %s cluster _helm -v 2 -- "$@"
 `, cmd)
