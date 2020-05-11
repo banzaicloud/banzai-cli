@@ -140,6 +140,7 @@ func runHelm(banzaiCli cli.Cli, options helmOptions, args []string) error {
 		} else {
 			if tiller, _ := tillerVersion(); tiller != "" {
 				log.Warn("Helm version 2 is deprecated but tiller is found on the cluster. Please migrate to helm version 3.")
+				log.Warn("Until the migration, you can use the 'helm2' command instead of 'helm'.")
 			}
 			envs, err = setHelmEnv(envs, banzaiCli)
 			if err != nil {
