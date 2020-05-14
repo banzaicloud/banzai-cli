@@ -36,6 +36,16 @@ brews:
         description: Command-line interface for Banzai Cloud Pipeline platform
         test: |
             system "#{bin}/banzai --version"
+        install: |
+            bin.install "banzai"
+
+            # Install bash completion
+            output = Utils.popen_read("#{bin}/banzai completion bash")
+            (bash_completion/"banzai").write output
+
+            # Install zsh completion
+            output = Utils.popen_read("#{bin}/banzai completion zsh")
+            (zsh_completion/"_banzai").write output
         dependencies:
             - kubectl
 
