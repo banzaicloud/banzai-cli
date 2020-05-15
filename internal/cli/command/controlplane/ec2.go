@@ -47,7 +47,7 @@ func ensureEC2Cluster(options *cpContext, creds map[string]string, useGeneratedK
 
 	argv := []string{"-oStrictHostKeyChecking=no", "-l", "centos"}
 	if useGeneratedKey {
-		argv = append(argv, "-i", options.sshkeyPath(), "-F", "/dev/null")
+		argv = append(argv, "-oIdentitiesOnly=yes", "-i", options.sshkeyPath(), "-F", "/dev/null")
 	}
 
 	argv = append(argv, host, "sudo", "cat", "/etc/kubernetes/admin.conf")
