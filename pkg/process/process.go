@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"emperror.dev/errors"
+	"github.com/emirpasic/gods/maps/linkedhashmap"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -51,7 +52,9 @@ func TailProcess(banzaiCli cli.Cli, processId string) error {
 	statuses := map[string]*spinner.Status{}
 
 	processVisibleChecks := 0
-	processedEvents := 0
+
+	eventsToBeProcessed := linkedhashmap.New()
+	processedEvents := map[int32]pipeline.ProcessEvent{}
 
 	for {
 		process, resp, err := client.ProcessesApi.GetProcess(context.Background(), orgID, processId)
@@ -71,11 +74,21 @@ func TailProcess(banzaiCli cli.Cli, processId string) error {
 			return errors.NewWithDetails("node pool update process list failed with http status code", "status_code", resp.StatusCode)
 		}
 
-		for i := processedEvents; i < len(process.Events); i++ {
-			event := process.Events[i]
+		for _, e := range process.Events {
+			if _, ok := processedEvents[e.Id]; !ok {
+				eventsToBeProcessed.Put(e.Id, e)
+			}
+		}
+
+		for i := 0; i < len(eventsToBeProcessed.Keys()); {
+			key := eventsToBeProcessed.Keys()[i]
+			value, _ := eventsToBeProcessed.Get(key)
+			event := value.(pipeline.ProcessEvent)
+
 			if s, ok := statuses[event.Type]; !ok {
-				// TODO(nandi) don't let multiple statuses run for now
+				// TODO(nandi) don't let multiple statuses run for now for different event types
 				if len(statuses) > 0 {
+					i++
 					continue
 				}
 
@@ -83,20 +96,20 @@ func TailProcess(banzaiCli cli.Cli, processId string) error {
 				status.Start(fmt.Sprintf("[%s] executing %s activity %s", event.Timestamp.Local().Format(time.RFC3339), event.Type, event.Log))
 				statuses[event.Type] = status
 
-				if i == len(process.Events)-1 {
-					time.Sleep(2 * time.Second)
-				}
-
-				processedEvents++
+				processedEvents[event.Id] = event
+				eventsToBeProcessed.Remove(key)
 			} else if event.Status != pipeline.RUNNING {
 				s.End(event.Status == pipeline.FINISHED)
 				delete(statuses, event.Type)
 
-				processedEvents++
+				processedEvents[event.Id] = event
+				eventsToBeProcessed.Remove(key)
+
+				// let's go back to the beginning of the stream and check for unprocessed events
+				i = 0
 			} else {
-				if i == len(process.Events)-1 {
-					time.Sleep(2 * time.Second)
-				}
+				// TODO(nandi) don't let multiple statuses run for now for same event types
+				i++
 			}
 		}
 
