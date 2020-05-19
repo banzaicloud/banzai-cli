@@ -9,6 +9,7 @@ require (
 	github.com/aws/aws-sdk-go v1.21.2
 	github.com/coreos/go-oidc v2.0.0+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/emirpasic/gods v1.12.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/uuid v1.1.1
 	github.com/imdario/mergo v0.3.7
