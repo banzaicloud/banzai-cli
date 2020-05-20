@@ -241,7 +241,13 @@ func getHelmVersion(banzaiCli cli.Cli) (string, error) {
 		return "", errors.WrapIf(err, "failed to retrieve capabilities")
 	}
 
-	return fmt.Sprintf("v%s", caps["helm"]["version"]), nil
+	if helm, ok := caps["helm"]; ok {
+		if version, ok := helm["version"]; ok {
+			return fmt.Sprintf("v%s", version), nil
+		}
+	}
+
+	return "", nil
 }
 
 func getHelmBinary(version string, banzaiCli cli.Cli) (string, error) {
