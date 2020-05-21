@@ -119,5 +119,7 @@ func TailProcess(banzaiCli cli.Cli, processId string) error {
 		} else if process.Status != pipeline.RUNNING {
 			return ProcessFailedError{fmt.Sprintf("%s process %s: %s", process.Type, process.Status, process.Log)}
 		}
+
+		time.Sleep(2 * time.Second)
 	}
 }
