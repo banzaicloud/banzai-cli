@@ -484,7 +484,7 @@ func getProviders() map[string]interface{} {
 			Folder:       "folder",
 			Datastore:    "DatastoreCluster",
 			ResourcePool: "resource-pool",
-			NodePools: []pipeline.PkeOnVsphereNodePool{
+			Nodepools: []pipeline.PkeOnVsphereNodePool{
 				{
 					Name:          "master",
 					Roles:         []string{"master", "worker"},

@@ -13,6 +13,9 @@ Name | Type | Description | Notes
 **Image** | **string** |  | [optional] 
 **Labels** | **map[string]string** |  | [optional] 
 **ResourceSummary** | [**map[string]ResourceSummary**](ResourceSummary.md) |  | [optional] 
+**Ram** | **int32** |  | [optional] 
+**Vcpu** | **int32** |  | [optional] 
+**Template** | **string** |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

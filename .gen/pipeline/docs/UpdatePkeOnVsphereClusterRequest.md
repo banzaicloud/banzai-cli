@@ -1,4 +1,4 @@
-# UpdateClusterRequestV2
+# UpdatePkeOnVsphereClusterRequest
 
 ## Properties
 
