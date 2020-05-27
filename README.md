@@ -1,11 +1,11 @@
-This is a command line interface under heavy development for the [Banzai Cloud Pipeline](https://beta.banzaicloud.io/) platform.
+This is a command-line interface under heavy development for the [Banzai Cloud Pipeline](https://beta.banzaicloud.io/) platform.
 
 ### Installation
 
 Use the following command to quickly install the CLI:
 
 ```
-$ curl https://getpipeline.sh/cli | sh
+$ curl https://getpipeline.sh | sh
 ```
 
 The [script](scripts/getcli.sh) automatically chooses the best distribution package for your platform.
@@ -19,10 +19,10 @@ Available packages:
 You can also select the installation method (one of `auto`, `deb`, `rpm`, `brew`, `tar` or `go`) explicitly:
 
 ```
-$ curl https://getpipeline.sh/cli | sh -s -- deb
+$ curl https://getpipeline.sh | sh -s -- deb
 ```
 
-On macOs, you can directly Homebrew:
+On macOS, you can directly Homebrew:
 
 ```
 $ brew install banzaicloud/tap/banzai-cli
@@ -37,7 +37,7 @@ $ go get github.com/banzaicloud/banzai-cli/cmd/banzai
 ### Logging in
 
 To use the command you will have to log in.
-You can either log in intaractively using a web browser, or provide an API endpoint and a token manually.
+You can either log in interactively using a web browser, or provide an API endpoint and a token manually.
 
 For interactive login, just run `banzai login`, and follow the instructions given.
 
