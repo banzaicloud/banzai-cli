@@ -23,24 +23,41 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
-	"github.com/ghodss/yaml"
 	log "github.com/sirupsen/logrus"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	kind "sigs.k8s.io/kind/pkg/cluster/config/v1alpha3"
-	"sigs.k8s.io/kind/pkg/container/cri"
+	yaml "gopkg.in/yaml.v3"
+	kind "sigs.k8s.io/kind/pkg/apis/config/v1alpha3"
 )
 
-const version = "v0.4.0"
+const version = "v0.8.1"
 const clusterName = "banzai"
 const kindCmd = "kind"
 
 func isKINDInstalled(banzaiCli cli.Cli) bool {
 	path, err := findKINDPath(banzaiCli)
-	return path != "" && err == nil
+	if path != "" && err == nil {
+		versionOutput, err := exec.Command(path, "version").CombinedOutput()
+		if err != nil {
+			return false
+		}
+
+		versionSplit := strings.SplitN(string(versionOutput), " ", 3)
+		if len(versionSplit) != 3 {
+			return false
+		}
+
+		if version == versionSplit[1] {
+			return true
+		}
+
+		log.Infof("KIND version mismatch, have %s, wanted %s...", versionSplit[1], version)
+	}
+
+	return false
 }
 
 func findKINDPath(banzaiCli cli.Cli) (string, error) {
@@ -88,7 +105,7 @@ func downloadKIND(banzaiCli cli.Cli) error {
 
 func ensureKINDCluster(banzaiCli cli.Cli, options *cpContext) error {
 	if !isKINDInstalled(banzaiCli) {
-		log.Info("KIND binary (kind) is not available in $PATH, downloading it...")
+		log.Infof("KIND binary (kind) is not available in $PATH, downloading version %s...", version)
 		err := downloadKIND(banzaiCli)
 		if err != nil {
 			return errors.WrapIf(err, "failed to download kind binary")
@@ -101,7 +118,7 @@ func ensureKINDCluster(banzaiCli cli.Cli, options *cpContext) error {
 		return err
 	}
 
-	cmd := exec.Command(kindPath, "get", "nodes", "--name", clusterName)
+	cmd := exec.Command(kindPath, "get", "kubeconfig", "--name", clusterName)
 	if err := cmd.Run(); err == nil {
 		if options.kubeconfigExists() {
 			return nil
@@ -111,14 +128,14 @@ func ensureKINDCluster(banzaiCli cli.Cli, options *cpContext) error {
 	}
 
 	cluster := kind.Cluster{
-		TypeMeta: metav1.TypeMeta{
+		TypeMeta: kind.TypeMeta{
 			Kind:       "Cluster",
 			APIVersion: "kind.sigs.k8s.io/v1alpha3",
 		},
 		Nodes: []kind.Node{
 			{
 				Role: kind.ControlPlaneRole,
-				ExtraPortMappings: []cri.PortMapping{
+				ExtraPortMappings: []kind.PortMapping{
 					{
 						ContainerPort: 80,
 						HostPort:      80,
@@ -145,7 +162,7 @@ func ensureKINDCluster(banzaiCli cli.Cli, options *cpContext) error {
 		return errors.WrapIf(err, "failed to write KIND cluster config")
 	}
 
-	cmd = exec.Command(kindPath, "create", "cluster", "--config", kindConfigFile, "--name", clusterName)
+	cmd = exec.Command(kindPath, "create", "cluster", "--config", kindConfigFile, "--name", clusterName, "--kubeconfig", options.kubeconfigPath())
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -170,7 +187,7 @@ func ensureKINDCluster(banzaiCli cli.Cli, options *cpContext) error {
 		}
 	}
 
-	return options.writeKubeconfig(kubeconfig)
+	return nil
 }
 
 func deleteKINDCluster(banzaiCli cli.Cli) error {

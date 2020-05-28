@@ -27,7 +27,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/imdario/mergo"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 func fileExists(filename string) bool {
