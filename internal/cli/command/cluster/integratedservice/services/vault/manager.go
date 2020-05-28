@@ -58,7 +58,13 @@ func (m Manager) BuildActivateRequestInteractively(clusterCtx clustercontext.Con
 
 	switch vaultType {
 	case vaultCustom:
-		customSpec, err := buildCustomVaultServiceRequest(m.banzaiCLI, defaults{})
+		defaultPolicy := fmt.Sprintf(`path "secret/data/orgs/%d/*" {
+			capabilities = ["read"]
+		  }`, m.banzaiCLI.Context().OrganizationID())
+
+		customSpec, err := buildCustomVaultServiceRequest(m.banzaiCLI, defaults{
+			policy: defaultPolicy,
+		})
 		if err != nil {
 			return request, errors.Wrap(err, "failed to build custom Vault integratedservice request")
 		}
@@ -349,7 +355,7 @@ func askVaultAddress(defaultValue string) (string, error) {
 	var address string
 	if err := survey.AskOne(
 		&survey.Input{
-			Message: "Please provide a Vault address",
+			Message: "Please provide a Vault address:",
 			Default: defaultValue,
 		},
 		&address,
@@ -415,7 +421,7 @@ func askPolicy(defaultValue string) (string, error) {
 	var policy string
 	if err := survey.AskOne(
 		&survey.Input{
-			Message: "Please provide policy: ",
+			Message: "Please provide a Vault policy:",
 			Default: defaultValue,
 		},
 		&policy,
