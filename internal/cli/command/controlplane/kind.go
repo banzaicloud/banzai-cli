@@ -179,7 +179,7 @@ func ensureKINDCluster(banzaiCli cli.Cli, options *cpContext) error {
 	if runtime.GOOS != "linux" {
 		// non-native docker daemons can't access the host machine directly even if running in host networking mode
 		// we have to rewrite configs referring to localhost to use the special name `host.docker.internal` instead
-		kubeconfig, err = input.RewriteLocalhostToHostDockerInternal(kubeconfig)
+		_, err = input.RewriteLocalhostToHostDockerInternal(kubeconfig)
 		if err != nil {
 			return errors.WrapIf(err, "failed to rewrite Kubernetes config")
 		}
