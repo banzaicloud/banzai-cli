@@ -22,8 +22,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
-	"strings"
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -45,16 +45,14 @@ func isKINDInstalled(banzaiCli cli.Cli) bool {
 			return false
 		}
 
-		versionSplit := strings.SplitN(string(versionOutput), " ", 3)
-		if len(versionSplit) != 3 {
-			return false
-		}
+		semver := regexp.MustCompile("v[0-9]+.[0-9]+.[0-9]+")
+		currentVersion := semver.FindString(string(versionOutput))
 
-		if version == versionSplit[1] {
+		if currentVersion == version {
 			return true
 		}
 
-		log.Infof("KIND version mismatch, have %s, wanted %s...", versionSplit[1], version)
+		log.Infof("KIND version mismatch, have %s, wanted %s...", currentVersion, version)
 	}
 
 	return false
