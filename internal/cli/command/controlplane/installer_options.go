@@ -34,7 +34,6 @@ import (
 const (
 	workspaceKey            = "installer.workspace"
 	valuesFilename          = "values.yaml"
-	kubeconfigFilename      = "kubeconfig"
 	ec2HostFilename         = "ec2-host"
 	sshkeyFilename          = "id_rsa"
 	traefikAddressFilename  = "traefik-address"
@@ -149,7 +148,7 @@ func (c *cpContext) readValues(out interface{}) error {
 }
 
 func (c *cpContext) kubeconfigPath() string {
-	return filepath.Join(c.workspace, kubeconfigFilename)
+	return filepath.Join(c.workspace, ".kube", "config")
 }
 
 func (c *cpContext) kubeconfigExists() bool {
@@ -181,7 +180,10 @@ func (c *cpContext) writeKubeconfig(outBytes []byte) error {
 }
 
 func (c *cpContext) deleteKubeconfig() error {
-	return os.Remove(c.kubeconfigPath())
+	if c.kubeconfigExists() {
+		return os.Remove(c.kubeconfigPath())
+	}
+	return nil
 }
 
 func (c *cpContext) sshkeyPath() string {
