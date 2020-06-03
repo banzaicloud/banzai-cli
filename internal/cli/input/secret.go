@@ -26,7 +26,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 
-	// "gopkg.in/yaml.v2" -- could not be used for kubernetes types
+	// "gopkg.in/yaml.v3" -- could not be used for kubernetes types
 	"github.com/ghodss/yaml"
 	v1 "k8s.io/client-go/tools/clientcmd/api/v1"
 
