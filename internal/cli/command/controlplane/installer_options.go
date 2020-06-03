@@ -151,9 +151,12 @@ func (c *cpContext) kubeconfigPath() string {
 	return filepath.Join(c.workspace, ".kube", "config")
 }
 
+func (c *cpContext) legacyKubeconfigPath() string {
+	return filepath.Join(c.workspace, "kubeconfig")
+}
+
 func (c *cpContext) kubeconfigExists() bool {
-	_, err := os.Stat(c.kubeconfigPath())
-	return err == nil
+	return fileExists(c.kubeconfigPath()) || fileExists(c.legacyKubeconfigPath())
 }
 
 func (c *cpContext) tfstatePath() string {
