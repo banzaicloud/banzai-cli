@@ -34,7 +34,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	yaml "gopkg.in/yaml.v3"
+	yaml "gopkg.in/yaml.v2"
 
 	serviceutils "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/utils"
 )
