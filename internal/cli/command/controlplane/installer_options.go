@@ -176,6 +176,13 @@ func (c *cpContext) deleteTfstate() error {
 func (c *cpContext) writeKubeconfig(outBytes []byte) error {
 	path := c.kubeconfigPath()
 	log.Debugf("writing kubeconfig file to %q", path)
+	if ok, err := dirExists(filepath.Dir(path)); err != nil {
+		return err
+	} else if !ok {
+		if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
+			return errors.WrapIf(err, "failed to create directories for kubeconfig")
+		}
+	}
 	return errors.WrapIf(ioutil.WriteFile(path, outBytes, 0600), "failed to write kubeconfig file")
 }
 

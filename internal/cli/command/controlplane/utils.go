@@ -39,6 +39,17 @@ func fileExists(filename string) bool {
 	return !info.IsDir()
 }
 
+func dirExists(filename string) (bool, error) {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	if info.IsDir() {
+		return true, nil
+	}
+	return false, errors.New("file exists but not a directory")
+}
+
 type ExportedFilesHandler func(map[string][]byte) error
 
 func processExports(options *cpContext, source string, exportedFilesHandlers []ExportedFilesHandler) error {
