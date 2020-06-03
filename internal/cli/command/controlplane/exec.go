@@ -43,7 +43,7 @@ func runTerraform(command string, options *cpContext, env map[string]string, tar
 		return errors.WrapIf(err, "failed to pull cp-installer")
 	}
 
-	cmdEnv := map[string]string{"KUBECONFIG": "/workspace/" + kubeconfigFilename}
+	cmdEnv := map[string]string{}
 	for k, v := range env {
 		cmdEnv[k] = v
 	}

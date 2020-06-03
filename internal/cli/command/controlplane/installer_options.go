@@ -34,7 +34,6 @@ import (
 const (
 	workspaceKey            = "installer.workspace"
 	valuesFilename          = "values.yaml"
-	kubeconfigFilename      = "kubeconfig"
 	ec2HostFilename         = "ec2-host"
 	sshkeyFilename          = "id_rsa"
 	traefikAddressFilename  = "traefik-address"
@@ -149,12 +148,15 @@ func (c *cpContext) readValues(out interface{}) error {
 }
 
 func (c *cpContext) kubeconfigPath() string {
-	return filepath.Join(c.workspace, kubeconfigFilename)
+	return filepath.Join(c.workspace, ".kube", "config")
+}
+
+func (c *cpContext) legacyKubeconfigPath() string {
+	return filepath.Join(c.workspace, "kubeconfig")
 }
 
 func (c *cpContext) kubeconfigExists() bool {
-	_, err := os.Stat(c.kubeconfigPath())
-	return err == nil
+	return fileExists(c.kubeconfigPath()) || fileExists(c.legacyKubeconfigPath())
 }
 
 func (c *cpContext) tfstatePath() string {
@@ -177,11 +179,21 @@ func (c *cpContext) deleteTfstate() error {
 func (c *cpContext) writeKubeconfig(outBytes []byte) error {
 	path := c.kubeconfigPath()
 	log.Debugf("writing kubeconfig file to %q", path)
+	if ok, err := dirExists(filepath.Dir(path)); err != nil {
+		return err
+	} else if !ok {
+		if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
+			return errors.WrapIf(err, "failed to create directories for kubeconfig")
+		}
+	}
 	return errors.WrapIf(ioutil.WriteFile(path, outBytes, 0600), "failed to write kubeconfig file")
 }
 
 func (c *cpContext) deleteKubeconfig() error {
-	return os.Remove(c.kubeconfigPath())
+	if c.kubeconfigExists() {
+		return os.Remove(c.kubeconfigPath())
+	}
+	return nil
 }
 
 func (c *cpContext) sshkeyPath() string {
