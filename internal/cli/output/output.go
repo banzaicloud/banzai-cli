@@ -20,7 +20,7 @@ import (
 	"io"
 
 	"emperror.dev/errors"
-	yaml "gopkg.in/yaml.v3"
+	yaml "gopkg.in/yaml.v2"
 
 	"github.com/banzaicloud/banzai-cli/pkg/formatting"
 )
