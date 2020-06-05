@@ -143,7 +143,16 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		}
 
 	case providerKind:
-		err := ensureKINDCluster(banzaiCli, options.cpContext)
+		listenAddress := "127.0.0.1"
+		if pc, ok := values["providerConfig"]; ok {
+			if pc, ok := pc.(map[interface{}]interface{}); ok {
+				if addr, ok := pc["listenAddress"].(string); ok && addr != "" {
+					listenAddress = addr
+				}
+			}
+		}
+		log.Debugf("listening on %q", listenAddress)
+		err := ensureKINDCluster(banzaiCli, options.cpContext, listenAddress)
 		if err != nil {
 			return errors.WrapIf(err, "failed to create KIND cluster")
 		}
@@ -151,7 +160,7 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 	case providerEc2:
 		useGeneratedKey := true
 		if pc, ok := values["providerConfig"]; ok {
-			if pc, ok := pc.(map[string]interface{}); ok {
+			if pc, ok := pc.(map[interface{}]interface{}); ok {
 				useGeneratedKey = pc["key_name"] != nil && pc["key_name"] != ""
 			}
 		}
