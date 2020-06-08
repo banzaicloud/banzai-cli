@@ -101,7 +101,7 @@ func downloadKIND(banzaiCli cli.Cli) error {
 	return errors.WrapIf(os.Rename(tempName, kindPath), "failed to move kind binary to its final place")
 }
 
-func ensureKINDCluster(banzaiCli cli.Cli, options *cpContext) error {
+func ensureKINDCluster(banzaiCli cli.Cli, options *cpContext, listenAddress string) error {
 	if !isKINDInstalled(banzaiCli) {
 		log.Infof("KIND binary (kind) is not available in $PATH, downloading version %s...", version)
 		err := downloadKIND(banzaiCli)
@@ -137,12 +137,12 @@ func ensureKINDCluster(banzaiCli cli.Cli, options *cpContext) error {
 					{
 						ContainerPort: 80,
 						HostPort:      80,
-						ListenAddress: "127.0.0.1",
+						ListenAddress: listenAddress,
 					},
 					{
 						ContainerPort: 443,
 						HostPort:      443,
-						ListenAddress: "127.0.0.1",
+						ListenAddress: listenAddress,
 					},
 				},
 			},
