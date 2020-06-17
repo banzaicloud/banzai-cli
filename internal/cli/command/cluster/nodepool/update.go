@@ -39,7 +39,7 @@ func NewUpdateCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "update [NAME]",
-		Aliases: []string{"u"},
+		Aliases: []string{"u", "upgrade"},
 		Short:   "Update a node pool (and related subcommands)",
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
