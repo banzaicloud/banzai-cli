@@ -16,6 +16,7 @@ package utils
 
 import (
 	"net/http"
+	"sort"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2/core"
@@ -31,6 +32,7 @@ func Names(sm IdToNameMap) []string {
 		names[i] = name
 		i = i + 1
 	}
+	sort.Strings(names)
 	return names
 }
 
