@@ -198,7 +198,7 @@ func isServiceEnabled(ctx context.Context, banzaiCLI cli.Cli) error {
 	}
 
 	// todo change this implementation when adding support for non-managed anchore
-	if !securityScanCapability.Enabled || !securityScanCapability.Managed {
+	if !securityScanCapability.Enabled {
 		return errors.New("security scan is not enabled")
 	}
 
@@ -300,7 +300,7 @@ func askForSecret(banzaiCLI cli.Cli, currentSecretID string) (string, error) {
 func getNamespaces(ctx context.Context, banzaiCLI cli.Cli, orgID int32, clusterID int32) ([]string, error) {
 	nsResponse, response, err := banzaiCLI.Client().ClustersApi.ListNamespaces(ctx, orgID, clusterID)
 	if err := utils.CheckCallResults(response, err); err != nil {
-		return nil, errors.WrapIf(err, "failed to retrieve policies")
+		return nil, errors.WrapIf(err, "failed to retrieve namespaces")
 	}
 
 	// filter out system namespaces
