@@ -300,7 +300,7 @@ func askForSecret(banzaiCLI cli.Cli, currentSecretID string) (string, error) {
 func getNamespaces(ctx context.Context, banzaiCLI cli.Cli, orgID int32, clusterID int32) ([]string, error) {
 	nsResponse, response, err := banzaiCLI.Client().ClustersApi.ListNamespaces(ctx, orgID, clusterID)
 	if err := utils.CheckCallResults(response, err); err != nil {
-		return nil, errors.WrapIf(err, "failed to retrieve policies")
+		return nil, errors.WrapIf(err, "failed to retrieve namespaces")
 	}
 
 	// filter out system namespaces
@@ -336,7 +336,24 @@ func askForPolicy(policySpecIn policySpec) (policySpec, error) {
 	}
 
 	if err := survey.Ask(qs, &policySpecIn); err != nil {
-		return policySpec{}, errors.WrapIf(err, "failed to read cluster domain")
+		return policySpec{}, errors.WrapIf(err, "failed to read policy")
+	}
+
+	if policySpecIn.PolicyID == "Custom" {
+		var customPolicy string
+		if err := survey.AskOne(&survey.Input{
+			Message: "Please provide an Anchore policy document",
+		}, &customPolicy); err != nil {
+			return policySpec{}, errors.WrapIf(err, "failed to read custom policy")
+		}
+
+		err := json.Unmarshal([]byte(customPolicy), &policySpecIn.CustomPolicy.Policy)
+		if err != nil {
+			return policySpec{}, errors.WrapIf(err, "failed to parse custom policy")
+		}
+
+		policySpecIn.CustomPolicy.Enabled = true
+		policySpecIn.PolicyID = ""
 	}
 
 	return policySpecIn, nil

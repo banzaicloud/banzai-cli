@@ -28,6 +28,7 @@ var (
 		"bdb91dcc-62ca-49a2-a497-ee8a3bb7ec9f": "RejectCritical",
 		"377c130d-0af7-45d4-adf9-cd72878993e2": "BlockRoot",
 		"97b33e2c-3b57-4a3f-a12b-a8c0daa472a0": "AllowAll",
+		"Custom":                               "Custom",
 	}
 )
 
