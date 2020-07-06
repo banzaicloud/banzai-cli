@@ -238,9 +238,9 @@ func askForAnchoreConfig(banzaiCLI cli.Cli, currentAnchoreSpec *anchoreSpec) (*a
 		return nil, errors.WrapIf(err, "failed to read custom Anchore URL")
 	}
 
-	secretID, err := askForSecret(banzaiCLI, currentAnchoreSpec.SecretID)
+	secretID, err := askForSecret(banzaiCLI, currentAnchoreSpec.SecretID, "Please select a secret to access the custom Anchore instance:")
 	if err != nil {
-		return nil, errors.WrapIf(err, "failed to read secret for accessing custom Anchore ")
+		return nil, errors.WrapIf(err, "failed to read secret for accessing custom Anchore")
 	}
 
 	return &anchoreSpec{
@@ -250,7 +250,7 @@ func askForAnchoreConfig(banzaiCLI cli.Cli, currentAnchoreSpec *anchoreSpec) (*a
 	}, nil
 }
 
-func askForSecret(banzaiCLI cli.Cli, currentSecretID string) (string, error) {
+func askForSecret(banzaiCLI cli.Cli, currentSecretID string, message string) (string, error) {
 	const (
 		PasswordSecretType = "password"
 	)
@@ -279,7 +279,7 @@ func askForSecret(banzaiCLI cli.Cli, currentSecretID string) (string, error) {
 	var secretName string
 	if err := survey.AskOne(
 		&survey.Select{
-			Message: "Please select a secret to access the custom Anchore instance:",
+			Message: message,
 			Options: options,
 			Default: currentSecretName,
 		},
@@ -507,25 +507,91 @@ func askForWhiteListItem() (*releaseSpec, error) {
 	}, nil
 }
 
+func askForCustomRegistry(banzaiCLI cli.Cli) (*registrySpec, error) {
+	var customRegistry bool
+	if err := survey.AskOne(
+		&survey.Confirm{
+			Message: "Configure a custom registry in anchore?",
+		},
+		&customRegistry,
+	); err != nil {
+		return nil, errors.WrapIf(err, "failure during survey")
+	}
+
+	if !customRegistry {
+		return nil, nil
+	}
+
+	var registry string
+	if err := survey.AskOne(
+		&survey.Input{
+			Message: "Please enter the custom anchore registry:",
+			Default: registry,
+		},
+		&registry,
+	); err != nil {
+		return nil, errors.WrapIf(err, "failed to read custom Anchore URL")
+	}
+
+	var registryType string
+	if err := survey.AskOne(
+		&survey.Select{
+			Message: "Registry type",
+			Options: []string{"docker_v2", "awsecr"},
+			Default: "docker_v2",
+		},
+		&registryType,
+	); err != nil {
+		return nil, errors.WrapIf(err, "failed to choose registry type")
+	}
+
+	var insecure bool
+	if err := survey.AskOne(
+		&survey.Confirm{
+			Message: "Access the registry without TLS verification?",
+		},
+		&insecure,
+	); err != nil {
+		return nil, errors.WrapIf(err, "failure during survey")
+	}
+
+	secretID, err := askForSecret(banzaiCLI, "", "Please select a secret to access the custom Anchore registry:")
+	if err != nil {
+		return nil, errors.WrapIf(err, "failed to read secret for accessing custom Anchore registry")
+	}
+
+	return &registrySpec{
+		Registry: registry,
+		SecretID: secretID,
+		Type:     registryType,
+		Insecure: insecure,
+	}, nil
+}
+
 func assembleServiceSpec(ctx context.Context, banzaiCLI cli.Cli, orgID int32, clusterID int32, serviceSpecIn ServiceSpec) (ServiceSpec, error) {
 	anchoreConfig, err := askForAnchoreConfig(banzaiCLI, &serviceSpecIn.CustomAnchore)
 	if err != nil {
-		return ServiceSpec{}, errors.WrapIf(err, "failed to assembele anchore data")
+		return ServiceSpec{}, errors.WrapIf(err, "failed to assemble anchore data")
 	}
 
 	policy, err := askForPolicy(serviceSpecIn.Policy)
 	if err != nil {
-		return ServiceSpec{}, errors.WrapIf(err, "failed to assembele policy data")
+		return ServiceSpec{}, errors.WrapIf(err, "failed to assemble policy data")
 	}
 
 	webhookConfig, err := askForWebHookConfig(ctx, banzaiCLI, orgID, clusterID, serviceSpecIn.WebhookConfig)
 	if err != nil {
-		return ServiceSpec{}, errors.WrapIf(err, "failed to assembele webhook data")
+		return ServiceSpec{}, errors.WrapIf(err, "failed to assemble webhook data")
 	}
 
 	releaseWhiteList, err := askForWhiteLists()
 	if err != nil {
-		return ServiceSpec{}, errors.WrapIf(err, "failed to assembele release data")
+		return ServiceSpec{}, errors.WrapIf(err, "failed to assemble release data")
+	}
+
+	customRegistry, err := askForCustomRegistry(banzaiCLI)
+	if err != nil {
+		return ServiceSpec{}, errors.WrapIf(err, "failed to assemble registry data")
 	}
 
 	return ServiceSpec{
@@ -533,5 +599,6 @@ func assembleServiceSpec(ctx context.Context, banzaiCLI cli.Cli, orgID int32, cl
 		Policy:           policy,
 		WebhookConfig:    webhookConfig,
 		ReleaseWhiteList: releaseWhiteList,
+		Registry:         customRegistry,
 	}, nil
 }
