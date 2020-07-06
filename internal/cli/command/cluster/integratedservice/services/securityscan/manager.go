@@ -213,7 +213,7 @@ func askForAnchoreConfig(banzaiCLI cli.Cli, currentAnchoreSpec *anchoreSpec) (*a
 	var customAnchore bool
 	if err := survey.AskOne(
 		&survey.Confirm{
-			Message: "Configure a custom anchore instance? ",
+			Message: "Configure a custom anchore instance?",
 		},
 		&customAnchore,
 	); err != nil {
@@ -327,7 +327,7 @@ func askForPolicy(policySpecIn policySpec) (policySpec, error) {
 		{
 			Name: "PolicyID",
 			Prompt: &survey.Select{
-				Message: "please select the policy bundle",
+				Message: "Please select the policy bundle",
 				Options: utils.Names(policyBundles),
 				Default: defaultPolicyBundle,
 			},
@@ -364,7 +364,7 @@ func askForWebHookConfig(ctx context.Context, banzaiCLI cli.Cli, orgID int32, cl
 		{
 			Name: "Enabled",
 			Prompt: &survey.Confirm{
-				Message: "enable the security scan webhook",
+				Message: "Enable the security scan webhook?",
 				Default: webhookSpecIn.Enabled,
 			},
 		},
@@ -408,7 +408,7 @@ func askForWebHookConfig(ctx context.Context, banzaiCLI cli.Cli, orgID int32, cl
 		{
 			Name: "Selector",
 			Prompt: &survey.Select{
-				Message: "choose the selector for namespaces:",
+				Message: "Choose the selector for namespaces:",
 				Options: []string{"include", "exclude"},
 				Default: webhookSpecIn.Selector,
 				Help:    "The selector defines whether the selected namespaces are included or excluded from security scans",
@@ -417,10 +417,10 @@ func askForWebHookConfig(ctx context.Context, banzaiCLI cli.Cli, orgID int32, cl
 		{
 			Name: "Namespaces",
 			Prompt: &survey.MultiSelect{
-				Message: "select the namespaces the selector applies to:",
+				Message: "Select the namespaces the selector applies to:",
 				Options: namespaceOptions,
 				Default: defaultNamespaces,
-				Help:    "selected namespaces will be included or excluded form security scans",
+				Help:    "Selected namespaces will be included or excluded form security scans",
 			},
 			Validate: func(selection interface{}) error {
 				selected := selection.([]core.OptionAnswer)
@@ -508,6 +508,11 @@ func askForWhiteListItem() (*releaseSpec, error) {
 }
 
 func assembleServiceSpec(ctx context.Context, banzaiCLI cli.Cli, orgID int32, clusterID int32, serviceSpecIn ServiceSpec) (ServiceSpec, error) {
+	anchoreConfig, err := askForAnchoreConfig(banzaiCLI, &serviceSpecIn.CustomAnchore)
+	if err != nil {
+		return ServiceSpec{}, errors.WrapIf(err, "failed to assembele anchore data")
+	}
+
 	policy, err := askForPolicy(serviceSpecIn.Policy)
 	if err != nil {
 		return ServiceSpec{}, errors.WrapIf(err, "failed to assembele policy data")
@@ -518,8 +523,15 @@ func assembleServiceSpec(ctx context.Context, banzaiCLI cli.Cli, orgID int32, cl
 		return ServiceSpec{}, errors.WrapIf(err, "failed to assembele webhook data")
 	}
 
+	releaseWhiteList, err := askForWhiteLists()
+	if err != nil {
+		return ServiceSpec{}, errors.WrapIf(err, "failed to assembele release data")
+	}
+
 	return ServiceSpec{
-		Policy:        policy,
-		WebhookConfig: webhookConfig,
+		CustomAnchore:    *anchoreConfig,
+		Policy:           policy,
+		WebhookConfig:    webhookConfig,
+		ReleaseWhiteList: releaseWhiteList,
 	}, nil
 }
