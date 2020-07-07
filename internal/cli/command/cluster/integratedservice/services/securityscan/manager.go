@@ -213,7 +213,7 @@ func askForAnchoreConfig(banzaiCLI cli.Cli, currentAnchoreSpec *anchoreSpec) (*a
 	var customAnchore bool
 	if err := survey.AskOne(
 		&survey.Confirm{
-			Message: "Configure a custom anchore instance? ",
+			Message: "Configure a custom anchore instance?",
 		},
 		&customAnchore,
 	); err != nil {
@@ -238,9 +238,9 @@ func askForAnchoreConfig(banzaiCLI cli.Cli, currentAnchoreSpec *anchoreSpec) (*a
 		return nil, errors.WrapIf(err, "failed to read custom Anchore URL")
 	}
 
-	secretID, err := askForSecret(banzaiCLI, currentAnchoreSpec.SecretID)
+	secretID, err := askForSecret(banzaiCLI, currentAnchoreSpec.SecretID, "Please select a secret to access the custom Anchore instance:", PasswordSecretType)
 	if err != nil {
-		return nil, errors.WrapIf(err, "failed to read secret for accessing custom Anchore ")
+		return nil, errors.WrapIf(err, "failed to read secret for accessing custom Anchore")
 	}
 
 	return &anchoreSpec{
@@ -250,16 +250,22 @@ func askForAnchoreConfig(banzaiCLI cli.Cli, currentAnchoreSpec *anchoreSpec) (*a
 	}, nil
 }
 
-func askForSecret(banzaiCLI cli.Cli, currentSecretID string) (string, error) {
-	const (
-		PasswordSecretType = "password"
-	)
+const (
+	PasswordSecretType = "password"
+	AmazonSecretType   = "amazon"
+)
 
+func askForSecret(banzaiCLI cli.Cli, currentSecretID string, message string, types ...string) (string, error) {
 	orgID := banzaiCLI.Context().OrganizationID()
 
-	secrets, _, err := banzaiCLI.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{Type_: optional.NewString(PasswordSecretType)})
-	if err != nil {
-		return "", errors.Wrap(err, "failed to retrieve secrets")
+	var secrets []pipeline.SecretItem // nolint
+	for _, secretType := range types {
+		s, _, err := banzaiCLI.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{Type_: optional.NewString(secretType)})
+		if err != nil {
+			return "", errors.Wrap(err, "failed to retrieve secrets")
+		}
+
+		secrets = append(secrets, s...)
 	}
 
 	// TODO add create secret option
@@ -279,7 +285,7 @@ func askForSecret(banzaiCLI cli.Cli, currentSecretID string) (string, error) {
 	var secretName string
 	if err := survey.AskOne(
 		&survey.Select{
-			Message: "Please select a secret to access the custom Anchore instance:",
+			Message: message,
 			Options: options,
 			Default: currentSecretName,
 		},
@@ -327,7 +333,7 @@ func askForPolicy(policySpecIn policySpec) (policySpec, error) {
 		{
 			Name: "PolicyID",
 			Prompt: &survey.Select{
-				Message: "please select the policy bundle",
+				Message: "Please select the policy bundle",
 				Options: utils.Names(policyBundles),
 				Default: defaultPolicyBundle,
 			},
@@ -364,7 +370,7 @@ func askForWebHookConfig(ctx context.Context, banzaiCLI cli.Cli, orgID int32, cl
 		{
 			Name: "Enabled",
 			Prompt: &survey.Confirm{
-				Message: "enable the security scan webhook",
+				Message: "Enable the security scan webhook?",
 				Default: webhookSpecIn.Enabled,
 			},
 		},
@@ -408,7 +414,7 @@ func askForWebHookConfig(ctx context.Context, banzaiCLI cli.Cli, orgID int32, cl
 		{
 			Name: "Selector",
 			Prompt: &survey.Select{
-				Message: "choose the selector for namespaces:",
+				Message: "Choose the selector for namespaces:",
 				Options: []string{"include", "exclude"},
 				Default: webhookSpecIn.Selector,
 				Help:    "The selector defines whether the selected namespaces are included or excluded from security scans",
@@ -417,10 +423,10 @@ func askForWebHookConfig(ctx context.Context, banzaiCLI cli.Cli, orgID int32, cl
 		{
 			Name: "Namespaces",
 			Prompt: &survey.MultiSelect{
-				Message: "select the namespaces the selector applies to:",
+				Message: "Select the namespaces the selector applies to:",
 				Options: namespaceOptions,
 				Default: defaultNamespaces,
-				Help:    "selected namespaces will be included or excluded form security scans",
+				Help:    "Selected namespaces will be included or excluded form security scans",
 			},
 			Validate: func(selection interface{}) error {
 				selected := selection.([]core.OptionAnswer)
@@ -507,19 +513,98 @@ func askForWhiteListItem() (*releaseSpec, error) {
 	}, nil
 }
 
+func askForCustomRegistry(banzaiCLI cli.Cli) (*registrySpec, error) {
+	var customRegistry bool
+	if err := survey.AskOne(
+		&survey.Confirm{
+			Message: "Configure a custom registry in anchore?",
+		},
+		&customRegistry,
+	); err != nil {
+		return nil, errors.WrapIf(err, "failure during survey")
+	}
+
+	if !customRegistry {
+		return nil, nil
+	}
+
+	var registry string
+	if err := survey.AskOne(
+		&survey.Input{
+			Message: "Please enter the custom container registry:",
+			Default: registry,
+		},
+		&registry,
+	); err != nil {
+		return nil, errors.WrapIf(err, "failed to read custom container registry")
+	}
+
+	var registryType string
+	if err := survey.AskOne(
+		&survey.Select{
+			Message: "Registry type",
+			Options: []string{"docker_v2", "awsecr"},
+			Default: "docker_v2",
+		},
+		&registryType,
+	); err != nil {
+		return nil, errors.WrapIf(err, "failed to choose registry type")
+	}
+
+	var insecure bool
+	if err := survey.AskOne(
+		&survey.Confirm{
+			Message: "Access the registry without TLS verification?",
+		},
+		&insecure,
+	); err != nil {
+		return nil, errors.WrapIf(err, "failure during survey")
+	}
+
+	secretID, err := askForSecret(banzaiCLI, "", "Please select a secret to access the custom Anchore registry:", PasswordSecretType, AmazonSecretType)
+	if err != nil {
+		return nil, errors.WrapIf(err, "failed to read secret for accessing custom Anchore registry")
+	}
+
+	return &registrySpec{
+		Registry: registry,
+		SecretID: secretID,
+		Type:     registryType,
+		Insecure: insecure,
+	}, nil
+}
+
 func assembleServiceSpec(ctx context.Context, banzaiCLI cli.Cli, orgID int32, clusterID int32, serviceSpecIn ServiceSpec) (ServiceSpec, error) {
+	anchoreConfig, err := askForAnchoreConfig(banzaiCLI, &serviceSpecIn.CustomAnchore)
+	if err != nil {
+		return ServiceSpec{}, errors.WrapIf(err, "failed to assemble anchore data")
+	}
+
 	policy, err := askForPolicy(serviceSpecIn.Policy)
 	if err != nil {
-		return ServiceSpec{}, errors.WrapIf(err, "failed to assembele policy data")
+		return ServiceSpec{}, errors.WrapIf(err, "failed to assemble policy data")
 	}
 
 	webhookConfig, err := askForWebHookConfig(ctx, banzaiCLI, orgID, clusterID, serviceSpecIn.WebhookConfig)
 	if err != nil {
-		return ServiceSpec{}, errors.WrapIf(err, "failed to assembele webhook data")
+		return ServiceSpec{}, errors.WrapIf(err, "failed to assemble webhook data")
+	}
+
+	releaseWhiteList, err := askForWhiteLists()
+	if err != nil {
+		return ServiceSpec{}, errors.WrapIf(err, "failed to assemble release data")
+	}
+
+	customRegistry, err := askForCustomRegistry(banzaiCLI)
+	if err != nil {
+		return ServiceSpec{}, errors.WrapIf(err, "failed to assemble registry data")
 	}
 
 	return ServiceSpec{
-		Policy:        policy,
-		WebhookConfig: webhookConfig,
+		CustomAnchore:    *anchoreConfig,
+		Policy:           policy,
+		WebhookConfig:    webhookConfig,
+		ReleaseWhiteList: releaseWhiteList,
+		Registry:         customRegistry,
 	}, nil
 }
