@@ -238,7 +238,7 @@ func askForAnchoreConfig(banzaiCLI cli.Cli, currentAnchoreSpec *anchoreSpec) (*a
 		return nil, errors.WrapIf(err, "failed to read custom Anchore URL")
 	}
 
-	secretID, err := askForSecret(banzaiCLI, currentAnchoreSpec.SecretID, "Please select a secret to access the custom Anchore instance:")
+	secretID, err := askForSecret(banzaiCLI, currentAnchoreSpec.SecretID, "Please select a secret to access the custom Anchore instance:", PasswordSecretType)
 	if err != nil {
 		return nil, errors.WrapIf(err, "failed to read secret for accessing custom Anchore")
 	}
@@ -250,16 +250,22 @@ func askForAnchoreConfig(banzaiCLI cli.Cli, currentAnchoreSpec *anchoreSpec) (*a
 	}, nil
 }
 
-func askForSecret(banzaiCLI cli.Cli, currentSecretID string, message string) (string, error) {
-	const (
-		PasswordSecretType = "password"
-	)
+const (
+	PasswordSecretType = "password"
+	AmazonSecretType   = "amazon"
+)
 
+func askForSecret(banzaiCLI cli.Cli, currentSecretID string, message string, types ...string) (string, error) {
 	orgID := banzaiCLI.Context().OrganizationID()
 
-	secrets, _, err := banzaiCLI.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{Type_: optional.NewString(PasswordSecretType)})
-	if err != nil {
-		return "", errors.Wrap(err, "failed to retrieve secrets")
+	var secrets []pipeline.SecretItem // nolint
+	for _, secretType := range types {
+		s, _, err := banzaiCLI.Client().SecretsApi.GetSecrets(context.Background(), orgID, &pipeline.GetSecretsOpts{Type_: optional.NewString(secretType)})
+		if err != nil {
+			return "", errors.Wrap(err, "failed to retrieve secrets")
+		}
+
+		secrets = append(secrets, s...)
 	}
 
 	// TODO add create secret option
@@ -525,12 +531,12 @@ func askForCustomRegistry(banzaiCLI cli.Cli) (*registrySpec, error) {
 	var registry string
 	if err := survey.AskOne(
 		&survey.Input{
-			Message: "Please enter the custom anchore registry:",
+			Message: "Please enter the custom container registry:",
 			Default: registry,
 		},
 		&registry,
 	); err != nil {
-		return nil, errors.WrapIf(err, "failed to read custom Anchore URL")
+		return nil, errors.WrapIf(err, "failed to read custom container registry")
 	}
 
 	var registryType string
@@ -555,7 +561,7 @@ func askForCustomRegistry(banzaiCLI cli.Cli) (*registrySpec, error) {
 		return nil, errors.WrapIf(err, "failure during survey")
 	}
 
-	secretID, err := askForSecret(banzaiCLI, "", "Please select a secret to access the custom Anchore registry:")
+	secretID, err := askForSecret(banzaiCLI, "", "Please select a secret to access the custom Anchore registry:", PasswordSecretType, AmazonSecretType)
 	if err != nil {
 		return nil, errors.WrapIf(err, "failed to read secret for accessing custom Anchore registry")
 	}
