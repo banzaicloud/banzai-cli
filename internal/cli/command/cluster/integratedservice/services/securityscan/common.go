@@ -23,11 +23,11 @@ import (
 var (
 	policyBundles = utils.IdToNameMap{
 		"2c53a13c-1765-11e8-82ef-23527761d060": "Default bundle",
-		"a81d4e45-6021-4b42-a217-a6554015d431": "DenyAll",
-		"0cd4785e-71fa-4273-8ea5-3b15f515cca4": "RejectHigh",
-		"bdb91dcc-62ca-49a2-a497-ee8a3bb7ec9f": "RejectCritical",
-		"377c130d-0af7-45d4-adf9-cd72878993e2": "BlockRoot",
-		"97b33e2c-3b57-4a3f-a12b-a8c0daa472a0": "AllowAll",
+		"deny_all":                             "Deny all",
+		"reject_high":                          "Reject high severity",
+		"reject_critical":                      "Reject critical severity",
+		"block_root":                           "Block root privileges",
+		"allow_all_and_warn":                   "Allow all and warning",
 		"Custom":                               "Custom",
 	}
 )
