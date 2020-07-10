@@ -63,7 +63,7 @@ const AwsRegionKey = "AWS_DEFAULT_REGION"
 
 // GetAmazonCredentials extracts the local credentials from env vars and user profile while ensuring a region
 func GetAmazonCredentialsRegion(defaultRegion string) (string, string, map[string]string, error) {
-	id, out, err := GetAmazonCredentials(false)
+	id, out, err := GetAmazonCredentials(true)
 	if err != nil {
 		return id, "", out, err
 	}
@@ -78,7 +78,7 @@ func GetAmazonCredentialsRegion(defaultRegion string) (string, string, map[strin
 }
 
 // GetAmazonCredentials extracts the local credentials from env vars and user profile
-func GetAmazonCredentials(createSecret bool) (string, map[string]string, error) {
+func GetAmazonCredentials(allowSessionToken bool) (string, map[string]string, error) {
 	/* create a new session, which is basically the same as the following, but may also contain a region
 	creds := credentials.NewChainCredentials(
 		[]credentials.Provider{
@@ -95,7 +95,7 @@ func GetAmazonCredentials(createSecret bool) (string, map[string]string, error) 
 		return "", nil, err
 	}
 
-	if createSecret && value.SessionToken != "" {
+	if !allowSessionToken && value.SessionToken != "" {
 		return "", nil, errors.New("AWS session tokens are not supported by Banzai Cloud Pipeline")
 	}
 
@@ -104,7 +104,7 @@ func GetAmazonCredentials(createSecret bool) (string, map[string]string, error) 
 		"AWS_SECRET_ACCESS_KEY": value.SecretAccessKey,
 	}
 
-	if !createSecret {
+	if allowSessionToken {
 		out["AWS_SESSION_TOKEN"] = value.SessionToken
 	}
 

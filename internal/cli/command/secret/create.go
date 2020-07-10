@@ -457,7 +457,7 @@ func importLocalCredential(banzaiCli cli.Cli, options *createSecretOptions) (map
 
 	switch options.secretType {
 	case TypeAmazon:
-		id, values, err = input.GetAmazonCredentials(true)
+		id, values, err = input.GetAmazonCredentials(false)
 	case TypeKubernetes:
 		var config []byte
 		id, config, err = input.GetCurrentKubecontext()
