@@ -161,10 +161,11 @@ func runUp(options *createOptions, banzaiCli cli.Cli) error {
 		useGeneratedKey := true
 		if pc, ok := values["providerConfig"]; ok {
 			if pc, ok := pc.(map[interface{}]interface{}); ok {
-				useGeneratedKey = pc["key_name"] != nil && pc["key_name"] != ""
+				if pc["key_name"] != nil && pc["key_name"] != "" {
+					useGeneratedKey = false
+				}
 			}
 		}
-
 		if err := ensureEC2Cluster(options.cpContext, env, useGeneratedKey); err != nil {
 			return errors.WrapIf(err, "failed to create EC2 cluster")
 		}
