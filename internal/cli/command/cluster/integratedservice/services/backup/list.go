@@ -21,6 +21,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/output"
@@ -60,6 +61,10 @@ func runList(banzaiCli cli.Cli, options listOptions) error {
 	orgID := banzaiCli.Context().OrganizationID()
 	clusterID := options.ClusterID()
 
+	if err := syncBackupList(client, orgID, clusterID); err != nil {
+		return errors.WrapIf(err, "failed to sync backups")
+	}
+
 	backups, _, err := client.ArkBackupsApi.ListARKBackupsOfACluster(context.Background(), orgID, clusterID)
 	if err != nil {
 		return errors.WrapIfWithDetails(err, "failed to list backups", "clusterID", clusterID)
@@ -97,6 +102,22 @@ func runList(banzaiCli cli.Cli, options listOptions) error {
 
 	if err := output.Output(ctx, table); err != nil {
 		log.Fatal(err)
+	}
+
+	return nil
+}
+
+func syncBackupList(client *pipeline.APIClient, orgID, clusterID int32) error {
+	ctx := context.Background()
+
+	_, err := client.ArkBucketsApi.SyncBackupBucket(ctx, orgID)
+	if err != nil {
+		return errors.WrapIf(err, "failed to sync backup buckets")
+	}
+
+	_, err = client.ArkBackupsApi.SyncOrgBackups(ctx, orgID)
+	if err != nil {
+		return errors.WrapIfWithDetails(err, "failed to sync organization backups")
 	}
 
 	return nil
