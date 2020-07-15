@@ -27,6 +27,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	"github.com/imdario/mergo"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cast"
 	"gopkg.in/yaml.v2"
 )
 
@@ -164,8 +165,15 @@ func getImageMetadata(cpContext *cpContext, values map[string]interface{}, write
 
 	awsAccessKeyID := ""
 	if values["provider"] == providerEc2 || imageMeta.Custom.CredentialType == "aws" {
+		profile := "default"
+		assumeRole := ""
+		if v, ok := values["providerConfig"]; ok {
+			providerConfig := cast.ToStringMap(v)
+			profile = cast.ToString(providerConfig["profile"])
+			assumeRole = cast.ToString(providerConfig["assume_role"])
+		}
 		log.Debug("using local AWS credentials")
-		id, creds, err := input.GetAmazonCredentials(true)
+		id, creds, err := input.GetAmazonCredentials(profile, assumeRole)
 		if err != nil {
 			return "", env, errors.WrapIf(err, "failed to get AWS credentials")
 		}
