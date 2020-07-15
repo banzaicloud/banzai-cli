@@ -120,7 +120,7 @@ func enableService(banzaiCli cli.Cli, options enableOptions) error {
 			return errors.WrapIf(err, "failed to build enable backup service request interactively")
 		}
 	} else {
-		if err = readActivateReqFromFileOrStdin(options.filePath, &request); err != nil {
+		if err = readEnableReqFromFileOrStdin(options.filePath, &request); err != nil {
 			return errors.WrapIf(err, "failed to read enable backup service specification")
 		}
 	}
@@ -137,7 +137,7 @@ func enableService(banzaiCli cli.Cli, options enableOptions) error {
 	return nil
 }
 
-func readActivateReqFromFileOrStdin(filePath string, req *pipeline.EnableArkRequest) error {
+func readEnableReqFromFileOrStdin(filePath string, req *pipeline.EnableArkRequest) error {
 	filename, raw, err := utils.ReadFileOrStdin(filePath)
 	if err != nil {
 		return errors.WrapIfWithDetails(err, "failed to read", "filename", filename)
