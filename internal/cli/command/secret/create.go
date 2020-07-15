@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"sort"
 	"strings"
 
@@ -457,7 +458,7 @@ func importLocalCredential(banzaiCli cli.Cli, options *createSecretOptions) (map
 
 	switch options.secretType {
 	case TypeAmazon:
-		id, values, err = input.GetAmazonCredentials(false)
+		id, values, err = input.GetAmazonCredentials(os.Getenv("AWS_PROFILE"), "")
 	case TypeKubernetes:
 		var config []byte
 		id, config, err = input.GetCurrentKubecontext()

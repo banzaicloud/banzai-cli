@@ -23,7 +23,8 @@ import (
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/antihax/optional"
-	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 
 	// "gopkg.in/yaml.v2" -- could not be used for kubernetes types
@@ -61,9 +62,9 @@ func AskSecret(banzaiCli cli.Cli, orgID int32, cloud string) (string, error) {
 
 const AwsRegionKey = "AWS_DEFAULT_REGION"
 
-// GetAmazonCredentials extracts the local credentials from env vars and user profile while ensuring a region
-func GetAmazonCredentialsRegion(defaultRegion string) (string, string, map[string]string, error) {
-	id, out, err := GetAmazonCredentials(true)
+// GetAmazonCredentialsRegion extracts the local credentials from env vars and user profile while ensuring a region
+func GetAmazonCredentialsRegion(profile string, defaultRegion string, assumeRole string) (string, string, map[string]string, error) {
+	id, out, err := GetAmazonCredentials(profile, assumeRole)
 	if err != nil {
 		return id, "", out, err
 	}
@@ -78,41 +79,45 @@ func GetAmazonCredentialsRegion(defaultRegion string) (string, string, map[strin
 }
 
 // GetAmazonCredentials extracts the local credentials from env vars and user profile
-func GetAmazonCredentials(allowSessionToken bool) (string, map[string]string, error) {
+func GetAmazonCredentials(profile string, assumeRole string) (string, map[string]string, error) {
 	/* create a new session, which is basically the same as the following, but may also contain a region
 	creds := credentials.NewChainCredentials(
 		[]credentials.Provider{
 			&credentials.EnvProvider{},
 			&credentials.SharedCredentialsProvider{},
 		}) */
-	session, err := session.NewSession(&aws.Config{})
+	session, err := session.NewSessionWithOptions(session.Options{
+		Profile: profile,
+	})
 	if err != nil {
 		return "", nil, err
 	}
 
-	value, err := session.Config.Credentials.Get()
-	if err != nil {
-		return "", nil, err
-	}
+	var creds credentials.Value
 
-	if !allowSessionToken && value.SessionToken != "" {
-		return "", nil, errors.New("AWS session tokens are not supported by Banzai Cloud Pipeline")
+	if assumeRole != "" {
+		creds, err = stscreds.NewCredentials(session, assumeRole).Get()
+		if err != nil {
+			return "", nil, err
+		}
+	} else {
+		creds, err = session.Config.Credentials.Get()
+		if err != nil {
+			return "", nil, err
+		}
 	}
 
 	out := map[string]string{
-		"AWS_ACCESS_KEY_ID":     value.AccessKeyID,
-		"AWS_SECRET_ACCESS_KEY": value.SecretAccessKey,
-	}
-
-	if allowSessionToken {
-		out["AWS_SESSION_TOKEN"] = value.SessionToken
+		"AWS_ACCESS_KEY_ID":     creds.AccessKeyID,
+		"AWS_SECRET_ACCESS_KEY": creds.SecretAccessKey,
+		"AWS_SESSION_TOKEN":     creds.SessionToken,
 	}
 
 	if session.Config.Region != nil {
 		out[AwsRegionKey] = *session.Config.Region
 	}
 
-	return value.AccessKeyID, out, nil
+	return creds.AccessKeyID, out, nil
 }
 
 // GetCurrentKubecontext extracts the Kubernetes context selected locally

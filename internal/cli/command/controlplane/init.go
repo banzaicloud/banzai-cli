@@ -29,6 +29,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
@@ -263,7 +264,8 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		out[externalHost] = defaultLocalhost
 		// TODO check if it resolves to 127.0.0.1 (user's dns recursor may drop this)
 	case providerEc2:
-		id, region, err := getAmazonCredentialsRegion(defaultAwsRegion)
+		assumeRole := cast.ToString(providerConfig["assume_role"])
+		id, region, err := getAmazonCredentialsRegion(os.Getenv("AWS_PROFILE"), defaultAwsRegion, assumeRole)
 		if err != nil {
 			return err
 		}
@@ -311,7 +313,8 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 
 		switch imageMeta.Custom.CredentialType {
 		case "aws":
-			id, region, err := getAmazonCredentialsRegion(defaultAwsRegion)
+			assumeRole := cast.ToString(providerConfig["assume_role"])
+			id, region, err := getAmazonCredentialsRegion(os.Getenv("AWS_PROFILE"), defaultAwsRegion, assumeRole)
 			if err != nil {
 				return err
 			}
@@ -412,10 +415,10 @@ func initImageValues(options initOptions, out map[string]interface{}) (image str
 	return image, tag
 }
 
-func getAmazonCredentialsRegion(defaultAwsRegion string) (string, string, error) {
-	id, region, _, err := input.GetAmazonCredentialsRegion("")
+func getAmazonCredentialsRegion(profile string, defaultAwsRegion string, assumeRole string) (string, string, error) {
+	id, region, _, err := input.GetAmazonCredentialsRegion(profile, "", assumeRole)
 	if err != nil {
-		id, region, _, err = input.GetAmazonCredentialsRegion(defaultAwsRegion)
+		id, region, _, err = input.GetAmazonCredentialsRegion(profile, defaultAwsRegion, assumeRole)
 		if err != nil {
 			log.Info("Please set your AWS credentials using aws-cli. See https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#cli-quick-configuration")
 			return "", "", errors.WrapIf(err, "failed to use local AWS credentials")
