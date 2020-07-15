@@ -31,6 +31,7 @@ func NewBackupCommand(banzaiCli cli.Cli) *cobra.Command {
 		newDisableCommand(banzaiCli),
 		newListCommand(banzaiCli),
 		newCreateCommand(banzaiCli),
+		newDeleteCommand(banzaiCli),
 	)
 
 	return cmd

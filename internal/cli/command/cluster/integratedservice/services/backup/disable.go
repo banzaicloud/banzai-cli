@@ -34,7 +34,6 @@ func newDisableCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "disable",
-		Aliases: []string{"d", "remove", "r"},
 		Short:   "Disable Backup service", // TODO (colin): add desc
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
