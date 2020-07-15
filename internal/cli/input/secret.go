@@ -23,6 +23,7 @@ import (
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/antihax/optional"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 
@@ -92,35 +93,31 @@ func GetAmazonCredentials(profile string, assumeRole string) (string, map[string
 		return "", nil, err
 	}
 
-	value, err := session.Config.Credentials.Get()
-	if err != nil {
-		return "", nil, err
-	}
-
-	var out map[string]string
+	var creds credentials.Value
 
 	if assumeRole != "" {
-		value, err := stscreds.NewCredentials(session, assumeRole).Get()
+		creds, err = stscreds.NewCredentials(session, assumeRole).Get()
 		if err != nil {
 			return "", nil, err
 		}
-		out = map[string]string{
-			"AWS_ACCESS_KEY_ID":     value.AccessKeyID,
-			"AWS_SECRET_ACCESS_KEY": value.SecretAccessKey,
-			"AWS_SESSION_TOKEN":     value.SessionToken,
-		}
 	} else {
-		out = map[string]string{
-			"AWS_ACCESS_KEY_ID":     value.AccessKeyID,
-			"AWS_SECRET_ACCESS_KEY": value.SecretAccessKey,
+		creds, err = session.Config.Credentials.Get()
+		if err != nil {
+			return "", nil, err
 		}
+	}
+
+	out := map[string]string{
+		"AWS_ACCESS_KEY_ID":     creds.AccessKeyID,
+		"AWS_SECRET_ACCESS_KEY": creds.SecretAccessKey,
+		"AWS_SESSION_TOKEN":     creds.SessionToken,
 	}
 
 	if session.Config.Region != nil {
 		out[AwsRegionKey] = *session.Config.Region
 	}
 
-	return value.AccessKeyID, out, nil
+	return creds.AccessKeyID, out, nil
 }
 
 // GetCurrentKubecontext extracts the Kubernetes context selected locally
