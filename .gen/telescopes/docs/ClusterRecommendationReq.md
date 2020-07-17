@@ -1,6 +1,7 @@
 # ClusterRecommendationReq
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **AllowBurst** | **bool** | Are burst instances allowed in recommendation | [optional] 

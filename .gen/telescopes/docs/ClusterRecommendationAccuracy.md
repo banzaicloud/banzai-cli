@@ -1,6 +1,7 @@
 # ClusterRecommendationAccuracy
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Cpu** | **float64** | Number of recommended cpus | [optional] 

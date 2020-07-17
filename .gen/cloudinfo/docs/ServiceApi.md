@@ -7,19 +7,23 @@ Method | HTTP request | Description
 [**GetService**](ServiceApi.md#GetService) | **Get** /providers/{provider}/services/{service} | 
 
 
-# **GetService**
+
+## GetService
+
 > ServiceResponse GetService(ctx, provider, service)
+
 
 
 Provides service details for the given service on the provider in the given region
 
 ### Required Parameters
 
+
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-  **provider** | **string**|  | 
-  **service** | **string**|  | 
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**provider** | **string**|  | 
+**service** | **string**|  | 
 
 ### Return type
 
@@ -31,8 +35,10 @@ No authorization required
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
 

@@ -1,6 +1,7 @@
 # NodePoolDesc
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **InstanceType** | **string** | Instance type of VMs in the node pool | [optional] 

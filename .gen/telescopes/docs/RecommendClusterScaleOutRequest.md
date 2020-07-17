@@ -1,6 +1,7 @@
 # RecommendClusterScaleOutRequest
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **ActualLayout** | [**[]NodePoolDesc**](NodePoolDesc.md) | Description of the current cluster layout in:body | [optional] 
