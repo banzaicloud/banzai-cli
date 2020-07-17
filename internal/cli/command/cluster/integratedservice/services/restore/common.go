@@ -15,9 +15,14 @@
 package restore
 
 import (
+	"context"
+
+	"emperror.dev/errors"
 	"github.com/spf13/cobra"
 
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 )
 
 func NewRestoreCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -29,7 +34,45 @@ func NewRestoreCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd.AddCommand(
 		newListCommand(banzaiCli),
 		newResultCommand(banzaiCli),
+		newDeleteCommand(banzaiCli),
 	)
 
 	return cmd
+}
+
+func askRestore(client *pipeline.APIClient, orgID, clusterID int32) (*pipeline.RestoreResponse, error) {
+	restores, _, err := client.ArkRestoresApi.ListARKRestores(context.Background(), orgID, clusterID)
+	if err != nil {
+		return nil, errors.WrapIfWithDetails(err, "failed to list restores", "clusterID", clusterID)
+	}
+
+	restoreOptions := make([]string, len(restores))
+	for id, r := range restores {
+		restoreOptions[id] = r.Name
+	}
+
+	var selectedRestoreName string
+	if err := input.DoQuestions([]input.QuestionMaker{
+		input.QuestionSelect{
+			QuestionInput: input.QuestionInput{
+				QuestionBase: input.QuestionBase{
+					Message: "Restore", // TODO (colin): add message
+					Help:    "",        // TODO (colin): need help msg??
+				},
+				Output: &selectedRestoreName,
+			},
+			Options: restoreOptions,
+		},
+	}); err != nil {
+		return nil, errors.WrapIf(err, "failed to ask restore")
+	}
+
+	var selectedRestore pipeline.RestoreResponse
+	for idx, r := range restores {
+		if r.Name == selectedRestoreName || (selectedRestoreName == "" && idx == 0) {
+			selectedRestore = r
+		}
+	}
+
+	return &selectedRestore, nil
 }
