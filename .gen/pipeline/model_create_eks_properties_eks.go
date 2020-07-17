@@ -12,6 +12,7 @@
 package pipeline
 // CreateEksPropertiesEks struct for CreateEksPropertiesEks
 type CreateEksPropertiesEks struct {
+	AuthConfigMap string `json:"authConfigMap,omitempty"`
 	Version string `json:"version,omitempty"`
 	LogTypes []string `json:"logTypes,omitempty"`
 	NodePools map[string]EksNodePool `json:"nodePools"`

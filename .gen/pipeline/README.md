@@ -105,6 +105,7 @@ Class | Method | HTTP request | Description
 *ClustersApi* | [**ListClusterSecrets**](docs/ClustersApi.md#listclustersecrets) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/secrets | List secrets which belongs to cluster
 *ClustersApi* | [**ListClusters**](docs/ClustersApi.md#listclusters) | **Get** /api/v1/orgs/{orgId}/clusters | List clusters
 *ClustersApi* | [**ListNamespaces**](docs/ClustersApi.md#listnamespaces) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/namespaces | Lists namespaces for a cluster
+*ClustersApi* | [**ListNodePools**](docs/ClustersApi.md#listnodepools) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodepools | List node pools
 *ClustersApi* | [**ListNodepoolLabels**](docs/ClustersApi.md#listnodepoollabels) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodepool-labels | List cluser nodepool labels
 *ClustersApi* | [**ListNodes**](docs/ClustersApi.md#listnodes) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodes | List cluser nodes
 *ClustersApi* | [**MergeSecret**](docs/ClustersApi.md#mergesecret) | **Patch** /api/v1/orgs/{orgId}/clusters/{id}/secrets/{secretName} | Merge a particular secret with an existing one with optional remapping

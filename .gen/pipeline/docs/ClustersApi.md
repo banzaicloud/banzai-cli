@@ -27,6 +27,7 @@ Method | HTTP request | Description
 [**ListClusterSecrets**](ClustersApi.md#ListClusterSecrets) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/secrets | List secrets which belongs to cluster
 [**ListClusters**](ClustersApi.md#ListClusters) | **Get** /api/v1/orgs/{orgId}/clusters | List clusters
 [**ListNamespaces**](ClustersApi.md#ListNamespaces) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/namespaces | Lists namespaces for a cluster
+[**ListNodePools**](ClustersApi.md#ListNodePools) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodepools | List node pools
 [**ListNodepoolLabels**](ClustersApi.md#ListNodepoolLabels) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodepool-labels | List cluser nodepool labels
 [**ListNodes**](ClustersApi.md#ListNodes) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodes | List cluser nodes
 [**MergeSecret**](ClustersApi.md#MergeSecret) | **Patch** /api/v1/orgs/{orgId}/clusters/{id}/secrets/{secretName} | Merge a particular secret with an existing one with optional remapping
@@ -863,6 +864,39 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**NamespaceListResponse**](NamespaceListResponse.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json, application/problem+json, 
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## ListNodePools
+
+> []NodePool ListNodePools(ctx, orgId, id)
+
+List node pools
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
+
+### Return type
+
+[**[]NodePool**](NodePool.md)
 
 ### Authorization
 
