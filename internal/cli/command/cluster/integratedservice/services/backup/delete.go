@@ -116,8 +116,8 @@ func askBackupToDelete(client *pipeline.APIClient, orgID, clusterID int32) (*pip
 	}
 
 	var selectedBucket pipeline.BackupResponse
-	for _, b := range backups {
-		if b.Name == selectedBackupName {
+	for idx, b := range backups {
+		if b.Name == selectedBackupName || (selectedBackupName == "" && idx == 0) {
 			selectedBucket = b
 		}
 	}
