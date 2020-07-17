@@ -19,8 +19,6 @@ import (
 	"fmt"
 
 	"emperror.dev/errors"
-	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
-	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -56,7 +54,7 @@ func newResultCommand(banzaiCli cli.Cli) *cobra.Command {
 	}
 	flags := cmd.Flags()
 	flags.Int32VarP(&options.restoreID, "restoreId", "", 0, "Restore ID")
-	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "list")
+	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "result")
 
 	return cmd
 }
@@ -195,41 +193,4 @@ func generateClusterTable(items []string, _type string) interface{} {
 	}
 
 	return table
-}
-
-func askRestore(client *pipeline.APIClient, orgID, clusterID int32) (*pipeline.RestoreResponse, error) {
-	restores, _, err := client.ArkRestoresApi.ListARKRestores(context.Background(), orgID, clusterID)
-	if err != nil {
-		return nil, errors.WrapIfWithDetails(err, "failed to list restores", "clusterID", clusterID)
-	}
-
-	restoreOptions := make([]string, len(restores))
-	for id, r := range restores {
-		restoreOptions[id] = r.Name
-	}
-
-	var selectedRestoreName string
-	if err := input.DoQuestions([]input.QuestionMaker{
-		input.QuestionSelect{
-			QuestionInput: input.QuestionInput{
-				QuestionBase: input.QuestionBase{
-					Message: "Restore", // TODO (colin): add message
-					Help:    "",        // TODO (colin): need help msg??
-				},
-				Output: &selectedRestoreName,
-			},
-			Options: restoreOptions,
-		},
-	}); err != nil {
-		return nil, errors.WrapIf(err, "failed to ask restore")
-	}
-
-	var selectedRestore pipeline.RestoreResponse
-	for _, r := range restores {
-		if r.Name == selectedRestoreName {
-			selectedRestore = r
-		}
-	}
-
-	return &selectedRestore, nil
 }
