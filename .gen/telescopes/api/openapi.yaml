@@ -10,7 +10,7 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: Cluster Recommender.
-  version: 0.5.2
+  version: 0.5.3
 servers:
 - url: /api/v1
 paths:

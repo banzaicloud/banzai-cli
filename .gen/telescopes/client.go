@@ -3,7 +3,7 @@
  *
  * This project can be used to recommend instance type groups on different cloud providers consisting of regular and spot/preemptible instances. The main goal is to provide and continuously manage a cost-effective but still stable cluster layout that's built up from a diverse set of regular and spot instances.
  *
- * API version: 0.5.2
+ * API version: 0.5.3
  * Contact: info@banzaicloud.com
  */
 
@@ -41,7 +41,7 @@ var (
 	xmlCheck  = regexp.MustCompile(`(?i:(?:application|text)/xml)`)
 )
 
-// APIClient manages communication with the Cluster Recommender. API v0.5.2
+// APIClient manages communication with the Cluster Recommender. API v0.5.3
 // In most cases there should be only one, shared, APIClient.
 type APIClient struct {
 	cfg    *Configuration
