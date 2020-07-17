@@ -18,6 +18,11 @@
 /.gen/cloudinfo/.travis.yml
 /.gen/cloudinfo/git_push.sh
 
+# telescopes openapi files
+/telescopes-openapi.yaml
+/.gen/telescopes/.travis.yml
+/.gen/telescopes/git_push.sh
+
 # IDE integration
 /.vscode/*
 !/.vscode/tasks.json
