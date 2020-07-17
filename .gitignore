@@ -8,6 +8,9 @@
 # packr files https://github.com/gobuffalo/packr/tree/master/v2
 *-packr.go
 
+# banzai cli generated local documentation files
+/cmd/docs/*.md
+
 # pipeline openapi files
 /pipeline-openapi.yaml
 /.gen/pipeline/.travis.yml
