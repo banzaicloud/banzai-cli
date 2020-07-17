@@ -35,6 +35,7 @@ func NewRestoreCommand(banzaiCli cli.Cli) *cobra.Command {
 		newListCommand(banzaiCli),
 		newResultCommand(banzaiCli),
 		newDeleteCommand(banzaiCli),
+		newRestoreCreateCommand(banzaiCli),
 	)
 
 	return cmd
