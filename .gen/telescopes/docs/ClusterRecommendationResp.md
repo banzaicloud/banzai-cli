@@ -1,6 +1,7 @@
 # ClusterRecommendationResp
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Accuracy** | [**ClusterRecommendationAccuracy**](ClusterRecommendationAccuracy.md) |  | [optional] 

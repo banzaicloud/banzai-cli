@@ -1,6 +1,7 @@
 # VirtualMachine
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **AvgPrice** | **float64** | Average price of the instance (differs from on demand price in case of spot or preemptible instances) | [optional] 

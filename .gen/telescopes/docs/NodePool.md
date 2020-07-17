@@ -1,6 +1,7 @@
 # NodePool
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Role** | **string** | Role in the cluster, eg. master or worker | [optional] 
