@@ -1,4 +1,4 @@
-// Copyright © 2019 Banzai Cloud
+// Copyright © 2020 Banzai Cloud
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,28 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package nodepool
+package format
 
 import (
-	"github.com/spf13/cobra"
-
-	"github.com/banzaicloud/banzai-cli/internal/cli"
+	"github.com/banzaicloud/banzai-cli/internal/cli/output"
+	log "github.com/sirupsen/logrus"
 )
 
-// NewNodePoolCommand returns a cobra command for `nodepool` subcommands.
-func NewNodePoolCommand(banzaiCli cli.Cli) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:     "nodepool",
-		Aliases: []string{"nodepools", "np"},
-		Short:   "Manage node pools",
+// NodePoolsWrite writes a node pool list to the output.
+func NodePoolsWrite(context formatContext, data interface{}) {
+	ctx := &output.Context{
+		Out:    context.Out(),
+		Color:  context.Color(),
+		Format: context.OutputFormat(),
+		Fields: []string{"Name", "Size", "Autoscaling", "MinimumSize", "MaximumSize", "InstanceType", "Image", "SpotPrice"},
 	}
 
-	cmd.AddCommand(
-		NewCreateCommand(banzaiCli),
-		NewDeleteCommand(banzaiCli),
-		NewListCommand(banzaiCli),
-		NewUpdateCommand(banzaiCli),
-	)
-
-	return cmd
+	err := output.Output(ctx, data)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
