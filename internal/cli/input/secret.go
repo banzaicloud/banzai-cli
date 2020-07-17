@@ -19,6 +19,7 @@ import (
 	"net/url"
 	"os/exec"
 	"path/filepath"
+	"time"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
@@ -96,7 +97,10 @@ func GetAmazonCredentials(profile string, assumeRole string) (string, map[string
 	var creds credentials.Value
 
 	if assumeRole != "" {
-		creds, err = stscreds.NewCredentials(session, assumeRole).Get()
+		options := func(p *stscreds.AssumeRoleProvider) {
+			p.Duration = 1 * time.Hour
+		}
+		creds, err = stscreds.NewCredentials(session, assumeRole, options).Get()
 		if err != nil {
 			return "", nil, err
 		}
