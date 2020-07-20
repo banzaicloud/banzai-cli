@@ -22,7 +22,8 @@ import (
 func NewBackupCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "backup",
-		Short: "Backup service", // TODO (colin): add desc
+		Short: "Allows you to enable the backup service for the cluster, in order to create manual and scheduled automatic backups of the cluster, and also to restore from these backups.",
+		Long:  "You must enable the backup service before it can be used. See the subcommands for details.",
 	}
 
 	cmd.AddCommand(

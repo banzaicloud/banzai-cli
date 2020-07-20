@@ -78,7 +78,7 @@ func newEnableCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "enable",
 		Aliases: []string{"e", "activate", "on"},
-		Short:   "Enable Backup service", // TODO (colin): add desc
+		Short:   "Enable the Backup service on this cluster and schedule an automatic backup. The cluster must be in RUNNING or WARNING state. This is required before running any other command related to this service.",
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
@@ -158,8 +158,8 @@ func buildEnableRequestInteractively(banzaiCli cli.Cli) (pipeline.EnableArkReque
 		input.QuestionSelect{
 			QuestionInput: input.QuestionInput{
 				QuestionBase: input.QuestionBase{
-					Message: "Schedule", // TODO (colin): add message
-					Help:    "",         // TODO (colin): need help message?
+					Message: "Schedule backups for every",
+					Help:    "Create a scheduled backup that runs periodically",
 				},
 				DefaultValue: scheduleDailyLabel,
 				Output:       &scheduleLabel,
@@ -169,8 +169,8 @@ func buildEnableRequestInteractively(banzaiCli cli.Cli) (pipeline.EnableArkReque
 		input.QuestionSelect{
 			QuestionInput: input.QuestionInput{
 				QuestionBase: input.QuestionBase{
-					Message: "Keep backups for", // TODO (colin): add message
-					Help:    "",                 // TODO (colin): need help message?
+					Message: "Keep backups for",
+					Help:    "Retain backups for the specified period.",
 				},
 				DefaultValue: ttl1DayLabel,
 				Output:       &ttlLabel,
@@ -310,7 +310,8 @@ func askBucketProvider() (string, error) {
 		input.QuestionSelect{
 			QuestionInput: input.QuestionInput{
 				QuestionBase: input.QuestionBase{
-					Message: "Select storage provider:", // TODO (colin): add message
+					Message: "Select storage provider:",
+					Help:    "Specify where to store the backups",
 				},
 				DefaultValue: providerAmazonS3Label,
 				Output:       &selectedProviderName,
