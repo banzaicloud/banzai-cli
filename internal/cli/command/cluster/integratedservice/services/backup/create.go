@@ -40,7 +40,7 @@ func newCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "create",
 		Aliases: []string{"c"},
-		Short:   "Create new backup", // TODO (colin): add desc
+		Short:   "Create a manual backup",
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
@@ -96,16 +96,16 @@ func buildCreateRequestInteractively() (pipeline.CreateBackupRequest, error) {
 	if err := input.DoQuestions([]input.QuestionMaker{
 		input.QuestionInput{
 			QuestionBase: input.QuestionBase{
-				Message: "Name", // TODO (colin): add message
-				Help:    "",     // TODO (colin): need help message?
+				Message: "Name of the backup",
+				Help:    "Name of the backup, for example, `manual-backup-2020-07-20`",
 			},
 			Output: &name,
 		},
 		input.QuestionSelect{
 			QuestionInput: input.QuestionInput{
 				QuestionBase: input.QuestionBase{
-					Message: "Keep backup for", // TODO (colin): add message
-					Help:    "",                // TODO (colin): need help message?
+					Message: "Keep backup for",
+					Help:    "Retain backup for the specified period.",
 				},
 				DefaultValue: ttl1DayLabel,
 				Output:       &ttlLabel,

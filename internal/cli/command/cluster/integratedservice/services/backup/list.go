@@ -37,7 +37,7 @@ func newListCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "list",
 		Aliases: []string{"l"},
-		Short:   "List backups", // TODO (colin): add desc
+		Short:   "List backups available for the cluster",
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true

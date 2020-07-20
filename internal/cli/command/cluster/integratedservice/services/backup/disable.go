@@ -33,9 +33,9 @@ func newDisableCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := disableOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "disable",
-		Short:   "Disable Backup service", // TODO (colin): add desc
-		Args:    cobra.NoArgs,
+		Use:   "disable",
+		Short: "Disable Backup service for the cluster. This disables the service, the backed up data won't be deleted. You have to do that manually.",
+		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
 			cmd.SilenceErrors = true
