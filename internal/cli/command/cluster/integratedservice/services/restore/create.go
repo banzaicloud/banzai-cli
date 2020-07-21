@@ -38,7 +38,7 @@ func newRestoreCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "create",
 		Aliases: []string{"c"},
-		Short:   "Create Restore", // TODO (colin): add desc
+		Short:   "Restore backup into a new cluster",
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
@@ -104,8 +104,8 @@ func askBackup(client *pipeline.APIClient, orgID, clusterID int32) (*pipeline.Ba
 		input.QuestionSelect{
 			QuestionInput: input.QuestionInput{
 				QuestionBase: input.QuestionBase{
-					Message: "Backup", // TODO (colin): add message
-					Help:    "",       // TODO (colin): need help msg??
+					Message: "Restore cluster from this backup",
+					Help:    "", // TODO (colin): need help msg??
 				},
 				Output: &selectedBackupName,
 			},

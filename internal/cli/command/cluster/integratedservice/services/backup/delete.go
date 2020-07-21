@@ -39,7 +39,7 @@ func newDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "delete",
 		Aliases: []string{"d", "remove", "r"},
-		Short:   "Delete Backup", // TODO (colin): add desc
+		Short:   "Delete the specified backup",
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
