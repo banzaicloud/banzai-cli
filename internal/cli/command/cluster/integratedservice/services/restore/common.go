@@ -28,7 +28,7 @@ import (
 func NewRestoreCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "restore",
-		Short: "Restore the cluster from a backup",
+		Short: "Restore the cluster from a backup.",
 	}
 
 	cmd.AddCommand(

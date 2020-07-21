@@ -41,6 +41,7 @@ func newCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 		Use:     "create",
 		Aliases: []string{"c"},
 		Short:   "Create a manual backup",
+		Long:    "Create a one-time manual backup.",
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
