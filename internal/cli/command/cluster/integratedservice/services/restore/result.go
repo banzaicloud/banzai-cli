@@ -39,7 +39,8 @@ func newResultCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "get",
 		Aliases: []string{"g", "result", "details"},
-		Short:   "Display the result of a restore job",
+		Short:   "Display the result of a restore job.",
+		Long:    "Display the detailed results of a specific restore job.",
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
