@@ -44,6 +44,7 @@ type nodeSSHOptions struct {
 	useInternalIP   bool
 	useExternalIP   bool
 	sshPort         int
+	host            string
 }
 
 const (
@@ -98,6 +99,7 @@ func NewSSHToNodeCommand(banzaiCli cli.Cli) *cobra.Command {
 	flags.BoolVar(&o.useInternalIP, "use-internal-ip", o.useInternalIP, "Use internal IP of the node to connect")
 	flags.BoolVar(&o.useExternalIP, "use-external-ip", o.useExternalIP, "Use external IP of the node to connect (default)")
 	flags.IntVar(&o.sshPort, "ssh-port", o.sshPort, "SSH port of the node to connect")
+	flags.StringVar(&o.host, "host", o.host, "Hostname or IP of the node to connect to")
 
 	o.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "get")
 
@@ -117,22 +119,34 @@ func runzSSHToNode(banzaiCli cli.Cli, options nodeSSHOptions, args []string) err
 	if clusterID == 0 {
 		return errors.New("no clusters found")
 	}
-
 	var nodeName string
-	if len(args) > 0 {
-		nodeName = args[0]
-	}
-	if nodeName == "" && options.nodeName != "" {
-		nodeName = options.nodeName
-	}
+	ipAddress := options.host
 
-	if nodeName == "" && !banzaiCli.Interactive() {
-		return errors.New("no node is selected; use the --node-name option or add node name as an argument")
-	}
+	if ipAddress == "" {
+		if len(args) > 0 {
+			nodeName = args[0]
+		}
+		if nodeName == "" && options.nodeName != "" {
+			nodeName = options.nodeName
+		}
 
-	node, err := getOrSelectNode(client, orgID, clusterID, nodeName)
-	if err != nil {
-		return err
+		if nodeName == "" && !banzaiCli.Interactive() {
+			return errors.New("no node is selected; use the --node-name option or add node name as an argument")
+		}
+
+		node, err := getOrSelectNode(client, orgID, clusterID, nodeName)
+		if err != nil {
+			return err
+		}
+		nodeName = node.Metadata.Name
+		for _, address := range node.Status.Addresses {
+			if address.Type == InternalIPType && options.useInternalIP {
+				ipAddress = address.Address
+			}
+			if address.Type == ExternalIPType && options.useExternalIP {
+				ipAddress = address.Address
+			}
+		}
 	}
 
 	secret, err := getSSHSecretForCluster(client, orgID, clusterID)
@@ -147,16 +161,6 @@ func runzSSHToNode(banzaiCli cli.Cli, options nodeSSHOptions, args []string) err
 	defer func() {
 		os.Remove(tmpfile.Name())
 	}()
-
-	var ipAddress string
-	for _, address := range node.Status.Addresses {
-		if address.Type == InternalIPType && options.useInternalIP {
-			ipAddress = address.Address
-		}
-		if address.Type == ExternalIPType && options.useExternalIP {
-			ipAddress = address.Address
-		}
-	}
 
 	cluster, _, err := client.ClustersApi.GetCluster(context.Background(), orgID, clusterID)
 	if err != nil {
@@ -205,7 +209,7 @@ func runzSSHToNode(banzaiCli cli.Cli, options nodeSSHOptions, args []string) err
 			opts = append(opts, sshconnector.NamespaceOption(options.namespace))
 		}
 		if options.useNodeAffinity {
-			opts = append(opts, sshconnector.NodeNameOption(node.Metadata.Name))
+			opts = append(opts, sshconnector.NodeNameOption(nodeName))
 		}
 		connector, err := sshconnector.NewPodSSHConnector(kubeconfigfile.Name(), opts...)
 		if err != nil {
