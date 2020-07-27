@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**AuthConfigMap** | **string** |  | [optional] 
 **Version** | **string** |  | [optional] 
 **LogTypes** | **[]string** |  | [optional] 
 **NodePools** | [**map[string]EksNodePool**](EKSNodePool.md) |  | 
