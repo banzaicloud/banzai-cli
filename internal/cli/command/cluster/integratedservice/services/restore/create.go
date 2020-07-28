@@ -38,7 +38,7 @@ func newRestoreCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "create",
 		Aliases: []string{"c"},
-		Short:   "Restore backup into a new cluster.",
+		Short:   "Restore backup into a new cluster",
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true

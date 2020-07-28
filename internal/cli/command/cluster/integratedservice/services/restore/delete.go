@@ -37,7 +37,7 @@ func newDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "delete",
 		Aliases: []string{"d", "remove"},
-		Short:   "Delete logs of a restore job.",
+		Short:   "Delete logs of a restore job",
 		Long:    "Delete logs of a restore job. Deleted jobs won't show up in the restore list.",
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {

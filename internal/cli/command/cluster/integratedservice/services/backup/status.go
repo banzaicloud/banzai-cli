@@ -34,7 +34,7 @@ func newStatusCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "status",
 		Aliases: []string{"s"},
-		Short:   "Display status of the Backup service.",
+		Short:   "Display status of the Backup service",
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
