@@ -117,6 +117,10 @@ func runShell(banzaiCli cli.Cli, options shellOptions, args []string) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	if os.Getenv("BANZAI_CURRENT_CLUSTER_ID") != "" {
+		return errors.New("banzai cluster shell sessions should be nested with care, exit or unset $BANZAI_CURRENT_CLUSTER_ID to force")
+	}
+
 	pipeline := banzaiCli.Client()
 	orgId := banzaiCli.Context().OrganizationID()
 	if err := options.Init(); err != nil {
