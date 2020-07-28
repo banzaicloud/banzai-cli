@@ -79,7 +79,7 @@ func newEnableCommand(banzaiCli cli.Cli) *cobra.Command {
 		Use:     "enable",
 		Aliases: []string{"e", "activate", "on"},
 		Short:   "Enable Backup service on this cluster",
-		Long:    "Enable the Backup service on this cluster and schedule an automatic backup. The cluster must be in RUNNING or WARNING state. This is required before running any other command related to this service.",
+		Long:    "Enable the Backup service on this cluster and schedule an automatic backup. The cluster must be in RUNNING or WARNING state. You need to enable the service before running any other related commands.",
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
