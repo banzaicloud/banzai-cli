@@ -61,6 +61,15 @@ func runList(banzaiCli cli.Cli, options listOptions) error {
 	orgID := banzaiCli.Context().OrganizationID()
 	clusterID := options.ClusterID()
 
+	enabled, err := isCommandEnabledForCluster(client, orgID, clusterID)
+	if err != nil {
+		return errors.WrapIf(err, "error during checking command availability")
+	}
+
+	if !enabled {
+		return NotAvailableError{}
+	}
+
 	if err := syncBackupList(client, orgID); err != nil {
 		return errors.WrapIf(err, "failed to sync backups")
 	}

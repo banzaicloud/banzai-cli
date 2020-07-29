@@ -15,8 +15,17 @@
 package backup
 
 import (
+	"context"
+
+	"emperror.dev/errors"
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/spf13/cobra"
+)
+
+const (
+	clusterRunningStatus = "RUNNING"
+	clusterWarningStatus = "WARNING"
 )
 
 func NewBackupCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -36,4 +45,30 @@ func NewBackupCommand(banzaiCli cli.Cli) *cobra.Command {
 	)
 
 	return cmd
+}
+
+type NotAvailableError struct {
+}
+
+func (NotAvailableError) Error() string {
+	return "This command is not available on this cluster. The following cloud providers are supported: Amazon, Azure, Google. The cluster must be in Running or Warning state to run this command."
+}
+
+func isCommandEnabledForCluster(client *pipeline.APIClient, orgID, clusterID int32) (bool, error) {
+	response, _, err := client.ClustersApi.GetCluster(context.Background(), orgID, clusterID)
+	if err != nil {
+		return false, errors.WrapIfWithDetails(err, "failed to get cluster", "clusterID", clusterID)
+	}
+
+	switch response.Cloud {
+	case amazonType, azureType, googleType:
+		switch response.Status {
+		case clusterRunningStatus, clusterWarningStatus:
+			return true, nil
+		default:
+			return false, nil
+		}
+	default:
+		return false, nil
+	}
 }

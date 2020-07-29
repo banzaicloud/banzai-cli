@@ -70,7 +70,15 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 	orgID := banzaiCli.Context().OrganizationID()
 	clusterID := options.ClusterID()
 
-	var err error
+	enabled, err := isCommandEnabledForCluster(client, orgID, clusterID)
+	if err != nil {
+		return errors.WrapIf(err, "error during checking command availability")
+	}
+
+	if !enabled {
+		return NotAvailableError{}
+	}
+
 	var request pipeline.CreateBackupRequest
 	if options.filePath == "" && banzaiCli.Interactive() {
 		if request, err = buildCreateRequestInteractively(); err != nil {

@@ -58,6 +58,15 @@ func showStatus(banzaiCli cli.Cli, options statusOptions) error {
 	orgID := banzaiCli.Context().OrganizationID()
 	clusterID := options.ClusterID()
 
+	enabled, err := isCommandEnabledForCluster(client, orgID, clusterID)
+	if err != nil {
+		return errors.WrapIf(err, "error during checking command availability")
+	}
+
+	if !enabled {
+		return NotAvailableError{}
+	}
+
 	response, _, err := client.ArkApi.CheckARKStatusGET(context.Background(), orgID, clusterID)
 	if err != nil {
 		return errors.WrapIfWithDetails(err, "failed to check backup status", "clusterID", clusterID)

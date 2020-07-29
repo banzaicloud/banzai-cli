@@ -65,6 +65,15 @@ func runDelete(banzaiCli cli.Cli, options deleteOptions) error {
 	orgID := banzaiCli.Context().OrganizationID()
 	clusterID := options.ClusterID()
 
+	enabled, err := isCommandEnabledForCluster(client, orgID, clusterID)
+	if err != nil {
+		return errors.WrapIf(err, "error during checking command availability")
+	}
+
+	if !enabled {
+		return NotAvailableError{}
+	}
+
 	if options.backupID == 0 {
 		if banzaiCli.Interactive() {
 			backup, err := askBackupToDelete(client, orgID, clusterID)
@@ -78,7 +87,7 @@ func runDelete(banzaiCli cli.Cli, options deleteOptions) error {
 		}
 	}
 
-	_, _, err := client.ArkBackupsApi.DeleteARKBackup(context.Background(), orgID, clusterID, options.backupID)
+	_, _, err = client.ArkBackupsApi.DeleteARKBackup(context.Background(), orgID, clusterID, options.backupID)
 	if err != nil {
 		return errors.WrapIfWithDetails(err, "failed to delete backup", "clusterID", clusterID, "backupID", options.backupID)
 	}

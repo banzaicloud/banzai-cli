@@ -59,7 +59,16 @@ func disableService(banzaiCli cli.Cli, options disableOptions) error {
 	orgID := banzaiCli.Context().OrganizationID()
 	clusterID := options.ClusterID()
 
-	_, _, err := client.ArkApi.DisableARK(context.Background(), orgID, clusterID)
+	enabled, err := isCommandEnabledForCluster(client, orgID, clusterID)
+	if err != nil {
+		return errors.WrapIf(err, "error during checking command availability")
+	}
+
+	if !enabled {
+		return NotAvailableError{}
+	}
+
+	_, _, err = client.ArkApi.DisableARK(context.Background(), orgID, clusterID)
 	if err != nil {
 		return errors.WrapIfWithDetails(err, "failed to disable backup service", "clusterID", clusterID)
 	}
