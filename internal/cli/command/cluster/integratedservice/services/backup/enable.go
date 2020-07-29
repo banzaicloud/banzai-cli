@@ -362,8 +362,12 @@ func askSecret(banzaiCLI cli.Cli, secretType string) (string, error) {
 
 	secretOptions := make([]string, secretLen)
 
+	var defaultSecretName string
 	for i, s := range finalSecrets {
 		var idx = i
+		if i == 0 {
+			defaultSecretName = s.Name
+		}
 		secretOptions[idx] = s.Name
 		secretIds[s.Name] = s.Id
 	}
@@ -373,7 +377,8 @@ func askSecret(banzaiCLI cli.Cli, secretType string) (string, error) {
 			QuestionBase: input.QuestionBase{
 				Message: "Provider secret:",
 			},
-			Output: &secretName,
+			DefaultValue: defaultSecretName,
+			Output:       &secretName,
 		},
 		Options: secretOptions,
 	}}); err != nil {
