@@ -61,7 +61,7 @@ func runList(banzaiCli cli.Cli, options listOptions) error {
 	orgID := banzaiCli.Context().OrganizationID()
 	clusterID := options.ClusterID()
 
-	if err := syncBackupList(client, orgID, clusterID); err != nil {
+	if err := syncBackupList(client, orgID); err != nil {
 		return errors.WrapIf(err, "failed to sync backups")
 	}
 
@@ -107,7 +107,7 @@ func runList(banzaiCli cli.Cli, options listOptions) error {
 	return nil
 }
 
-func syncBackupList(client *pipeline.APIClient, orgID, clusterID int32) error {
+func syncBackupList(client *pipeline.APIClient, orgID int32) error {
 	ctx := context.Background()
 
 	_, err := client.ArkBucketsApi.SyncBackupBucket(ctx, orgID)
