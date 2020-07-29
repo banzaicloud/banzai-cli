@@ -17,6 +17,8 @@ package backup
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"time"
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
@@ -94,11 +96,13 @@ func buildCreateRequestInteractively() (pipeline.CreateBackupRequest, error) {
 	var name string
 	var ttlLabel string
 
+	var currentTime = time.Now()
+
 	if err := input.DoQuestions([]input.QuestionMaker{
 		input.QuestionInput{
 			QuestionBase: input.QuestionBase{
 				Message: "Name of the backup",
-				Help:    "Name of the backup, for example, `manual-backup-2020-07-20`",
+				Help:    fmt.Sprintf("Name of the backup, for example, `manual-backup-%s`", currentTime.Format("2006-01-02")),
 			},
 			Output: &name,
 		},
