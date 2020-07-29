@@ -76,14 +76,14 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 		}
 	}
 
-	_, _, err := client.ArkRestoresApi.CreateARKRestore(context.Background(), orgID, clusterID, pipeline.CreateRestoreRequest{
+	response, _, err := client.ArkRestoresApi.CreateARKRestore(context.Background(), orgID, clusterID, pipeline.CreateRestoreRequest{
 		BackupName: options.backupName,
 	})
 	if err != nil {
 		return errors.WrapIfWithDetails(err, "failed to create restore", "clusterID", clusterID, "backupName", options.backupName)
 	}
 
-	log.Info("Restore started to create")
+	log.Infof("Starting to restore cluster. You can check the status with `banzai cluster restore result --restoreId=%d`", response.Restore.Id)
 
 	return nil
 }
@@ -115,12 +115,12 @@ func askBackup(client *pipeline.APIClient, orgID, clusterID int32) (*pipeline.Ba
 		return nil, errors.WrapIf(err, "failed to get bucket")
 	}
 
-	var selectedBucket pipeline.BackupResponse
+	var selectedBackup pipeline.BackupResponse
 	for idx, b := range backups {
 		if b.Name == selectedBackupName || (selectedBackupName == "" && idx == 0) {
-			selectedBucket = b
+			selectedBackup = b
 		}
 	}
 
-	return &selectedBucket, nil
+	return &selectedBackup, nil
 }

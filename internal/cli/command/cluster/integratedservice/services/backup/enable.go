@@ -126,7 +126,7 @@ func enableService(banzaiCli cli.Cli, options enableOptions) error {
 		}
 	}
 
-	log.Infof("Backup service is started to enable for [%d] cluster", clusterID)
+	log.Infof("Enabling backup service for [%d] cluster", clusterID)
 
 	_, _, err = client.ArkApi.EnableARK(context.Background(), orgID, clusterID, request)
 	if err != nil {
@@ -145,7 +145,11 @@ func readEnableReqFromFileOrStdin(filePath string, req *pipeline.EnableArkReques
 	}
 
 	if err := json.Unmarshal(raw, &req); err != nil {
-		return errors.WrapIf(err, "failed to unmarshal input")
+		return errors.WrapIfWithDetails(err,
+			"failed to unmarshal input",
+			"fileName", filename,
+			"raw request", string(raw),
+		)
 	}
 
 	return nil
@@ -264,11 +268,11 @@ func askBucket(banzaiCLI cli.Cli, bucketType, secretID string) (*pipeline.Bucket
 		},
 	)
 	if err != nil {
-		return nil, errors.WrapIfWithDetails(err, "failed to get bucket(s)", "secretID", secretID, "cloud", bucketType)
+		return nil, errors.WrapIfWithDetails(err, "failed to list buckets", "secretID", secretID, "cloud", bucketType)
 	}
 
 	if len(buckets) == 0 {
-		return nil, errors.New("there's no buckets")
+		return nil, errors.New("there are no buckets configured")
 	}
 
 	var defaultBucketName string

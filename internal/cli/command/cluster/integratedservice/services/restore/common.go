@@ -57,8 +57,8 @@ func askRestore(client *pipeline.APIClient, orgID, clusterID int32) (*pipeline.R
 		input.QuestionSelect{
 			QuestionInput: input.QuestionInput{
 				QuestionBase: input.QuestionBase{
-					Message: "Restore", // TODO (colin): add message
-					Help:    "",        // TODO (colin): need help msg??
+					Message: "Restore job",
+					Help:    "", // TODO (colin): need help msg??
 				},
 				Output: &selectedRestoreName,
 			},

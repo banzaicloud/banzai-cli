@@ -87,7 +87,7 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 		return errors.WrapIf(err, "failed to create backup")
 	}
 
-	log.Infof("Backup create for cluster [%d]", clusterID)
+	log.Infof("Backup created for cluster [%d]", clusterID)
 
 	return nil
 }
@@ -144,7 +144,11 @@ func readCreateReqFromFileOrStdin(filePath string, req *pipeline.CreateBackupReq
 	}
 
 	if err := json.Unmarshal(raw, &req); err != nil {
-		return errors.WrapIf(err, "failed to unmarshal input")
+		return errors.WrapIfWithDetails(err,
+			"failed to unmarshal input",
+			"fileName", filename,
+			"raw request", string(raw),
+		)
 	}
 
 	return nil

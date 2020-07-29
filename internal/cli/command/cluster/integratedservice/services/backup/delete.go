@@ -38,7 +38,7 @@ func newDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "delete",
-		Aliases: []string{"d", "remove", "r"},
+		Aliases: []string{"d", "remove", "rm"},
 		Short:   "Delete the specified backup",
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -115,12 +115,12 @@ func askBackupToDelete(client *pipeline.APIClient, orgID, clusterID int32) (*pip
 		return nil, errors.WrapIf(err, "failed to get bucket to delete")
 	}
 
-	var selectedBucket pipeline.BackupResponse
+	var selectedBackup pipeline.BackupResponse
 	for idx, b := range backups {
 		if b.Name == selectedBackupName || (selectedBackupName == "" && idx == 0) {
-			selectedBucket = b
+			selectedBackup = b
 		}
 	}
 
-	return &selectedBucket, nil
+	return &selectedBackup, nil
 }
