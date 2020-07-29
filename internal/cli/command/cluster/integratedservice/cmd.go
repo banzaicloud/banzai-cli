@@ -26,7 +26,6 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/services/ingress"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/services/logging"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/services/monitoring"
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/services/restore"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/services/securityscan"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice/services/vault"
 )
@@ -58,7 +57,6 @@ func NewIntegratedServiceCommand(banzaiCli cli.Cli) *cobra.Command {
 		services.NewServiceCommand(banzaiCli, "vault", vault.NewManager(banzaiCli)),
 
 		backup.NewBackupCommand(banzaiCli),
-		restore.NewRestoreCommand(banzaiCli),
 	)
 
 	return cmd
