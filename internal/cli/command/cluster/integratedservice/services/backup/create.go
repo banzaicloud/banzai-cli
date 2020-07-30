@@ -106,7 +106,7 @@ func buildCreateRequestInteractively() (pipeline.CreateBackupRequest, error) {
 
 	var currentTime = time.Now()
 
-	if err := input.DoQuestions([]input.QuestionMaker{
+	err := input.DoQuestions([]input.QuestionMaker{
 		input.QuestionInput{
 			QuestionBase: input.QuestionBase{
 				Message: "Name of the backup",
@@ -125,7 +125,8 @@ func buildCreateRequestInteractively() (pipeline.CreateBackupRequest, error) {
 			},
 			Options: []string{ttl1DayLabel, ttl2DaysLabel, ttl1WeekLabel},
 		},
-	}); err != nil {
+	})
+	if err != nil {
 		return pipeline.CreateBackupRequest{}, errors.WrapIf(err, "error during getting create options")
 	}
 
