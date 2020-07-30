@@ -106,13 +106,15 @@ func buildCreateRequestInteractively() (pipeline.CreateBackupRequest, error) {
 
 	var currentTime = time.Now()
 
+	var defaultBackupName = fmt.Sprintf("manual-backup-%s", currentTime.Format("2006-01-02"))
 	err := input.DoQuestions([]input.QuestionMaker{
 		input.QuestionInput{
 			QuestionBase: input.QuestionBase{
 				Message: "Name of the backup",
-				Help:    fmt.Sprintf("Name of the backup, for example, `manual-backup-%s`", currentTime.Format("2006-01-02")),
+				Help:    fmt.Sprintf("Name of the backup, for example, `%s`", defaultBackupName),
 			},
-			Output: &name,
+			DefaultValue: defaultBackupName,
+			Output:       &name,
 		},
 		input.QuestionSelect{
 			QuestionInput: input.QuestionInput{
