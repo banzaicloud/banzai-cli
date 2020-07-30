@@ -105,7 +105,6 @@ func askBackup(client *pipeline.APIClient, orgID, clusterID int32) (*pipeline.Ba
 			QuestionInput: input.QuestionInput{
 				QuestionBase: input.QuestionBase{
 					Message: "Restore cluster from this backup",
-					Help:    "", // TODO (colin): need help msg??
 				},
 				Output: &selectedBackupName,
 			},

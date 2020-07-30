@@ -113,8 +113,7 @@ func askBackupToDelete(client *pipeline.APIClient, orgID, clusterID int32) (*pip
 		input.QuestionSelect{
 			QuestionInput: input.QuestionInput{
 				QuestionBase: input.QuestionBase{
-					Message: "Backup to delete", // TODO (colin): add message
-					Help:    "",                 // TODO (colin): need help msg??
+					Message: "Backup to delete",
 				},
 				Output: &selectedBackupName,
 			},
