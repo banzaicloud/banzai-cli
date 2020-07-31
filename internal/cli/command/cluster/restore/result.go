@@ -17,6 +17,7 @@ package restore
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"emperror.dev/errors"
 	log "github.com/sirupsen/logrus"
@@ -29,8 +30,6 @@ import (
 
 type resultOptions struct {
 	clustercontext.Context
-
-	restoreID int32
 }
 
 func newResultCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -41,7 +40,7 @@ func newResultCommand(banzaiCli cli.Cli) *cobra.Command {
 		Aliases: []string{"g", "result", "details"},
 		Short:   "Display the result of a restore job",
 		Long:    "Display the detailed results of a specific restore job.",
-		Args:    cobra.NoArgs,
+		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
 			cmd.SilenceErrors = true
@@ -50,37 +49,44 @@ func newResultCommand(banzaiCli cli.Cli) *cobra.Command {
 				return errors.WrapIf(err, "failed to initialize options")
 			}
 
-			return showResult(banzaiCli, options)
+			return showResult(banzaiCli, options, args)
 		},
 	}
-	flags := cmd.Flags()
-	flags.Int32VarP(&options.restoreID, "restoreId", "", 0, "Restore ID")
 	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "result")
 
 	return cmd
 }
 
-func showResult(banzaiCli cli.Cli, options resultOptions) error {
+func showResult(banzaiCli cli.Cli, options resultOptions, args []string) error {
 	client := banzaiCli.Client()
 	orgID := banzaiCli.Context().OrganizationID()
 	clusterID := options.ClusterID()
 
-	if options.restoreID == 0 {
+	var restoreID int32
+	if len(args) > 0 {
+		if id, err := strconv.ParseUint(args[0], 10, 64); err != nil {
+			return errors.WrapIf(err, "failed to parse restoreID")
+		} else {
+			restoreID = int32(id)
+		}
+	}
+
+	if restoreID == 0 {
 		if banzaiCli.Interactive() {
 			restore, err := askRestore(client, orgID, clusterID)
 			if err != nil {
 				return errors.WrapIf(err, "failed to ask restore")
 			}
 
-			options.restoreID = restore.Id
+			restoreID = restore.Id
 		} else {
-			return errors.NewWithDetails("invalid restore ID", "restoreID", options.restoreID)
+			return errors.NewWithDetails("invalid restore ID", "restoreID", restoreID)
 		}
 	}
 
-	response, _, err := client.ArkRestoresApi.GetARKRestoreResuts(context.Background(), orgID, clusterID, options.restoreID)
+	response, _, err := client.ArkRestoresApi.GetARKRestoreResuts(context.Background(), orgID, clusterID, restoreID)
 	if err != nil {
-		return errors.WrapIfWithDetails(err, "failed to get restore results", "clusterID", clusterID, "restoreID", options.restoreID)
+		return errors.WrapIfWithDetails(err, "failed to get restore results", "clusterID", clusterID, "restoreID", restoreID)
 	}
 
 	ctx := &output.Context{

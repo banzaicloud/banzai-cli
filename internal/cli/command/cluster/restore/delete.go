@@ -16,6 +16,7 @@ package restore
 
 import (
 	"context"
+	"strconv"
 
 	"emperror.dev/errors"
 	log "github.com/sirupsen/logrus"
@@ -27,8 +28,6 @@ import (
 
 type deleteOptions struct {
 	clustercontext.Context
-
-	restoreID int32
 }
 
 func newDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -39,7 +38,7 @@ func newDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 		Aliases: []string{"d", "remove"},
 		Short:   "Delete logs of a restore job",
 		Long:    "Delete logs of a restore job. Deleted jobs won't show up in the restore list.",
-		Args:    cobra.NoArgs,
+		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
 			cmd.SilenceErrors = true
@@ -48,40 +47,47 @@ func newDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 				return errors.WrapIf(err, "failed to initialize options")
 			}
 
-			return runDelete(banzaiCli, options)
+			return runDelete(banzaiCli, options, args)
 		},
 	}
-	flags := cmd.Flags()
-	flags.Int32VarP(&options.restoreID, "restoreId", "", 0, "Restore ID")
 	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "delete")
 
 	return cmd
 }
 
-func runDelete(banzaiCli cli.Cli, options deleteOptions) error {
+func runDelete(banzaiCli cli.Cli, options deleteOptions, args []string) error {
 	client := banzaiCli.Client()
 	orgID := banzaiCli.Context().OrganizationID()
 	clusterID := options.ClusterID()
 
-	if options.restoreID == 0 {
+	var restoreID int32
+	if len(args) > 0 {
+		if id, err := strconv.ParseUint(args[0], 10, 64); err != nil {
+			return errors.WrapIf(err, "failed to parse restoreID")
+		} else {
+			restoreID = int32(id)
+		}
+	}
+
+	if restoreID == 0 {
 		if banzaiCli.Interactive() {
 			restore, err := askRestore(client, orgID, clusterID)
 			if err != nil {
 				return errors.WrapIf(err, "failed to ask restore")
 			}
 
-			options.restoreID = restore.Id
+			restoreID = restore.Id
 		} else {
-			return errors.NewWithDetails("invalid restore ID", "restoreID", options.restoreID)
+			return errors.NewWithDetails("invalid restore ID", "restoreID", restoreID)
 		}
 	}
 
-	_, _, err := client.ArkRestoresApi.DeleteARKRestore(context.Background(), orgID, clusterID, options.restoreID)
+	_, _, err := client.ArkRestoresApi.DeleteARKRestore(context.Background(), orgID, clusterID, restoreID)
 	if err != nil {
-		return errors.WrapIfWithDetails(err, "failed to delete restore", "clusterID", clusterID, "restoreID", options.restoreID)
+		return errors.WrapIfWithDetails(err, "failed to delete restore", "clusterID", clusterID, "restoreID", restoreID)
 	}
 
-	log.Infof("Restore [%d] deleted successfully", options.restoreID)
+	log.Infof("Restore [%d] deleted successfully", restoreID)
 
 	return nil
 }
