@@ -16,6 +16,7 @@ package backup
 
 import (
 	"context"
+	"strconv"
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
@@ -29,8 +30,6 @@ import (
 
 type deleteOptions struct {
 	clustercontext.Context
-
-	backupID int32
 }
 
 func newDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -40,7 +39,7 @@ func newDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 		Use:     "delete",
 		Aliases: []string{"d", "remove", "rm"},
 		Short:   "Delete the specified backup",
-		Args:    cobra.NoArgs,
+		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
 			cmd.SilenceErrors = true
@@ -49,18 +48,16 @@ func newDeleteCommand(banzaiCli cli.Cli) *cobra.Command {
 				return errors.WrapIf(err, "failed to initialize options")
 			}
 
-			return runDelete(banzaiCli, options)
+			return runDelete(banzaiCli, options, args)
 		},
 	}
 
-	flags := cmd.Flags()
-	flags.Int32VarP(&options.backupID, "backupId", "", 0, "Backup ID to delete")
 	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "delete")
 
 	return cmd
 }
 
-func runDelete(banzaiCli cli.Cli, options deleteOptions) error {
+func runDelete(banzaiCli cli.Cli, options deleteOptions, args []string) error {
 	client := banzaiCli.Client()
 	orgID := banzaiCli.Context().OrganizationID()
 	clusterID := options.ClusterID()
@@ -74,22 +71,31 @@ func runDelete(banzaiCli cli.Cli, options deleteOptions) error {
 		return NotAvailableError{}
 	}
 
-	if options.backupID == 0 {
+	var backupID int32
+	if len(args) > 0 {
+		if id, err := strconv.ParseUint(args[0], 10, 64); err != nil {
+			return errors.WrapIf(err, "failed to parse backupID")
+		} else {
+			backupID = int32(id)
+		}
+	}
+
+	if backupID == 0 {
 		if banzaiCli.Interactive() {
 			backup, err := askBackupToDelete(client, orgID, clusterID)
 			if err != nil {
 				return errors.WrapIf(err, "failed to ask backup to delete")
 			}
 
-			options.backupID = backup.Id
+			backupID = backup.Id
 		} else {
-			return errors.NewWithDetails("invalid backup ID", "backupID", options.backupID)
+			return errors.NewWithDetails("invalid backup ID", "backupID", backupID)
 		}
 	}
 
-	_, _, err = client.ArkBackupsApi.DeleteARKBackup(context.Background(), orgID, clusterID, options.backupID)
+	_, _, err = client.ArkBackupsApi.DeleteARKBackup(context.Background(), orgID, clusterID, backupID)
 	if err != nil {
-		return errors.WrapIfWithDetails(err, "failed to delete backup", "clusterID", clusterID, "backupID", options.backupID)
+		return errors.WrapIfWithDetails(err, "failed to delete backup", "clusterID", clusterID, "backupID", backupID)
 	}
 
 	log.Info("Backup deleted successfully")
