@@ -109,7 +109,7 @@ func askBackupToDelete(client *pipeline.APIClient, orgID, clusterID int32) (*pip
 	}
 
 	var selectedBackupName string
-	if err := input.DoQuestions([]input.QuestionMaker{
+	err = input.DoQuestions([]input.QuestionMaker{
 		input.QuestionSelect{
 			QuestionInput: input.QuestionInput{
 				QuestionBase: input.QuestionBase{
@@ -119,7 +119,8 @@ func askBackupToDelete(client *pipeline.APIClient, orgID, clusterID int32) (*pip
 			},
 			Options: backupOptions,
 		},
-	}); err != nil {
+	})
+	if err != nil {
 		return nil, errors.WrapIf(err, "failed to get bucket to delete")
 	}
 

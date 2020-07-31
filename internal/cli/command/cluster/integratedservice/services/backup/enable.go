@@ -168,7 +168,7 @@ func buildEnableRequestInteractively(banzaiCli cli.Cli) (pipeline.EnableArkReque
 	var scheduleLabel string
 	var ttlLabel string
 
-	if err := input.DoQuestions([]input.QuestionMaker{
+	err := input.DoQuestions([]input.QuestionMaker{
 		input.QuestionSelect{
 			QuestionInput: input.QuestionInput{
 				QuestionBase: input.QuestionBase{
@@ -191,7 +191,8 @@ func buildEnableRequestInteractively(banzaiCli cli.Cli) (pipeline.EnableArkReque
 			},
 			Options: []string{ttl1DayLabel, ttl2DaysLabel, ttl1WeekLabel},
 		},
-	}); err != nil {
+	})
+	if err != nil {
 		return pipeline.EnableArkRequest{}, errors.WrapIf(err, "error during getting enable options")
 	}
 
@@ -294,7 +295,7 @@ func askBucket(banzaiCLI cli.Cli, bucketType, secretID string) (*pipeline.Bucket
 	}
 
 	var bucketName string
-	if err := input.DoQuestions([]input.QuestionMaker{input.QuestionSelect{
+	err = input.DoQuestions([]input.QuestionMaker{input.QuestionSelect{
 		QuestionInput: input.QuestionInput{
 			QuestionBase: input.QuestionBase{
 				Message: "Bucket name:",
@@ -303,7 +304,8 @@ func askBucket(banzaiCLI cli.Cli, bucketType, secretID string) (*pipeline.Bucket
 			Output:       &bucketName,
 		},
 		Options: secretOptions,
-	}}); err != nil {
+	}})
+	if err != nil {
 		return nil, errors.WrapIf(err, "error during getting secret")
 	}
 
@@ -320,7 +322,7 @@ func askBucket(banzaiCLI cli.Cli, bucketType, secretID string) (*pipeline.Bucket
 
 func askBucketProvider() (string, error) {
 	var selectedProviderName string
-	if err := input.DoQuestions([]input.QuestionMaker{
+	err := input.DoQuestions([]input.QuestionMaker{
 		input.QuestionSelect{
 			QuestionInput: input.QuestionInput{
 				QuestionBase: input.QuestionBase{
@@ -332,7 +334,8 @@ func askBucketProvider() (string, error) {
 			},
 			Options: []string{providerAmazonS3Label, providerAzureLabel, providerGoogleGCSLabel},
 		},
-	}); err != nil {
+	})
+	if err != nil {
 		return "", errors.WrapIf(err, "error during getting provider")
 	}
 
@@ -381,7 +384,7 @@ func askSecret(banzaiCLI cli.Cli, secretType string) (string, error) {
 		secretIds[s.Name] = s.Id
 	}
 
-	if err := input.DoQuestions([]input.QuestionMaker{input.QuestionSelect{
+	err = input.DoQuestions([]input.QuestionMaker{input.QuestionSelect{
 		QuestionInput: input.QuestionInput{
 			QuestionBase: input.QuestionBase{
 				Message: "Provider secret:",
@@ -390,7 +393,8 @@ func askSecret(banzaiCLI cli.Cli, secretType string) (string, error) {
 			Output:       &secretName,
 		},
 		Options: secretOptions,
-	}}); err != nil {
+	}})
+	if err != nil {
 		return "", errors.WrapIf(err, "error during getting secret")
 	}
 
