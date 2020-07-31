@@ -32,7 +32,7 @@ type createOptions struct {
 	backupName string
 }
 
-func newRestoreCreateCommand(banzaiCli cli.Cli) *cobra.Command {
+func newCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	options := createOptions{}
 
 	cmd := &cobra.Command{
