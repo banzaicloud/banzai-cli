@@ -15,12 +15,13 @@
 package cluster
 
 import (
-	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/nodepool"
 	"github.com/spf13/cobra"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/integratedservice"
 	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/node"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/nodepool"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/restore"
 )
 
 // NewClusterCommand returns a cobra command for `cluster` subcommands.
@@ -43,6 +44,7 @@ func NewClusterCommand(banzaiCli cli.Cli) *cobra.Command {
 		integratedservice.NewIntegratedServiceCommand(banzaiCli),
 		node.NewNodeCommand(banzaiCli),
 		nodepool.NewNodePoolCommand(banzaiCli),
+		restore.NewRestoreCommand(banzaiCli),
 	)
 
 	return cmd
