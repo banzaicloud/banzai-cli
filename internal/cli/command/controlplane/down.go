@@ -64,7 +64,7 @@ func runDestroy(options destroyOptions, banzaiCli cli.Cli) error {
 		_ = survey.AskOne(
 			&survey.Confirm{
 				Message: "Do you want to DESTROY the controlplane now?",
-				Default: true,
+				Default: false,
 			},
 			&destroy,
 		)
