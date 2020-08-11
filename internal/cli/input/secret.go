@@ -17,6 +17,7 @@ package input
 import (
 	"context"
 	"net/url"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
@@ -24,9 +25,11 @@ import (
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/antihax/optional"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
+	log "github.com/sirupsen/logrus"
 
 	// "gopkg.in/yaml.v2" -- could not be used for kubernetes types
 	"github.com/ghodss/yaml"
@@ -87,9 +90,21 @@ func GetAmazonCredentials(profile string, assumeRole string) (string, map[string
 			&credentials.EnvProvider{},
 			&credentials.SharedCredentialsProvider{},
 		}) */
-	session, err := session.NewSessionWithOptions(session.Options{
-		Profile: profile,
-	})
+	var sess *session.Session
+	var err error
+
+	// use direct auth based on exported env vars
+	if id, ok := os.LookupEnv("AWS_ACCESS_KEY_ID"); ok {
+		if profile != "" {
+			log.Warnf("AWS profile %s is overridden by access key id %s explicitly", profile, id)
+		}
+		sess, err = session.NewSession(&aws.Config{})
+	} else {
+		sess, err = session.NewSessionWithOptions(session.Options{
+			Profile: profile,
+		})
+	}
+
 	if err != nil {
 		return "", nil, err
 	}
@@ -100,12 +115,12 @@ func GetAmazonCredentials(profile string, assumeRole string) (string, map[string
 		options := func(p *stscreds.AssumeRoleProvider) {
 			p.Duration = 1 * time.Hour
 		}
-		creds, err = stscreds.NewCredentials(session, assumeRole, options).Get()
+		creds, err = stscreds.NewCredentials(sess, assumeRole, options).Get()
 		if err != nil {
 			return "", nil, err
 		}
 	} else {
-		creds, err = session.Config.Credentials.Get()
+		creds, err = sess.Config.Credentials.Get()
 		if err != nil {
 			return "", nil, err
 		}
@@ -117,8 +132,8 @@ func GetAmazonCredentials(profile string, assumeRole string) (string, map[string
 		"AWS_SESSION_TOKEN":     creds.SessionToken,
 	}
 
-	if session.Config.Region != nil {
-		out[AwsRegionKey] = *session.Config.Region
+	if sess.Config.Region != nil {
+		out[AwsRegionKey] = *sess.Config.Region
 	}
 
 	return creds.AccessKeyID, out, nil
