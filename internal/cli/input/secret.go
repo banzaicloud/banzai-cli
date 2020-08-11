@@ -96,7 +96,7 @@ func GetAmazonCredentials(profile string, assumeRole string) (string, map[string
 	// use direct auth based on exported env vars
 	if id, ok := os.LookupEnv("AWS_ACCESS_KEY_ID"); ok {
 		if profile != "" {
-			log.Warnf("AWS profile %s is overridden by access key id %s explicitly", profile, id)
+			log.Warnf("AWS profile `%s` is overridden to `%s` by AWS_ACCESS_KEY_ID env var explicitly", profile, id)
 		}
 		sess, err = session.NewSession(&aws.Config{})
 	} else {

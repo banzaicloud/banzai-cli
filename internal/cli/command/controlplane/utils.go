@@ -165,12 +165,18 @@ func getImageMetadata(cpContext *cpContext, values map[string]interface{}, write
 
 	awsAccessKeyID := ""
 	if values["provider"] == providerEc2 || imageMeta.Custom.CredentialType == "aws" {
-		profile := "default"
+		profile := ""
 		assumeRole := ""
 		if v, ok := values["providerConfig"]; ok {
 			providerConfig := cast.ToStringMap(v)
 			profile = cast.ToString(providerConfig["profile"])
 			assumeRole = cast.ToString(providerConfig["assume_role"])
+		}
+		if envProfile, ok := os.LookupEnv("AWS_PROFILE"); ok {
+			if profile != "" {
+				log.Warnf("AWS profile `%s` in the providerConfig is overridden to `%s` by AWS_PROFILE env var explicitly", profile, envProfile)
+			}
+			profile = envProfile
 		}
 		log.Debug("using local AWS credentials")
 		id, creds, err := input.GetAmazonCredentials(profile, assumeRole)
