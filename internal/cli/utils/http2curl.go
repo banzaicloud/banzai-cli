@@ -54,7 +54,7 @@ func GetCurlCommand(req *http.Request, insecureSkipVerify bool) (*CurlCommand, e
 
 	command.append("-X", bashEscape(req.Method))
 
-	keys := make([]string, len(req.Header))
+	keys := make([]string, 0, len(req.Header))
 	for k := range req.Header {
 		keys = append(keys, k)
 	}
