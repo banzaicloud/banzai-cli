@@ -21,7 +21,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var clusterFields = []string{"Id", "Name", "Distribution", "Location", "CreatorName", "CreatedAt", "Status", "StatusMessage"}
+var clusterFields = []string{"Id", "Name", "Distribution", "Location", "Version", "CreatorName", "CreatedAt", "Status", "StatusMessage"}
 
 // ClusterShortWrite writes the basic params of a cluster to the output.
 func ClusterShortWrite(context formatContext, data interface{}) {
