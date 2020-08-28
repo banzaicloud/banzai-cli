@@ -57,6 +57,9 @@ func Init(version string, commitHash string, buildDate string, pipelineVersion s
 		buildDate,
 		pipelineVersion,
 	))
+
+	cli := cli.NewCli(os.Stdout, version)
+	command.AddCommands(rootCmd, cli)
 }
 
 // GetRootCommand returns the cli root command
@@ -103,10 +106,6 @@ func init() {
 	viper.SetDefault("cloudinfo.basepath", "https://try.pipeline.banzai.cloud/cloudinfo/api/v1")
 	viper.BindEnv("cloudinfo.basepath", "BANZAI_CLOUDINFO_BASEPATH")
 	viper.SetDefault("telescopes.basepath", "https://try.pipeline.banzai.cloud/recommender/api/v1")
-
-	cli := cli.NewCli(os.Stdout)
-
-	command.AddCommands(rootCmd, cli)
 }
 
 // initConfig reads in config file and ENV variables if set.

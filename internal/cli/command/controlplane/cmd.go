@@ -31,6 +31,7 @@ func NewControlPlaneCommand(banzaiCli cli.Cli) *cobra.Command {
 		NewUpCommand(banzaiCli),
 		NewDownCommand(banzaiCli),
 		NewInitCommand(banzaiCli),
+		NewDebugCommand(banzaiCli),
 	)
 
 	return cmd
