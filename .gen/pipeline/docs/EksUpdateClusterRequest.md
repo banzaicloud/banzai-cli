@@ -1,10 +1,10 @@
-# AmazonPoviderConfig
+# EksUpdateClusterRequest
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**AutoScalingGroup** | [**AmazonAutoScalingGroup**](AmazonAutoScalingGroup.md) |  | 
+**Version** | **string** |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

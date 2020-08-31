@@ -106,12 +106,13 @@ Class | Method | HTTP request | Description
 *ClustersApi* | [**ListClusters**](docs/ClustersApi.md#listclusters) | **Get** /api/v1/orgs/{orgId}/clusters | List clusters
 *ClustersApi* | [**ListNamespaces**](docs/ClustersApi.md#listnamespaces) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/namespaces | Lists namespaces for a cluster
 *ClustersApi* | [**ListNodePools**](docs/ClustersApi.md#listnodepools) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodepools | List node pools
-*ClustersApi* | [**ListNodepoolLabels**](docs/ClustersApi.md#listnodepoollabels) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodepool-labels | List cluser nodepool labels
-*ClustersApi* | [**ListNodes**](docs/ClustersApi.md#listnodes) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodes | List cluser nodes
+*ClustersApi* | [**ListNodepoolLabels**](docs/ClustersApi.md#listnodepoollabels) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodepool-labels | List cluster nodepool labels
+*ClustersApi* | [**ListNodes**](docs/ClustersApi.md#listnodes) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodes | List cluster nodes
 *ClustersApi* | [**MergeSecret**](docs/ClustersApi.md#mergesecret) | **Patch** /api/v1/orgs/{orgId}/clusters/{id}/secrets/{secretName} | Merge a particular secret with an existing one with optional remapping
 *ClustersApi* | [**PostLeaderElection**](docs/ClustersApi.md#postleaderelection) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/pke/leader | Apply as new cluster leader
 *ClustersApi* | [**PostReadyPKENode**](docs/ClustersApi.md#postreadypkenode) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/pke/ready | Report to Pipeline that a new node is ready (to be called by PKE installer)
-*ClustersApi* | [**UpdateCluster**](docs/ClustersApi.md#updatecluster) | **Put** /api/v1/orgs/{orgId}/clusters/{id} | Update cluster
+*ClustersApi* | [**UpdateCluster**](docs/ClustersApi.md#updatecluster) | **Put** /api/v1/orgs/{orgId}/clusters/{id}/update | Update an existing cluster
+*ClustersApi* | [**UpdateClusterDeprecated**](docs/ClustersApi.md#updateclusterdeprecated) | **Put** /api/v1/orgs/{orgId}/clusters/{id} | Update cluster
 *ClustersApi* | [**UpdateNodePool**](docs/ClustersApi.md#updatenodepool) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/nodepools/{name}/update | Update an existing node pool
 *CommonApi* | [**ApiVersionGet**](docs/CommonApi.md#apiversionget) | **Get** /api/version | 
 *CommonApi* | [**ListEndpoints**](docs/CommonApi.md#listendpoints) | **Get** /api | List Pipeline API endpoints
@@ -185,7 +186,7 @@ Class | Method | HTTP request | Description
  - [ActivateIntegratedServiceRequest](docs/ActivateIntegratedServiceRequest.md)
  - [AmazonAutoScalingGroup](docs/AmazonAutoScalingGroup.md)
  - [AmazonAutoScalingGroupSize](docs/AmazonAutoScalingGroupSize.md)
- - [AmazonPoviderConfig](docs/AmazonPoviderConfig.md)
+ - [AmazonProviderConfig](docs/AmazonProviderConfig.md)
  - [ApiClusterGroup](docs/ApiClusterGroup.md)
  - [ApiCreateRequest](docs/ApiCreateRequest.md)
  - [ApiCreateResponse](docs/ApiCreateResponse.md)
@@ -274,10 +275,16 @@ Class | Method | HTTP request | Description
  - [DeploymentScalingRequest](docs/DeploymentScalingRequest.md)
  - [DeploymentTargetClusterStatus](docs/DeploymentTargetClusterStatus.md)
  - [DisableArkResponse](docs/DisableArkResponse.md)
+ - [EksAuthConfig](docs/EksAuthConfig.md)
+ - [EksAuthConfigRoles](docs/EksAuthConfigRoles.md)
+ - [EksAuthConfigUsers](docs/EksAuthConfigUsers.md)
+ - [EksEncryptionConfig](docs/EksEncryptionConfig.md)
+ - [EksEncryptionConfigProvider](docs/EksEncryptionConfigProvider.md)
  - [EksIam](docs/EksIam.md)
  - [EksNodePool](docs/EksNodePool.md)
  - [EksNodePoolAllOf](docs/EksNodePoolAllOf.md)
  - [EksSubnet](docs/EksSubnet.md)
+ - [EksUpdateClusterRequest](docs/EksUpdateClusterRequest.md)
  - [EksUpdateNodePoolRequest](docs/EksUpdateNodePoolRequest.md)
  - [EksUpdateNodePoolRequestAllOf](docs/EksUpdateNodePoolRequestAllOf.md)
  - [EksVpc](docs/EksVpc.md)
@@ -401,6 +408,7 @@ Class | Method | HTTP request | Description
  - [UpdateAzureProperties](docs/UpdateAzureProperties.md)
  - [UpdateAzurePropertiesAzure](docs/UpdateAzurePropertiesAzure.md)
  - [UpdateClusterRequest](docs/UpdateClusterRequest.md)
+ - [UpdateClusterRequestDeprecated](docs/UpdateClusterRequestDeprecated.md)
  - [UpdateClusterRequestV2](docs/UpdateClusterRequestV2.md)
  - [UpdateEksProperties](docs/UpdateEksProperties.md)
  - [UpdateEksPropertiesEks](docs/UpdateEksPropertiesEks.md)

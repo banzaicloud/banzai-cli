@@ -14,6 +14,8 @@ package pipeline
 type AmazonAutoScalingGroup struct {
 	Name string `json:"name"`
 	Image string `json:"image"`
+	// Size of root EBS volume to attach to the nodes in GBs. Zero means that the size is determined automatically.
+	VolumeSize int32 `json:"volumeSize,omitempty"`
 	Zones []string `json:"zones"`
 	InstanceType string `json:"instanceType"`
 	LaunchConfigurationName string `json:"launchConfigurationName"`

@@ -22,7 +22,7 @@ type UpdateNodePoolsPke struct {
 	MinCount int32 `json:"minCount,omitempty"`
 	// If cluster autoscaler is enabled for this node pool it sets the maximum node count the cluster autoscaler can upscale the node pool to.
 	MaxCount int32 `json:"maxCount,omitempty"`
-	// If cluster autoscaler is not enabled this specifies the desired ndoe count in the node pool. If cluster autoscaler is enabled this specifies the initial node count in the ndoe pool.
+	// If cluster autoscaler is not enabled this specifies the desired node count in the node pool. If cluster autoscaler is enabled this specifies the initial node count in the node pool.
 	Count int32 `json:"count,omitempty"`
 	// The subnet to create the node pool into. If this field is omitted than the subnet from the cluster level network configuration is used.
 	Subnets []string `json:"subnets,omitempty"`

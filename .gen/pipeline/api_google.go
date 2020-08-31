@@ -29,7 +29,7 @@ type GoogleApiService service
 
 /*
 ListProjects Retrieves projects visible for the user identified by the secret id
-Retrieves projects visible by the user represented by the secretid header from the google cloud
+Retrieves projects visible by the user represented by the secretId header from the google cloud
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param orgId Organization identifier
  * @param secretId Secret identification.
