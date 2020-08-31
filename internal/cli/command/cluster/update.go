@@ -75,30 +75,39 @@ func runUpdate(banzaiCli cli.Cli, options updateOptions) error {
 
 	id := options.ClusterID()
 
+	var request pipeline.UpdateClusterRequest
+
 	if banzaiCli.Interactive() {
 		if cluster, _, err := client.ClustersApi.GetCluster(context.Background(), orgID, id); err != nil {
 			return errors.WrapIf(err, "failed to get cluster details")
 		} else {
 			format.ClusterWrite(banzaiCli, cluster)
 		}
+
 		confirmed := false
-		survey.AskOne(&survey.Confirm{Message: "Do you want to UPDATE the cluster?"}, &confirmed)
+		err := survey.AskOne(&survey.Confirm{Message: "Do you want to UPDATE the cluster?"}, &confirmed)
+		if err != nil {
+			return errors.WrapIf(err, "failed to read cluster update confirmation")
+		}
 		if !confirmed {
 			return errors.New("update cancelled")
 		}
-	}
 
-	filename, raw, err := utils.ReadFileOrStdin(options.file)
-	if err != nil {
-		return errors.WrapIfWithDetails(err, "failed to read", "filename", filename)
-	}
+		err = survey.AskOne(&survey.Input{Message: "Which version you wish to update to?"}, &request.Version)
+		if err != nil {
+			return errors.WrapIf(err, "failed to read cluster version")
+		}
+	} else {
+		filename, raw, err := utils.ReadFileOrStdin(options.file)
+		if err != nil {
+			return errors.WrapIfWithDetails(err, "failed to read", "filename", filename)
+		}
 
-	log.Debugf("%d bytes read", len(raw))
+		log.Debugf("%d bytes read", len(raw))
 
-	var request pipeline.UpdateClusterRequest
-
-	if err := utils.Unmarshal(raw, &request); err != nil {
-		return errors.WrapIf(err, "failed to unmarshal update cluster request")
+		if err := utils.Unmarshal(raw, &request); err != nil {
+			return errors.WrapIf(err, "failed to unmarshal update cluster request")
+		}
 	}
 
 	log.Debugf("update request: %#v", request)
@@ -114,7 +123,7 @@ func runUpdate(banzaiCli cli.Cli, options updateOptions) error {
 		for {
 			cluster, _, err := client.ClustersApi.GetCluster(context.Background(), orgID, id)
 			if err != nil {
-				cli.LogAPIError("create cluster", err, request)
+				cli.LogAPIError("get cluster", err, request)
 			} else {
 				format.ClusterShortWrite(banzaiCli, cluster)
 				if cluster.Status != "UPDATING" {
