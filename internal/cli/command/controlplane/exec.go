@@ -242,14 +242,22 @@ func untarInMemory(reader io.Reader) (map[string][]byte, error) {
 }
 
 func runTerraformCommandGeneric(options *cpContext, cmd []string, cmdEnv map[string]string) error {
+	logFile, err := options.createLog(cmd...)
+	if err != nil {
+		return errors.WrapIf(err, "failed to write output logs")
+	}
+	defer logFile.Close()
+
 	cmdOpt := func(cmd *exec.Cmd) error {
 		cmd.Env = os.Environ()
 		for key, value := range cmdEnv {
 			cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, value))
 		}
 		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
+		// TODO find out how to deal with ctr (containerd) bypassing output redirection
+		cmd.Stdout = io.MultiWriter(logFile, os.Stdout)
+		cmd.Stderr = io.MultiWriter(logFile, os.Stderr)
+
 		return nil
 	}
 

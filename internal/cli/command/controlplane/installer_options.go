@@ -16,11 +16,13 @@ package controlplane
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -39,6 +41,7 @@ const (
 	traefikAddressFilename  = "traefik-address"
 	externalAddressFilename = "external-address"
 	tfstateFilename         = "terraform.tfstate"
+	logsDir                 = "logs"
 	defaultImage            = "docker.io/banzaicloud/pipeline-installer"
 	latestTag               = "latest"
 )
@@ -56,6 +59,7 @@ type cpContext struct {
 	installerPulled     *sync.Once
 	installerPullResult error
 	flags               *pflag.FlagSet
+	logOutput           bool
 }
 
 func NewContext(cmd *cobra.Command, banzaiCli cli.Cli) *cpContext {
@@ -69,6 +73,7 @@ func NewContext(cmd *cobra.Command, banzaiCli cli.Cli) *cpContext {
 	ctx.flags.StringVar(&ctx.installerImageRepo, "image", defaultImage, "Name of Docker image repository to use")
 	ctx.flags.BoolVar(&ctx.pullInstaller, "image-pull", true, "Pull installer image even if it's present locally")
 	ctx.flags.BoolVar(&ctx.autoApprove, "auto-approve", true, "Automatically approve the changes to deploy")
+	ctx.flags.BoolVar(&ctx.logOutput, "log-output", true, "Log output of terraform calls")
 	ctx.flags.StringVar(&ctx.workspace, "workspace", "", "Name of directory for storing the applied configuration and deployment status")
 	ctx.flags.StringVar(&ctx.containerRuntime, "container-runtime", "auto", `Run the terraform command with "docker", "containerd" (crictl) or "exec" (execute locally)`)
 	ctx.flags.BoolVar(&ctx.refreshState, "refresh-state", true, "Refresh terraform state for each run (turn off to save time during development)")
@@ -237,6 +242,20 @@ func (c *cpContext) readEc2Host() (string, error) {
 		return "", errors.WrapIf(err, "can't read address of created EC2 instance")
 	}
 	return strings.Trim(string(bytes), "\n"), nil
+}
+
+func (c *cpContext) createLog(nameParts ...string) (io.WriteCloser, error) {
+	if !c.logOutput {
+		return nil, nil
+	}
+
+	dir := filepath.Join(c.workspace, logsDir)
+	if err := os.MkdirAll(dir, 0777); err != nil {
+		return nil, errors.WrapIf(err, "failed to create log directory")
+	}
+	ts, _ := time.Now().MarshalText()
+	name := fmt.Sprintf("%s-%s.log", ts, strings.ReplaceAll(strings.Join(nameParts, "-"), "/", ""))
+	return os.Create(filepath.Join(dir, name))
 }
 
 // Init completes the cp context from the options, env vars, and if possible from the user
