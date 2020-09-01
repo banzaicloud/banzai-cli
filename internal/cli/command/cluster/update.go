@@ -16,10 +16,12 @@ package cluster
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/Masterminds/semver"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -78,14 +80,15 @@ func runUpdate(banzaiCli cli.Cli, options updateOptions) error {
 	var request pipeline.UpdateClusterRequest
 
 	if banzaiCli.Interactive() {
-		if cluster, _, err := client.ClustersApi.GetCluster(context.Background(), orgID, id); err != nil {
+		cluster, _, err := client.ClustersApi.GetCluster(context.Background(), orgID, id)
+		if err != nil {
 			return errors.WrapIf(err, "failed to get cluster details")
-		} else {
-			format.ClusterWrite(banzaiCli, cluster)
 		}
 
+		format.ClusterWrite(banzaiCli, cluster)
+
 		confirmed := false
-		err := survey.AskOne(&survey.Confirm{Message: "Do you want to UPDATE the cluster?"}, &confirmed)
+		err = survey.AskOne(&survey.Confirm{Message: "Do you want to UPDATE the cluster?"}, &confirmed)
 		if err != nil {
 			return errors.WrapIf(err, "failed to read cluster update confirmation")
 		}
@@ -93,7 +96,22 @@ func runUpdate(banzaiCli cli.Cli, options updateOptions) error {
 			return errors.New("update cancelled")
 		}
 
-		err = survey.AskOne(&survey.Input{Message: "Which version you wish to update to?"}, &request.Version)
+		var nextVersion string
+		if cluster.Distribution == "eks" {
+			version, err := semver.NewVersion(cluster.Version)
+			if err != nil {
+				return errors.WrapIf(err, "failed to parse cluster version")
+			}
+
+			updated := version.IncMinor()
+			nextVersion = fmt.Sprintf("%d.%d", updated.Major(), updated.Minor())
+		}
+
+		err = survey.AskOne(&survey.Input{
+			Message: "Which version you wish to update to?",
+			Help:    "Possible versions: [1.15, 1.16, 1.17]",
+			Default: nextVersion,
+		}, &request.Version)
 		if err != nil {
 			return errors.WrapIf(err, "failed to read cluster version")
 		}
