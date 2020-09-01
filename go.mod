@@ -5,6 +5,7 @@ go 1.14
 require (
 	emperror.dev/errors v0.4.2
 	github.com/AlecAivazis/survey/v2 v2.0.2
+	github.com/Masterminds/semver v1.5.0
 	github.com/antihax/optional v0.0.0-20180407024304-ca021399b1a6
 	github.com/aws/aws-sdk-go v1.21.2
 	github.com/coreos/go-oidc v2.0.0+incompatible

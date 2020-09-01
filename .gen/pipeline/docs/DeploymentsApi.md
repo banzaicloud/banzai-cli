@@ -202,7 +202,7 @@ Name | Type | Description  | Notes
 
 
 
- **resourceTypes** | **optional.String**| K8s reource type | 
+ **resourceTypes** | **optional.String**| K8s resource type | 
 
 ### Return type
 

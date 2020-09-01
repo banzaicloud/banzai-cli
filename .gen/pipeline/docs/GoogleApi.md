@@ -14,7 +14,7 @@ Method | HTTP request | Description
 
 Retrieves projects visible for the user identified by the secret id
 
-Retrieves projects visible by the user represented by the secretid header from the google cloud
+Retrieves projects visible by the user represented by the secretId header from the google cloud
 
 ### Required Parameters
 

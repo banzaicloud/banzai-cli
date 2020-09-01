@@ -28,12 +28,13 @@ Method | HTTP request | Description
 [**ListClusters**](ClustersApi.md#ListClusters) | **Get** /api/v1/orgs/{orgId}/clusters | List clusters
 [**ListNamespaces**](ClustersApi.md#ListNamespaces) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/namespaces | Lists namespaces for a cluster
 [**ListNodePools**](ClustersApi.md#ListNodePools) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodepools | List node pools
-[**ListNodepoolLabels**](ClustersApi.md#ListNodepoolLabels) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodepool-labels | List cluser nodepool labels
-[**ListNodes**](ClustersApi.md#ListNodes) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodes | List cluser nodes
+[**ListNodepoolLabels**](ClustersApi.md#ListNodepoolLabels) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodepool-labels | List cluster nodepool labels
+[**ListNodes**](ClustersApi.md#ListNodes) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/nodes | List cluster nodes
 [**MergeSecret**](ClustersApi.md#MergeSecret) | **Patch** /api/v1/orgs/{orgId}/clusters/{id}/secrets/{secretName} | Merge a particular secret with an existing one with optional remapping
 [**PostLeaderElection**](ClustersApi.md#PostLeaderElection) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/pke/leader | Apply as new cluster leader
 [**PostReadyPKENode**](ClustersApi.md#PostReadyPKENode) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/pke/ready | Report to Pipeline that a new node is ready (to be called by PKE installer)
-[**UpdateCluster**](ClustersApi.md#UpdateCluster) | **Put** /api/v1/orgs/{orgId}/clusters/{id} | Update cluster
+[**UpdateCluster**](ClustersApi.md#UpdateCluster) | **Put** /api/v1/orgs/{orgId}/clusters/{id}/update | Update an existing cluster
+[**UpdateClusterDeprecated**](ClustersApi.md#UpdateClusterDeprecated) | **Put** /api/v1/orgs/{orgId}/clusters/{id} | Update cluster
 [**UpdateNodePool**](ClustersApi.md#UpdateNodePool) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/nodepools/{name}/update | Update an existing node pool
 
 
@@ -916,7 +917,7 @@ Name | Type | Description  | Notes
 
 > map[string][]NodepoolLabels ListNodepoolLabels(ctx, orgId, id)
 
-List cluser nodepool labels
+List cluster nodepool labels
 
 List cluster nodepool labels
 
@@ -951,9 +952,9 @@ Name | Type | Description  | Notes
 
 > ListNodesResponse ListNodes(ctx, orgId, id)
 
-List cluser nodes
+List cluster nodes
 
-List cluser nodes
+List cluster nodes
 
 ### Required Parameters
 
@@ -1089,7 +1090,43 @@ Name | Type | Description  | Notes
 
 ## UpdateCluster
 
-> UpdateCluster(ctx, orgId, id, body)
+> UpdateCluster(ctx, orgId, id, updateClusterRequest)
+
+Update an existing cluster
+
+Update the settings of an existing cluster. Changing some settings (like Kubernetes version) might trigger a rolling update. 
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**orgId** | **int32**| Organization identifier | 
+**id** | **int32**| Cluster identifier | 
+**updateClusterRequest** | [**UpdateClusterRequest**](UpdateClusterRequest.md)|  | 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json, application/problem+json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## UpdateClusterDeprecated
+
+> UpdateClusterDeprecated(ctx, orgId, id, body)
 
 Update cluster
 

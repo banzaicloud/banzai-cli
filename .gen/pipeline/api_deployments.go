@@ -455,7 +455,7 @@ Retrieves the K8s resources of a deployment
  * @param id Cluster identifier
  * @param name Deployment name
  * @param optional nil or *GetDeploymentResourceOpts - Optional Parameters:
- * @param "ResourceTypes" (optional.String) -  K8s reource type
+ * @param "ResourceTypes" (optional.String) -  K8s resource type
 @return []map[string]interface{}
 */
 func (a *DeploymentsApiService) GetDeploymentResource(ctx _context.Context, orgId int32, id int32, name string, localVarOptionals *GetDeploymentResourceOpts) ([]map[string]interface{}, *_nethttp.Response, error) {

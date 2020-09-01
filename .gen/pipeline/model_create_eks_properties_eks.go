@@ -12,8 +12,10 @@
 package pipeline
 // CreateEksPropertiesEks struct for CreateEksPropertiesEks
 type CreateEksPropertiesEks struct {
-	AuthConfigMap string `json:"authConfigMap,omitempty"`
+	AuthConfig EksAuthConfig `json:"authConfig,omitempty"`
 	Version string `json:"version,omitempty"`
+	// List of encryption config objects to define the encryption providers and their corresponding resources to encrypt. More information can be found at https://docs.aws.amazon.com/eks/latest/userguide/create-cluster.html and https://docs.aws.amazon.com/eks/latest/APIReference/API_CreateCluster.html.
+	EncryptionConfig []EksEncryptionConfig `json:"encryptionConfig,omitempty"`
 	LogTypes []string `json:"logTypes,omitempty"`
 	NodePools map[string]EksNodePool `json:"nodePools"`
 	Vpc EksVpc `json:"vpc,omitempty"`
@@ -24,6 +26,6 @@ type CreateEksPropertiesEks struct {
 	Iam EksIam `json:"iam,omitempty"`
 	// List of access point types for the API server; public and private are the only valid values
 	ApiServerAccessPoints []string `json:"apiServerAccessPoints,omitempty"`
-	// User definied tags to be added to created AWS resources. Empty keys and values are not permitted.
+	// User defined tags to be added to created AWS resources. Empty keys and values are not permitted.
 	Tags map[string]string `json:"tags,omitempty"`
 }
