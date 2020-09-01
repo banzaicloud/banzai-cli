@@ -1,3 +1,3 @@
 package pipeline
 
-const PipelineVersion = "33d4ec8"
+const PipelineVersion = "0.56.0"
