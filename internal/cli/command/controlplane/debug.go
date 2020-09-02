@@ -16,9 +16,11 @@ package controlplane
 
 import (
 	"archive/tar"
+	"bytes"
 	"compress/gzip"
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -83,6 +85,9 @@ type debugMetadata struct {
 }
 
 func runDebug(options debugOptions, banzaiCli cli.Cli) error {
+	logBuffer := new(bytes.Buffer)
+	log.SetOutput(io.MultiWriter(os.Stderr, logBuffer))
+
 	if err := options.Init(); err != nil {
 		return err
 	}
@@ -125,6 +130,8 @@ func runDebug(options debugOptions, banzaiCli cli.Cli) error {
 	logResult("add values.yaml", copyFile(tarWriter, "pipeline/values.yaml", options.valuesPath()))
 
 	log.Infof("debug bundle has been written to %q", path)
+	logResult("add meta.log", addFile(tarWriter, "meta.log", logBuffer.String()))
+
 	return nil
 }
 
@@ -149,7 +156,7 @@ func logResult(what string, err error) {
 	if err == nil {
 		log.Debugf("%s succeeded", what)
 	} else {
-		log.Errorf("%s failed: %v", err)
+		log.Errorf("%s failed: %v", what, err)
 	}
 }
 
