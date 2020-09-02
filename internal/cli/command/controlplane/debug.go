@@ -129,6 +129,55 @@ func runDebug(options debugOptions, banzaiCli cli.Cli) error {
 	logResult("create pipeline/", addDir(tarWriter, "pipeline"))
 	logResult("add values.yaml", copyFile(tarWriter, "pipeline/values.yaml", options.valuesPath()))
 
+	// run some terraform diagnostics commands to catch their output in the logs folder
+	var values map[string]interface{}
+	logResult("read values", options.readValues(&values))
+	_, env, err := getImageMetadata(options.cpContext, values, true)
+	logResult("get image metadata", err)
+	logResult("run tf plan", runTerraform("plan", options.cpContext, env))
+	logResult("run tf graph", runTerraform("graph", options.cpContext, env))
+	logResult("run tf state list", runTerraform("state list", options.cpContext, env))
+
+	logResult("create pipeline/installer-logs", addDir(tarWriter, "pipeline/installer-logs"))
+	logDir, logFiles, err := options.listLogs()
+	if err != nil {
+		log.Errorf("listing log files failed: %v", err)
+	} else {
+		for _, file := range logFiles {
+			logResult("add log file", copyFile(tarWriter, filepath.Join("pipeline/installer-logs", file), filepath.Join(logDir, file)))
+		}
+	}
+
+	logResult("add pipeline/files.txt", addFile(tarWriter, "pipeline/files.txt", simpleCommand("find", options.workspace, "-ls")))
+
+	logResult("create pipeline/resources", addDir(tarWriter, "pipeline/resources"))
+	logResult("add pipeline/resources/all.txt", addFile(tarWriter, "pipeline/resources/all.txt", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "all", "-A", "-owide"}, env)))
+	logResult("add pipeline/resources/namespaces.yaml", addFile(tarWriter, "pipeline/resources/namespaces.yaml", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "ns", "-oyaml"}, env)))
+	logResult("add pipeline/resources/nodes.yaml", addFile(tarWriter, "pipeline/resources/nodes.yaml", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "nodes", "-oyaml"}, env)))
+	logResult("add pipeline/resources/top_node.txt", addFile(tarWriter, "pipeline/resources/top_node.txt", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "top", "node"}, env)))
+	logResult("add pipeline/resources/webhooks.yaml", addFile(tarWriter, "pipeline/resources/webhooks.yaml", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "mutatingwebhookconfigurations,validatingwebhookconfigurations", "-oyaml"}, env)))
+
+	logResult("create pipeline/resources/banzaicloud", addDir(tarWriter, "pipeline/resources/banzaicloud"))
+
+	logResult("add pipeline/resources/banzaicloud/pods.yaml", addFile(tarWriter, "pipeline/resources/banzaicloud/pods.yaml", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "pods", "-oyaml", "-nbanzaicloud"}, env)))
+	logResult("add pipeline/resources/banzaicloud/services.yaml", addFile(tarWriter, "pipeline/resources/banzaicloud/services.yaml", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "services", "-oyaml", "-nbanzaicloud"}, env)))
+	logResult("add pipeline/resources/banzaicloud/ingresses.yaml", addFile(tarWriter, "pipeline/resources/banzaicloud/ingresses.yaml", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "ingresses", "-oyaml", "-nbanzaicloud"}, env)))
+	logResult("add pipeline/resources/banzaicloud/persistentvolumes.yaml", addFile(tarWriter, "pipeline/resources/banzaicloud/persistentvolumes.yaml", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "persistentvolumes", "-oyaml", "-nbanzaicloud"}, env)))
+	logResult("add pipeline/resources/banzaicloud/persistentvolumeclaims.yaml", addFile(tarWriter, "pipeline/resources/banzaicloud/persistentvolumeclaims.yaml", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "persistentvolumeclaims", "-oyaml", "-nbanzaicloud"}, env)))
+	logResult("add pipeline/resources/banzaicloud/configmaps.txt", addFile(tarWriter, "pipeline/resources/banzaicloud/configmaps.txt", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "configmaps", "-owide", "-nbanzaicloud"}, env))) // -owide does not include contents
+	logResult("add pipeline/resources/banzaicloud/secrets.txt", addFile(tarWriter, "pipeline/resources/banzaicloud/secrets.txt", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "secrets", "-owide", "-nbanzaicloud"}, env)))          // -owide does not include contents
+	logResult("add pipeline/resources/banzaicloud/events.yaml", addFile(tarWriter, "pipeline/resources/banzaicloud/events.yaml", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "events", "-oyaml", "-nbanzaicloud"}, env)))
+	// TODO add helm binary to installer image
+	logResult("add pipeline/resources/banzaicloud/helm_list.txt", addFile(tarWriter, "pipeline/resources/banzaicloud/helm_list.txt", fetchContainerCommandOutputAndError(options.cpContext, []string{"helm", "list", "--namespace", "banzaicloud", "--all"}, env)))
+
+	logResult("create pipeline/logs", addDir(tarWriter, "pipeline/logs"))
+	logResult("create pipeline/logs/banzaicloud", addDir(tarWriter, "pipeline/logs/banzaicloud"))
+	pods := strings.Split(strings.TrimSpace(fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "pods", "-oname", "-nbanzaicloud"}, env)), "\n")
+	for _, pod := range pods {
+		pod = strings.TrimPrefix(strings.TrimSpace(pod), "pod/")
+		logResult("add pod log", addFile(tarWriter, filepath.Join("pipeline/logs/banzaicloud/", pod+".log"), fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "logs", "-nbanzaicloud", pod, "--all-containers"}, env)))
+	}
+
 	log.Infof("debug bundle has been written to %q", path)
 	logResult("add meta.log", addFile(tarWriter, "meta.log", logBuffer.String()))
 
@@ -136,11 +185,14 @@ func runDebug(options debugOptions, banzaiCli cli.Cli) error {
 }
 
 // simpleCommand runs the given shell command, and returns its outputs, an error message or both
-func simpleCommand(command string) string {
+func simpleCommand(command string, args ...string) string {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, "sh", "-c", command)
+	if len(args) > 0 {
+		cmd = exec.CommandContext(ctx, command, args...)
+	}
 	out, err := cmd.CombinedOutput()
 	output := strings.TrimSpace(string(out))
 	if err != nil {

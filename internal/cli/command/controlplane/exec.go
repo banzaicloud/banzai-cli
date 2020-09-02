@@ -48,26 +48,36 @@ func runTerraform(command string, options *cpContext, env map[string]string, tar
 		cmdEnv[k] = v
 	}
 
-	cmd := []string{"terraform", command}
+	cmd := []string{"terraform"}
+	for _, word := range strings.Split(command, " ") {
+		cmd = append(cmd, word)
+	}
 
-	if command != "init" {
+	switch command {
+	case "state list": // nop
+	case "graph": // nop
+
+	case "init":
+		cmd = append(cmd, "-input=false", "-force-copy")
+
+		if fileExists(filepath.Join(options.workspace, "state.tfvars")) {
+			cmd = append(cmd, "-backend-config", "/workspace/state.tfvars")
+		}
+
+	case "apply":
+		if options.AutoApprove() {
+			cmd = append(cmd, "-auto-approve")
+		}
+		fallthrough
+
+	default:
 		cmd = append(cmd, []string{
 			"-var", "workdir=/workspace",
 			fmt.Sprintf("-refresh=%v", options.refreshState),
 		}...)
 
-		if options.AutoApprove() {
-			cmd = append(cmd, "-auto-approve")
-		}
-
 		for _, target := range targets {
 			cmd = append(cmd, "-target", target)
-		}
-	} else {
-		cmd = append(cmd, "-input=false", "-force-copy")
-
-		if fileExists(filepath.Join(options.workspace, "state.tfvars")) {
-			cmd = append(cmd, "-backend-config", "/workspace/state.tfvars")
 		}
 	}
 
@@ -186,6 +196,53 @@ func pullImage(options *cpContext, _ cli.Cli) error {
 	cmd.Stderr = os.Stderr
 
 	return cmd.Run()
+}
+
+func fetchContainerCommandOutputAndError(options *cpContext, cmd []string, cmdEnv map[string]string) string {
+	out, err := fetchContainerCommandOutput(options, cmd, cmdEnv)
+	if err != nil {
+		out += "\n\n" + err.Error()
+	}
+	return out
+}
+
+func fetchContainerCommandOutput(options *cpContext, cmd []string, cmdEnv map[string]string) (string, error) {
+	buffer := new(bytes.Buffer)
+	cmdOpt := func(cmd *exec.Cmd) error {
+		cmd.Stdout = buffer
+		cmd.Stderr = buffer
+		cmd.Env = os.Environ()
+		for key, value := range cmdEnv {
+			cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, value))
+		}
+		return nil
+	}
+
+	var err error
+	switch options.containerRuntime {
+	case runtimeExec:
+		err = runLocally(cmd, cmdOpt)
+	case runtimeDocker:
+		args := []string{
+			"-v", fmt.Sprintf("%s:/workspace", options.workspace),
+		}
+		for key := range cmdEnv {
+			args = append(args, "-e", key)
+		}
+		err = runDocker(cmd, options, args, cmdOpt)
+	case runtimeContainerd:
+		args := []string{
+			"--mount", fmt.Sprintf("type=bind,src=%s,dst=/workspace,options=rbind:rw", options.workspace),
+		}
+		for key, value := range cmdEnv {
+			args = append(args, "--env", fmt.Sprintf("%s=%s", key, value)) // env propagation does not work with ctr
+		}
+		err = runContainer(cmd, options, args, cmdOpt)
+	default:
+		err = errors.Errorf("unknown container runtime: %q", options.containerRuntime)
+	}
+
+	return buffer.String(), err
 }
 
 func readFilesFromContainerToMemory(options *cpContext, source string) (map[string][]byte, error) {

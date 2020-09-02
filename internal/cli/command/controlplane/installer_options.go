@@ -244,18 +244,45 @@ func (c *cpContext) readEc2Host() (string, error) {
 	return strings.Trim(string(bytes), "\n"), nil
 }
 
+func (c *cpContext) logDir() (string, error) {
+	dir := filepath.Join(c.workspace, logsDir)
+	if err := os.MkdirAll(dir, 0777); err != nil {
+		return "", errors.WrapIf(err, "failed to create log directory")
+	}
+
+	return dir, nil
+}
+
 func (c *cpContext) createLog(nameParts ...string) (io.WriteCloser, error) {
 	if !c.logOutput {
 		return nil, nil
 	}
 
-	dir := filepath.Join(c.workspace, logsDir)
-	if err := os.MkdirAll(dir, 0777); err != nil {
-		return nil, errors.WrapIf(err, "failed to create log directory")
+	logdir, err := c.logDir()
+	if err != nil {
+		return nil, err
 	}
+
 	ts, _ := time.Now().MarshalText()
 	name := fmt.Sprintf("%s-%s.log", ts, strings.ReplaceAll(strings.Join(nameParts, "-"), "/", ""))
-	return os.Create(filepath.Join(dir, name))
+	return os.Create(filepath.Join(logdir, name))
+}
+
+func (c *cpContext) listLogs() (dir string, out []string, err error) {
+	dir, err = c.logDir()
+	if err != nil {
+		return "", nil, err
+	}
+
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return "", nil, errors.Wrap(err, "failed to list logs")
+	}
+
+	for _, file := range files {
+		out = append(out, file.Name())
+	}
+	return dir, out, nil
 }
 
 // Init completes the cp context from the options, env vars, and if possible from the user
