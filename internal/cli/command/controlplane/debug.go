@@ -152,6 +152,7 @@ func runDebug(options debugOptions, banzaiCli cli.Cli) error {
 
 	logResult("create pipeline/resources", addDir(tarWriter, "pipeline/resources"))
 	logResult("add pipeline/resources/all.txt", addFile(tarWriter, "pipeline/resources/all.txt", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "all", "-A", "-owide"}, env)))
+	logResult("add pipeline/resources/version.txt", addFile(tarWriter, "pipeline/resources/version.txt", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "version"}, env)))
 	logResult("add pipeline/resources/namespaces.yaml", addFile(tarWriter, "pipeline/resources/namespaces.yaml", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "ns", "-oyaml"}, env)))
 	logResult("add pipeline/resources/nodes.yaml", addFile(tarWriter, "pipeline/resources/nodes.yaml", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "nodes", "-oyaml"}, env)))
 	logResult("add pipeline/resources/top_node.txt", addFile(tarWriter, "pipeline/resources/top_node.txt", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "top", "node"}, env)))
