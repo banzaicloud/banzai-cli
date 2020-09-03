@@ -36,8 +36,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const basePath = "pipeline-debug-bundle/"
-
 type debugOptions struct {
 	filename string
 	*cpContext
@@ -85,8 +83,10 @@ type debugMetadata struct {
 }
 
 func runDebug(options debugOptions, banzaiCli cli.Cli) error {
+	logger := log.StandardLogger()    // TODO add logger to cli.Cli
+	logHandler := errorLogger{logger} // error handler for best-effort operations
 	logBuffer := new(bytes.Buffer)
-	log.SetOutput(io.MultiWriter(os.Stderr, logBuffer))
+	logger.SetOutput(io.MultiWriter(os.Stderr, logBuffer))
 
 	if err := options.Init(); err != nil {
 		return err
@@ -102,13 +102,8 @@ func runDebug(options debugOptions, banzaiCli cli.Cli) error {
 	gzWriter := gzip.NewWriter(f)
 	defer gzWriter.Close()
 
-	tarWriter := tar.NewWriter(gzWriter)
-	defer tarWriter.Close()
-
-	err = addDir(tarWriter, "")
-	if err != nil {
-		return errors.Wrapf(err, "adding bundle base directory at %s failed", basePath)
-	}
+	tm := newTarManager(tar.NewWriter(gzWriter), logHandler, logger, "pipeline-debug-bundle")
+	defer tm.Close()
 
 	meta := debugMetadata{
 		Timestamp:       time.Now(),
@@ -123,64 +118,55 @@ func runDebug(options debugOptions, banzaiCli cli.Cli) error {
 		meta.Host = *info
 	}
 
-	bytes, _ := yaml.Marshal(meta)
-	logResult("add meta.yaml", addFile(tarWriter, "meta.yaml", string(bytes)))
+	metaBytes, _ := yaml.Marshal(meta)
+	tm.AddFile("meta.yaml", metaBytes)
 
-	logResult("create pipeline/", addDir(tarWriter, "pipeline"))
-	logResult("add values.yaml", copyFile(tarWriter, "pipeline/values.yaml", options.valuesPath()))
+	tm.CopyFile("pipeline/values.yaml", options.valuesPath())
+	tm.AddFile("pipeline/files.txt", simpleCommand("find", options.workspace, "-ls"))
 
 	// run some terraform diagnostics commands to catch their output in the logs folder
 	var values map[string]interface{}
-	logResult("read values", options.readValues(&values))
+	logHandler.Handle(options.readValues(&values))
 	_, env, err := getImageMetadata(options.cpContext, values, true)
-	logResult("get image metadata", err)
-	logResult("run tf plan", runTerraform("plan", options.cpContext, env))
-	logResult("run tf graph", runTerraform("graph", options.cpContext, env))
-	logResult("run tf state list", runTerraform("state list", options.cpContext, env))
+	logHandler.Handle(err)
+	logHandler.Handle(runTerraform("plan", options.cpContext, env))
+	logHandler.Handle(runTerraform("graph", options.cpContext, env))
+	logHandler.Handle(runTerraform("state list", options.cpContext, env))
 
-	logResult("create pipeline/installer-logs", addDir(tarWriter, "pipeline/installer-logs"))
+	tm.Cd("/pipeline/installer-logs")
 	logDir, logFiles, err := options.listLogs()
 	if err != nil {
-		log.Errorf("listing log files failed: %v", err)
+		logHandler.Handle(errors.WrapIf(err, "listing log files failed"))
 	} else {
 		for _, file := range logFiles {
-			logResult("add log file", copyFile(tarWriter, filepath.Join("pipeline/installer-logs", file), filepath.Join(logDir, file)))
+			tm.CopyFile(file, filepath.Join(logDir, file))
 		}
 	}
 
-	logResult("add pipeline/files.txt", addFile(tarWriter, "pipeline/files.txt", simpleCommand("find", options.workspace, "-ls")))
+	tm.Cd("/pipeline/resources/banzaicloud")
+	for _, resource := range []string{"pods", "services", "ingresses", "persistentvolumes", "persistentvolumeclaims", "events"} {
+		tm.AddFile(resource+".yaml", combineOutput(runContainerCommand(options.cpContext, []string{"kubectl", "get", resource, "-oyaml", "-nbanzaicloud"}, env)))
+	}
+	for _, resource := range []string{"secrets", "configmaps"} {
+		tm.AddFile(resource+".txt", combineOutput(runContainerCommand(options.cpContext, []string{"kubectl", "get", resource, "-owide", "-nbanzaicloud"}, env)))
+	}
 
-	logResult("create pipeline/resources", addDir(tarWriter, "pipeline/resources"))
-	logResult("add pipeline/resources/all.txt", addFile(tarWriter, "pipeline/resources/all.txt", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "all", "-A", "-owide"}, env)))
-	logResult("add pipeline/resources/version.txt", addFile(tarWriter, "pipeline/resources/version.txt", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "version"}, env)))
-	logResult("add pipeline/resources/namespaces.yaml", addFile(tarWriter, "pipeline/resources/namespaces.yaml", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "ns", "-oyaml"}, env)))
-	logResult("add pipeline/resources/nodes.yaml", addFile(tarWriter, "pipeline/resources/nodes.yaml", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "nodes", "-oyaml"}, env)))
-	logResult("add pipeline/resources/top_node.txt", addFile(tarWriter, "pipeline/resources/top_node.txt", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "top", "node"}, env)))
-	logResult("add pipeline/resources/webhooks.yaml", addFile(tarWriter, "pipeline/resources/webhooks.yaml", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "mutatingwebhookconfigurations,validatingwebhookconfigurations", "-oyaml"}, env)))
-
-	logResult("create pipeline/resources/banzaicloud", addDir(tarWriter, "pipeline/resources/banzaicloud"))
-
-	logResult("add pipeline/resources/banzaicloud/pods.yaml", addFile(tarWriter, "pipeline/resources/banzaicloud/pods.yaml", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "pods", "-oyaml", "-nbanzaicloud"}, env)))
-	logResult("add pipeline/resources/banzaicloud/services.yaml", addFile(tarWriter, "pipeline/resources/banzaicloud/services.yaml", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "services", "-oyaml", "-nbanzaicloud"}, env)))
-	logResult("add pipeline/resources/banzaicloud/ingresses.yaml", addFile(tarWriter, "pipeline/resources/banzaicloud/ingresses.yaml", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "ingresses", "-oyaml", "-nbanzaicloud"}, env)))
-	logResult("add pipeline/resources/banzaicloud/persistentvolumes.yaml", addFile(tarWriter, "pipeline/resources/banzaicloud/persistentvolumes.yaml", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "persistentvolumes", "-oyaml", "-nbanzaicloud"}, env)))
-	logResult("add pipeline/resources/banzaicloud/persistentvolumeclaims.yaml", addFile(tarWriter, "pipeline/resources/banzaicloud/persistentvolumeclaims.yaml", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "persistentvolumeclaims", "-oyaml", "-nbanzaicloud"}, env)))
-	logResult("add pipeline/resources/banzaicloud/configmaps.txt", addFile(tarWriter, "pipeline/resources/banzaicloud/configmaps.txt", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "configmaps", "-owide", "-nbanzaicloud"}, env))) // -owide does not include contents
-	logResult("add pipeline/resources/banzaicloud/secrets.txt", addFile(tarWriter, "pipeline/resources/banzaicloud/secrets.txt", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "secrets", "-owide", "-nbanzaicloud"}, env)))          // -owide does not include contents
-	logResult("add pipeline/resources/banzaicloud/events.yaml", addFile(tarWriter, "pipeline/resources/banzaicloud/events.yaml", fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "events", "-oyaml", "-nbanzaicloud"}, env)))
 	// TODO add helm binary to installer image
-	logResult("add pipeline/resources/banzaicloud/helm_list.txt", addFile(tarWriter, "pipeline/resources/banzaicloud/helm_list.txt", fetchContainerCommandOutputAndError(options.cpContext, []string{"helm", "list", "--namespace", "banzaicloud", "--all"}, env)))
+	tm.AddFile("helm_list.txt", combineOutput(runContainerCommand(options.cpContext, []string{"helm", "list", "--namespace", "banzaicloud", "--all"}, env)))
 
-	logResult("create pipeline/logs", addDir(tarWriter, "pipeline/logs"))
-	logResult("create pipeline/logs/banzaicloud", addDir(tarWriter, "pipeline/logs/banzaicloud"))
-	pods := strings.Split(strings.TrimSpace(fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "get", "pods", "-oname", "-nbanzaicloud"}, env)), "\n")
-	for _, pod := range pods {
-		pod = strings.TrimPrefix(strings.TrimSpace(pod), "pod/")
-		logResult("add pod log", addFile(tarWriter, filepath.Join("pipeline/logs/banzaicloud/", pod+".log"), fetchContainerCommandOutputAndError(options.cpContext, []string{"kubectl", "logs", "-nbanzaicloud", pod, "--all-containers"}, env)))
+	tm.Cd("/pipeline/logs/banzaicloud")
+	pods, err := runContainerCommand(options.cpContext, []string{"kubectl", "get", "pods", "-oname", "-nbanzaicloud"}, env)
+	if err != nil {
+		logHandler.Handle(errors.WrapIf(err, "failed to list pods"))
+	} else {
+		for _, pod := range strings.Split(strings.TrimSpace(pods), "\n") {
+			pod = strings.TrimPrefix(strings.TrimSpace(pod), "pod/")
+			tm.AddFile(fmt.Sprintf("%s.log", pod), combineOutput(runContainerCommand(options.cpContext, []string{"kubectl", "logs", "--namespace", "banzaicloud", pod, "--all-containers"}, env)))
+		}
 	}
 
 	log.Infof("debug bundle has been written to %q", path)
-	logResult("add meta.log", addFile(tarWriter, "meta.log", logBuffer.String()))
+	tm.AddFile("meta.log", logBuffer)
 
 	return nil
 }
@@ -196,50 +182,158 @@ func simpleCommand(command string, args ...string) string {
 	}
 	out, err := cmd.CombinedOutput()
 	output := strings.TrimSpace(string(out))
-	if err != nil {
-		if output != "" {
-			output += "\n"
-		}
-		output += err.Error()
-	}
-	return output
+	return combineOutput(output, err)
 }
 
-func logResult(what string, err error) {
-	if err == nil {
-		log.Debugf("%s succeeded", what)
+type errorHandler interface {
+	Handle(err error)
+}
+
+type errorLogger struct {
+	logger
+}
+
+func (e errorLogger) Handle(err error) {
+	if err != nil {
+		e.logger.Error(err.Error())
+	}
+}
+
+type logger interface {
+	Error(args ...interface{})
+	Errorf(format string, args ...interface{})
+	Info(args ...interface{})
+	Infof(format string, args ...interface{})
+	Debug(args ...interface{})
+	Debugf(format string, args ...interface{})
+}
+
+type tarManager struct {
+	tarWriter    *tar.Writer
+	errorHandler errorHandler
+	logger       logger
+	directories  map[string]bool
+	baseDir      string
+	cwd          string
+	dirPerm      int64
+	filePerm     int64
+	time         func() time.Time
+}
+
+func newTarManager(tarWriter *tar.Writer, errorHandler errorHandler, logger logger, baseDir string) tarManager {
+	tm := tarManager{
+		tarWriter:    tarWriter,
+		errorHandler: errorHandler,
+		logger:       logger,
+		directories:  make(map[string]bool),
+		baseDir:      baseDir,
+		dirPerm:      0777,
+		filePerm:     0666,
+		time:         time.Now,
+	}
+	tm.Cd("/")
+	return tm
+}
+
+// Cd changes the working directory to the given folder in the tar archive.
+// Directories are created implicitly. You can give relative path to the
+// current working directory, or an absolute path starting with a /
+// (where / refers to the baseDir).
+func (t *tarManager) Cd(dir string) {
+	path := t.path(dir)
+	t.Mkdir(path)
+	t.cwd = path
+}
+
+func (t *tarManager) path(dir string) string {
+	if filepath.IsAbs(dir) {
+		return filepath.Clean(filepath.Join("/", dir))
+	}
+	return filepath.Clean(filepath.Join(t.cwd, dir))
+}
+
+// Mkdir creates the given directory and its parents when any of them are missing
+func (t *tarManager) Mkdir(dir string) {
+	path := t.path(dir)
+	if t.directories[path] {
+		return
+	}
+	parent := filepath.Clean(filepath.Join(dir, ".."))
+	if parent != "/" {
+		t.Mkdir(parent)
+	}
+	t.addDir(path)
+	t.directories[path] = true
+}
+
+func (t tarManager) addDir(name string) {
+	// trailing slash makes this a directory, relative paths are normally preferred in the archive
+	name = strings.TrimLeft(filepath.Clean(filepath.Join("/", t.baseDir, name))+"/", "/")
+	err := t.tarWriter.WriteHeader(&tar.Header{Name: name, Mode: t.dirPerm, ModTime: t.time(), ChangeTime: t.time()})
+	if err != nil {
+		t.errorHandler.Handle(errors.WrapIf(err, "failed to create directory in archive"))
 	} else {
-		log.Errorf("%s failed: %v", what, err)
+		t.logger.Debugf("added directory %q", name)
 	}
 }
 
-func addDir(w *tar.Writer, name string) error {
-	name = strings.TrimRight(filepath.Join(basePath, name), "/") + "/"
-	err := w.WriteHeader(&tar.Header{Name: name, Mode: 0777})
-	return errors.WrapIf(err, "failed to create directory in archive")
-}
-
-func addFile(w *tar.Writer, name, content string) (err error) {
-	name = filepath.Join(basePath, name)
+func (t tarManager) addFile(name, content string) (err error) {
+	// relative paths are normally preferred in the archive
+	name = strings.TrimLeft(filepath.Clean(filepath.Join("/", t.baseDir, t.path(name))), "/")
 	bytes := []byte(content)
-	err = w.WriteHeader(&tar.Header{Name: name, Mode: 0666, Size: int64(len(bytes))})
+	err = t.tarWriter.WriteHeader(&tar.Header{Name: name, Mode: t.filePerm, ModTime: t.time(), ChangeTime: t.time(), Size: int64(len(bytes))})
 	if err != nil {
 		return err
 	}
 
-	_, err = w.Write(bytes)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	n, err := t.tarWriter.Write(bytes)
+	t.logger.Debugf("%d bytes written to %q", n, name)
+	return err
 }
 
-func copyFile(w *tar.Writer, name, path string) error {
+// AddFile adds the file with the given name and content to the archive. The
+// name is relative to the working directory, but it can also be an
+// absolute path (starting from the base directory).
+// Directories are created implicitly.
+func (t *tarManager) AddFile(name string, content interface{}) {
+	path := t.path(name)
+	dir, _ := filepath.Split(path)
+	t.Mkdir(dir)
+
+	var str string
+	switch v := content.(type) {
+	case string:
+		str = v
+	case []byte:
+		str = string(v)
+	case interface{ String() string }:
+		str = v.String()
+	default:
+		str = fmt.Sprint(v)
+	}
+	err := t.addFile(path, str)
+	if err != nil {
+		t.errorHandler.Handle(errors.WrapIff(err, "failed to add %q", path))
+	} else {
+		t.logger.Infof("file added to archive: %q", path)
+	}
+}
+
+// CopyFile copies the contents of the local file at the given path as name to the archive.
+func (t tarManager) CopyFile(name, path string) {
 	content, err := ioutil.ReadFile(path)
 	if err != nil {
-		return err
+		t.errorHandler.Handle(err)
 	}
 
-	return addFile(w, name, string(content))
+	t.AddFile(name, content)
+}
+
+func (t tarManager) Close() {
+	err := t.tarWriter.Close()
+	if err != nil {
+		t.errorHandler.Handle(errors.Wrap(err, "closing tar archive"))
+	} else {
+		t.logger.Debug("closed tar archive")
+	}
 }

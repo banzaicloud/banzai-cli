@@ -198,15 +198,17 @@ func pullImage(options *cpContext, _ cli.Cli) error {
 	return cmd.Run()
 }
 
-func fetchContainerCommandOutputAndError(options *cpContext, cmd []string, cmdEnv map[string]string) string {
-	out, err := fetchContainerCommandOutput(options, cmd, cmdEnv)
+func combineOutput(output string, err error) string {
 	if err != nil {
-		out += "\n\n" + err.Error()
+		if output != "" {
+			output += "\n\n"
+		}
+		output += err.Error()
 	}
-	return out
+	return output
 }
 
-func fetchContainerCommandOutput(options *cpContext, cmd []string, cmdEnv map[string]string) (string, error) {
+func runContainerCommand(options *cpContext, cmd []string, cmdEnv map[string]string) (string, error) {
 	buffer := new(bytes.Buffer)
 	cmdOpt := func(cmd *exec.Cmd) error {
 		cmd.Stdout = buffer
