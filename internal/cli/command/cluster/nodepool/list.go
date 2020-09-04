@@ -47,6 +47,7 @@ type nodePoolListItem struct {
 	Autoscaling  nodePoolAutoscaling
 	MinimumSize  int32
 	MaximumSize  int32
+	VolumeSize   int32
 	InstanceType string
 	Image        string
 	SpotPrice    string
@@ -98,6 +99,7 @@ func runNodePoolList(banzaiCli cli.Cli, options nodePoolListOptions) error {
 			Autoscaling:  newNodePoolAutoscaling(nodePool.Autoscaling.Enabled),
 			MinimumSize:  nodePool.Autoscaling.MinSize,
 			MaximumSize:  nodePool.Autoscaling.MaxSize,
+			VolumeSize:   nodePool.VolumeSize,
 			InstanceType: nodePool.InstanceType,
 			Image:        nodePool.Image,
 			SpotPrice:    nodePool.SpotPrice,
