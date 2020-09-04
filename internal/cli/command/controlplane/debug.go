@@ -193,6 +193,7 @@ func runDebug(options debugOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
+	tm.Cd("/")
 	tm.AddFile("meta.log", logBuffer)
 
 	log.Infof("debug bundle has been written to %q", options.outputFile)
