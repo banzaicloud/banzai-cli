@@ -169,7 +169,10 @@ func runDebug(options debugOptions, banzaiCli cli.Cli) error {
 	}
 
 	tm.Cd("/pipeline/resources/banzaicloud")
-	for _, resource := range []string{"pods", "services", "ingresses", "persistentvolumes", "persistentvolumeclaims", "events"} {
+	for _, resource := range []string{
+		"pods", "services", "ingresses", "persistentvolumes", "persistentvolumeclaims", "events",
+		"clusterflows,clusteroutputs,flows,loggings,outputs",
+	} {
 		tm.AddFile(resource+".yaml", combineOutput(runContainerCommand(options.cpContext, []string{"kubectl", "get", resource, "-oyaml", "-nbanzaicloud"}, env)))
 	}
 	for _, resource := range []string{"secrets", "configmaps"} {
