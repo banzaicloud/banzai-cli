@@ -80,7 +80,7 @@ func NewDebugCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "debug",
 		Short: "Generate debug bundle",
-		Long:  "Collect and package status information and configuration data that is needed by Banzai Cloud support team to resolve issues on a remote Pipeline installation",
+		Long:  "Collect and package status information and configuration data required by the Banzai Cloud support team to resolve issues on a remote Pipeline installation",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceErrors = true
