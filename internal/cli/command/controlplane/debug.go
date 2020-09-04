@@ -37,15 +37,40 @@ import (
 )
 
 type debugOptions struct {
-	filename string
+	outputFile string
 	*cpContext
 }
 
-func (d *debugOptions) filepath() string {
-	if !d.cpContext.flags.Changed("filename") {
-		d.filename = fmt.Sprintf("pipeline-debug-bundle-%s.tgz", time.Now().Format("20060102-1504"))
+func (d *debugOptions) Init() error {
+	if err := d.cpContext.Init(); err != nil {
+		return err
 	}
-	return filepath.Join(d.cpContext.workspace, d.filename)
+	return d.setOutputFilename()
+}
+
+func (d *debugOptions) setOutputFilename() error {
+	value := d.outputFile
+
+	base := d.cpContext.workspace
+	if filepath.IsAbs(value) {
+		base = "/"
+	} else if strings.HasPrefix(value, "./") {
+		base, _ = os.Getwd()
+	}
+	value = filepath.Clean(filepath.Join(base, value))
+
+	stat, err := os.Stat(value)
+	if err == nil {
+		if stat.IsDir() {
+			value = filepath.Join(
+				value,
+				fmt.Sprintf("pipeline-debug-bundle-%s.tgz", time.Now().Format("20060102-1504")))
+		} else {
+			return errors.New(fmt.Sprintf("output file named %q already exists", value))
+		}
+	}
+	d.outputFile = filepath.Clean(value)
+	return nil
 }
 
 // NewDebugCommand creates a new cobra.Command for `banzai pipeline debug`.
@@ -67,7 +92,7 @@ func NewDebugCommand(banzaiCli cli.Cli) *cobra.Command {
 
 	options.cpContext = NewContext(cmd, banzaiCli)
 	flags := cmd.Flags()
-	flags.StringVarP(&options.filename, "filename", "f", "", "Name or path to output file relative to the workspace (prefix with ./ for current working directory; default: pipeline-debug-bundle-DATE.tgz)")
+	flags.StringVarP(&options.outputFile, "output-file", "O", "", "Name or path to output file relative to the workspace (prefix with ./ for current working directory; default: pipeline-debug-bundle-DATE.tgz)")
 
 	return cmd
 }
@@ -92,15 +117,15 @@ func runDebug(options debugOptions, banzaiCli cli.Cli) error {
 		return err
 	}
 
-	path := options.filepath()
-	f, err := os.Create(path)
+	logger.Debugf("creating %q", options.outputFile)
+	f, err := os.Create(options.outputFile)
 	if err != nil {
-		return errors.WrapIff(err, "failed to create archive at %q", path)
+		return errors.WrapIff(err, "failed to create archive at %q", options.outputFile)
 	}
-	defer f.Close()
+	defer func() { logHandler.Handle(f.Close()) }()
 
 	gzWriter := gzip.NewWriter(f)
-	defer gzWriter.Close()
+	defer func() { logHandler.Handle(gzWriter.Close()) }()
 
 	tm := newTarManager(tar.NewWriter(gzWriter), logHandler, logger, "pipeline-debug-bundle")
 	defer tm.Close()
@@ -165,9 +190,9 @@ func runDebug(options debugOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
-	log.Infof("debug bundle has been written to %q", path)
 	tm.AddFile("meta.log", logBuffer)
 
+	log.Infof("debug bundle has been written to %q", options.outputFile)
 	return nil
 }
 
