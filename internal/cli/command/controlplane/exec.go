@@ -313,9 +313,13 @@ func runTerraformCommandGeneric(options *cpContext, cmd []string, cmdEnv map[str
 			cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, value))
 		}
 		cmd.Stdin = os.Stdin
-		// TODO find out how to deal with ctr (containerd) bypassing output redirection
-		cmd.Stdout = io.MultiWriter(logFile, os.Stdout)
-		cmd.Stderr = io.MultiWriter(logFile, os.Stderr)
+		if options.containerRuntime == runtimeContainerd {
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+		} else {
+			cmd.Stdout = io.MultiWriter(logFile, os.Stdout)
+			cmd.Stderr = io.MultiWriter(logFile, os.Stderr)
+		}
 
 		return nil
 	}
@@ -354,7 +358,24 @@ func runTerraformCommandGeneric(options *cpContext, cmd []string, cmdEnv map[str
 		for key, value := range cmdEnv {
 			args = append(args, "--env", fmt.Sprintf("%s=%s", key, value)) // env propagation does not work with ctr
 		}
-		return runContainer(cmd, options, args, cmdOpt)
+
+		var cmdLine string
+		for _, word := range cmd {
+			cmdLine += fmt.Sprintf("%q ", word)
+		}
+		cmdLine += "2>&1 | tee /workspace/.out"
+		cmd = []string{"sh", "-o", "pipefail", "-c", cmdLine}
+
+		containerErr := runContainer(cmd, options, args, cmdOpt)
+
+		outpath := filepath.Join(options.workspace, ".out")
+		f, err := os.Open(outpath)
+		if err == nil {
+			_, _ = io.Copy(logFile, f)
+			_ = f.Close()
+		}
+		_ = os.Remove(outpath)
+		return containerErr
 	default:
 		return errors.Errorf("unknown container runtime: %q", options.containerRuntime)
 	}
