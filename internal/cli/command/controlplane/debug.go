@@ -132,6 +132,10 @@ func runDebug(options debugOptions, banzaiCli cli.Cli) error {
 		return err
 	}
 
+	if !options.valuesExists() {
+		return errors.New(fmt.Sprintf("%q is not an initialized workspace (no values file found)", options.workspace))
+	}
+
 	logger.Debugf("creating %q", options.outputFile)
 	f, err := os.Create(options.outputFile)
 	if err != nil {
@@ -183,27 +187,31 @@ func runDebug(options debugOptions, banzaiCli cli.Cli) error {
 		}
 	}
 
-	tm.Cd("/pipeline/resources/banzaicloud")
-	for _, resource := range []string{
-		"pods", "services", "ingresses", "persistentvolumes", "persistentvolumeclaims", "events",
-		"clusterflows,clusteroutputs,flows,loggings,outputs",
-	} {
-		tm.AddFile(resource+".yaml", combineOutput(runContainerCommand(options.cpContext, []string{"kubectl", "get", resource, "-oyaml", "-nbanzaicloud"}, env)))
-	}
-	for _, resource := range []string{"secrets", "configmaps"} {
-		tm.AddFile(resource+".txt", combineOutput(runContainerCommand(options.cpContext, []string{"kubectl", "get", resource, "-owide", "-nbanzaicloud"}, env)))
-	}
-
-	tm.AddFile("helm_list.txt", combineOutput(runContainerCommand(options.cpContext, []string{"helm", "list", "--namespace", "banzaicloud", "--all"}, env)))
-
-	tm.Cd("/pipeline/logs/banzaicloud")
-	pods, err := runContainerCommand(options.cpContext, []string{"kubectl", "get", "pods", "-oname", "-nbanzaicloud"}, env)
-	if err != nil {
-		logHandler.Handle(errors.WrapIf(err, "failed to list pods"))
+	if !options.kubeconfigExists() {
+		logger.Errorf("No kubeconfig found in the workspace. This means that the debug bundle will contain very limited information. If the cluster is running, please create the support bundle from a workspace where `banzai pipeline up` has been run.")
 	} else {
-		for _, pod := range strings.Split(strings.TrimSpace(pods), "\n") {
-			pod = strings.TrimPrefix(strings.TrimSpace(pod), "pod/")
-			tm.AddFile(fmt.Sprintf("%s.log", pod), combineOutput(runContainerCommand(options.cpContext, []string{"kubectl", "logs", "--namespace", "banzaicloud", pod, "--all-containers"}, env)))
+		tm.Cd("/pipeline/resources/banzaicloud")
+		for _, resource := range []string{
+			"pods", "services", "ingresses", "persistentvolumes", "persistentvolumeclaims", "events",
+			"clusterflows,clusteroutputs,flows,loggings,outputs",
+		} {
+			tm.AddFile(resource+".yaml", combineOutput(runContainerCommand(options.cpContext, []string{"kubectl", "get", resource, "-oyaml", "-nbanzaicloud"}, env)))
+		}
+		for _, resource := range []string{"secrets", "configmaps"} {
+			tm.AddFile(resource+".txt", combineOutput(runContainerCommand(options.cpContext, []string{"kubectl", "get", resource, "-owide", "-nbanzaicloud"}, env)))
+		}
+
+		tm.AddFile("helm_list.txt", combineOutput(runContainerCommand(options.cpContext, []string{"helm", "list", "--namespace", "banzaicloud", "--all"}, env)))
+
+		tm.Cd("/pipeline/logs/banzaicloud")
+		pods, err := runContainerCommand(options.cpContext, []string{"kubectl", "get", "pods", "-oname", "-nbanzaicloud"}, env)
+		if err != nil {
+			logHandler.Handle(errors.WrapIf(err, "failed to list pods"))
+		} else {
+			for _, pod := range strings.Split(strings.TrimSpace(pods), "\n") {
+				pod = strings.TrimPrefix(strings.TrimSpace(pod), "pod/")
+				tm.AddFile(fmt.Sprintf("%s.log", pod), combineOutput(runContainerCommand(options.cpContext, []string{"kubectl", "logs", "--namespace", "banzaicloud", pod, "--all-containers"}, env)))
+			}
 		}
 	}
 
