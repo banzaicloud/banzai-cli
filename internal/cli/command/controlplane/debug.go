@@ -20,7 +20,6 @@ import (
 	"compress/gzip"
 	"context"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -107,11 +106,27 @@ type debugMetadata struct {
 	DockerVersion   string
 }
 
+type loggerHook struct {
+	*log.Logger
+}
+
+func (l loggerHook) Fire(e *log.Entry) error {
+	l.Log(e.Level, e.Message)
+	return nil
+}
+
+func (loggerHook) Levels() []log.Level {
+	return log.AllLevels
+}
+
 func runDebug(options debugOptions, banzaiCli cli.Cli) error {
 	logger := log.StandardLogger()    // TODO add logger to cli.Cli
 	logHandler := errorLogger{logger} // error handler for best-effort operations
+
 	logBuffer := new(bytes.Buffer)
-	logger.SetOutput(io.MultiWriter(os.Stderr, logBuffer))
+	bufferLogger := log.New()
+	bufferLogger.SetOutput(logBuffer)
+	logger.AddHook(loggerHook{bufferLogger})
 
 	if err := options.Init(); err != nil {
 		return err
