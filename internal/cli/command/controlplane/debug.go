@@ -135,7 +135,7 @@ func runDebug(options debugOptions, banzaiCli cli.Cli) error {
 		CLIVersion:      banzaiCli.Version(),
 		WorkspacePath:   options.workspace,
 		Workspaces:      strings.Split(simpleCommand("ls ~/.banzai/pipeline"), "\n"),
-		InstallerImages: strings.Split(simpleCommand("docker image list|grep pipeline-installer"), "\n"),
+		InstallerImages: strings.Split(simpleCommand("docker image list | grep pipeline-installer"), "\n"),
 		DockerVersion:   simpleCommand("docker --version"),
 	}
 
@@ -255,7 +255,7 @@ func newTarManager(tarWriter *tar.Writer, errorHandler errorHandler, logger logg
 		errorHandler: errorHandler,
 		logger:       logger,
 		directories:  make(map[string]bool),
-		baseDir:      baseDir,
+		baseDir:      filepath.Clean(filepath.Join("/", baseDir)),
 		dirPerm:      0777,
 		filePerm:     0666,
 		time:         time.Now,
@@ -276,7 +276,7 @@ func (t *tarManager) Cd(dir string) {
 
 func (t *tarManager) path(dir string) string {
 	if filepath.IsAbs(dir) {
-		return filepath.Clean(filepath.Join("/", dir))
+		return filepath.Clean(dir)
 	}
 	return filepath.Clean(filepath.Join(t.cwd, dir))
 }
@@ -297,7 +297,7 @@ func (t *tarManager) Mkdir(dir string) {
 
 func (t tarManager) addDir(name string) {
 	// trailing slash makes this a directory, relative paths are normally preferred in the archive
-	name = strings.TrimLeft(filepath.Clean(filepath.Join("/", t.baseDir, name))+"/", "/")
+	name = strings.TrimLeft(filepath.Clean(filepath.Join(t.baseDir, name))+"/", "/")
 	err := t.tarWriter.WriteHeader(&tar.Header{Name: name, Mode: t.dirPerm, ModTime: t.time(), ChangeTime: t.time()})
 	if err != nil {
 		t.errorHandler.Handle(errors.WrapIf(err, "failed to create directory in archive"))
@@ -308,7 +308,7 @@ func (t tarManager) addDir(name string) {
 
 func (t tarManager) addFile(name, content string) (err error) {
 	// relative paths are normally preferred in the archive
-	name = strings.TrimLeft(filepath.Clean(filepath.Join("/", t.baseDir, t.path(name))), "/")
+	name = strings.TrimLeft(filepath.Clean(filepath.Join(t.baseDir, t.path(name))), "/")
 	bytes := []byte(content)
 	err = t.tarWriter.WriteHeader(&tar.Header{Name: name, Mode: t.filePerm, ModTime: t.time(), ChangeTime: t.time(), Size: int64(len(bytes))})
 	if err != nil {

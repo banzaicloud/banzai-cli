@@ -305,7 +305,9 @@ func runTerraformCommandGeneric(options *cpContext, cmd []string, cmdEnv map[str
 	if err != nil {
 		return errors.WrapIf(err, "failed to write output logs")
 	}
-	defer logFile.Close()
+	if logFile != nil {
+		defer logFile.Close()
+	}
 
 	cmdOpt := func(cmd *exec.Cmd) error {
 		cmd.Env = os.Environ()
@@ -313,7 +315,7 @@ func runTerraformCommandGeneric(options *cpContext, cmd []string, cmdEnv map[str
 			cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, value))
 		}
 		cmd.Stdin = os.Stdin
-		if options.containerRuntime == runtimeContainerd {
+		if options.containerRuntime == runtimeContainerd || logFile == nil {
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
 		} else {
@@ -369,10 +371,12 @@ func runTerraformCommandGeneric(options *cpContext, cmd []string, cmdEnv map[str
 		containerErr := runContainer(cmd, options, args, cmdOpt)
 
 		outpath := filepath.Join(options.workspace, ".out")
-		f, err := os.Open(outpath)
-		if err == nil {
-			_, _ = io.Copy(logFile, f)
-			_ = f.Close()
+		if logFile != nil {
+			f, err := os.Open(outpath)
+			if err == nil {
+				_, _ = io.Copy(logFile, f)
+				_ = f.Close()
+			}
 		}
 		_ = os.Remove(outpath)
 		return containerErr
