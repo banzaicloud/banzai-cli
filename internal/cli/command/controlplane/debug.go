@@ -179,7 +179,6 @@ func runDebug(options debugOptions, banzaiCli cli.Cli) error {
 		tm.AddFile(resource+".txt", combineOutput(runContainerCommand(options.cpContext, []string{"kubectl", "get", resource, "-owide", "-nbanzaicloud"}, env)))
 	}
 
-	// TODO add helm binary to installer image
 	tm.AddFile("helm_list.txt", combineOutput(runContainerCommand(options.cpContext, []string{"helm", "list", "--namespace", "banzaicloud", "--all"}, env)))
 
 	tm.Cd("/pipeline/logs/banzaicloud")
