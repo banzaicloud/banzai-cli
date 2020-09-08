@@ -60,6 +60,7 @@ type Cli interface {
 	Context() Context
 	OutputFormat() string
 	Home() string // Home is the path to the .banzai directory of the user
+	Version() string
 }
 
 type Context interface {
@@ -77,11 +78,13 @@ type banzaiCli struct {
 	cloudinfoClientOnce  sync.Once
 	telescopesClient     *telescopes.APIClient
 	telescopesClientOnce sync.Once
+	version              string
 }
 
-func NewCli(out io.Writer) Cli {
+func NewCli(out io.Writer, version string) Cli {
 	return &banzaiCli{
-		out: out,
+		out:     out,
+		version: version,
 	}
 }
 
@@ -410,4 +413,8 @@ func (c *banzaiCli) save() {
 	if err != nil {
 		log.Fatalf("failed to write config: %v", err)
 	}
+}
+
+func (c *banzaiCli) Version() string {
+	return c.version
 }

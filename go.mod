@@ -20,6 +20,7 @@ require (
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/pkg/browser v0.0.0-20180916011732-0a3d74bf9ce4
 	github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35 // indirect
+	github.com/shirou/gopsutil v2.20.7+incompatible
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cast v1.3.0
 	github.com/spf13/cobra v1.0.0
@@ -28,6 +29,7 @@ require (
 	github.com/stretchr/testify v1.4.0
 	github.com/ttacon/chalk v0.0.0-20140724125006-76b3c8b611de
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
+	golang.org/x/sys v0.0.0-20200819171115-d785dc25833f // indirect
 	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1 // indirect
 	gopkg.in/square/go-jose.v2 v2.3.1 // indirect
 	gopkg.in/yaml.v2 v2.2.8
