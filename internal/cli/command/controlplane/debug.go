@@ -79,8 +79,34 @@ func NewDebugCommand(banzaiCli cli.Cli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "debug",
 		Short: "Generate debug bundle",
-		Long:  "Collect and package status information and configuration data required by the Banzai Cloud support team to resolve issues on a remote Pipeline installation",
-		Args:  cobra.NoArgs,
+		Long: `Collect and package status information and configuration data required by the Banzai Cloud support team to resolve issues on a remote Pipeline installation.
+
+The command will generate a tar archive, which contains information about the
+machine used for creating the support bundle, the configuration values and the
+deployment logs from the workspace, and the description and logs of relevant
+resources on the cluster.
+
+The following data is included:
+
+* Timestamp of the debug bundle
+* Banzai CLI version number
+* Local file system path to the Banzai Pipeline workspace
+* List of other workspaces managed on the local machine
+* List of docker images available on the local machine
+* Version of the local Docker daemon
+* Basic local machine information (hostname, uptime, boot time, number of processes, operating system type and version, virtualization, host identifier).
+* The values.yaml file from the workspace (should not contain sensitive data)
+* List of all files in the workspace
+* Logs (output) of all previous terraform runs issued by the Banzai CLI in the specific local workspace
+* Logs (output) of terraform plan, graph and state list
+* Full YAML description of the following resource kinds in the banzaicloud namespace of the Pipeline cluster: pods, services, ingresses, persistentvolumes, persistentvolumeclaims, events, clusterflows, clusteroutputs, flows, loggings, outputs.
+* List of secrets and configmaps in the banzaicloud namespace (without the content)
+* Output of helm list in the banzaicloud namespace.
+* Logs of all pods and containers in the banzaicloud namespace
+* Log of the support bundle execution`,
+		Example: `banzai pipeline debug --workspace prod
+banzai pipeline debug --output-file ./`,
+		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceErrors = true
 			cmd.SilenceUsage = true
