@@ -8,17 +8,12 @@ builds:
         goos:
             - linux
             - darwin
-            - windows
         goarch:
             - amd64
 
 archives:
     -
         name_template: "banzai_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-        format_overrides:
-            -
-                goos: windows
-                format: zip
 
 checksum:
     name_template: "banzai_checksums.txt"
