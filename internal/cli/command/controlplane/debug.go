@@ -245,6 +245,7 @@ func runDebug(options debugOptions, banzaiCli cli.Cli) error {
 	tm.AddFile("meta.log", logBuffer)
 
 	log.Infof("debug bundle has been written to %q", options.outputFile)
+	log.Infof("You may want to encrypt the archive with a command like `gpg --encrypt -r 37E2B4AEBEB1F45B %q`, and send %q to the Banzai Cloud Support Team. Ask for the public key on a trusted channel.", options.outputFile, options.outputFile+".gpg")
 	return nil
 }
 
