@@ -26,3 +26,5 @@ FROM ${FROM_IMAGE}
 RUN apk add --update --no-cache openssh-client
 COPY --from=builder /usr/local/bin/* /bin/
 COPY --from=builder /build/build/banzai /bin/
+
+ENTRYPOINT [ "/bin/banzai" ]
