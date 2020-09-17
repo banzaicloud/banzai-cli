@@ -57,7 +57,7 @@ Select organization
 $ docker run --rm -ti -v $(PWD)/banzai-cli:/root/ ghcr.io/banzaicloud/banzai-cli organization select
 ```
 
-List clusters:
+List clusters
 ```
 $ docker run --rm -ti -v $(PWD)/banzai-cli:/root/ ghcr.io/banzaicloud/banzai-cli cluster list
 ```
