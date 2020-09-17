@@ -16,6 +16,8 @@ package nodepool
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
@@ -80,6 +82,13 @@ func deleteNodePool(banzaiCli cli.Cli, options deleteOptions, args []string) err
 		cli.LogAPIError("delete node pool", err, nodePoolName)
 
 		return err
+	}
+
+	switch resp.StatusCode {
+	case http.StatusAccepted:
+		_, _ = fmt.Fprintf(banzaiCli.Out(), "delete process initiated for node pool '%s'\n", nodePoolName)
+	case http.StatusNoContent:
+		_, _ = fmt.Fprintf(banzaiCli.Out(), "node pool '%s' does not exist, nothing to do\n", nodePoolName)
 	}
 
 	return nil
