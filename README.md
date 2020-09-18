@@ -1,4 +1,4 @@
-This is a command-line interface under heavy development for the [Banzai Cloud Pipeline](https://beta.banzaicloud.io/) platform.
+This is a command-line interface for the [Banzai Cloud Pipeline](https://try.pipeline.banzai.cloud/) platform.
 
 ### Installation
 
@@ -44,3 +44,25 @@ For interactive login, just run `banzai login`, and follow the instructions give
 ### Use
 
 See [command reference](https://banzaicloud.com/docs/pipeline/cli/reference/) in the [official documentation](https://banzaicloud.com/docs/pipeline/cli/).
+
+### Use Docker image
+
+Logging in
+```
+$ docker run --rm -v $(PWD)/banzai-cli:/root/ ghcr.io/banzaicloud/banzai-cli login --token <your-pipeline-token> -e https://try.pipeine.banzai.cloud/pipeline
+```
+
+Select organization
+```
+$ docker run --rm -ti -v $(PWD)/banzai-cli:/root/ ghcr.io/banzaicloud/banzai-cli organization select
+```
+
+List clusters
+```
+$ docker run --rm -ti -v $(PWD)/banzai-cli:/root/ ghcr.io/banzaicloud/banzai-cli cluster list
+```
+
+Run cluster shell
+```
+$ docker run --rm -ti -v $(PWD)/banzai-cli:/root/ ghcr.io/banzaicloud/banzai-cli cluster shell
+```
