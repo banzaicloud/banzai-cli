@@ -164,7 +164,7 @@ bin/goreleaser-${GORELEASER_VERSION}:
 
 .PHONY: release
 release: bin/goreleaser # Publish a release
-	bin/goreleaser release ${GORELEASERFLAGS}
+	GORELEASER_LDFLAGS="$(LDFLAGS)" bin/goreleaser release ${GORELEASERFLAGS}
 
 # release-%: TAG_PREFIX = v
 release-%:
@@ -211,7 +211,7 @@ major: ## Release a new major version
 
 .PHONY: unstable
 unstable: bin/goreleaser # Publish an experimental release
-	bin/goreleaser release -f .goreleaser.unstable.yml ${GORELEASERFLAGS}
+	GORELEASER_LDFLAGS="$(LDFLAGS)" bin/goreleaser release -f .goreleaser.unstable.yml ${GORELEASERFLAGS}
 
 .PHONY: list
 list: ## List all make targets
