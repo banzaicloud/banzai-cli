@@ -6,6 +6,19 @@ OS = $(shell uname | tr A-Z a-z)
 PACKAGE = github.com/banzaicloud/banzai-cli
 BINARY_NAME = banzai
 
+PIPELINE_VERSION = 0.57.0
+CLOUDINFO_VERSION = 0.13.0
+TELESCOPES_VERSION = 0.5.3
+
+# Dependency versions
+GOTESTSUM_VERSION = 0.4.1
+GOLANGCI_VERSION = 1.24.0
+LICENSEI_VERSION = 0.1.0
+GORELEASER_VERSION = 0.112.2
+OPENAPI_GENERATOR_VERSION = v4.2.3
+
+GOLANG_VERSION = 1.14
+
 # Build variables
 BUILD_DIR ?= build
 BUILD_PACKAGE = ${PACKAGE}/cmd/banzai
@@ -20,19 +33,6 @@ ifeq ($(filter -v,${GOARGS}),)
 endif
 TEST_FORMAT = short-verbose
 endif
-
-PIPELINE_VERSION = 0.57.0
-CLOUDINFO_VERSION = 0.13.0
-TELESCOPES_VERSION = 0.5.3
-
-# Dependency versions
-GOTESTSUM_VERSION = 0.4.1
-GOLANGCI_VERSION = 1.24.0
-LICENSEI_VERSION = 0.1.0
-GORELEASER_VERSION = 0.112.2
-OPENAPI_GENERATOR_VERSION = v4.2.3
-
-GOLANG_VERSION = 1.14
 
 # Add the ability to override some variables
 # Use with care
