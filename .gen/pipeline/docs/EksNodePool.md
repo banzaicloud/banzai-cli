@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **MinCount** | **int32** |  | 
 **MaxCount** | **int32** |  | 
 **Labels** | **map[string]string** |  | [optional] 
+**VolumeSize** | **int32** | Size of the EBS volume in GBs of the nodes in the pool. | [optional] 
 **Image** | **string** |  | [optional] 
 **Subnet** | [**EksSubnet**](EKSSubnet.md) |  | [optional] 
 
