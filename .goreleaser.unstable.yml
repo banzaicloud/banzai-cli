@@ -4,7 +4,7 @@ builds:
         binary: banzai
         env:
             - CGO_ENABLED=0
-        ldflags: "-s -w -X main.version={{ .Version }} -X main.commitHash={{ .ShortCommit }} -X main.buildDate={{ .Date }}"
+        ldflags: "-s -w {{ .Env.GORELEASER_LDFLAGS }}"
         goos:
             - linux
             - darwin
