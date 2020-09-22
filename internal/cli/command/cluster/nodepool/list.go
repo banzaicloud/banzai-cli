@@ -51,6 +51,7 @@ type nodePoolListItem struct {
 	InstanceType string
 	Image        string
 	SpotPrice    string
+	SubnetID     string
 }
 
 type nodePoolListOptions struct {
@@ -103,6 +104,7 @@ func runNodePoolList(banzaiCli cli.Cli, options nodePoolListOptions) error {
 			InstanceType: nodePool.InstanceType,
 			Image:        nodePool.Image,
 			SpotPrice:    nodePool.SpotPrice,
+			SubnetID:     nodePool.SubnetId,
 		}
 	}
 
