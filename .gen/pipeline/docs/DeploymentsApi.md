@@ -206,7 +206,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**[]map[string]interface{}**](map[string]interface{}.md)
+**[]map[string]interface{}**
 
 ### Authorization
 
