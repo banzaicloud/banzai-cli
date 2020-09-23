@@ -2012,16 +2012,16 @@ ListNodePools List node pools
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param orgId Organization identifier
  * @param id Cluster identifier
-@return []NodePool
+@return []NodePoolSummary
 */
-func (a *ClustersApiService) ListNodePools(ctx _context.Context, orgId int32, id int32) ([]NodePool, *_nethttp.Response, error) {
+func (a *ClustersApiService) ListNodePools(ctx _context.Context, orgId int32, id int32) ([]NodePoolSummary, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  []NodePool
+		localVarReturnValue  []NodePoolSummary
 	)
 
 	// create path and map variables
