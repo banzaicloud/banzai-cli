@@ -354,6 +354,8 @@ Class | Method | HTTP request | Description
  - [OidcConfig](docs/OidcConfig.md)
  - [OracleStorageProps](docs/OracleStorageProps.md)
  - [OrganizationListItemResponse](docs/OrganizationListItemResponse.md)
+ - [PkeAwsUpdateNodePoolRequest](docs/PkeAwsUpdateNodePoolRequest.md)
+ - [PkeAwsUpdateNodePoolRequestAllOf](docs/PkeAwsUpdateNodePoolRequestAllOf.md)
  - [PkeClusterHttpProxy](docs/PkeClusterHttpProxy.md)
  - [PkeClusterHttpProxyOptions](docs/PkeClusterHttpProxyOptions.md)
  - [PkeClusterReadinessResponse](docs/PkeClusterReadinessResponse.md)
