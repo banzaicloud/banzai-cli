@@ -15,10 +15,10 @@
 package cluster
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"emperror.dev/errors"
+	"github.com/mitchellh/mapstructure"
 
 	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 )
@@ -192,11 +192,19 @@ var (
 )
 
 func convertCreateTemplate(in interface{}) (map[string]interface{}, error) {
-	var out map[string]interface{}
-	b, _ := json.Marshal(in)
-	if err := json.Unmarshal(b, &out); err != nil {
+	out := &map[string]interface{}{}
+
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		TagName: "json",
+		Result:  out,
+	})
+	if err != nil {
+		return nil, errors.WrapIf(err, "failed to create decoder")
+	}
+
+	if err := decoder.Decode(in); err != nil {
 		return nil, errors.WrapIf(err, "failed to convert create template")
 	}
 
-	return out, nil
+	return *out, nil
 }
