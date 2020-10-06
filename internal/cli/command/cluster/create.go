@@ -70,7 +70,7 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	flags.StringVar(&options.name, "name", "", "Cluster name (overrides name defined in the descriptor)")
 	flags.BoolVarP(&options.wait, "wait", "w", false, "Wait for cluster creation")
 	flags.IntVarP(&options.interval, "interval", "i", 10, "Interval in seconds for polling cluster status")
-	flags.StringVarP(&options.template, "template", "t", "", "Cluster template for creation")
+	flags.StringVarP(&options.template, "template", "t", "", "Cluster template for creation (use keys: pke-on-aws, pke-on-azure, ack, aks, gke, eks, oke)")
 
 	return cmd
 }
