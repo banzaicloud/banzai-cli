@@ -45,6 +45,7 @@ type createOptions struct {
 	name     string
 	wait     bool
 	interval int
+	template string
 }
 
 // NewCreateCommand creates a new cobra.Command for `banzai cluster create`.
@@ -69,6 +70,7 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	flags.StringVar(&options.name, "name", "", "Cluster name (overrides name defined in the descriptor)")
 	flags.BoolVarP(&options.wait, "wait", "w", false, "Wait for cluster creation")
 	flags.IntVarP(&options.interval, "interval", "i", 10, "Interval in seconds for polling cluster status")
+	flags.StringVarP(&options.template, "template", "t", "", "Cluster template for creation (use keys: pke-on-aws, pke-on-azure, ack, aks, gke, eks, oke)")
 
 	return cmd
 }
@@ -292,34 +294,49 @@ func buildInteractiveEKSCreateRequest(banzaiCli cli.Cli, out map[string]interfac
 func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, orgID int32, out map[string]interface{}) error {
 	var content string
 	var fileName = options.file
+	var selectedTemplate interface{}
 
-	for {
-		if fileName == "" {
-			_ = survey.AskOne(
-				&survey.Input{
-					Message: "Load a JSON or YAML file:",
-					Default: "skip",
-					Help:    "Give either a relative or an absolute path to a file containing a JSON or YAML Cluster creation request. Leave empty to cancel.",
-				},
-				&fileName,
-			)
-			if fileName == "skip" || fileName == "" {
+	if options.template == "" {
+		for {
+			if fileName == "" {
+				_ = survey.AskOne(
+					&survey.Input{
+						Message: "Load a JSON or YAML file:",
+						Default: "skip",
+						Help:    "Give either a relative or an absolute path to a file containing a JSON or YAML Cluster creation request. Leave empty to cancel.",
+					},
+					&fileName,
+				)
+				if fileName == "skip" || fileName == "" {
+					break
+				}
+			}
+
+			if raw, err := ioutil.ReadFile(fileName); err != nil {
+				fileName = "" // reset fileName so that we can ask for one
+
+				log.Errorf("failed to read file %q: %v", fileName, err)
+
+				continue
+			} else {
+				if err := utils.Unmarshal(raw, &out); err != nil {
+					return errors.WrapIf(err, "failed to parse CreateClusterRequest")
+				}
+
 				break
 			}
 		}
+	} else {
+		// use template
+		selectedTemplate = templates[options.template]
+		if selectedTemplate == nil {
+			return TemplateNotFoundError{Name: options.template}
+		}
 
-		if raw, err := ioutil.ReadFile(fileName); err != nil {
-			fileName = "" // reset fileName so that we can ask for one
-
-			log.Errorf("failed to read file %q: %v", fileName, err)
-
-			continue
-		} else {
-			if err := utils.Unmarshal(raw, &out); err != nil {
-				return errors.WrapIf(err, "failed to parse CreateClusterRequest")
-			}
-
-			break
+		var err error
+		out, err = convertCreateTemplate(selectedTemplate)
+		if err != nil {
+			return errors.WrapIf(err, "failed to convert create cluster template")
 		}
 	}
 
@@ -420,114 +437,14 @@ func buildInteractiveCreateRequest(banzaiCli cli.Cli, options createOptions, org
 }
 func getProviders() map[string]interface{} {
 	return map[string]interface{}{
-		pkeOnAws: pipeline.CreateClusterRequest{
-			Cloud:    "amazon",
-			Location: "us-east-2",
-			Properties: map[string]interface{}{
-				"pke": pipeline.CreatePkeProperties{
-					NodePools: []pipeline.NodePoolsPke{
-						{
-							Name:     "master",
-							Roles:    []string{"master", "worker"},
-							Provider: "amazon",
-							ProviderConfig: map[string]interface{}{
-								"autoScalingGroup": map[string]interface{}{
-									"instanceType": "c5.large",
-									"zones":        []string{"us-east-2a"},
-									"spotPrice":    "",
-									"size": map[string]interface{}{
-										"desired": 1,
-										"min":     1,
-										"max":     1,
-									},
-								},
-							},
-						},
-					},
-					Kubernetes: pipeline.CreatePkePropertiesKubernetes{
-						Version: "v1.15.3",
-						Rbac: pipeline.CreatePkePropertiesKubernetesRbac{
-							Enabled: true,
-						},
-					},
-					Cri: pipeline.CreatePkePropertiesCri{
-						Runtime: "containerd",
-					},
-				},
-			},
-		},
-		pkeOnAzure: pipeline.CreatePkeOnAzureClusterRequest{
-			Type:     pkeOnAzure,
-			Location: "westus2",
-			Nodepools: []pipeline.PkeOnAzureNodePool{
-				{
-					Name:         "master",
-					Roles:        []string{"master", "worker"},
-					Autoscaling:  false,
-					MinCount:     1,
-					MaxCount:     1,
-					Count:        1,
-					InstanceType: "Standard_D2s_v3",
-				},
-			},
-			Kubernetes: pipeline.CreatePkeClusterKubernetes{
-				Version: "1.15.3",
-				Rbac:    true,
-			},
-		},
-		pkeOnVsphere: pipeline.CreatePkeOnVsphereClusterRequest{
-			Type: pkeOnVsphere,
-			Kubernetes: pipeline.CreatePkeClusterKubernetes{
-				Version: "1.15.3",
-				Rbac:    true,
-			},
-			Folder:       "folder",
-			Datastore:    "DatastoreCluster",
-			ResourcePool: "resource-pool",
-			Nodepools: []pipeline.PkeOnVsphereNodePool{
-				{
-					Name:          "master",
-					Roles:         []string{"master", "worker"},
-					Size:          1,
-					Vcpu:          2,
-					Ram:           1024,
-					Template:      "pke-template",
-					AdminUsername: "root",
-				},
-			},
-		},
-		"ack": pipeline.CreateClusterRequest{
-			Cloud: "alibaba",
-			Properties: map[string]interface{}{
-				"ack": pipeline.CreateAckPropertiesAck{},
-			},
-		},
-		"aks": pipeline.CreateClusterRequest{
-			Cloud:    "azure",
-			Location: "westus2",
-			Properties: map[string]interface{}{
-				"aks": pipeline.CreateAksPropertiesAks{},
-			},
-		},
-		"eks": pipeline.CreateClusterRequest{
-			Cloud:    "amazon",
-			Location: "us-east-2",
-			Properties: map[string]interface{}{
-				"eks": pipeline.CreateEksPropertiesEks{},
-			},
-		},
-		"gke": pipeline.CreateClusterRequest{
-			Cloud: "google",
-			Properties: map[string]interface{}{
-				"gke": pipeline.CreateGkePropertiesGke{},
-			},
-		},
-		"oke": pipeline.CreateClusterRequest{
-			Cloud: "oracle",
-			Properties: map[string]interface{}{
-				"oke": pipeline.CreateUpdateOkePropertiesOke{},
-			},
-		},
+		pkeOnAws:     templates[pkeOnAws],
+		pkeOnAzure:   templates[pkeOnAzure],
+		pkeOnVsphere: templates[pkeOnVsphere],
+		"ack":        templates["ack"],
+		"aks":        templates["aks"],
+		"eks":        templates["eks"],
+		"gke":        templates["gke"],
+		"oke":        templates["oke"],
 	}
 }
 
