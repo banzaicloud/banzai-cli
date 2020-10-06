@@ -22,7 +22,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-[**map[string]map[string]interface{}**](map[string]interface{}.md)
+**map[string]map[string]interface{}**
 
 ### Authorization
 

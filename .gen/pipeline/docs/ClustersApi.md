@@ -882,7 +882,7 @@ Name | Type | Description  | Notes
 
 ## ListNodePools
 
-> []NodePool ListNodePools(ctx, orgId, id)
+> []NodePoolSummary ListNodePools(ctx, orgId, id)
 
 List node pools
 
@@ -897,7 +897,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**[]NodePool**](NodePool.md)
+[**[]NodePoolSummary**](NodePoolSummary.md)
 
 ### Authorization
 
@@ -1072,7 +1072,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**map[string]interface{}**](map[string]interface{}.md)
+**map[string]interface{}**
 
 ### Authorization
 
