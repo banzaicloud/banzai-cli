@@ -1,3 +1,3 @@
 package pipeline
 
-const PipelineVersion = "pke-nodepool-update"
+const PipelineVersion = "0.59.0"
