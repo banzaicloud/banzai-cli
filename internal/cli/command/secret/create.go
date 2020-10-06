@@ -146,7 +146,9 @@ func runCreateSecret(banzaiCli cli.Cli, options *createSecretOptions) error {
 			Validate: getValidationFlag(options.validate),
 		},
 	)
+
 	if err != nil {
+		delete(out.Values, "AWS_SECRET_ACCESS_KEY")
 		cli.LogAPIError("create secret", err, out)
 		return errors.WrapIf(err, "failed to create secret")
 	}
