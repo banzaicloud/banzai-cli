@@ -189,13 +189,6 @@ func (a *LoginApp) requestTokenFromPipeline(rawIDToken string, refreshToken stri
 		return "", fmt.Errorf("request returned: %s", string(body))
 	}
 
-	// The old version of getting the Pipeline token, should be removed in a future release.
-	for _, cookie := range resp.Cookies() {
-		if cookie.Name == "user_sess" {
-			return cookie.Value, nil
-		}
-	}
-
 	sessionToken := resp.Header.Get("Authorization")
 	if sessionToken != "" {
 		return sessionToken, nil

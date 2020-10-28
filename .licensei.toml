@@ -20,6 +20,7 @@ ignored = [
     # Vanity URLS :\
     "cloud.google.com/go",
     "emperror.dev/errors",
+    "gopkg.in/square/go-jose.v2",
     "go.opencensus.io",
     "go.uber.org/atomic",
     "go.uber.org/multierr",
