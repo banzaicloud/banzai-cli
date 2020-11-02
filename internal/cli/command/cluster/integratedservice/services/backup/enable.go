@@ -27,7 +27,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
+	"github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 )
 
 const (
@@ -126,7 +126,7 @@ func enableService(banzaiCli cli.Cli, options enableOptions) error {
 
 	var request pipeline.EnableArkRequest
 	if options.filePath == "" && banzaiCli.Interactive() {
-		if request, err = buildEnableRequestInteractively(banzaiCli); err != nil {
+		if request, err = buildEnableRequestInteractively(banzaiCli, options); err != nil {
 			return errors.WrapIf(err, "failed to build enable backup service request interactively")
 		}
 	} else {
@@ -164,7 +164,7 @@ func readEnableReqFromFileOrStdin(filePath string, req *pipeline.EnableArkReques
 	return nil
 }
 
-func buildEnableRequestInteractively(banzaiCli cli.Cli) (pipeline.EnableArkRequest, error) {
+func buildEnableRequestInteractively(banzaiCli cli.Cli, options enableOptions) (pipeline.EnableArkRequest, error) {
 	var scheduleLabel string
 	var ttlLabel string
 
@@ -223,12 +223,29 @@ func buildEnableRequestInteractively(banzaiCli cli.Cli) (pipeline.EnableArkReque
 		return pipeline.EnableArkRequest{}, errors.WrapIf(err, "failed to get bucket")
 	}
 
+	useClusterSecret := false
+	if options.ClusterCloud() == amazonType {
+		err = input.DoQuestions([]input.QuestionMaker{
+			input.QuestionConfirm{
+					QuestionBase: input.QuestionBase{
+						Message: "Deploy cluster secret to give access for Velero to make volume snapshots",
+						Help:    "In case you are not deploying cluster secret you must add snapshot permissions to your instance profile."},
+					DefaultValue: false,
+					Output:       &useClusterSecret,
+			},
+		})
+		if err != nil {
+			return pipeline.EnableArkRequest{}, errors.WrapIf(err, "error during getting useClusterSecret option")
+		}
+	}
+
 	return pipeline.EnableArkRequest{
 		Cloud:      bucketInfo.provider,
 		BucketName: bucketInfo.name,
 		Schedule:   selectedSchedule,
 		Ttl:        selectedTTL,
 		SecretId:   bucketInfo.secretID,
+		UseClusterSecret: useClusterSecret,
 	}, nil
 }
 
