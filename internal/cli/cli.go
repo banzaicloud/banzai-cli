@@ -328,6 +328,9 @@ func (c *banzaiCli) CloudinfoClient() *cloudinfo.APIClient {
 		config := cloudinfo.NewConfiguration()
 		config.BasePath = viper.GetString("cloudinfo.basepath")
 		config.UserAgent = banzaiUserAgent
+		config.HTTPClient = &http.Client{
+			Transport: c.RoundTripper(),
+		}
 
 		c.cloudinfoClient = cloudinfo.NewAPIClient(config)
 	})
@@ -340,6 +343,9 @@ func (c *banzaiCli) TelescopesClient() *telescopes.APIClient {
 		config := telescopes.NewConfiguration()
 		config.BasePath = viper.GetString("telescopes.basepath")
 		config.UserAgent = banzaiUserAgent
+		config.HTTPClient = &http.Client{
+			Transport: c.RoundTripper(),
+		}
 
 		c.telescopesClient = telescopes.NewAPIClient(config)
 	})
