@@ -229,7 +229,7 @@ func buildEnableRequestInteractively(banzaiCli cli.Cli, options enableOptions) (
 			input.QuestionConfirm{
 					QuestionBase: input.QuestionBase{
 						Message: "Deploy cluster secret to give access for Velero to make volume snapshots",
-						Help:    "This option deploys the cloud provider secret used for creating this cluster to the cluster itself. In case you are not deploying cluster secret you must add snapshot permissions to your instance profile."},
+						Help:    "This option deploys the cloud provider secret used for creating this cluster to the cluster itself. In case you are not deploying cluster secret you must add snapshot permissions to your node instance role."},
 					DefaultValue: false,
 					Output:       &useClusterSecret,
 			},
