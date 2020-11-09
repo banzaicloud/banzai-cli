@@ -29,11 +29,13 @@ type Context interface {
 	Init(...string) error
 	ClusterID() int32
 	ClusterName() string
+	ClusterCloud() string
 }
 
 type clusterContext struct {
 	id        int32
 	name      string
+	cloud     string
 	banzaiCli cli.Cli
 }
 
@@ -60,6 +62,10 @@ func (c *clusterContext) ClusterName() string {
 	return c.name
 }
 
+func (c *clusterContext) ClusterCloud() string {
+	return c.cloud
+}
+
 // Init completes the cluster context from the options, env vars, and if possible from the user
 func (c *clusterContext) Init(args ...string) error {
 	pipeline := c.banzaiCli.Client()
@@ -84,6 +90,7 @@ func (c *clusterContext) Init(args ...string) error {
 		}
 
 		c.name = cluster.Name
+
 		return nil
 	}
 
@@ -115,6 +122,7 @@ func (c *clusterContext) Init(args ...string) error {
 	for _, cluster := range clusters {
 		if c.name == cluster.Name {
 			c.id = cluster.Id
+			c.cloud = cluster.Cloud
 			return nil
 		}
 	}
