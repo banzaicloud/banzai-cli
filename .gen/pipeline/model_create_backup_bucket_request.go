@@ -15,4 +15,11 @@ type CreateBackupBucketRequest struct {
 	Cloud string `json:"cloud"`
 	BucketName string `json:"bucketName"`
 	SecretId string `json:"secretId"`
+	// Optional, if not provided will be set to the name of the cluster
+	Prefix string `json:"prefix,omitempty"`
+	Location string `json:"location,omitempty"`
+	// required only in case of Azure
+	StorageAccount string `json:"storageAccount,omitempty"`
+	// required only case of Azure
+	ResourceGroup string `json:"resourceGroup,omitempty"`
 }
