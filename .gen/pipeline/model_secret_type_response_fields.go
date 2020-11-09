@@ -14,5 +14,6 @@ package pipeline
 type SecretTypeResponseFields struct {
 	Name string `json:"name,omitempty"`
 	Required bool `json:"required,omitempty"`
+	IsSafeToDisplay bool `json:"isSafeToDisplay,omitempty"`
 	Description string `json:"description,omitempty"`
 }

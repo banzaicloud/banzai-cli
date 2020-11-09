@@ -59,7 +59,7 @@ type createSecretOptions struct {
 
 // secretFieldQuestion contains all necessary field for a secret question (any type except generic)
 type secretFieldQuestion struct {
-	input    *survey.Password
+	input    survey.Prompt
 	name     string
 	output   string
 	required bool
@@ -373,14 +373,23 @@ func surveySecretFields(options *createSecretOptions, secretTypes map[string]pip
 		fields := secretType.Fields
 		questions := make([]secretFieldQuestion, len(fields))
 		for index, f := range fields {
-			questions[index] = secretFieldQuestion{
-				name: f.Name,
-				input: &survey.Password{
-					Message: f.Name,
-					Help:    f.Description,
-				},
+			sfq := secretFieldQuestion{
+				name:     f.Name,
 				required: f.Required,
 			}
+
+			if f.IsSafeToDisplay {
+				sfq.input = &survey.Input{
+					Message: f.Name,
+					Help:    f.Description,
+				}
+			} else {
+				sfq.input = &survey.Password{
+					Message: f.Name,
+					Help:    f.Description,
+				}
+			}
+			questions[index] = sfq
 		}
 
 		for i, q := range questions {
