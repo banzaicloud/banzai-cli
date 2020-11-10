@@ -90,6 +90,7 @@ func (c *clusterContext) Init(args ...string) error {
 		}
 
 		c.name = cluster.Name
+		c.cloud = cluster.Cloud
 
 		return nil
 	}
