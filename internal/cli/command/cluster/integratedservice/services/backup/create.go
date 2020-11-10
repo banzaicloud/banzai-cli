@@ -79,6 +79,15 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 		return NotAvailableError{}
 	}
 
+	response, _, err := client.ArkApi.CheckARKStatusGET(context.Background(), orgID, clusterID)
+	if err != nil {
+		return errors.WrapIfWithDetails(err, "failed to check backup status", "clusterID", clusterID)
+	}
+
+	if !response.Enabled {
+		return errors.New("backup service is not enabled")
+	}
+
 	var request pipeline.CreateBackupRequest
 	if options.filePath == "" && banzaiCli.Interactive() {
 		if request, err = buildCreateRequestInteractively(); err != nil {
