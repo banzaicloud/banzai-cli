@@ -83,7 +83,7 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 		return errors.WrapIfWithDetails(err, "failed to create restore", "clusterID", clusterID, "backupName", options.backupName)
 	}
 
-	log.Infof("Starting to restore cluster. You can check the status with `banzai cluster restore result --restoreId=%d`", response.Restore.Id)
+	log.Infof("Starting to restore cluster. You can check the status with `banzai cluster restore result --restore-id=%d`", response.Restore.Id)
 
 	return nil
 }

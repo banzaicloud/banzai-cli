@@ -17,7 +17,6 @@ package restore
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"emperror.dev/errors"
 	log "github.com/sirupsen/logrus"
@@ -30,6 +29,8 @@ import (
 
 type resultOptions struct {
 	clustercontext.Context
+
+	restoreID int32
 }
 
 func newResultCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -49,28 +50,22 @@ func newResultCommand(banzaiCli cli.Cli) *cobra.Command {
 				return errors.WrapIf(err, "failed to initialize options")
 			}
 
-			return showResult(banzaiCli, options, args)
+			return showResult(banzaiCli, options)
 		},
 	}
+	flags := cmd.Flags()
+	flags.Int32VarP(&options.restoreID, "restore-id", "", 0, "Restore ID")
 	options.Context = clustercontext.NewClusterContext(cmd, banzaiCli, "result")
 
 	return cmd
 }
 
-func showResult(banzaiCli cli.Cli, options resultOptions, args []string) error {
+func showResult(banzaiCli cli.Cli, options resultOptions) error {
 	client := banzaiCli.Client()
 	orgID := banzaiCli.Context().OrganizationID()
 	clusterID := options.ClusterID()
 
-	var restoreID int32
-	if len(args) > 0 {
-		if id, err := strconv.ParseUint(args[0], 10, 64); err != nil {
-			return errors.WrapIf(err, "failed to parse restoreID")
-		} else {
-			restoreID = int32(id)
-		}
-	}
-
+	restoreID := options.restoreID
 	if restoreID == 0 {
 		if banzaiCli.Interactive() {
 			restore, err := askRestore(client, orgID, clusterID)
