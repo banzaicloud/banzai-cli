@@ -17,6 +17,7 @@ package clustercontext
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"emperror.dev/errors"
 	"github.com/AlecAivazis/survey/v2"
@@ -48,7 +49,6 @@ func NewClusterContext(cmd *cobra.Command, banzaiCli cli.Cli, verb string) Conte
 	flags := cmd.Flags()
 
 	flags.Int32Var(&ctx.id, "cluster", 0, fmt.Sprintf("ID of cluster to %s", verb))
-	viper.BindEnv(clusterIdKey, "BANZAI_CURRENT_CLUSTER_ID")
 	flags.StringVar(&ctx.name, "cluster-name", "", fmt.Sprintf("Name of cluster to %s", verb))
 
 	return &ctx
@@ -79,7 +79,12 @@ func (c *clusterContext) Init(args ...string) error {
 		return errors.New("invalid number of arguments")
 	}
 
-	if c.name == "" && c.id == 0 {
+	if id := os.Getenv("BANZAI_CURRENT_CLUSTER_ID"); id != "" {
+		_, err := fmt.Sscanf(id, "%d", &c.id)
+		if err != nil {
+			return errors.WrapIff(err, "invalid BANZAI_CURRENT_CLUSTER_ID=%q env var", id)
+		}
+	} else if c.name == "" && c.id == 0 {
 		c.id = viper.GetInt32(clusterIdKey)
 	}
 
