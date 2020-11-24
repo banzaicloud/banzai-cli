@@ -27,5 +27,7 @@ type EksUpdateNodePoolRequest struct {
 	Version string `json:"version,omitempty"`
 	// The upper limit price for the requested spot instance. If this field is empty or 0 on-demand instances are used instead of spot instances.
 	SpotPrice string `json:"spotPrice,omitempty"`
+	// List of additional custom security groups for all nodes in the pool.
+	SecurityGroups *[]string `json:"securityGroups,omitempty"`
 	Options BaseUpdateNodePoolOptions `json:"options,omitempty"`
 }

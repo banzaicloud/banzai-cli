@@ -23,4 +23,6 @@ type EksNodePool struct {
 	VolumeSize int32 `json:"volumeSize,omitempty"`
 	Image string `json:"image,omitempty"`
 	Subnet EksSubnet `json:"subnet,omitempty"`
+	// List of additional custom security groups for all nodes in the pool.
+	SecurityGroups []string `json:"securityGroups,omitempty"`
 }
