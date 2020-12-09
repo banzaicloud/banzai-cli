@@ -223,19 +223,35 @@ func buildEnableRequestInteractively(banzaiCli cli.Cli, options enableOptions) (
 		return pipeline.EnableArkRequest{}, errors.WrapIf(err, "failed to get bucket")
 	}
 
+	serviceAccountRoleARN := ""
 	useClusterSecret := false
 	if options.ClusterCloud() == amazonType {
 		err = input.DoQuestions([]input.QuestionMaker{
-			input.QuestionConfirm{
+			input.QuestionInput{
+				QuestionBase: input.QuestionBase{
+					Message: "Service Account Role ARN to use for Velero",
+					Help:    "This IAM role ARN will be used to annotate service account for Velero and should be associated with relevant snapshot permissions."},
+				DefaultValue: "arn:aws:iam::YOUR_ACCOUNT_ID:role/YOUR_ROLE_NAME",
+				Output:       &serviceAccountRoleARN,
+			},
+		})
+		if err != nil {
+			return pipeline.EnableArkRequest{}, errors.WrapIf(err, "error during getting serviceAccountRoleARN")
+		}
+
+		if serviceAccountRoleARN == "" {
+			err = input.DoQuestions([]input.QuestionMaker{
+				input.QuestionConfirm{
 					QuestionBase: input.QuestionBase{
 						Message: "Deploy cluster secret to give access for Velero to make volume snapshots",
 						Help:    "This option deploys the cloud provider secret used for creating this cluster to the cluster itself. In case you are not deploying cluster secret you must add snapshot permissions to your node instance role."},
 					DefaultValue: false,
 					Output:       &useClusterSecret,
-			},
-		})
-		if err != nil {
-			return pipeline.EnableArkRequest{}, errors.WrapIf(err, "error during getting useClusterSecret option")
+				},
+			})
+			if err != nil {
+				return pipeline.EnableArkRequest{}, errors.WrapIf(err, "error during getting useClusterSecret option")
+			}
 		}
 	}
 
@@ -246,6 +262,7 @@ func buildEnableRequestInteractively(banzaiCli cli.Cli, options enableOptions) (
 		Ttl:        selectedTTL,
 		SecretId:   bucketInfo.secretID,
 		UseClusterSecret: useClusterSecret,
+		ServiceAccountRoleARN: serviceAccountRoleARN,
 	}, nil
 }
 
