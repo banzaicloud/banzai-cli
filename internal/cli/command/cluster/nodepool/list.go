@@ -42,18 +42,19 @@ func newNodePoolAutoscaling(isEnabled bool) (autoscaling nodePoolAutoscaling) {
 }
 
 type nodePoolListItem struct {
-	Name          string
-	Size          int32
-	Autoscaling   nodePoolAutoscaling
-	MinimumSize   int32
-	MaximumSize   int32
-	VolumeSize    int32
-	InstanceType  string
-	Image         string
-	SpotPrice     string
-	SubnetID      string
-	Status        string
-	StatusMessage string
+	Name           string
+	Size           int32
+	Autoscaling    nodePoolAutoscaling
+	MinimumSize    int32
+	MaximumSize    int32
+	VolumeSize     int32
+	InstanceType   string
+	Image          string
+	SpotPrice      string
+	SubnetID       string
+	SecurityGroups []string
+	Status         string
+	StatusMessage  string
 }
 
 type nodePoolListOptions struct {
@@ -97,18 +98,19 @@ func runNodePoolList(banzaiCli cli.Cli, options nodePoolListOptions) error {
 	nodePoolListItems := make([]nodePoolListItem, len(nodePools))
 	for nodePoolIndex, nodePool := range nodePools {
 		nodePoolListItems[nodePoolIndex] = nodePoolListItem{
-			Name:          nodePool.Name,
-			Size:          nodePool.Size,
-			Autoscaling:   newNodePoolAutoscaling(nodePool.Autoscaling.Enabled),
-			MinimumSize:   nodePool.Autoscaling.MinSize,
-			MaximumSize:   nodePool.Autoscaling.MaxSize,
-			VolumeSize:    nodePool.VolumeSize,
-			InstanceType:  nodePool.InstanceType,
-			Image:         nodePool.Image,
-			SpotPrice:     nodePool.SpotPrice,
-			SubnetID:      nodePool.SubnetId,
-			Status:        nodePool.Status,
-			StatusMessage: nodePool.StatusMessage,
+			Name:           nodePool.Name,
+			Size:           nodePool.Size,
+			Autoscaling:    newNodePoolAutoscaling(nodePool.Autoscaling.Enabled),
+			MinimumSize:    nodePool.Autoscaling.MinSize,
+			MaximumSize:    nodePool.Autoscaling.MaxSize,
+			VolumeSize:     nodePool.VolumeSize,
+			InstanceType:   nodePool.InstanceType,
+			Image:          nodePool.Image,
+			SpotPrice:      nodePool.SpotPrice,
+			SubnetID:       nodePool.SubnetId,
+			SecurityGroups: nodePool.SecurityGroups,
+			Status:         nodePool.Status,
+			StatusMessage:  nodePool.StatusMessage,
 		}
 	}
 

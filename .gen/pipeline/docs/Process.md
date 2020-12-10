@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 **Type** | **string** |  | [optional] 
 **Log** | **string** |  | [optional] 
 **ResourceId** | **string** |  | [optional] 
+**ResourceType** | **string** |  | [optional] 
 **Status** | [**ProcessStatus**](ProcessStatus.md) |  | [optional] 
 **StartedAt** | [**time.Time**](time.Time.md) |  | [optional] 
 **FinishedAt** | Pointer to [**time.Time**](time.Time.md) |  | [optional] 

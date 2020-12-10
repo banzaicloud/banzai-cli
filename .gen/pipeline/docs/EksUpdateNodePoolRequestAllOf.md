@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 **Image** | **string** | The instance AMI to use for your node pool. | [optional] 
 **Version** | **string** | The Kubernetes version to use for your node pool. | [optional] 
 **SpotPrice** | **string** | The upper limit price for the requested spot instance. If this field is empty or 0 on-demand instances are used instead of spot instances. | [optional] 
+**SecurityGroups** | Pointer to **[]string** | List of additional custom security groups for all nodes in the pool. | [optional] 
 **Options** | [**BaseUpdateNodePoolOptions**](BaseUpdateNodePoolOptions.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

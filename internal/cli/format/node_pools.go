@@ -25,7 +25,7 @@ func NodePoolsWrite(context formatContext, data interface{}) {
 		Out:    context.Out(),
 		Color:  context.Color(),
 		Format: context.OutputFormat(),
-		Fields: []string{"Name", "Size", "Autoscaling", "MinimumSize", "MaximumSize", "VolumeSize", "InstanceType", "Image", "SpotPrice", "SubnetID", "Status", "StatusMessage"},
+		Fields: []string{"Name", "Size", "Autoscaling", "MinimumSize", "MaximumSize", "VolumeSize", "InstanceType", "Image", "SpotPrice", "SubnetID", "SecurityGroups", "Status", "StatusMessage"},
 	}
 
 	err := output.Output(ctx, data)

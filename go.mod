@@ -6,12 +6,14 @@ require (
 	emperror.dev/errors v0.4.2
 	github.com/AlecAivazis/survey/v2 v2.0.2
 	github.com/Masterminds/semver v1.5.0
+	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/antihax/optional v0.0.0-20180407024304-ca021399b1a6
 	github.com/aws/aws-sdk-go v1.21.2
 	github.com/coreos/go-oidc v2.0.0+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/emirpasic/gods v1.12.0
 	github.com/ghodss/yaml v1.0.0
+	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/google/uuid v1.1.1
 	github.com/imdario/mergo v0.3.7
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect

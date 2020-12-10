@@ -22,4 +22,6 @@ type EksNodePoolAllOf struct {
 	// The upper limit price for the requested spot instance. If this field is left empty or 0 passed in on-demand instances used instead of spot instances.
 	SpotPrice string `json:"spotPrice,omitempty"`
 	SubnetId string `json:"subnetId,omitempty"`
+	// List of additional custom security groups for all nodes in the pool.
+	SecurityGroups []string `json:"securityGroups,omitempty"`
 }

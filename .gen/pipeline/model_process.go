@@ -21,6 +21,7 @@ type Process struct {
 	Type string `json:"type,omitempty"`
 	Log string `json:"log,omitempty"`
 	ResourceId string `json:"resourceId,omitempty"`
+	ResourceType string `json:"resourceType,omitempty"`
 	Status ProcessStatus `json:"status,omitempty"`
 	StartedAt time.Time `json:"startedAt,omitempty"`
 	FinishedAt *time.Time `json:"finishedAt,omitempty"`

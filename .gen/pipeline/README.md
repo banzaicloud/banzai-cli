@@ -111,6 +111,7 @@ Class | Method | HTTP request | Description
 *ClustersApi* | [**MergeSecret**](docs/ClustersApi.md#mergesecret) | **Patch** /api/v1/orgs/{orgId}/clusters/{id}/secrets/{secretName} | Merge a particular secret with an existing one with optional remapping
 *ClustersApi* | [**PostLeaderElection**](docs/ClustersApi.md#postleaderelection) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/pke/leader | Apply as new cluster leader
 *ClustersApi* | [**PostReadyPKENode**](docs/ClustersApi.md#postreadypkenode) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/pke/ready | Report to Pipeline that a new node is ready (to be called by PKE installer)
+*ClustersApi* | [**ReportPKENodeStatus**](docs/ClustersApi.md#reportpkenodestatus) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/pke/status | Report to Pipeline the progress of the bootstrapping of a new node (to be called by PKE installer)
 *ClustersApi* | [**UpdateCluster**](docs/ClustersApi.md#updatecluster) | **Put** /api/v1/orgs/{orgId}/clusters/{id}/update | Update an existing cluster
 *ClustersApi* | [**UpdateClusterDeprecated**](docs/ClustersApi.md#updateclusterdeprecated) | **Put** /api/v1/orgs/{orgId}/clusters/{id} | Update cluster
 *ClustersApi* | [**UpdateNodePool**](docs/ClustersApi.md#updatenodepool) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/nodepools/{name}/update | Update an existing node pool
@@ -372,6 +373,8 @@ Class | Method | HTTP request | Description
  - [ProcessEvent](docs/ProcessEvent.md)
  - [ProcessStatus](docs/ProcessStatus.md)
  - [ReleaseWhiteListItem](docs/ReleaseWhiteListItem.md)
+ - [ReportPkeNodeStatusRequest](docs/ReportPkeNodeStatusRequest.md)
+ - [ReportPkeNodeStatusResponse](docs/ReportPkeNodeStatusResponse.md)
  - [RequestedResources](docs/RequestedResources.md)
  - [Resource](docs/Resource.md)
  - [ResourceGroupCreated](docs/ResourceGroupCreated.md)
