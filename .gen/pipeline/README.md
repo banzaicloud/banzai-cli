@@ -282,6 +282,7 @@ Class | Method | HTTP request | Description
  - [EksIam](docs/EksIam.md)
  - [EksNodePool](docs/EksNodePool.md)
  - [EksNodePoolAllOf](docs/EksNodePoolAllOf.md)
+ - [EksNodePoolVolumeEncryption](docs/EksNodePoolVolumeEncryption.md)
  - [EksSubnet](docs/EksSubnet.md)
  - [EksUpdateClusterRequest](docs/EksUpdateClusterRequest.md)
  - [EksUpdateNodePoolRequest](docs/EksUpdateNodePoolRequest.md)
