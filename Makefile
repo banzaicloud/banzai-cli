@@ -21,7 +21,8 @@ endif
 TEST_FORMAT = short-verbose
 endif
 
-PIPELINE_VERSION = 0.65.0
+PIPELINE_VERSION = instance-storage-api
+
 CLOUDINFO_VERSION = 0.13.0
 TELESCOPES_VERSION = 0.5.3
 
