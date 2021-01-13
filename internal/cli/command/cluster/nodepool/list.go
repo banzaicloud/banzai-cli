@@ -19,6 +19,7 @@ import (
 	"log"
 	"sort"
 
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/format"
@@ -42,23 +43,53 @@ func newNodePoolAutoscaling(isEnabled bool) (autoscaling nodePoolAutoscaling) {
 }
 
 type nodePoolListItem struct {
-	Name           string
-	Size           int32
-	Autoscaling    nodePoolAutoscaling
-	MinimumSize    int32
-	MaximumSize    int32
-	VolumeSize     int32
-	InstanceType   string
-	Image          string
-	SpotPrice      string
-	SubnetID       string
-	SecurityGroups []string
-	Status         string
-	StatusMessage  string
+	Name             string
+	Size             int32
+	Autoscaling      nodePoolAutoscaling
+	MinimumSize      int32
+	MaximumSize      int32
+	VolumeEncryption nodePoolVolumeEncryption
+	VolumeSize       int32
+	InstanceType     string
+	Image            string
+	SpotPrice        string
+	SubnetID         string
+	SecurityGroups   []string
+	Status           string
+	StatusMessage    string
 }
 
 type nodePoolListOptions struct {
 	clustercontext.Context
+}
+
+type nodePoolVolumeEncryption string
+
+const (
+	// nodePoolVolumeEncryptionAWSAccountDefault indicates the default AWS
+	// account volume encryption setting is being used.
+	nodePoolVolumeEncryptionAWSAccountDefault nodePoolVolumeEncryption = "AWS account default"
+
+	// nodePoolVolumeEncryptionDisabled indicates no volume encryption.
+	nodePoolVolumeEncryptionDisabled nodePoolVolumeEncryption = "Disabled"
+
+	// nodePoolVolumeEncryptionEnabled indicates a volume encryption with the
+	// AWS account default volume encryption key for the account.
+	nodePoolVolumeEncryptionEnabled nodePoolVolumeEncryption = "Enabled (AWS default key)"
+)
+
+// newNodePoolVolumeEncryptionString transforms the volume encryption object
+// into an explanatory string.
+func newNodePoolVolumeEncryption(volumeEncryption *pipeline.EksNodePoolVolumeEncryption) nodePoolVolumeEncryption {
+	if volumeEncryption == nil {
+		return nodePoolVolumeEncryptionAWSAccountDefault
+	} else if volumeEncryption.Enabled == false {
+		return nodePoolVolumeEncryptionDisabled
+	} else if volumeEncryption.EncryptionKeyARN == "" {
+		return nodePoolVolumeEncryptionEnabled
+	}
+
+	return nodePoolVolumeEncryption(volumeEncryption.EncryptionKeyARN)
 }
 
 func NewListCommand(banzaiCli cli.Cli) *cobra.Command {
@@ -80,7 +111,7 @@ func NewListCommand(banzaiCli cli.Cli) *cobra.Command {
 }
 
 func runNodePoolList(banzaiCli cli.Cli, options nodePoolListOptions) error {
-	pipeline := banzaiCli.Client()
+	pipelineClient := banzaiCli.Client()
 	organizationID := banzaiCli.Context().OrganizationID()
 
 	if err := options.Init(); err != nil {
@@ -89,7 +120,7 @@ func runNodePoolList(banzaiCli cli.Cli, options nodePoolListOptions) error {
 
 	clusterID := options.ClusterID()
 
-	nodePools, _, err := pipeline.ClustersApi.ListNodePools(context.Background(), organizationID, clusterID)
+	nodePools, _, err := pipelineClient.ClustersApi.ListNodePools(context.Background(), organizationID, clusterID)
 	if err != nil {
 		cli.LogAPIError("list node pools", err, clusterID)
 		log.Fatalf("could not list node pools: %v", err)
@@ -98,19 +129,20 @@ func runNodePoolList(banzaiCli cli.Cli, options nodePoolListOptions) error {
 	nodePoolListItems := make([]nodePoolListItem, len(nodePools))
 	for nodePoolIndex, nodePool := range nodePools {
 		nodePoolListItems[nodePoolIndex] = nodePoolListItem{
-			Name:           nodePool.Name,
-			Size:           nodePool.Size,
-			Autoscaling:    newNodePoolAutoscaling(nodePool.Autoscaling.Enabled),
-			MinimumSize:    nodePool.Autoscaling.MinSize,
-			MaximumSize:    nodePool.Autoscaling.MaxSize,
-			VolumeSize:     nodePool.VolumeSize,
-			InstanceType:   nodePool.InstanceType,
-			Image:          nodePool.Image,
-			SpotPrice:      nodePool.SpotPrice,
-			SubnetID:       nodePool.SubnetId,
-			SecurityGroups: nodePool.SecurityGroups,
-			Status:         nodePool.Status,
-			StatusMessage:  nodePool.StatusMessage,
+			Name:             nodePool.Name,
+			Size:             nodePool.Size,
+			Autoscaling:      newNodePoolAutoscaling(nodePool.Autoscaling.Enabled),
+			MinimumSize:      nodePool.Autoscaling.MinSize,
+			MaximumSize:      nodePool.Autoscaling.MaxSize,
+			VolumeEncryption: newNodePoolVolumeEncryption(nodePool.VolumeEncryption),
+			VolumeSize:       nodePool.VolumeSize,
+			InstanceType:     nodePool.InstanceType,
+			Image:            nodePool.Image,
+			SpotPrice:        nodePool.SpotPrice,
+			SubnetID:         nodePool.SubnetId,
+			SecurityGroups:   nodePool.SecurityGroups,
+			Status:           nodePool.Status,
+			StatusMessage:    nodePool.StatusMessage,
 		}
 	}
 

@@ -5,6 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Autoscaling** | [**NodePoolAutoScaling**](NodePoolAutoScaling.md) |  | [optional] 
+**VolumeEncryption** | Pointer to [**EksNodePoolVolumeEncryption**](EKSNodePoolVolumeEncryption.md) |  | [optional] 
 **VolumeSize** | **int32** | Size of the EBS volume in GBs of the nodes in the pool. | [optional] 
 **InstanceType** | **string** | Machine instance type. | 
 **Image** | **string** | Instance AMI. | [optional] 
