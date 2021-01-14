@@ -38,7 +38,7 @@ type ServiceSpec struct {
 	Policy           policySpec        `json:"policy" mapstructure:"policy"`
 	ReleaseWhiteList []releaseSpec     `json:"releaseWhiteList,omitempty" mapstructure:"releaseWhiteList"`
 	WebhookConfig    webHookConfigSpec `json:"webhookConfig" mapstructure:"webhookConfig"`
-	Registry         *registrySpec     `json:"registry,omitempty" mapstructure:"registry"`
+	Registries       []*registrySpec   `json:"registry,omitempty" mapstructure:"registries"`
 }
 
 // Validate validates the input security scan specification.
@@ -59,8 +59,10 @@ func (s ServiceSpec) Validate() error {
 
 	validationErrors = errors.Combine(validationErrors, s.WebhookConfig.Validate())
 
-	if s.Registry != nil {
-		validationErrors = errors.Combine(validationErrors, s.Registry.Validate())
+	if s.Registries != nil {
+		for _, registryItem := range s.Registries {
+			validationErrors = errors.Combine(validationErrors, registryItem.Validate())
+		}
 	}
 
 	return validationErrors

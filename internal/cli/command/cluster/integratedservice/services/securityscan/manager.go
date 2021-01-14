@@ -514,20 +514,6 @@ func askForWhiteListItem() (*releaseSpec, error) {
 }
 
 func askForCustomRegistry(banzaiCLI cli.Cli) (*registrySpec, error) {
-	var customRegistry bool
-	if err := survey.AskOne(
-		&survey.Confirm{
-			Message: "Configure a custom registry in anchore?",
-		},
-		&customRegistry,
-	); err != nil {
-		return nil, errors.WrapIf(err, "failure during survey")
-	}
-
-	if !customRegistry {
-		return nil, nil
-	}
-
 	var registry string
 	if err := survey.AskOne(
 		&survey.Input{
@@ -595,9 +581,28 @@ func assembleServiceSpec(ctx context.Context, banzaiCLI cli.Cli, orgID int32, cl
 		return ServiceSpec{}, errors.WrapIf(err, "failed to assemble release data")
 	}
 
-	customRegistry, err := askForCustomRegistry(banzaiCLI)
-	if err != nil {
-		return ServiceSpec{}, errors.WrapIf(err, "failed to assemble registry data")
+	var customRegistries []*registrySpec
+
+	var addCustomRegistry bool
+
+	for {
+		if err := survey.AskOne(
+			&survey.Confirm{
+				Message: "Add a custom registry in anchore?",
+			},
+			&addCustomRegistry,
+		); err != nil {
+			return ServiceSpec{}, errors.WrapIf(err, "failure during survey")
+		}
+
+		if !addCustomRegistry {
+			break
+		}
+		customRegistry, err := askForCustomRegistry(banzaiCLI)
+		if err != nil {
+			return ServiceSpec{}, errors.WrapIf(err, "failed to assemble registry data")
+		}
+		customRegistries = append(customRegistries, customRegistry)
 	}
 
 	return ServiceSpec{
@@ -605,6 +610,6 @@ func assembleServiceSpec(ctx context.Context, banzaiCLI cli.Cli, orgID int32, cl
 		Policy:           policy,
 		WebhookConfig:    webhookConfig,
 		ReleaseWhiteList: releaseWhiteList,
-		Registry:         customRegistry,
+		Registries:       customRegistries,
 	}, nil
 }
