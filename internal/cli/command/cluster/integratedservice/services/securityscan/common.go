@@ -59,10 +59,8 @@ func (s ServiceSpec) Validate() error {
 
 	validationErrors = errors.Combine(validationErrors, s.WebhookConfig.Validate())
 
-	if s.Registries != nil {
-		for _, registryItem := range s.Registries {
-			validationErrors = errors.Combine(validationErrors, registryItem.Validate())
-		}
+	for _, registryItem := range s.Registries {
+		validationErrors = errors.Combine(validationErrors, registryItem.Validate())
 	}
 
 	return validationErrors
