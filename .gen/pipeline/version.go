@@ -1,4 +1,3 @@
 package pipeline
 
-const PipelineVersion = "instance-storage-api"
-
+const PipelineVersion = "0.65.1"
