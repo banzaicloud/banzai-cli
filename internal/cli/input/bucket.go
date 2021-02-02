@@ -23,28 +23,22 @@ import (
 )
 
 const (
-	AlibabaBucketNameRegex = "^[a-z]([-a-z0-9]{1,62}[a-z0-9])$"
-	AmazonBucketNameRegex  = "^[a-z]([-a-z0-9]{1,62}[a-z0-9])$"
-	AzureBucketNameRegex   = "^[a-z]([-a-z0-9]{1,61}[a-z0-9])$"
-	GoogleBucketNameRegex  = "^[a-z]([-a-z0-9]{1,61}[a-z0-9])$"
-	OracleBucketNameRegex  = "^[A-Za-z0-9-_.]{1,255}$"
-	BucketNameRegex        = "^[\\w-.]{3,63}$"
+	AmazonBucketNameRegex = "^[a-z]([-a-z0-9]{1,62}[a-z0-9])$"
+	AzureBucketNameRegex  = "^[a-z]([-a-z0-9]{1,61}[a-z0-9])$"
+	GoogleBucketNameRegex = "^[a-z]([-a-z0-9]{1,61}[a-z0-9])$"
+	BucketNameRegex       = "^[\\w-.]{3,63}$"
 )
 
 func ValidateBucketName(cloud, name string) error {
 	var regex string
 
 	switch cloud {
-	case CloudProviderAlibaba:
-		regex = AlibabaBucketNameRegex
 	case CloudProviderAmazon:
 		regex = AmazonBucketNameRegex
 	case CloudProviderAzure:
 		regex = AzureBucketNameRegex
 	case CloudProviderGoogle:
 		regex = GoogleBucketNameRegex
-	case CloudProviderOracle:
-		regex = OracleBucketNameRegex
 	}
 
 	r, err := regexp.Compile(regex)

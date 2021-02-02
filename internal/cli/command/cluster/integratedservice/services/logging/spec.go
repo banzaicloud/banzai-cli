@@ -110,7 +110,7 @@ func (s providerSpec) Validate() error {
 	}
 
 	switch s.Name {
-	case providerAmazonS3Key, providerAzureKey, providerAlibabaOSSKey, providerGoogleGCSKey:
+	case providerAmazonS3Key, providerAzureKey, providerGoogleGCSKey:
 	default:
 		return errors.New("invalid provider name")
 	}

@@ -32,9 +32,6 @@ func DetailedBucketWrite(context formatContext, data interface{}, cloud string) 
 	case input.CloudProviderAzure:
 		AzureBucketWrite(context.Out(), context.OutputFormat(), context.Color(), data)
 		return
-	case input.CloudProviderOracle:
-		OracleBucketWrite(context.Out(), context.OutputFormat(), context.Color(), data)
-		return
 	default:
 		bucketsWrite(context.Out(), context.OutputFormat(), context.Color(), data, []string{"Name", "Cloud", "Location", "Status", "StatusMessage"})
 	}
@@ -42,10 +39,6 @@ func DetailedBucketWrite(context formatContext, data interface{}, cloud string) 
 
 func AzureBucketWrite(out io.Writer, format string, color bool, data interface{}) {
 	bucketsWrite(out, format, color, data, []string{"Name", "Cloud", "Location", "ResourceGroup", "StorageAccount", "Status", "StatusMessage"})
-}
-
-func OracleBucketWrite(out io.Writer, format string, color bool, data interface{}) {
-	bucketsWrite(out, format, color, data, []string{"Name", "Cloud", "Location", "Namespace", "Status", "StatusMessage"})
 }
 
 func bucketsWrite(out io.Writer, format string, color bool, data interface{}, fields []string) {

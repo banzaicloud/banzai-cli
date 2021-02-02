@@ -49,9 +49,6 @@ type Bucket struct {
 	// Azure property
 	ResourceGroup string `json:"resourceGroup,omitempty" yaml:"resourceGroup,omitempty"`
 
-	// Oracle property
-	Namespace string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
-
 	secretID   string
 	secretName string
 }
@@ -109,8 +106,7 @@ func GetManagedBucket(banzaiCli cli.Cli, orgID int32, name, cloud, location, sto
 	} else {
 		for _, bucket := range buckets {
 			if bucket.Name == name && bucket.Cloud == cloud &&
-				(cloud != input.CloudProviderAzure || storageAccount == bucket.StorageAccount) &&
-				(cloud != input.CloudProviderOracle || location == bucket.Location) {
+				(cloud != input.CloudProviderAzure || storageAccount == bucket.StorageAccount) {
 				selectedBucket = bucket
 				break
 			}
@@ -137,8 +133,6 @@ func ConvertBucketInfoToBucket(bucket pipeline.BucketInfo) Bucket {
 
 		StorageAccount: bucket.Aks.StorageAccount,
 		ResourceGroup:  bucket.Aks.ResourceGroup,
-
-		Namespace: bucket.Oracle.Namespace,
 
 		secretID:   bucket.Secret.Id,
 		secretName: bucket.Secret.Name,
@@ -177,12 +171,6 @@ func (bucket Bucket) formattedName() string {
 
 func validateCloudAndLocation(banzaiCli cli.Cli, cloud, location string) error {
 	if cloud != "" {
-		if !banzaiCli.Interactive() {
-			if cloud == input.CloudProviderOracle && location == "" {
-				return errors.New("--location must be specified for Oracle")
-			}
-		}
-
 		err := input.IsCloudProviderSupported(cloud)
 		if err != nil {
 			return err

@@ -20,11 +20,9 @@ import (
 )
 
 const (
-	CloudProviderAlibaba = "alibaba"
-	CloudProviderAmazon  = "amazon"
-	CloudProviderAzure   = "azure"
-	CloudProviderGoogle  = "google"
-	CloudProviderOracle  = "oracle"
+	CloudProviderAmazon = "amazon"
+	CloudProviderAzure  = "azure"
+	CloudProviderGoogle = "google"
 )
 
 // AskCloud asks for cloud provider
@@ -32,11 +30,9 @@ func AskCloud() (string, error) {
 	var cloud string
 
 	err := survey.AskOne(&survey.Select{Message: "Cloud:", Options: []string{
-		CloudProviderAlibaba,
 		CloudProviderAmazon,
 		CloudProviderAzure,
 		CloudProviderGoogle,
-		CloudProviderOracle,
 	}}, &cloud, survey.WithValidator(survey.Required))
 	if err != nil {
 		return cloud, errors.WrapIf(err, "failed to select cloud")
@@ -48,7 +44,7 @@ func AskCloud() (string, error) {
 // IsCloudProviderSupported checks whether the given cloud provider is supported
 func IsCloudProviderSupported(cloud string) error {
 	switch cloud {
-	case CloudProviderAlibaba, CloudProviderAmazon, CloudProviderAzure, CloudProviderGoogle, CloudProviderOracle:
+	case CloudProviderAmazon, CloudProviderAzure, CloudProviderGoogle:
 	default:
 		return errors.Errorf("invalid cloud provider specified: %s", cloud)
 	}
