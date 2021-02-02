@@ -40,9 +40,7 @@ const (
 	TypeGeneric    = "generic"
 	TypeAmazon     = "amazon"
 	TypeAzure      = "azure"
-	TypeAlibaba    = "alibaba"
 	TypeGoogle     = "google"
-	TypeOracle     = "oracle"
 	TypeKubernetes = "kubernetes"
 )
 
@@ -264,9 +262,7 @@ func buildInteractiveCreateSecretRequest(banzaiCli cli.Cli, options *createSecre
 	if options.validate == "" {
 		if options.secretType == TypeAmazon ||
 			options.secretType == TypeAzure ||
-			options.secretType == TypeAlibaba ||
-			options.secretType == TypeGoogle ||
-			options.secretType == TypeOracle {
+			options.secretType == TypeGoogle {
 			// request validation just in case of cloud types
 			options.validate = "true"
 			var v bool

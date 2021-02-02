@@ -134,9 +134,6 @@ Class | Method | HTTP request | Description
 *HelmApi* | [**HelmReposDelete**](docs/HelmApi.md#helmreposdelete) | **Delete** /api/v1/orgs/{orgId}/helm/repos/{repoName} | Delete Repo
 *HelmApi* | [**HelmReposModify**](docs/HelmApi.md#helmreposmodify) | **Put** /api/v1/orgs/{orgId}/helm/repos/{repoName} | Modify Repo
 *HelmApi* | [**HelmReposUpdate**](docs/HelmApi.md#helmreposupdate) | **Put** /api/v1/orgs/{orgId}/helm/repos/{repoName}/update | Update Repo
-*HpaApi* | [**DeleteDeploymentAutoscaling**](docs/HpaApi.md#deletedeploymentautoscaling) | **Delete** /api/v1/orgs/{orgId}/clusters/{id}/hpa | Delete Deployment Scaling
-*HpaApi* | [**GetDeploymentAutoscaling**](docs/HpaApi.md#getdeploymentautoscaling) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/hpa | Get Deployment Scaling Info
-*HpaApi* | [**UpdateDeploymentAutoscaling**](docs/HpaApi.md#updatedeploymentautoscaling) | **Put** /api/v1/orgs/{orgId}/clusters/{id}/hpa | Create / Update Deployment Scaling
 *ImagesApi* | [**ListDeploymentsByImage**](docs/ImagesApi.md#listdeploymentsbyimage) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/images/{imageDigest}/deployments | List Deployments by Image
 *ImagesApi* | [**ListImages**](docs/ImagesApi.md#listimages) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/images | List Images used in cluster
 *InfoApi* | [**CreateResourceGroup**](docs/InfoApi.md#createresourcegroup) | **Post** /api/v1/orgs/{orgId}/azure/resourcegroups | Create resource groups
@@ -208,11 +205,8 @@ Class | Method | HTTP request | Description
  - [ClusterConfig](docs/ClusterConfig.md)
  - [ClusterImage](docs/ClusterImage.md)
  - [CommonError](docs/CommonError.md)
- - [CreateAckProperties](docs/CreateAckProperties.md)
- - [CreateAckPropertiesAck](docs/CreateAckPropertiesAck.md)
  - [CreateAksProperties](docs/CreateAksProperties.md)
  - [CreateAksPropertiesAks](docs/CreateAksPropertiesAks.md)
- - [CreateAlibabaObjectStoreBucketProperties](docs/CreateAlibabaObjectStoreBucketProperties.md)
  - [CreateAmazonObjectStoreBucketProperties](docs/CreateAmazonObjectStoreBucketProperties.md)
  - [CreateAzureObjectStoreBucketProperties](docs/CreateAzureObjectStoreBucketProperties.md)
  - [CreateBackupBucketRequest](docs/CreateBackupBucketRequest.md)
@@ -231,7 +225,6 @@ Class | Method | HTTP request | Description
  - [CreateObjectStoreBucketProperties](docs/CreateObjectStoreBucketProperties.md)
  - [CreateObjectStoreBucketRequest](docs/CreateObjectStoreBucketRequest.md)
  - [CreateObjectStoreBucketResponse](docs/CreateObjectStoreBucketResponse.md)
- - [CreateOracleObjectStoreBucketProperties](docs/CreateOracleObjectStoreBucketProperties.md)
  - [CreatePkeClusterKubernetes](docs/CreatePkeClusterKubernetes.md)
  - [CreatePkeClusterKubernetesCri](docs/CreatePkeClusterKubernetesCri.md)
  - [CreatePkeClusterKubernetesNetwork](docs/CreatePkeClusterKubernetesNetwork.md)
@@ -256,10 +249,6 @@ Class | Method | HTTP request | Description
  - [CreateSecretResponse](docs/CreateSecretResponse.md)
  - [CreateUpdateDeploymentRequest](docs/CreateUpdateDeploymentRequest.md)
  - [CreateUpdateDeploymentResponse](docs/CreateUpdateDeploymentResponse.md)
- - [CreateUpdateOkeProperties](docs/CreateUpdateOkeProperties.md)
- - [CreateUpdateOkePropertiesOke](docs/CreateUpdateOkePropertiesOke.md)
- - [CustomMetric](docs/CustomMetric.md)
- - [CustomMetricStatus](docs/CustomMetricStatus.md)
  - [DeleteBackupBucketResponse](docs/DeleteBackupBucketResponse.md)
  - [DeleteBackupResponse](docs/DeleteBackupResponse.md)
  - [DeleteDeploymentResponse](docs/DeleteDeploymentResponse.md)
@@ -270,8 +259,6 @@ Class | Method | HTTP request | Description
  - [DeploymentCreateUpdateDeploymentResponse](docs/DeploymentCreateUpdateDeploymentResponse.md)
  - [DeploymentDeploymentInfo](docs/DeploymentDeploymentInfo.md)
  - [DeploymentListDeploymentResponse](docs/DeploymentListDeploymentResponse.md)
- - [DeploymentScaleStatus](docs/DeploymentScaleStatus.md)
- - [DeploymentScalingRequest](docs/DeploymentScalingRequest.md)
  - [DeploymentTargetClusterStatus](docs/DeploymentTargetClusterStatus.md)
  - [DisableArkResponse](docs/DisableArkResponse.md)
  - [EksAuthConfig](docs/EksAuthConfig.md)
@@ -340,17 +327,13 @@ Class | Method | HTTP request | Description
  - [NodePoolStatusAzure](docs/NodePoolStatusAzure.md)
  - [NodePoolStatusGoogle](docs/NodePoolStatusGoogle.md)
  - [NodePoolStatusInformation](docs/NodePoolStatusInformation.md)
- - [NodePoolStatusOracle](docs/NodePoolStatusOracle.md)
  - [NodePoolStatusVSphere](docs/NodePoolStatusVSphere.md)
  - [NodePoolSummary](docs/NodePoolSummary.md)
- - [NodePoolsAck](docs/NodePoolsAck.md)
  - [NodePoolsAzure](docs/NodePoolsAzure.md)
  - [NodePoolsGoogle](docs/NodePoolsGoogle.md)
- - [NodePoolsOracle](docs/NodePoolsOracle.md)
  - [NodePoolsPke](docs/NodePoolsPke.md)
  - [NodepoolLabels](docs/NodepoolLabels.md)
  - [OidcConfig](docs/OidcConfig.md)
- - [OracleStorageProps](docs/OracleStorageProps.md)
  - [OrganizationListItemResponse](docs/OrganizationListItemResponse.md)
  - [PkeAwsUpdateNodePoolRequest](docs/PkeAwsUpdateNodePoolRequest.md)
  - [PkeAwsUpdateNodePoolRequestAllOf](docs/PkeAwsUpdateNodePoolRequestAllOf.md)
@@ -379,8 +362,6 @@ Class | Method | HTTP request | Description
  - [RequestedResources](docs/RequestedResources.md)
  - [Resource](docs/Resource.md)
  - [ResourceGroupCreated](docs/ResourceGroupCreated.md)
- - [ResourceMetric](docs/ResourceMetric.md)
- - [ResourceMetricStatus](docs/ResourceMetricStatus.md)
  - [ResourceSummary](docs/ResourceSummary.md)
  - [RestoreResponse](docs/RestoreResponse.md)
  - [RestoreResultErrors](docs/RestoreResultErrors.md)
@@ -397,7 +378,6 @@ Class | Method | HTTP request | Description
  - [SecretKeyValueGeneric](docs/SecretKeyValueGeneric.md)
  - [SecretKeyValueGoogle](docs/SecretKeyValueGoogle.md)
  - [SecretKeyValueKubernetes](docs/SecretKeyValueKubernetes.md)
- - [SecretKeyValueOracle](docs/SecretKeyValueOracle.md)
  - [SecretKeyValueTls](docs/SecretKeyValueTls.md)
  - [SecretTypeResponse](docs/SecretTypeResponse.md)
  - [SecretTypeResponseFields](docs/SecretTypeResponseFields.md)
@@ -405,8 +385,6 @@ Class | Method | HTTP request | Description
  - [TokenCreateRequest](docs/TokenCreateRequest.md)
  - [TokenCreateResponse](docs/TokenCreateResponse.md)
  - [TokenListResponseItem](docs/TokenListResponseItem.md)
- - [UpdateAckProperties](docs/UpdateAckProperties.md)
- - [UpdateAckPropertiesAck](docs/UpdateAckPropertiesAck.md)
  - [UpdateAzureProperties](docs/UpdateAzureProperties.md)
  - [UpdateAzurePropertiesAzure](docs/UpdateAzurePropertiesAzure.md)
  - [UpdateClusterRequest](docs/UpdateClusterRequest.md)

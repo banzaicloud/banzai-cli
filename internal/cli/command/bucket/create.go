@@ -234,16 +234,12 @@ func getCreateBucketRequest(o createBucketsOptions) pipeline.CreateObjectStoreBu
 	// fill location for every provider since openapi doesn't generate those as pointers
 	// TODO fix this
 	properties := pipeline.CreateObjectStoreBucketProperties{
-		Amazon:  &pipeline.CreateAmazonObjectStoreBucketProperties{Location: "n/a"},
-		Google:  &pipeline.CreateGoogleObjectStoreBucketProperties{Location: "n/a"},
-		Alibaba: &pipeline.CreateAlibabaObjectStoreBucketProperties{Location: "n/a"},
-		Azure:   &pipeline.CreateAzureObjectStoreBucketProperties{Location: "n/a"},
-		Oracle:  &pipeline.CreateOracleObjectStoreBucketProperties{Location: "n/a"},
+		Amazon: &pipeline.CreateAmazonObjectStoreBucketProperties{Location: "n/a"},
+		Google: &pipeline.CreateGoogleObjectStoreBucketProperties{Location: "n/a"},
+		Azure:  &pipeline.CreateAzureObjectStoreBucketProperties{Location: "n/a"},
 	}
 
 	switch o.cloud {
-	case input.CloudProviderAlibaba:
-		properties.Alibaba.Location = o.location
 	case input.CloudProviderAmazon:
 		properties.Amazon.Location = o.location
 	case input.CloudProviderAzure:
@@ -252,8 +248,6 @@ func getCreateBucketRequest(o createBucketsOptions) pipeline.CreateObjectStoreBu
 		properties.Azure.ResourceGroup = o.resourceGroup
 	case input.CloudProviderGoogle:
 		properties.Google.Location = o.location
-	case input.CloudProviderOracle:
-		properties.Oracle.Location = o.location
 	}
 
 	return pipeline.CreateObjectStoreBucketRequest{

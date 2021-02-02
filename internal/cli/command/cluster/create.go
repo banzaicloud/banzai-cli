@@ -70,7 +70,7 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	flags.StringVar(&options.name, "name", "", "Cluster name (overrides name defined in the descriptor)")
 	flags.BoolVarP(&options.wait, "wait", "w", false, "Wait for cluster creation")
 	flags.IntVarP(&options.interval, "interval", "i", 10, "Interval in seconds for polling cluster status")
-	flags.StringVarP(&options.template, "template", "t", "", "Cluster template for creation (use keys: pke-on-aws, pke-on-azure, ack, aks, gke, eks, oke)")
+	flags.StringVarP(&options.template, "template", "t", "", "Cluster template for creation (use keys: pke-on-aws, pke-on-azure, aks, gke, eks)")
 
 	return cmd
 }
@@ -440,11 +440,9 @@ func getProviders() map[string]interface{} {
 		pkeOnAws:     templates[pkeOnAws],
 		pkeOnAzure:   templates[pkeOnAzure],
 		pkeOnVsphere: templates[pkeOnVsphere],
-		"ack":        templates["ack"],
 		"aks":        templates["aks"],
 		"eks":        templates["eks"],
 		"gke":        templates["gke"],
-		"oke":        templates["oke"],
 	}
 }
 

@@ -451,8 +451,6 @@ func askClusterOutput(banzaiCLI cli.Cli, defaults clusterOutputSpec) (*clusterOu
 	if isEnabled {
 		var defaultProviderName string
 		switch defaults.Provider.Name {
-		case providerAlibabaOSSKey:
-			defaultProviderName = providerAlibabaOSSName
 		case providerGoogleGCSKey:
 			defaultProviderName = providerGoogleGCSName
 		case providerAzureKey:
@@ -471,7 +469,7 @@ func askClusterOutput(banzaiCLI cli.Cli, defaults clusterOutputSpec) (*clusterOu
 					DefaultValue: defaultProviderName,
 					Output:       &selectedProviderName,
 				},
-				Options: []string{providerAmazonS3Name, providerAzureName, providerGoogleGCSName, providerAlibabaOSSName},
+				Options: []string{providerAmazonS3Name, providerAzureName, providerGoogleGCSName},
 			},
 		}); err != nil {
 			return nil, errors.WrapIf(err, "error during getting cluster output provider")
@@ -480,11 +478,6 @@ func askClusterOutput(banzaiCLI cli.Cli, defaults clusterOutputSpec) (*clusterOu
 		var providerOptions *providerSpec
 		var err error
 		switch selectedProviderName {
-		case providerAlibabaOSSName:
-			providerOptions, err = askOssOptions(banzaiCLI, defaults.Provider)
-			if err != nil {
-				return nil, errors.WrapIf(err, "failed to get OSS options")
-			}
 		case providerAzureName:
 			providerOptions, err = askAzureOptions(banzaiCLI, defaults.Provider)
 			if err != nil {
@@ -541,26 +534,6 @@ func askGCSOptions(banzaiCLI cli.Cli, defaults providerSpec) (*providerSpec, err
 
 	return &providerSpec{
 		Name: providerGoogleGCSKey,
-		Bucket: bucketSpec{
-			Name: bucket.Name,
-		},
-		SecretID: secretID,
-	}, nil
-}
-
-func askOssOptions(banzaiCLI cli.Cli, defaults providerSpec) (*providerSpec, error) {
-	secretID, err := askSecret(banzaiCLI, alibabaType, defaults.SecretID, false)
-	if err != nil {
-		return nil, errors.WrapIf(err, "failed to get Alibaba secret")
-	}
-
-	bucket, err := askBuckets(banzaiCLI, alibabaType, secretID, defaults.Name)
-	if err != nil {
-		return nil, errors.WrapIf(err, "failed to get OSS buckets")
-	}
-
-	return &providerSpec{
-		Name: providerAlibabaOSSKey,
 		Bucket: bucketSpec{
 			Name: bucket.Name,
 		},
