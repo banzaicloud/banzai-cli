@@ -136,7 +136,7 @@ Deletes the object store bucket identified by the given name. The credentials fo
  * @param "Force" (optional.Bool) -  Is the operation forced
  * @param "ResourceGroup" (optional.String) -  Azure resource group the storage account that holds the bucket (storage container) to be deleted
  * @param "StorageAccount" (optional.String) -  Azure storage account to delete the bucket (storage container) from
- * @param "Location" (optional.String) -  The region to delete the bucket from. Required on Amazon, Oracle and Alibaba cloud providers.
+ * @param "Location" (optional.String) -  The region to delete the bucket from. Required on Amazon cloud provider.
 */
 func (a *StorageApiService) DeleteObjectStoreBucket(ctx _context.Context, orgId int32, name string, secretId string, cloudType string, localVarOptionals *DeleteObjectStoreBucketOpts) (*_nethttp.Response, error) {
 	var (
@@ -243,7 +243,7 @@ Retrieves the details of the object store bucket given its name
  * @param "SecretName" (optional.String) -  Secret identification by name
  * @param "ResourceGroup" (optional.String) -  Azure resource group to lookup the bucket(storage container) under. Required only on Azure cloud provider.
  * @param "StorageAccount" (optional.String) -  Azure storage account to lookup the bucket(storage container) under. Required only on Azure cloud provider.
- * @param "Location" (optional.String) -  The region to lookup the bucket under. Required on Amazon, Oracle and Alibaba cloud providers.
+ * @param "Location" (optional.String) -  The region to lookup the bucket under. Required on Amazon cloud provider.
 @return BucketInfo
 */
 func (a *StorageApiService) GetBucket(ctx _context.Context, orgId int32, name string, cloudType string, localVarOptionals *GetBucketOpts) (BucketInfo, *_nethttp.Response, error) {
@@ -363,7 +363,7 @@ Retrieves the status of the object store bucket given its name
  * @param "SecretName" (optional.String) -  Secret identification by name
  * @param "ResourceGroup" (optional.String) -  Azure resource group to lookup the bucket(storage container) under. Required only on Azure cloud provider.
  * @param "StorageAccount" (optional.String) -  Azure storage account to lookup the bucket(storage container) under. Required only on Azure cloud provider.
- * @param "Location" (optional.String) -  The region to lookup the bucket under. Required on Amazon, Oracle and Alibaba cloud providers.
+ * @param "Location" (optional.String) -  The region to lookup the bucket under. Required on Amazon provider.
 */
 func (a *StorageApiService) GetObjectStoreBucketStatus(ctx _context.Context, orgId int32, name string, cloudType string, localVarOptionals *GetObjectStoreBucketStatusOpts) (*_nethttp.Response, error) {
 	var (

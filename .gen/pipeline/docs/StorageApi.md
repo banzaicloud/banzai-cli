@@ -81,7 +81,7 @@ Name | Type | Description  | Notes
  **force** | **optional.Bool**| Is the operation forced | 
  **resourceGroup** | **optional.String**| Azure resource group the storage account that holds the bucket (storage container) to be deleted | 
  **storageAccount** | **optional.String**| Azure storage account to delete the bucket (storage container) from | 
- **location** | **optional.String**| The region to delete the bucket from. Required on Amazon, Oracle and Alibaba cloud providers. | 
+ **location** | **optional.String**| The region to delete the bucket from. Required on Amazon cloud provider. | 
 
 ### Return type
 
@@ -134,7 +134,7 @@ Name | Type | Description  | Notes
  **secretName** | **optional.String**| Secret identification by name | 
  **resourceGroup** | **optional.String**| Azure resource group to lookup the bucket(storage container) under. Required only on Azure cloud provider. | 
  **storageAccount** | **optional.String**| Azure storage account to lookup the bucket(storage container) under. Required only on Azure cloud provider. | 
- **location** | **optional.String**| The region to lookup the bucket under. Required on Amazon, Oracle and Alibaba cloud providers. | 
+ **location** | **optional.String**| The region to lookup the bucket under. Required on Amazon cloud provider. | 
 
 ### Return type
 
@@ -187,7 +187,7 @@ Name | Type | Description  | Notes
  **secretName** | **optional.String**| Secret identification by name | 
  **resourceGroup** | **optional.String**| Azure resource group to lookup the bucket(storage container) under. Required only on Azure cloud provider. | 
  **storageAccount** | **optional.String**| Azure storage account to lookup the bucket(storage container) under. Required only on Azure cloud provider. | 
- **location** | **optional.String**| The region to lookup the bucket under. Required on Amazon, Oracle and Alibaba cloud providers. | 
+ **location** | **optional.String**| The region to lookup the bucket under. Required on Amazon provider. | 
 
 ### Return type
 

@@ -32,8 +32,6 @@ tags:
   name: info
 - description: Storage related functions
   name: storage
-- description: Horizontal Pod Autoscaling related functions
-  name: hpa
 - description: Google projects related operations
   name: projects
 - description: ARK service related functions
@@ -4531,411 +4529,6 @@ paths:
       summary: Get deployment K8s images
       tags:
       - deployments
-  /api/v1/orgs/{orgId}/clusters/{id}/hpa:
-    delete:
-      description: Delete scaling info for a Helm deployment
-      operationId: DeleteDeploymentAutoscaling
-      parameters:
-      - description: Organization identifier
-        explode: false
-        in: path
-        name: orgId
-        required: true
-        schema:
-          type: integer
-        style: simple
-      - description: Cluster identifier
-        explode: false
-        in: path
-        name: id
-        required: true
-        schema:
-          type: integer
-        style: simple
-      - description: Deployment or StatefulSet name
-        explode: true
-        in: query
-        name: scaleTarget
-        required: true
-        schema:
-          type: string
-        style: form
-      responses:
-        "201":
-          description: Deployment autoscaling updated successfully
-        default:
-          content:
-            application/json:
-              examples:
-                BadRequest:
-                  value:
-                    code: 400
-                    message: Invalid request
-                    error: Failed to parse request.
-                Unauthorized:
-                  value:
-                    code: 401
-                    message: Unauthorized
-                    error: Unauthorized
-                OrganizationNotFound:
-                  value:
-                    code: 404
-                    message: Organization not found
-                    error: Organization not found
-                SecretAlreadyExists:
-                  value:
-                    code: 409
-                    message: Secret already exists
-                    error: Secret already exists
-                InternalServerError:
-                  value:
-                    code: 500
-                    message: Something went wrong
-                    error: Something went wrong
-              schema:
-                $ref: '#/components/schemas/CommonError'
-            application/problem+json:
-              examples:
-                BadRequest:
-                  value:
-                    type: about:blank
-                    title: Invalid request
-                    status: 400
-                    detail: Failed to parse request.
-                    instance: ""
-                    code: 400
-                    message: Failed to parse request.
-                    error: Invalid request
-                Unauthorized:
-                  value:
-                    type: about:blank
-                    title: Unauthorized
-                    status: 401
-                    detail: You are unauthorized to access this resource.
-                    instance: ""
-                    code: 401
-                    message: You are unauthorized to access this resource.
-                    error: Unauthorized
-                AccessDenied:
-                  value:
-                    type: about:blank
-                    title: Access denied
-                    status: 403
-                    detail: You are unauthorized to perform this action access this
-                      resource.
-                    instance: ""
-                    code: 403
-                    message: You are unauthorized to perform this action access this
-                      resource.
-                    error: Access denied
-                OrganizationNotFound:
-                  value:
-                    type: about:blank
-                    title: Organization not found
-                    status: 404
-                    detail: Organization not found
-                    instance: ""
-                    code: 404
-                    message: Organization not found
-                    error: Organization not found
-                SecretAlreadyExists:
-                  value:
-                    type: about:blank
-                    title: Secret already exists
-                    status: 409
-                    detail: Secret already exists
-                    instance: ""
-                    code: 409
-                    message: Secret already exists
-                    error: Secret already exists
-                InternalServerError:
-                  value:
-                    type: about:blank
-                    title: Internal server error
-                    status: 500
-                    detail: Something went wrong
-                    instance: ""
-                    code: 500
-                    message: Something went wrong
-                    error: Internal server error
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Internal server error
-      security:
-      - bearerAuth: []
-      summary: Delete Deployment Scaling
-      tags:
-      - hpa
-    get:
-      description: Get scaling info for a Helm deployment
-      operationId: GetDeploymentAutoscaling
-      parameters:
-      - description: Organization identifier
-        explode: false
-        in: path
-        name: orgId
-        required: true
-        schema:
-          type: integer
-        style: simple
-      - description: Cluster identifier
-        explode: false
-        in: path
-        name: id
-        required: true
-        schema:
-          type: integer
-        style: simple
-      - description: Deployment or StatefulSet name
-        explode: true
-        in: query
-        name: scaleTarget
-        required: true
-        schema:
-          type: string
-        style: form
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DeploymentScalingResponse'
-          description: Deployment autoscaling info
-        default:
-          content:
-            application/json:
-              examples:
-                BadRequest:
-                  value:
-                    code: 400
-                    message: Invalid request
-                    error: Failed to parse request.
-                Unauthorized:
-                  value:
-                    code: 401
-                    message: Unauthorized
-                    error: Unauthorized
-                OrganizationNotFound:
-                  value:
-                    code: 404
-                    message: Organization not found
-                    error: Organization not found
-                SecretAlreadyExists:
-                  value:
-                    code: 409
-                    message: Secret already exists
-                    error: Secret already exists
-                InternalServerError:
-                  value:
-                    code: 500
-                    message: Something went wrong
-                    error: Something went wrong
-              schema:
-                $ref: '#/components/schemas/CommonError'
-            application/problem+json:
-              examples:
-                BadRequest:
-                  value:
-                    type: about:blank
-                    title: Invalid request
-                    status: 400
-                    detail: Failed to parse request.
-                    instance: ""
-                    code: 400
-                    message: Failed to parse request.
-                    error: Invalid request
-                Unauthorized:
-                  value:
-                    type: about:blank
-                    title: Unauthorized
-                    status: 401
-                    detail: You are unauthorized to access this resource.
-                    instance: ""
-                    code: 401
-                    message: You are unauthorized to access this resource.
-                    error: Unauthorized
-                AccessDenied:
-                  value:
-                    type: about:blank
-                    title: Access denied
-                    status: 403
-                    detail: You are unauthorized to perform this action access this
-                      resource.
-                    instance: ""
-                    code: 403
-                    message: You are unauthorized to perform this action access this
-                      resource.
-                    error: Access denied
-                OrganizationNotFound:
-                  value:
-                    type: about:blank
-                    title: Organization not found
-                    status: 404
-                    detail: Organization not found
-                    instance: ""
-                    code: 404
-                    message: Organization not found
-                    error: Organization not found
-                SecretAlreadyExists:
-                  value:
-                    type: about:blank
-                    title: Secret already exists
-                    status: 409
-                    detail: Secret already exists
-                    instance: ""
-                    code: 409
-                    message: Secret already exists
-                    error: Secret already exists
-                InternalServerError:
-                  value:
-                    type: about:blank
-                    title: Internal server error
-                    status: 500
-                    detail: Something went wrong
-                    instance: ""
-                    code: 500
-                    message: Something went wrong
-                    error: Internal server error
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Internal server error
-      security:
-      - bearerAuth: []
-      summary: Get Deployment Scaling Info
-      tags:
-      - hpa
-    put:
-      description: Create / update scaling info for a Helm deployment
-      operationId: UpdateDeploymentAutoscaling
-      parameters:
-      - description: Organization identifier
-        explode: false
-        in: path
-        name: orgId
-        required: true
-        schema:
-          type: integer
-        style: simple
-      - description: Cluster identifier
-        explode: false
-        in: path
-        name: id
-        required: true
-        schema:
-          type: integer
-        style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DeploymentScalingRequest'
-        required: true
-      responses:
-        "201":
-          description: Deployment autoscaling updated successfully
-        default:
-          content:
-            application/json:
-              examples:
-                BadRequest:
-                  value:
-                    code: 400
-                    message: Invalid request
-                    error: Failed to parse request.
-                Unauthorized:
-                  value:
-                    code: 401
-                    message: Unauthorized
-                    error: Unauthorized
-                OrganizationNotFound:
-                  value:
-                    code: 404
-                    message: Organization not found
-                    error: Organization not found
-                SecretAlreadyExists:
-                  value:
-                    code: 409
-                    message: Secret already exists
-                    error: Secret already exists
-                InternalServerError:
-                  value:
-                    code: 500
-                    message: Something went wrong
-                    error: Something went wrong
-              schema:
-                $ref: '#/components/schemas/CommonError'
-            application/problem+json:
-              examples:
-                BadRequest:
-                  value:
-                    type: about:blank
-                    title: Invalid request
-                    status: 400
-                    detail: Failed to parse request.
-                    instance: ""
-                    code: 400
-                    message: Failed to parse request.
-                    error: Invalid request
-                Unauthorized:
-                  value:
-                    type: about:blank
-                    title: Unauthorized
-                    status: 401
-                    detail: You are unauthorized to access this resource.
-                    instance: ""
-                    code: 401
-                    message: You are unauthorized to access this resource.
-                    error: Unauthorized
-                AccessDenied:
-                  value:
-                    type: about:blank
-                    title: Access denied
-                    status: 403
-                    detail: You are unauthorized to perform this action access this
-                      resource.
-                    instance: ""
-                    code: 403
-                    message: You are unauthorized to perform this action access this
-                      resource.
-                    error: Access denied
-                OrganizationNotFound:
-                  value:
-                    type: about:blank
-                    title: Organization not found
-                    status: 404
-                    detail: Organization not found
-                    instance: ""
-                    code: 404
-                    message: Organization not found
-                    error: Organization not found
-                SecretAlreadyExists:
-                  value:
-                    type: about:blank
-                    title: Secret already exists
-                    status: 409
-                    detail: Secret already exists
-                    instance: ""
-                    code: 409
-                    message: Secret already exists
-                    error: Secret already exists
-                InternalServerError:
-                  value:
-                    type: about:blank
-                    title: Internal server error
-                    status: 500
-                    detail: Something went wrong
-                    instance: ""
-                    code: 500
-                    message: Something went wrong
-                    error: Internal server error
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Internal server error
-      security:
-      - bearerAuth: []
-      summary: Create / Update Deployment Scaling
-      tags:
-      - hpa
   /api/v1/tokens:
     get:
       description: List all API tokens
@@ -7933,8 +7526,6 @@ paths:
           - amazon
           - google
           - azure
-          - oracle
-          - alibaba
           type: string
         style: form
       - description: Is the operation forced
@@ -7963,8 +7554,8 @@ paths:
         schema:
           type: string
         style: form
-      - description: The region to delete the bucket from. Required on Amazon, Oracle
-          and Alibaba cloud providers.
+      - description: The region to delete the bucket from. Required on Amazon cloud
+          provider.
         explode: true
         in: query
         name: location
@@ -8124,8 +7715,6 @@ paths:
           - amazon
           - google
           - azure
-          - oracle
-          - alibaba
           type: string
         style: form
       - description: Azure resource group to lookup the bucket(storage container)
@@ -8146,8 +7735,8 @@ paths:
         schema:
           type: string
         style: form
-      - description: The region to lookup the bucket under. Required on Amazon, Oracle
-          and Alibaba cloud providers.
+      - description: The region to lookup the bucket under. Required on Amazon cloud
+          provider.
         explode: true
         in: query
         name: location
@@ -8311,8 +7900,6 @@ paths:
           - amazon
           - google
           - azure
-          - oracle
-          - alibaba
           type: string
         style: form
       - description: Azure resource group to lookup the bucket(storage container)
@@ -8333,8 +7920,7 @@ paths:
         schema:
           type: string
         style: form
-      - description: The region to lookup the bucket under. Required on Amazon, Oracle
-          and Alibaba cloud providers.
+      - description: The region to lookup the bucket under. Required on Amazon provider.
         explode: true
         in: query
         name: location
@@ -8479,8 +8065,6 @@ paths:
           - amazon
           - google
           - azure
-          - oracle
-          - alibaba
           type: string
         style: form
       - description: Identifies the region of the VPC network (required when cloudType
@@ -8650,8 +8234,6 @@ paths:
           - amazon
           - google
           - azure
-          - oracle
-          - alibaba
           type: string
         style: form
       - description: Identifies the region of the VPC network (required when cloudType
@@ -8821,8 +8403,6 @@ paths:
           - amazon
           - google
           - azure
-          - oracle
-          - alibaba
           type: string
         style: form
       - description: Identifies the region of the VPC network (required when cloudType
@@ -19389,27 +18969,6 @@ components:
       required:
       - eks
       type: object
-    CreateACKProperties:
-      properties:
-        ack:
-          $ref: '#/components/schemas/CreateACKProperties_ack'
-      required:
-      - ack
-      type: object
-    NodePoolsACK:
-      properties:
-        instanceType:
-          type: string
-        minCount:
-          example: 1
-          type: integer
-        maxCount:
-          example: 1
-          type: integer
-      required:
-      - count
-      - instanceType
-      type: object
     CreateAKSProperties:
       properties:
         aks:
@@ -19479,41 +19038,6 @@ components:
       - instanceType
       type: object
     LabelsGoogle:
-      example: labelValue
-      type: string
-    CreateUpdateOKEProperties:
-      properties:
-        oke:
-          $ref: '#/components/schemas/CreateUpdateOKEProperties_oke'
-      required:
-      - oke
-      type: object
-    NodePoolsOracle:
-      properties:
-        version:
-          example: v1.10.3
-          type: string
-        count:
-          example: 1
-          type: integer
-        image:
-          example: Oracle-Linux-7.5
-          type: string
-        shape:
-          example: VM.Standard1.1
-          type: string
-        labels:
-          additionalProperties:
-            $ref: '#/components/schemas/LabelsOracle'
-          type: object
-        subnetIds:
-          items:
-            example: ocid1.subnet.oc1.iad.abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwx
-            type: string
-          maxItems: 3
-          type: array
-      type: object
-    LabelsOracle:
       example: labelValue
       type: string
     CreatePKEProperties:
@@ -19732,13 +19256,6 @@ components:
           $ref: '#/components/schemas/UpdateEksProperties_eks'
       required:
       - eks
-      type: object
-    UpdateACKProperties:
-      properties:
-        ack:
-          $ref: '#/components/schemas/UpdateACKProperties_ack'
-      required:
-      - ack
       type: object
     UpdateAzureProperties:
       properties:
@@ -20949,28 +20466,6 @@ components:
       - token_uri
       - type
       type: object
-    SecretKeyValueOracle:
-      properties:
-        user_ocid:
-          type: string
-        tenancy_ocid:
-          type: string
-        api_key:
-          type: string
-        api_key_fingerprint:
-          type: string
-        region:
-          type: string
-        client_id:
-          type: string
-      required:
-      - api_key
-      - api_key_fingerprint
-      - compartment_ocid
-      - region
-      - tenancy_ocid
-      - user_ocid
-      type: object
     SecretKeyValueTLS:
       properties:
         hosts:
@@ -21191,7 +20686,6 @@ components:
       - $ref: '#/components/schemas/NodePoolStatusAmazon'
       - $ref: '#/components/schemas/NodePoolStatusAzure'
       - $ref: '#/components/schemas/NodePoolStatusGoogle'
-      - $ref: '#/components/schemas/NodePoolStatusOracle'
       - $ref: '#/components/schemas/NodePoolStatusVSphere'
     NodePoolStatusAmazon:
       properties:
@@ -21270,31 +20764,6 @@ components:
             $ref: '#/components/schemas/ResourceSummary'
           type: object
       type: object
-    NodePoolStatusOracle:
-      properties:
-        count:
-          example: 1
-          type: integer
-        minCount:
-          example: 1
-          type: integer
-        maxCount:
-          example: 2
-          type: integer
-        instanceType:
-          example: VM.Standard1.1
-          type: string
-        image:
-          example: ami-4d485ca7
-          type: string
-        autoscaling:
-          example: false
-          type: boolean
-        resourceSummary:
-          additionalProperties:
-            $ref: '#/components/schemas/ResourceSummary'
-          type: object
-      type: object
     NodePoolStatusVSphere:
       properties:
         count:
@@ -21322,10 +20791,6 @@ components:
         properties:
           amazon:
             location: eu-west-1
-          alibaba:
-            location: eu-central-1
-          oracle:
-            location: location
           google:
             location: europe
           azure:
@@ -21351,10 +20816,6 @@ components:
       example:
         amazon:
           location: eu-west-1
-        alibaba:
-          location: eu-central-1
-        oracle:
-          location: location
         google:
           location: europe
         azure:
@@ -21362,27 +20823,12 @@ components:
           location: westeurope
           storageAccount: mystorageaccount
       properties:
-        alibaba:
-          $ref: '#/components/schemas/CreateAlibabaObjectStoreBucketProperties'
         amazon:
           $ref: '#/components/schemas/CreateAmazonObjectStoreBucketProperties'
         azure:
           $ref: '#/components/schemas/CreateAzureObjectStoreBucketProperties'
         google:
           $ref: '#/components/schemas/CreateGoogleObjectStoreBucketProperties'
-        oracle:
-          $ref: '#/components/schemas/CreateOracleObjectStoreBucketProperties'
-      type: object
-    CreateAlibabaObjectStoreBucketProperties:
-      example:
-        location: eu-central-1
-      nullable: true
-      properties:
-        location:
-          example: eu-central-1
-          type: string
-      required:
-      - location
       type: object
     CreateAmazonObjectStoreBucketProperties:
       example:
@@ -21426,16 +20872,6 @@ components:
       - resourceGroup
       - storageAccount
       type: object
-    CreateOracleObjectStoreBucketProperties:
-      example:
-        location: location
-      nullable: true
-      properties:
-        location:
-          type: string
-      required:
-      - location
-      type: object
     CreateObjectStoreBucketResponse:
       example:
         cloud: amazon
@@ -21449,8 +20885,6 @@ components:
           - amazon
           - azure
           - google
-          - oracle
-          - alibaba
           example: amazon
           type: string
       required:
@@ -21461,8 +20895,6 @@ components:
       example:
         cloud: amazon
         notes: There's no secret with this ID
-        oracle:
-          namespace: namespace
         managed: true
         name: mybucket
         aks:
@@ -21501,8 +20933,6 @@ components:
           $ref: '#/components/schemas/BucketInfo_secret'
         aks:
           $ref: '#/components/schemas/AzureBlobStorageProps'
-        oracle:
-          $ref: '#/components/schemas/OracleStorageProps'
         status:
           description: the status of the bucket
           enum:
@@ -21623,15 +21053,6 @@ components:
       required:
       - resourceGroup
       - storageAccount
-      type: object
-    OracleStorageProps:
-      example:
-        namespace: namespace
-      properties:
-        namespace:
-          type: string
-      required:
-      - namespace
       type: object
     PodDetailsResponse:
       items:
@@ -21805,174 +21226,6 @@ components:
       properties:
         name:
           example: NewResourceGroupName
-          type: string
-      type: object
-    DeploymentScalingRequest:
-      example:
-        scaleTarget: k8sDeploymentName
-        minReplicas: 1
-        maxReplicas: 3
-        cpu:
-          targetAverageUtilization: 70
-        memory:
-          targetAverageValue: 500Mi
-        customMetrics:
-          custom_metric_name:
-            type: pod
-            targetAverageValue: 700m
-      properties:
-        scaleTarget:
-          example: k8sDeploymentName
-          type: string
-        minReplicas:
-          example: 1
-          format: int32
-          type: integer
-        maxReplicas:
-          example: 3
-          format: int32
-          type: integer
-        cpu:
-          $ref: '#/components/schemas/ResourceMetric'
-        memory:
-          $ref: '#/components/schemas/ResourceMetric'
-        customMetrics:
-          additionalProperties:
-            $ref: '#/components/schemas/CustomMetric'
-          example:
-            custom_metric_name:
-              type: pod
-              targetAverageValue: 700m
-          type: object
-      required:
-      - maxReplicas
-      - minReplicas
-      - scaleTarget
-      title: Create / Update Deployment Scaling Request
-      type: object
-    ResourceMetric:
-      properties:
-        targetAverageValue:
-          example: 700m
-          type: string
-        targetAverageValueType:
-          enum:
-          - quantity
-          - percentage
-          type: string
-      required:
-      - targetAverageValue
-      - targetAverageValueType
-      title: ResourceMetric
-      type: object
-    CustomMetric:
-      properties:
-        type:
-          example: pod
-          type: string
-        targetAverageValue:
-          example: 700m
-          type: string
-      required:
-      - targetValue
-      - type
-      title: CustomMetric
-      type: object
-    DeploymentScalingResponse:
-      example:
-      - scaleTarget: k8sDeploymentName
-        kind: Deployment
-        minReplicas: 1
-        maxReplicas: 3
-        cpu:
-          targetAverageValueType: percentage
-          targetAverageValue: 60
-          currentAverageValue: 0
-        memory:
-          targetAverageValueType: quantity
-          targetAverageValue: 1100Mi
-          currentAverageUtilization: quantity
-          currentAverageValue: 780013568
-        customMetrics:
-          custom_metric_name:
-            type: pod
-            targetAverageValue: 700m
-            currentAverageValue: 300m
-        status:
-          currentReplicas: 1
-          desiredReplicas: 1
-          message: 'ScalingActive = true, lastTransitionTime: 2018-00-22T15:31:16Z,
-            the HPA was able to successfully calculate a replica count from memory
-            resource'
-      items:
-        properties:
-          scaleTarget:
-            example: k8sDeploymentName
-            type: string
-          kind:
-            example: Deployment
-            type: string
-          minReplicas:
-            example: 1
-            format: int32
-            type: integer
-          maxReplicas:
-            example: 3
-            format: int32
-            type: integer
-          cpu:
-            $ref: '#/components/schemas/ResourceMetricStatus'
-          memory:
-            $ref: '#/components/schemas/ResourceMetricStatus'
-          customMetrics:
-            additionalProperties:
-              $ref: '#/components/schemas/CustomMetricStatus'
-            example:
-              custom_metric_name:
-                type: pod
-                targetAverageValue: 700m
-                currentAverageValue: 300m
-            type: object
-          status:
-            $ref: '#/components/schemas/DeploymentScaleStatus'
-        type: object
-      title: Get Deployment Scaling Response
-      type: array
-    ResourceMetricStatus:
-      properties:
-        allOf:
-          $ref: '#/components/schemas/ResourceMetric'
-        currentAverageValue:
-          example: 100m
-          type: string
-        currentAverageValueType:
-          enum:
-          - quantity
-          - percentage
-          type: string
-      type: object
-    CustomMetricStatus:
-      properties:
-        allOf:
-          $ref: '#/components/schemas/CustomMetric'
-        currentAverageValue:
-          example: 300m
-          type: string
-      type: object
-    DeploymentScaleStatus:
-      properties:
-        currentReplicas:
-          example: 1
-          format: int32
-          type: integer
-        desiredReplicas:
-          example: 1
-          format: int32
-          type: integer
-        message:
-          example: 'ScalingActive = true, lastTransitionTime: 2018-08-22T15:31:16Z,
-            the HPA was able to successfully calculate a replica count from memory
-            resource'
           type: string
       type: object
     ScanLogList:
@@ -23820,23 +23073,6 @@ components:
           type: object
       required:
       - nodePools
-    CreateACKProperties_ack:
-      properties:
-        regionId:
-          type: string
-        zoneId:
-          type: string
-        vswitchId:
-          example: vsw-zysrfslpfhasklu338qys
-          type: string
-        nodePools:
-          additionalProperties:
-            $ref: '#/components/schemas/NodePoolsACK'
-          type: object
-      required:
-      - nodePools
-      - regionId
-      - zoneId
     CreateAKSProperties_aks:
       properties:
         resourceGroup:
@@ -23886,27 +23122,6 @@ components:
           type: object
       required:
       - nodePools
-    CreateUpdateOKEProperties_oke:
-      properties:
-        version:
-          example: v1.10.3
-          type: string
-        nodePools:
-          additionalProperties:
-            $ref: '#/components/schemas/NodePoolsOracle'
-          type: object
-        vcnId:
-          example: ocid1.vcn.oc1.iad.aaaaaaaapt4vnv6vhy4nxwxfq7e5hji44ugdz3dqpffxk77gurec7skjbcyq
-          type: string
-        lbSubnetId1:
-          example: ocid1.subnet.oc1.iad.abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwx
-          type: string
-        lbSubnetId2:
-          example: ocid1.subnet.oc1.iad.abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwx
-          type: string
-      required:
-      - nodePools
-      - version
     CreatePKEProperties_network:
       properties:
         apiServerAddress:
@@ -23966,14 +23181,6 @@ components:
         nodePools:
           additionalProperties:
             $ref: '#/components/schemas/EKSNodePool'
-          type: object
-      required:
-      - nodePools
-    UpdateACKProperties_ack:
-      properties:
-        nodePools:
-          additionalProperties:
-            $ref: '#/components/schemas/NodePoolsACK'
           type: object
       required:
       - nodePools

@@ -11,7 +11,6 @@ Name | Type | Description | Notes
 **Notes** | **string** | notes for the bucket | [optional] 
 **Secret** | [**BucketInfoSecret**](BucketInfo_secret.md) |  | [optional] 
 **Aks** | [**AzureBlobStorageProps**](AzureBlobStorageProps.md) |  | [optional] 
-**Oracle** | [**OracleStorageProps**](OracleStorageProps.md) |  | [optional] 
 **Status** | **string** | the status of the bucket | 
 **StatusMessage** | **string** | the reason for the error status | [optional] 
 
