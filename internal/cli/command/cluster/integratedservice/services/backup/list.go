@@ -70,7 +70,7 @@ func runList(banzaiCli cli.Cli, options listOptions) error {
 		return NotAvailableError{}
 	}
 
-	if err := syncBackupList(client, orgID); err != nil {
+	if err := syncBackupList(client, orgID, clusterID); err != nil {
 		return errors.WrapIf(err, "failed to sync backups")
 	}
 
@@ -116,17 +116,12 @@ func runList(banzaiCli cli.Cli, options listOptions) error {
 	return nil
 }
 
-func syncBackupList(client *pipeline.APIClient, orgID int32) error {
+func syncBackupList(client *pipeline.APIClient, orgID int32, clusterID int32) error {
 	ctx := context.Background()
 
-	_, err := client.ArkBucketsApi.SyncBackupBucket(ctx, orgID)
+	_, err := client.ArkBackupsApi.SyncARKBackupsOfACluster(ctx, orgID, clusterID)
 	if err != nil {
-		return errors.WrapIf(err, "failed to sync backup buckets")
-	}
-
-	_, err = client.ArkBackupsApi.SyncOrgBackups(ctx, orgID)
-	if err != nil {
-		return errors.WrapIfWithDetails(err, "failed to sync organization backups")
+		return errors.WrapIfWithDetails(err, "failed to sync cluster backups")
 	}
 
 	return nil
