@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"emperror.dev/errors"
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -61,6 +62,10 @@ func runList(banzaiCli cli.Cli, options listOptions) error {
 	orgID := banzaiCli.Context().OrganizationID()
 	clusterID := options.ClusterID()
 
+	if err := syncRestoreList(client, orgID, clusterID); err != nil {
+		return errors.WrapIf(err, "failed to sync restores")
+	}
+
 	restores, _, err := client.ArkRestoresApi.ListARKRestores(context.Background(), orgID, clusterID)
 	if err != nil {
 		return errors.WrapIfWithDetails(err, "failed to list restores", "clusterID", clusterID)
@@ -92,6 +97,17 @@ func runList(banzaiCli cli.Cli, options listOptions) error {
 
 	if err := output.Output(ctx, table); err != nil {
 		log.Fatal(err)
+	}
+
+	return nil
+}
+
+func syncRestoreList(client *pipeline.APIClient, orgID int32, clusterID int32) error {
+	ctx := context.Background()
+
+	_, err := client.ArkRestoresApi.SyncARKRestoresOfACluster(ctx, orgID, clusterID)
+	if err != nil {
+		return errors.WrapIfWithDetails(err, "failed to sync cluster restores")
 	}
 
 	return nil
