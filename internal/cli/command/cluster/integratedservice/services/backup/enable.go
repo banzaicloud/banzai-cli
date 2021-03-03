@@ -230,8 +230,8 @@ func buildEnableRequestInteractively(banzaiCli cli.Cli, options enableOptions) (
 			input.QuestionInput{
 				QuestionBase: input.QuestionBase{
 					Message: "Service Account Role ARN to use for Velero",
-					Help:    "This optional IAM role ARN will be used to annotate the service account for Velero and should be associated with the relevant snapshot permissions. Alternatively, when no service account role ARN is specified, either an optional cluster secret can be deployed or a node instance role can be extended with the snapshot permissions for creating volume snapshots with Velero."},
-				DefaultValue: "arn:aws:iam::YOUR_ACCOUNT_ID:role/YOUR_ROLE_NAME",
+					Help:    "This optional IAM role ARN will be used to annotate the service account for Velero and should be associated with the relevant snapshot permissions. Alternatively, when no service account role ARN is specified, either an optional cluster secret can be deployed or a node instance role can be extended with the snapshot permissions for creating volume snapshots with Velero. Example: arn:aws:iam::YOUR_ACCOUNT_ID:role/YOUR_ROLE_NAME"},
+				DefaultValue: "",
 				Output:       &serviceAccountRoleARN,
 			},
 		})

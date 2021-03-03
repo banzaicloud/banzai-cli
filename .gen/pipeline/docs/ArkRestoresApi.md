@@ -9,7 +9,7 @@ Method | HTTP request | Description
 [**GetARKRestore**](ArkRestoresApi.md#GetARKRestore) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/restores/{restoreId} | Get ARK restore
 [**GetARKRestoreResuts**](ArkRestoresApi.md#GetARKRestoreResuts) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/restores/{restoreId}/results | Get ARK restore results
 [**ListARKRestores**](ArkRestoresApi.md#ListARKRestores) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/restores | List ARK restores
-[**SyncARKRestoresOfACluster**](ArkRestoresApi.md#SyncARKRestoresOfACluster) | **Put** /api/v1/orgs/{orgId}/restores/{id}/sync | Sync ARK restores of a cluster
+[**SyncARKRestoresOfACluster**](ArkRestoresApi.md#SyncARKRestoresOfACluster) | **Put** /api/v1/orgs/{orgId}/clusters/{id}/restores/sync | Sync ARK restores of a cluster
 
 
 
