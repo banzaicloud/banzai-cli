@@ -11,7 +11,7 @@ Method | HTTP request | Description
 [**GetARKBackupLogs**](ArkBackupsApi.md#GetARKBackupLogs) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/backups/{backupId}/logs | Get ARK backup logs
 [**ListARKBackupsForOrganization**](ArkBackupsApi.md#ListARKBackupsForOrganization) | **Get** /api/v1/orgs/{orgId}/backups | List ARK backups of an Organization
 [**ListARKBackupsOfACluster**](ArkBackupsApi.md#ListARKBackupsOfACluster) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/backups | List ARK backups of a cluster
-[**SyncARKBackupsOfACluster**](ArkBackupsApi.md#SyncARKBackupsOfACluster) | **Put** /api/v1/orgs/{orgId}/backups/{id}/sync | Sync ARK backups of a cluster
+[**SyncARKBackupsOfACluster**](ArkBackupsApi.md#SyncARKBackupsOfACluster) | **Put** /api/v1/orgs/{orgId}/clusters/{id}/backups/sync | Sync ARK backups of a cluster
 [**SyncOrgBackups**](ArkBackupsApi.md#SyncOrgBackups) | **Put** /api/v1/orgs/{orgId}/backups/sync | Sync ARK backups of an Organization
 
 

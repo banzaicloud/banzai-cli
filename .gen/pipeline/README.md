@@ -46,7 +46,7 @@ Class | Method | HTTP request | Description
 *ArkBackupsApi* | [**GetARKBackupLogs**](docs/ArkBackupsApi.md#getarkbackuplogs) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/backups/{backupId}/logs | Get ARK backup logs
 *ArkBackupsApi* | [**ListARKBackupsForOrganization**](docs/ArkBackupsApi.md#listarkbackupsfororganization) | **Get** /api/v1/orgs/{orgId}/backups | List ARK backups of an Organization
 *ArkBackupsApi* | [**ListARKBackupsOfACluster**](docs/ArkBackupsApi.md#listarkbackupsofacluster) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/backups | List ARK backups of a cluster
-*ArkBackupsApi* | [**SyncARKBackupsOfACluster**](docs/ArkBackupsApi.md#syncarkbackupsofacluster) | **Put** /api/v1/orgs/{orgId}/backups/{id}/sync | Sync ARK backups of a cluster
+*ArkBackupsApi* | [**SyncARKBackupsOfACluster**](docs/ArkBackupsApi.md#syncarkbackupsofacluster) | **Put** /api/v1/orgs/{orgId}/clusters/{id}/backups/sync | Sync ARK backups of a cluster
 *ArkBackupsApi* | [**SyncOrgBackups**](docs/ArkBackupsApi.md#syncorgbackups) | **Put** /api/v1/orgs/{orgId}/backups/sync | Sync ARK backups of an Organization
 *ArkBucketsApi* | [**CreateBackupBucket**](docs/ArkBucketsApi.md#createbackupbucket) | **Post** /api/v1/orgs/{orgId}/backupbuckets | Create backup bucket
 *ArkBucketsApi* | [**DeleteBackupBucket**](docs/ArkBucketsApi.md#deletebackupbucket) | **Delete** /api/v1/orgs/{orgId}/backupbuckets/{bucketId} | Delete backup bucket by ID
@@ -58,7 +58,7 @@ Class | Method | HTTP request | Description
 *ArkRestoresApi* | [**GetARKRestore**](docs/ArkRestoresApi.md#getarkrestore) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/restores/{restoreId} | Get ARK restore
 *ArkRestoresApi* | [**GetARKRestoreResuts**](docs/ArkRestoresApi.md#getarkrestoreresuts) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/restores/{restoreId}/results | Get ARK restore results
 *ArkRestoresApi* | [**ListARKRestores**](docs/ArkRestoresApi.md#listarkrestores) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/restores | List ARK restores
-*ArkRestoresApi* | [**SyncARKRestoresOfACluster**](docs/ArkRestoresApi.md#syncarkrestoresofacluster) | **Put** /api/v1/orgs/{orgId}/restores/{id}/sync | Sync ARK restores of a cluster
+*ArkRestoresApi* | [**SyncARKRestoresOfACluster**](docs/ArkRestoresApi.md#syncarkrestoresofacluster) | **Put** /api/v1/orgs/{orgId}/clusters/{id}/restores/sync | Sync ARK restores of a cluster
 *ArkSchedulesApi* | [**CreateARKSchedule**](docs/ArkSchedulesApi.md#createarkschedule) | **Post** /api/v1/orgs/{orgId}/clusters/{id}/schedules | Create ARK schedule
 *ArkSchedulesApi* | [**DeleteARKSchedule**](docs/ArkSchedulesApi.md#deletearkschedule) | **Delete** /api/v1/orgs/{orgId}/clusters/{id}/schedules/{scheduleName} | Delete ARK schedule
 *ArkSchedulesApi* | [**GetARKSchedule**](docs/ArkSchedulesApi.md#getarkschedule) | **Get** /api/v1/orgs/{orgId}/clusters/{id}/schedules/{scheduleName} | Get ARK schedule
