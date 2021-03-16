@@ -225,6 +225,7 @@ func buildEnableRequestInteractively(banzaiCli cli.Cli, options enableOptions) (
 
 	serviceAccountRoleARN := ""
 	useClusterSecret := false
+	useProviderSecret := false
 	if options.ClusterCloud() == amazonType {
 		err = input.DoQuestions([]input.QuestionMaker{
 			input.QuestionInput{
@@ -243,14 +244,29 @@ func buildEnableRequestInteractively(banzaiCli cli.Cli, options enableOptions) (
 			err = input.DoQuestions([]input.QuestionMaker{
 				input.QuestionConfirm{
 					QuestionBase: input.QuestionBase{
-						Message: "Deploy cluster secret to give access for Velero to make volume snapshots",
-						Help:    "This option deploys the cloud provider secret used for creating this cluster to the cluster itself. In case you are not deploying cluster secret you must add snapshot permissions to your node instance role."},
+						Message: "Use provider secret to give access for Velero to make volume snapshots",
+						Help:    "This option configures the specified provider secret for volume snapshots."},
 					DefaultValue: false,
-					Output:       &useClusterSecret,
+					Output:       &useProviderSecret,
 				},
 			})
 			if err != nil {
-				return pipeline.EnableArkRequest{}, errors.WrapIf(err, "error during getting useClusterSecret option")
+				return pipeline.EnableArkRequest{}, errors.WrapIf(err, "error during getting useBucketSecret option")
+			}
+
+			if !useProviderSecret {
+				err = input.DoQuestions([]input.QuestionMaker{
+					input.QuestionConfirm{
+						QuestionBase: input.QuestionBase{
+							Message: "Deploy cluster secret to give access for Velero to make volume snapshots",
+							Help:    "This option deploys the cloud provider secret used for creating this cluster to the cluster itself. In case you are not deploying cluster secret you must add snapshot permissions to your node instance role."},
+						DefaultValue: false,
+						Output:       &useClusterSecret,
+					},
+				})
+				if err != nil {
+					return pipeline.EnableArkRequest{}, errors.WrapIf(err, "error during getting useClusterSecret option")
+				}
 			}
 		}
 	}
@@ -263,6 +279,7 @@ func buildEnableRequestInteractively(banzaiCli cli.Cli, options enableOptions) (
 		SecretId:   bucketInfo.secretID,
 		UseClusterSecret: useClusterSecret,
 		ServiceAccountRoleARN: serviceAccountRoleARN,
+		UseProviderSecret: useProviderSecret,
 	}, nil
 }
 

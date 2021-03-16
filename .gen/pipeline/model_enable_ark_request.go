@@ -22,6 +22,8 @@ type EnableArkRequest struct {
 	UseClusterSecret bool `json:"useClusterSecret,omitempty"`
 	// relevant only in case of Amazon clusters. This a third option to give permissions for volume snapshots to Velero, besides the default NodeInstance role or cluster secret deployment.
 	ServiceAccountRoleARN string `json:"serviceAccountRoleARN,omitempty"`
+	// relevant only in case of Amazon clusters. This a fourth option to give permissions for volume snapshots to Velero. Should you set to true Pipeline will configure your provider secret (specified in secretId) for volume snapshot.
+	UseProviderSecret bool `json:"useProviderSecret,omitempty"`
 	// required only case of Azure
 	StorageAccount string `json:"storageAccount,omitempty"`
 	// required only case of Azure
