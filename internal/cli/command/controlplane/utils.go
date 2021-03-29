@@ -164,7 +164,7 @@ func getImageMetadata(cpContext *cpContext, values map[string]interface{}, write
 	}
 
 	awsAccessKeyID := ""
-	if values["provider"] == providerEc2 || imageMeta.Custom.CredentialType == "aws" {
+	if values["provider"] == providerEc2 || values["passAWSCredentials"] == true || imageMeta.Custom.CredentialType == "aws" {
 		profile := ""
 		assumeRole := ""
 		if v, ok := values["providerConfig"]; ok {
