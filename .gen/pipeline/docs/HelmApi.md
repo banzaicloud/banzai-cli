@@ -6,6 +6,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**HelmChartDetails**](HelmApi.md#HelmChartDetails) | **Get** /api/v1/orgs/{orgId}/helm/chart/{repoName}/{chartName} | Chart details
 [**HelmChartList**](HelmApi.md#HelmChartList) | **Get** /api/v1/orgs/{orgId}/helm/charts | Chart List
+[**HelmCurrentClusterChartList**](HelmApi.md#HelmCurrentClusterChartList) | **Get** /api/v1/orgs/{orgId}/helm/cluster-charts | Current Chart List of Managed Clusters
 [**HelmListRepos**](HelmApi.md#HelmListRepos) | **Get** /api/v1/orgs/{orgId}/helm/repos | List repositories
 [**HelmReposAdd**](HelmApi.md#HelmReposAdd) | **Post** /api/v1/orgs/{orgId}/helm/repos | Add Repo
 [**HelmReposDelete**](HelmApi.md#HelmReposDelete) | **Delete** /api/v1/orgs/{orgId}/helm/repos/{repoName} | Delete Repo
@@ -95,6 +96,40 @@ Name | Type | Description  | Notes
 ### Return type
 
 **[]map[string]interface{}**
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json, application/problem+json, 
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## HelmCurrentClusterChartList
+
+> []HelmChartDetailsResponse HelmCurrentClusterChartList(ctx, orgId)
+
+Current Chart List of Managed Clusters
+
+Get the list of Helm charts currently used for managed clusters
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**orgId** | **int32**| Organization identifier | 
+
+### Return type
+
+[**[]HelmChartDetailsResponse**](HelmChartDetailsResponse.md)
 
 ### Authorization
 

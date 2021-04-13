@@ -129,6 +129,7 @@ Class | Method | HTTP request | Description
 *GoogleApi* | [**ListProjects**](docs/GoogleApi.md#listprojects) | **Get** /api/v1/orgs/{orgId}/cloud/google/projects | Retrieves projects visible for the user identified by the secret id
 *HelmApi* | [**HelmChartDetails**](docs/HelmApi.md#helmchartdetails) | **Get** /api/v1/orgs/{orgId}/helm/chart/{repoName}/{chartName} | Chart details
 *HelmApi* | [**HelmChartList**](docs/HelmApi.md#helmchartlist) | **Get** /api/v1/orgs/{orgId}/helm/charts | Chart List
+*HelmApi* | [**HelmCurrentClusterChartList**](docs/HelmApi.md#helmcurrentclusterchartlist) | **Get** /api/v1/orgs/{orgId}/helm/cluster-charts | Current Chart List of Managed Clusters
 *HelmApi* | [**HelmListRepos**](docs/HelmApi.md#helmlistrepos) | **Get** /api/v1/orgs/{orgId}/helm/repos | List repositories
 *HelmApi* | [**HelmReposAdd**](docs/HelmApi.md#helmreposadd) | **Post** /api/v1/orgs/{orgId}/helm/repos | Add Repo
 *HelmApi* | [**HelmReposDelete**](docs/HelmApi.md#helmreposdelete) | **Delete** /api/v1/orgs/{orgId}/helm/repos/{repoName} | Delete Repo
