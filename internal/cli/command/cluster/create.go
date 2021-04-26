@@ -264,30 +264,6 @@ func buildInteractiveEKSCreateRequest(banzaiCli cli.Cli, out map[string]interfac
 	unstructured.SetNestedField(out, eksOut, "properties", "eks")
 	out["location"] = region
 
-	// add scaleOptions
-	var addScaleOptions bool
-	_ = survey.AskOne(&survey.Confirm{Message: "Do you want enable Hollowtrees?"}, &addScaleOptions)
-	if !addScaleOptions {
-		return nil
-	}
-
-	scaleOptions := pipeline.ScaleOptions{
-		Enabled:             true,
-		DesiredCpu:          float64(sumCpu),
-		DesiredMem:          float64(sumMem),
-		DesiredGpu:          0,
-		OnDemandPct:         int32(onDemandPct),
-		KeepDesiredCapacity: true,
-	}
-
-	marshalledScaleOptions, err := json.Marshal(scaleOptions)
-	if err != nil {
-		return errors.WrapIf(err, "failed to marshal EKS properties")
-	}
-	var scaleOptionsOut interface{}
-	utils.Unmarshal(marshalledScaleOptions, &scaleOptionsOut)
-	out["scaleOptions"] = scaleOptionsOut
-
 	return nil
 }
 

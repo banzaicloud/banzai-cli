@@ -8,7 +8,6 @@ Name | Type | Description | Notes
 **SecretId** | **string** |  | [optional] 
 **SecretName** | **string** |  | [optional] 
 **SshSecretId** | **string** |  | [optional] 
-**ScaleOptions** | [**ScaleOptions**](ScaleOptions.md) |  | [optional] 
 **Type** | **string** |  | 
 **Kubernetes** | [**CreatePkeClusterKubernetes**](CreatePKEClusterKubernetes.md) |  | 
 **Proxy** | [**PkeClusterHttpProxy**](PKEClusterHTTPProxy.md) |  | [optional] 
