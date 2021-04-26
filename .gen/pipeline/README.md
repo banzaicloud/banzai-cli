@@ -369,7 +369,6 @@ Class | Method | HTTP request | Description
  - [RestoreResultWarnings](docs/RestoreResultWarnings.md)
  - [RestoreResultsResponse](docs/RestoreResultsResponse.md)
  - [RouteTableInfo](docs/RouteTableInfo.md)
- - [ScaleOptions](docs/ScaleOptions.md)
  - [ScanLogItem](docs/ScanLogItem.md)
  - [ScanLogItemImage](docs/ScanLogItemImage.md)
  - [ScheduleResponse](docs/ScheduleResponse.md)

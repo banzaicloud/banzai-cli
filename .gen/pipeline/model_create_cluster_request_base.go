@@ -16,6 +16,5 @@ type CreateClusterRequestBase struct {
 	SecretId string `json:"secretId,omitempty"`
 	SecretName string `json:"secretName,omitempty"`
 	SshSecretId string `json:"sshSecretId,omitempty"`
-	ScaleOptions ScaleOptions `json:"scaleOptions,omitempty"`
 	Type string `json:"type"`
 }
