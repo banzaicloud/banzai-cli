@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **Autoscaling** | [**NodePoolAutoScaling**](NodePoolAutoScaling.md) |  | [optional] 
 **VolumeEncryption** | Pointer to [**EksNodePoolVolumeEncryption**](EKSNodePoolVolumeEncryption.md) |  | [optional] 
 **VolumeSize** | **int32** | Size of the EBS volume in GBs of the nodes in the pool. | [optional] 
+**VolumeType** | **string** | Type of the EBS volume of the nodes in the pool (default gp3). | [optional] 
 **InstanceType** | **string** | The instance type to use for your node pool. | [optional] 
 **Image** | **string** | The instance AMI to use for your node pool. | [optional] 
 **Version** | **string** | The Kubernetes version to use for your node pool. | [optional] 

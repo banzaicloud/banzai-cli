@@ -7,6 +7,7 @@ Name | Type | Description | Notes
 **Autoscaling** | [**NodePoolAutoScaling**](NodePoolAutoScaling.md) |  | [optional] 
 **VolumeEncryption** | Pointer to [**EksNodePoolVolumeEncryption**](EKSNodePoolVolumeEncryption.md) |  | [optional] 
 **VolumeSize** | **int32** | Size of the EBS volume in GBs of the nodes in the pool. | [optional] 
+**VolumeType** | **string** | Type of the EBS volume of the nodes in the pool (default gp3). | [optional] 
 **InstanceType** | **string** | Machine instance type. | 
 **Image** | **string** | Instance AMI. | [optional] 
 **SpotPrice** | **string** | The upper limit price for the requested spot instance. If this field is left empty or 0 passed in on-demand instances used instead of spot instances. | [optional] 

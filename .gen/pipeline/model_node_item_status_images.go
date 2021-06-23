@@ -13,5 +13,5 @@ package pipeline
 // NodeItemStatusImages struct for NodeItemStatusImages
 type NodeItemStatusImages struct {
 	Name []string `json:"name,omitempty"`
-	SizeBytes int32 `json:"sizeBytes,omitempty"`
+	SizeBytes int64 `json:"sizeBytes,omitempty"`
 }
