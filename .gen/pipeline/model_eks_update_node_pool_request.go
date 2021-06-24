@@ -20,6 +20,8 @@ type EksUpdateNodePoolRequest struct {
 	VolumeEncryption *EksNodePoolVolumeEncryption `json:"volumeEncryption,omitempty"`
 	// Size of the EBS volume in GBs of the nodes in the pool.
 	VolumeSize int32 `json:"volumeSize,omitempty"`
+	// Type of the EBS volume of the nodes in the pool (default gp3).
+	VolumeType string `json:"volumeType,omitempty"`
 	// The instance type to use for your node pool.
 	InstanceType string `json:"instanceType,omitempty"`
 	// The instance AMI to use for your node pool.
