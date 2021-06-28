@@ -50,6 +50,7 @@ type nodePoolListItem struct {
 	MaximumSize      int32
 	VolumeEncryption nodePoolVolumeEncryption
 	VolumeSize       int32
+	VolumeType       string
 	InstanceType     string
 	Image            string
 	SpotPrice        string
@@ -136,6 +137,7 @@ func runNodePoolList(banzaiCli cli.Cli, options nodePoolListOptions) error {
 			MaximumSize:      nodePool.Autoscaling.MaxSize,
 			VolumeEncryption: newNodePoolVolumeEncryption(nodePool.VolumeEncryption),
 			VolumeSize:       nodePool.VolumeSize,
+			VolumeType:       nodePool.VolumeType,
 			InstanceType:     nodePool.InstanceType,
 			Image:            nodePool.Image,
 			SpotPrice:        nodePool.SpotPrice,
