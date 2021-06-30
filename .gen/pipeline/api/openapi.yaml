@@ -17158,7 +17158,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NodePool'
+              $ref: '#/components/schemas/CreateNodePoolRequest'
         required: true
       responses:
         "202":
@@ -18741,6 +18741,10 @@ components:
       allOf:
       - $ref: '#/components/schemas/CreateClusterRequestBase'
       - $ref: '#/components/schemas/CreateClusterRequestBase'
+    CreateNodePoolRequest:
+      items:
+        $ref: '#/components/schemas/NodePool'
+      type: array
     NodePool:
       oneOf:
       - $ref: '#/components/schemas/EksNodePool'

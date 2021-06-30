@@ -16,9 +16,11 @@ package nodepool
 
 import (
 	"context"
+	"encoding/json"
+	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
+	"strings"
 
 	"emperror.dev/errors"
-	"github.com/banzaicloud/banzai-cli/.gen/pipeline"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
 	"github.com/banzaicloud/banzai-cli/internal/cli/utils"
@@ -60,6 +62,31 @@ func NewCreateCommand(banzaiCli cli.Cli) *cobra.Command {
 	return cmd
 }
 
+func parseNodePoolCreateRequest(raw []byte) ([]pipeline.NodePool, error) {
+	str := string(raw)
+	jsonDecoder := json.NewDecoder(strings.NewReader(str))
+
+	var rawRequest interface{}
+	err := jsonDecoder.Decode(&rawRequest)
+	if err != nil {
+		return nil, errors.WrapIf(err, "invalid JSON request")
+	}
+
+	if _, isArray := rawRequest.([]interface{}); isArray {
+		var request []pipeline.NodePool
+		if err := utils.Unmarshal(raw, &request); err != nil {
+			return nil, errors.WrapIf(err, "failed to unmarshal create node pool request")
+		}
+		return request, nil
+	}
+
+	var request pipeline.NodePool
+	if err := utils.Unmarshal(raw, &request); err != nil {
+		return nil, errors.WrapIf(err, "failed to unmarshal create node pool request")
+	}
+	return []pipeline.NodePool{request}, nil
+}
+
 func createNodePool(banzaiCli cli.Cli, options createOptions) error {
 	client := banzaiCli.Client()
 	orgID := banzaiCli.Context().OrganizationID()
@@ -81,17 +108,16 @@ func createNodePool(banzaiCli cli.Cli, options createOptions) error {
 
 	log.Debugf("%d bytes read", len(raw))
 
-	var request pipeline.NodePool
-
-	if err := utils.Unmarshal(raw, &request); err != nil {
-		return errors.WrapIf(err, "failed to unmarshal create node pool request")
+	request, err := parseNodePoolCreateRequest(raw)
+	if err != nil {
+		return errors.WrapIfWithDetails(err, "failed to parse create node pool request")
 	}
 
 	if options.name != "" {
-		request.Name = options.name
+		for _, req := range request {
+			req.Name = options.name
+		}
 	}
-
-	// TODO: validate request
 
 	log.Debugf("create request: %#v", request)
 

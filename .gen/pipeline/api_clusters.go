@@ -279,7 +279,7 @@ Add new node pool to a cluster
  * @param id Cluster identifier
  * @param nodePool
 */
-func (a *ClustersApiService) CreateNodePool(ctx _context.Context, orgId int32, id int32, nodePool NodePool) (*_nethttp.Response, error) {
+func (a *ClustersApiService) CreateNodePool(ctx _context.Context, orgId int32, id int32, nodePool []NodePool) (*_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPost
 		localVarPostBody     interface{}
