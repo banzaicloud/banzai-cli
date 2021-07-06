@@ -1,3 +1,3 @@
 package pipeline
 
-const PipelineVersion = "multi-node-pools"
+const PipelineVersion = "0.76.0"
