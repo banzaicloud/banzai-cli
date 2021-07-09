@@ -148,7 +148,7 @@ Name | Type | Description  | Notes
 
 ## CreateNodePool
 
-> CreateNodePool(ctx, orgId, id, nodePool)
+> CreateNodePool(ctx, orgId, id, createNodePoolRequest)
 
 Create new node pool
 
@@ -162,7 +162,7 @@ Name | Type | Description  | Notes
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **orgId** | **int32**| Organization identifier | 
 **id** | **int32**| Cluster identifier | 
-**nodePool** | [**NodePool**](NodePool.md)|  | 
+**createNodePoolRequest** | [**CreateNodePoolRequest**](CreateNodePoolRequest.md)|  | 
 
 ### Return type
 

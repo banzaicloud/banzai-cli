@@ -277,9 +277,9 @@ Add new node pool to a cluster
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param orgId Organization identifier
  * @param id Cluster identifier
- * @param nodePool
+ * @param createNodePoolRequest
 */
-func (a *ClustersApiService) CreateNodePool(ctx _context.Context, orgId int32, id int32, nodePool NodePool) (*_nethttp.Response, error) {
+func (a *ClustersApiService) CreateNodePool(ctx _context.Context, orgId int32, id int32, createNodePoolRequest CreateNodePoolRequest) (*_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPost
 		localVarPostBody     interface{}
@@ -316,7 +316,7 @@ func (a *ClustersApiService) CreateNodePool(ctx _context.Context, orgId int32, i
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = &nodePool
+	localVarPostBody = &createNodePoolRequest
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return nil, err

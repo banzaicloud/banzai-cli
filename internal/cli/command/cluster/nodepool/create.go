@@ -81,17 +81,25 @@ func createNodePool(banzaiCli cli.Cli, options createOptions) error {
 
 	log.Debugf("%d bytes read", len(raw))
 
-	var request pipeline.NodePool
-
+	var request pipeline.CreateNodePoolRequest
 	if err := utils.Unmarshal(raw, &request); err != nil {
 		return errors.WrapIf(err, "failed to unmarshal create node pool request")
 	}
 
 	if options.name != "" {
-		request.Name = options.name
+		switch len(request.NodePools) {
+		case 0: // Note: single node pool, overwrite name with option.
+			request.Name = options.name
+		case 1: // Note: single node pool in a map, overwrite name with option.
+			for nodePoolName, nodePool := range request.NodePools {
+				nodePool.Name = options.name
+				request.NodePools[options.name] = nodePool
+				delete(request.NodePools, nodePoolName)
+			}
+		default: // Note: >=2, multiple node pools, single name option doesn't make sense.
+			return errors.WrapIf(err, "invalid option name specified for multiple node pool creation")
+		}
 	}
-
-	// TODO: validate request
 
 	log.Debugf("create request: %#v", request)
 
