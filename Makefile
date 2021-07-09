@@ -21,7 +21,7 @@ endif
 TEST_FORMAT = short-verbose
 endif
 
-PIPELINE_VERSION = multi-node-pools
+PIPELINE_VERSION = 0.76.0
 
 CLOUDINFO_VERSION = 0.13.0
 TELESCOPES_VERSION = 0.5.3
