@@ -24,12 +24,17 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"time"
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/input"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/net/context"
 	yaml "gopkg.in/yaml.v3"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 	kind "sigs.k8s.io/kind/pkg/apis/config/v1alpha3"
 )
 
@@ -185,6 +190,13 @@ func ensureKINDCluster(banzaiCli cli.Cli, options *cpContext, listenAddress stri
 		}
 	}
 
+	if runtime.GOOS == "darwin" {
+		err = fixKind0_8_1KubeProxy(kubeconfig)
+		if err != nil {
+			return errors.Wrap(err, "failed to fix Kind v0.8.1 kube-proxy CrashLoopBackoff")
+		}
+	}
+
 	return nil
 }
 
@@ -199,6 +211,91 @@ func deleteKINDCluster(banzaiCli cli.Cli) error {
 	_, err = cmd.Output()
 	if err != nil {
 		return errors.WrapIf(err, "failed to delete KIND cluster")
+	}
+
+	return nil
+}
+
+// fixKind0_8_1KubeProxy returns an error if failed, otherwise fixes the Kind
+// v0.8.1 kube-proxy issue of
+// https://github.com/kubernetes-sigs/kind/issues/2240 on macOS without
+// requiring Kind upgrade to v0.11.1 / because that would pull in K8s client
+// v0.21 upgrade which breaks bank-vaults 1.3 and would require bank-vaults 1.13
+// which would pull in a lot of changes.
+func fixKind0_8_1KubeProxy(kubeconfig []byte) error {
+	namespace := "kube-system"
+	configMapName := "kube-proxy"
+	configFileName := "config.conf"
+
+	clientConfig, err := clientcmd.NewClientConfigFromBytes(kubeconfig)
+	if err != nil {
+		return errors.Wrap(err, "instantiating ClientConfig failed")
+	}
+
+	config, err := clientConfig.ClientConfig()
+	if err != nil {
+		return errors.Wrap(err, "retrieving config failed")
+	}
+
+	clientSet, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return errors.Wrap(err, "instantiating ClientSet failed")
+	}
+
+	getContext, cancelFunction := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancelFunction()
+
+	kubeProxyConfigMap, err := clientSet.CoreV1().ConfigMaps(namespace).Get(
+		getContext,
+		configMapName,
+		metav1.GetOptions{},
+	)
+	if err != nil {
+		return errors.Wrap(err, "retrieving kube-proxy ConfigMap failed")
+	}
+
+	configConfData := kubeProxyConfigMap.Data[configFileName]
+
+	var configConf map[string]interface{}
+	err = yaml.Unmarshal([]byte(configConfData), &configConf)
+	if err != nil {
+		return errors.WrapWithDetails(err, "unmarshalling kube-proxy config.conf data failed", "configConf")
+	}
+
+	connTrack, isOk := configConf["conntrack"].(map[string]interface{})
+	if !isOk {
+		return errors.Errorf(
+			"retrieving conntrack object from kube-proxy conf.conf failed, configConfData: %+v",
+			configConf,
+		)
+	}
+
+	connTrack["maxPerCore"] = 0
+	configConf["conntrack"] = connTrack
+
+	editedConfigConfYAML, err := yaml.Marshal(configConf)
+	if err != nil {
+		return errors.Wrap(err, "marshalling config.conf into YAML failed")
+	}
+
+	kubeProxyConfigMap.Data[configFileName] = string(editedConfigConfYAML)
+
+	updateContext, updateCancelFunction := context.WithTimeout(context.Background(), 15*time.Second)
+	defer updateCancelFunction()
+
+	_, err = clientSet.CoreV1().ConfigMaps(namespace).Update(
+		updateContext,
+		kubeProxyConfigMap,
+		metav1.UpdateOptions{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "ConfigMap",
+				APIVersion: "v1",
+			},
+			FieldManager: "banzai-cli",
+		},
+	)
+	if err != nil {
+		return errors.Wrap(err, "patching kube-proxy ConfigMap failed")
 	}
 
 	return nil
