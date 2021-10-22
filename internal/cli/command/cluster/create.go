@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"sort"
 	"strconv"
@@ -118,7 +119,24 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 		for {
 			cluster, _, err := banzaiCli.Client().ClustersApi.GetCluster(context.Background(), orgID, cluster.Id)
 			if err != nil {
-				cli.LogAPIError("create cluster", err, out)
+				openAPIError, ok := err.(pipeline.GenericOpenAPIError)
+				if !ok {
+					cli.LogAPIError("create cluster", err, out)
+				}
+
+				var commonError pipeline.CommonError
+				unmarshalErr := json.Unmarshal(openAPIError.Body(), &commonError)
+				if unmarshalErr != nil {
+					cli.LogAPIError("create cluster", err, out)
+				}
+
+				if commonError.Code == http.StatusConflict &&
+					commonError.Message == "Secret has not been created yet" &&
+					commonError.Error == "cluster is not ready" {
+					log.Info("cluster is being created")
+				} else {
+					cli.LogAPIError("create cluster", err, out)
+				}
 			} else {
 				format.ClusterShortWrite(banzaiCli, cluster)
 				if cluster.Status != "CREATING" {
