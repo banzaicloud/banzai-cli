@@ -132,6 +132,10 @@ jobs:
                         - gomod-v1-master
                         - gomod-v1
 
+            -
+                run:
+                    name: Update package registry
+                    command: sudo apt update --yes
 
             -
                 run:
