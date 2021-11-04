@@ -158,9 +158,12 @@ generate-telescopes-client: ## Generate client from Telescopes OpenAPI spec
 
 bin/goreleaser: bin/goreleaser-${GORELEASER_VERSION}
 	@ln -sf goreleaser-${GORELEASER_VERSION} bin/goreleaser
+
+# Note: removing the last line of the script because we install and run
+# goreleaser in 2 separate steps, the last line is the execution line.
 bin/goreleaser-${GORELEASER_VERSION}:
 	@mkdir -p bin
-	curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh | bash -s -- -b ./bin/ v${GORELEASER_VERSION}
+	curl -sfL https://git.io/goreleaser | sed '$$ d' | TMPDIR=./bin VERSION=v${GORELEASER_VERSION} bash
 	@mv bin/goreleaser $@
 
 .PHONY: release
