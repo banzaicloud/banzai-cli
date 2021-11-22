@@ -108,10 +108,15 @@ func runCreate(banzaiCli cli.Cli, options createOptions) error {
 	}
 
 	log.Debugf("create request: %#v", out)
-	cluster, _, err := banzaiCli.Client().ClustersApi.CreateCluster(context.Background(), orgID, out)
+	cluster, resp, err := banzaiCli.Client().ClustersApi.CreateCluster(context.Background(), orgID, out)
 	if err != nil {
 		cli.LogAPIError("create cluster", err, out)
 		return errors.WrapIf(err, "failed to create cluster")
+	}
+
+	if resp.StatusCode == http.StatusCreated {
+		log.Infof(`cluster "%s" is already being created`, out["name"])
+		return nil
 	}
 
 	log.Info("cluster is being created")
