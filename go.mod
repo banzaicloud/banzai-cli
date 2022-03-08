@@ -35,10 +35,10 @@ require (
 	golang.org/x/sys v0.0.0-20200819171115-d785dc25833f // indirect
 	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1 // indirect
 	gopkg.in/square/go-jose.v2 v2.3.1 // indirect
-	gopkg.in/yaml.v2 v2.2.8
-	gopkg.in/yaml.v3 v3.0.0-20200121175148-a6ecf24a6d71
-	k8s.io/apimachinery v0.18.2
+	gopkg.in/yaml.v2 v2.3.0
+	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
+	k8s.io/apimachinery v0.18.8
 	k8s.io/client-go v0.18.2
 	k8s.io/utils v0.0.0-20200414100711-2df71ebbae66 // indirect
-	sigs.k8s.io/kind v0.8.1
+	sigs.k8s.io/kind v0.9.0
 )
