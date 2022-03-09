@@ -35,10 +35,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-	kind "sigs.k8s.io/kind/pkg/apis/config/v1alpha3"
+	kind "sigs.k8s.io/kind/pkg/apis/config/v1alpha4"
 )
 
-const version = "v0.8.1"
+const version = "v0.9.0"
 const clusterName = "banzai"
 const kindCmd = "kind"
 
@@ -133,7 +133,7 @@ func ensureKINDCluster(banzaiCli cli.Cli, options *cpContext, listenAddress stri
 	cluster := kind.Cluster{
 		TypeMeta: kind.TypeMeta{
 			Kind:       "Cluster",
-			APIVersion: "kind.sigs.k8s.io/v1alpha3",
+			APIVersion: "kind.x-k8s.io/v1alpha4",
 		},
 		Nodes: []kind.Node{
 			{
