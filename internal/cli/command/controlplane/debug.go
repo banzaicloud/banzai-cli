@@ -29,7 +29,7 @@ import (
 
 	"emperror.dev/errors"
 	"github.com/banzaicloud/banzai-cli/internal/cli"
-	"github.com/shirou/gopsutil/host"
+	"github.com/shirou/gopsutil/v3/host"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
