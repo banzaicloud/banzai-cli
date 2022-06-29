@@ -30,6 +30,7 @@ import (
 	"github.com/banzaicloud/banzai-cli/internal/cli"
 	"github.com/banzaicloud/banzai-cli/internal/cli/auth"
 	clustercontext "github.com/banzaicloud/banzai-cli/internal/cli/command/cluster/context"
+	"github.com/banzaicloud/banzai-cli/pkg/kubectlversion"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/ttacon/chalk"
@@ -85,6 +86,13 @@ func getKubeConfig(ctx context.Context, client *pipeline.APIClient, orgId, id in
 		retry = response.StatusCode == 400
 		err = errors.WrapIf(clusterErr, "could not get cluster config")
 		return
+	}
+
+	// in kubectl version 1.24 client.authentication.k8s.io/v1alpha1 has been deprecated
+	if less, kubectlVersionErr := kubectlversion.LessThan("1.24"); !less && kubectlVersionErr == nil {
+		config.Data = strings.Replace(config.Data, "apiVersion: client.authentication.k8s.io/v1alpha1", "apiVersion: client.authentication.k8s.io/v1beta1", -1)
+	} else if kubectlVersionErr != nil {
+		err = errors.WrapIf(kubectlVersionErr, "could not get kubectl version")
 	}
 
 	return
