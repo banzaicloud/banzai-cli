@@ -256,14 +256,11 @@ func getHelmBinary(version string, banzaiCli cli.Cli) (string, error) {
 		return "", errors.WrapIff(err, "failed to create %q directory", bindir)
 	}
 
-	url := fmt.Sprintf("https://get.helm.sh/helm-%s-%s-amd64.tar.gz", version, runtime.GOOS)
+	url := fmt.Sprintf("https://get.helm.sh/helm-%s-%s-%s.tar.gz", version, runtime.GOOS, runtime.GOARCH)
 	name := filepath.Join(bindir, fmt.Sprintf("helm-%s", version))
 
 	if _, err := os.Stat(name); err != nil {
 		log.Infof("Downloading helm %s...", version)
-		if runtime.GOARCH != "amd64" {
-			return "", errors.Errorf("unsupported architecture: %v", runtime.GOARCH)
-		}
 		if err := writeHelm(url, name); err != nil {
 			return "", errors.WrapIf(err, "failed to download helm client")
 		}
