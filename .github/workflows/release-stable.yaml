@@ -1,0 +1,178 @@
+name: Stable release
+
+on:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+  build:
+    name: Build project
+    runs-on: ubuntu-latest
+
+    env:
+      GO_VERSION: 1.14
+      GOFLAGS: -mod=readonly
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v3.2.1
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Cache Go module dependencies
+        id: cache-go-module-dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: go-mod-cache-${{ runner.os }}-${{ env.GO_VERSION }}-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            go-mod-cache-${{ runner.os }}-${{ env.GO_VERSION }}
+            go-mod-cache-${{ runner.os }}
+            go-mod-cache
+
+      - name: Download license information for dependencies
+        env:
+          GITHUB_TOKEN: ${{ github.token }} # Note: this is required for licensei auth in steps to avoid rate-limiting.
+        run: make license-cache
+
+      - name: List license information for dependencies
+        env:
+          GITHUB_TOKEN: ${{ github.token }} # Note: this is required for licensei auth in steps to avoid rate-limiting.
+        run: ./bin/licensei list
+
+      - name: Check dependency licenses
+        env:
+          GITHUB_TOKEN: ${{ github.token }} # Note: this is required for licensei auth in steps to avoid rate-limiting.
+        run: make license-check
+
+      - name: Build
+        run: make build
+
+      - name: Run linter
+        run: make lint
+
+      - name: Run tests
+        run: GOARGS="-p=2" make test
+
+  docker:
+    name: Docker
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          driver-opts: image=moby/buildkit:master
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.ref }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Determine tag or commit
+        uses: haya14busa/action-cond@v1
+        id: refortag
+        with:
+          cond: ${{ startsWith(github.ref, 'refs/tags/') }}
+          if_true: ${{ github.ref }}
+          if_false: latest
+      - name: Determine image tag
+        id: imagetag
+        run: echo "::set-output name=value::${TAG_OR_BRANCH##*/}"
+        env:
+          TAG_OR_BRANCH: ${{ steps.refortag.outputs.value }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CR_PAT }}
+
+      - name: Build banzai-cli
+        uses: docker/build-push-action@v2
+        with:
+          tags: |
+            ghcr.io/banzaicloud/banzai-cli:latest
+            ghcr.io/banzaicloud/banzai-cli:${{ steps.imagetag.outputs.value }}
+          file: Dockerfile
+          push: true
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+          build-args: VERSION=${{ steps.imagetag.outputs.value }}
+
+  release-stable:
+    name: Stable release
+    runs-on: ubuntu-latest
+    needs: build
+
+    env:
+      GO_VERSION: 1.14
+      GOFLAGS: -mod=readonly
+      GO111MODULE: "on"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v3.2.1
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Update package registry
+        run: sudo apt update --yes
+
+      - name: Install RPM
+        run: sudo apt install rpm --yes
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: make release
+
+  cdn-invalidate:
+    name: Invalidate cloudfront edge cache
+    runs-on: ubuntu-latest
+    needs: release-stable
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+
+      - name: Invalidate cloudfront edge cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CDN_DISTRIBUTION_ID }} \
+            --paths "/downloads/banzai-cli/*"
+
+  trigger-docs-update:
+    name: Update docs
+    runs-on: ubuntu-latest
+    needs: release-stable
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Trigger
+        env:
+          GITHUB_TOKEN: ${{ secrets.CR_PAT }}
+        run: scripts/trigger-docs-update.sh ${{ github.ref_name }}

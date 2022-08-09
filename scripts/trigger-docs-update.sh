@@ -2,24 +2,19 @@
 
 set -euf
 
-PROJECT_SLUG='gh/banzaicloud/banzaicloud.github.io'
 RELEASE_TAG="$1"
+OWNER='banzaicloud'
+REPO='banzaicloud.github.io'
+WORKFLOW='cli-docgen.yml'
 
 function main()
 {
     curl \
-        -u "${CIRCLE_TOKEN}:" \
-        -X POST \
-        --header "Content-Type: application/json" \
-        -d "{
-            \"branch\": \"gh-pages\",
-            \"parameters\": {
-                \"remote-trigger\": true,
-                \"cli\": \"banzai-cli\",
-                \"cli-release-tag\": \"${RELEASE_TAG}\",
-                \"cli-base-path\": \"/docs/pipeline/cli/reference/\"
-            }
-        }" "https://circleci.com/api/v2/project/${PROJECT_SLUG}/pipeline"
+      -X POST \
+      -H "Accept: application/vnd.github+json" \
+      -H "Authorization: token ${GITHUB_TOKEN}" \
+      "https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW}/dispatches" \
+      -d "{\"ref\":\"gh-pages\",\"inputs\":{\"cli\":\"banzai-cli\", \"cli-release-tag\": \"${RELEASE_TAG}\", \"cli-base-path\":\"/docs/pipeline/cli/reference/\"}}"
 }
 
 main "$@"

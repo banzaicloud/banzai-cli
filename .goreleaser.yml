@@ -23,7 +23,7 @@ changelog:
 
 brews:
     -
-        github:
+        tap:
             owner: banzaicloud
             name: homebrew-tap
         folder: Formula
