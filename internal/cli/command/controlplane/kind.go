@@ -41,6 +41,7 @@ import (
 const version = "v0.9.0"
 const clusterName = "banzai"
 const kindCmd = "kind"
+const linuxGOOS = "linux"
 
 func isKINDInstalled(banzaiCli cli.Cli) bool {
 	path, err := findKINDPath(banzaiCli)
@@ -181,7 +182,7 @@ func ensureKINDCluster(banzaiCli cli.Cli, options *cpContext, listenAddress stri
 		return errors.WrapIf(err, "failed to get KIND kubeconfig")
 	}
 
-	if runtime.GOOS != "linux" {
+	if runtime.GOOS != linuxGOOS {
 		// non-native docker daemons can't access the host machine directly even if running in host networking mode
 		// we have to rewrite configs referring to localhost to use the special name `host.docker.internal` instead
 		_, err = input.RewriteLocalhostToHostDockerInternal(kubeconfig)
@@ -190,7 +191,7 @@ func ensureKINDCluster(banzaiCli cli.Cli, options *cpContext, listenAddress stri
 		}
 	}
 
-	if runtime.GOOS == "darwin" || runtime.GOOS == "linux" {
+	if runtime.GOOS == "darwin" || runtime.GOOS == linuxGOOS {
 		err = fixKind0_9_0KubeProxy(kubeconfig)
 		if err != nil {
 			return errors.Wrap(err, "failed to fix Kind v0.9.0 kube-proxy CrashLoopBackoff")

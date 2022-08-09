@@ -205,7 +205,7 @@ func runInit(options initOptions, banzaiCli cli.Cli) error {
 		}
 		k8sContext = ""
 		log.Debugf("won't use local kubernetes context: %v", err)
-	} else if runtime.GOOS != "linux" {
+	} else if runtime.GOOS != linuxGOOS {
 		// non-native docker daemons can't access the host machine directly even if running in host networking mode
 		// we have to rewrite configs referring to localhost to use the special name `host.docker.internal` instead
 		k8sConfig, err = input.RewriteLocalhostToHostDockerInternal(k8sConfig)
