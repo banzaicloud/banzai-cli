@@ -139,17 +139,13 @@ jobs:
       - name: Install RPM
         run: sudo apt install rpm --yes
 
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
-        with:
-          distribution: goreleaser
-          version: 1.10.3
-          args: release --rm-dist
+      - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_DEFAULT_REGION: us-east-1
+        run: make release
 
   cdn-invalidate:
     name: Invalidate cloudfront edge cache
