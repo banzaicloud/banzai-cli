@@ -42,7 +42,7 @@ brews:
             output = Utils.popen_read("#{bin}/banzai completion zsh")
             (zsh_completion/"_banzai").write output
         dependencies:
-            - kubectl
+            - name: kubectl
 
 nfpms:
     -
