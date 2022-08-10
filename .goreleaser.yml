@@ -59,5 +59,6 @@ nfpms:
 blobs:
     -
         provider: s3
+        region: us-east-1
         bucket: banzaicloud.com
         folder: "downloads/banzai-cli/{{ .Version }}"
