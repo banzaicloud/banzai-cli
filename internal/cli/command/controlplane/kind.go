@@ -41,6 +41,7 @@ import (
 const version = "v0.9.0"
 const clusterName = "banzai"
 const kindCmd = "kind"
+const linuxGOOS = "linux"
 
 func isKINDInstalled(banzaiCli cli.Cli) bool {
 	path, err := findKINDPath(banzaiCli)
@@ -181,7 +182,7 @@ func ensureKINDCluster(banzaiCli cli.Cli, options *cpContext, listenAddress stri
 		return errors.WrapIf(err, "failed to get KIND kubeconfig")
 	}
 
-	if runtime.GOOS != "linux" {
+	if runtime.GOOS != linuxGOOS {
 		// non-native docker daemons can't access the host machine directly even if running in host networking mode
 		// we have to rewrite configs referring to localhost to use the special name `host.docker.internal` instead
 		_, err = input.RewriteLocalhostToHostDockerInternal(kubeconfig)
@@ -190,10 +191,10 @@ func ensureKINDCluster(banzaiCli cli.Cli, options *cpContext, listenAddress stri
 		}
 	}
 
-	if runtime.GOOS == "darwin" {
-		err = fixKind0_8_1KubeProxy(kubeconfig)
+	if runtime.GOOS == "darwin" || runtime.GOOS == linuxGOOS {
+		err = fixKind0_9_0KubeProxy(kubeconfig)
 		if err != nil {
-			return errors.Wrap(err, "failed to fix Kind v0.8.1 kube-proxy CrashLoopBackoff")
+			return errors.Wrap(err, "failed to fix Kind v0.9.0 kube-proxy CrashLoopBackoff")
 		}
 	}
 
@@ -216,13 +217,13 @@ func deleteKINDCluster(banzaiCli cli.Cli) error {
 	return nil
 }
 
-// fixKind0_8_1KubeProxy returns an error if failed, otherwise fixes the Kind
+// fixKind0_9_0KubeProxy returns an error if failed, otherwise fixes the Kind
 // v0.8.1 kube-proxy issue of
-// https://github.com/kubernetes-sigs/kind/issues/2240 on macOS without
+// https://github.com/kubernetes-sigs/kind/issues/2240 on macOS and linux without
 // requiring Kind upgrade to v0.11.1 / because that would pull in K8s client
 // v0.21 upgrade which breaks bank-vaults 1.3 and would require bank-vaults 1.13
 // which would pull in a lot of changes.
-func fixKind0_8_1KubeProxy(kubeconfig []byte) error {
+func fixKind0_9_0KubeProxy(kubeconfig []byte) error {
 	namespace := "kube-system"
 	configMapName := "kube-proxy"
 	configFileName := "config.conf"
