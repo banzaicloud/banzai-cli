@@ -17,6 +17,7 @@ Name | Type | Description | Notes
 **SubnetId** | **string** |  | [optional] 
 **SecurityGroups** | **[]string** | List of additional custom security groups for all nodes in the pool. | [optional] 
 **UseInstanceStore** | **bool** | Setup available instance stores (NVMe disks) to use for Kubelet root if available. As a result emptyDir volumes will be provisioned on local instance storage disks. You can check out available instance storages here https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html#instance-store-volumes. | [optional] 
+**Volumes** | Pointer to [**EksNodePoolVolumes**](EKSNodePoolVolumes.md) |  | [optional] 
 **Status** | **string** | Current status of the node pool. | [optional] 
 **StatusMessage** | **string** | Details and reasoning about the status value. | [optional] 
 
