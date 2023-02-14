@@ -7,7 +7,7 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.0.2
 	github.com/Masterminds/semver v1.5.0
 	github.com/antihax/optional v0.0.0-20180407024304-ca021399b1a6
-	github.com/aws/aws-sdk-go v1.21.2
+	github.com/aws/aws-sdk-go v1.34.0
 	github.com/coreos/go-oidc v2.0.0+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/emirpasic/gods v1.12.0
@@ -28,7 +28,7 @@ require (
 	github.com/spf13/viper v1.7.0
 	github.com/stretchr/testify v1.7.1
 	github.com/ttacon/chalk v0.0.0-20140724125006-76b3c8b611de
-	golang.org/x/net v0.0.0-20191004110552-13f9640d40b9
+	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1 // indirect
 	gopkg.in/square/go-jose.v2 v2.3.1 // indirect
